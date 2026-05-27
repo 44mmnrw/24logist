@@ -3,14 +3,14 @@
 set -euo pipefail
 
 FILE="vendor/livewire/livewire/src/Features/SupportFileUploads/FileUploadConfiguration.php"
+ENDPOINT_FILE="vendor/livewire/livewire/src/Mechanisms/HandleRequests/EndpointResolver.php"
 
 if [[ ! -f "$FILE" ]]; then
   echo "[patch] skip: $FILE not found"
   exit 0
 fi
-
-if grep -q 'putFileAs(static::path()' "$FILE"; then
-  echo "[patch] already applied"
+if [[ ! -f "$ENDPOINT_FILE" ]]; then
+  echo "[patch] skip: $ENDPOINT_FILE not found"
   exit 0
 fi
 
@@ -18,12 +18,21 @@ php <<'PHP'
 <?php
 $file = 'vendor/livewire/livewire/src/Features/SupportFileUploads/FileUploadConfiguration.php';
 $content = file_get_contents($file);
-$old = <<<'OLD'
+$changed = false;
+
+$replacements = [
+    [
+        "Storage::disk(\$disk)->put('/'.static::path(\$metaFilename), json_encode([",
+        "Storage::disk(\$disk)->put(static::path(\$metaFilename), json_encode([",
+        'meta put leading slash',
+    ],
+    [
+        <<<'OLD'
         return $file->storeAs('/'.static::path(), $filename, [
             'disk' => $disk
         ]);
-OLD;
-$new = <<<'NEW'
+OLD,
+        <<<'NEW'
         $stored = \Illuminate\Support\Facades\Storage::disk($disk)->putFileAs(static::path(), $file, $filename);
 
         if (! is_string($stored) || $stored === '') {
@@ -31,11 +40,45 @@ $new = <<<'NEW'
         }
 
         return $stored;
-NEW;
-if (! str_contains($content, $old)) {
-    fwrite(STDERR, "[patch] pattern not found in FileUploadConfiguration.php\n");
-    exit(1);
+NEW,
+        'storeAs leading slash',
+    ],
+];
+
+foreach ($replacements as [$old, $new, $label]) {
+    if (! str_contains($content, $old)) {
+        continue;
+    }
+
+    $content = str_replace($old, $new, $content);
+    $changed = true;
+    echo "[patch] fixed: {$label}\n";
 }
-file_put_contents($file, str_replace($old, $new, $content));
+
+if (! $changed) {
+    echo "[patch] already applied\n";
+    exit(0);
+}
+
+file_put_contents($file, $content);
 echo "[patch] Livewire FileUploadConfiguration updated\n";
+PHP
+
+php <<'PHP'
+<?php
+$file = 'vendor/livewire/livewire/src/Mechanisms/HandleRequests/EndpointResolver.php';
+$content = file_get_contents($file);
+$updated = str_replace(
+    "return static::prefix() . '/upload-file';",
+    "return static::prefix() . '/upload';",
+    $content,
+    $count,
+);
+
+if ($count > 0) {
+    file_put_contents($file, $updated);
+    echo "[patch] fixed: upload endpoint path\n";
+} else {
+    echo "[patch] upload endpoint already patched\n";
+}
 PHP

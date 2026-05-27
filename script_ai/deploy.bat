@@ -294,10 +294,9 @@ if "%SKIP_FRONTEND_BUILD%"=="1" (
 echo.
 echo [6] Laravel cache on server...
 REM route:cache breaks Livewire/Filament file uploads (upload-file, preview-file).
-call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && php artisan optimize:clear && php artisan route:clear"
+call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && php artisan optimize:clear && php artisan route:clear && php artisan config:clear"
 if errorlevel 1 exit /b 1
-call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && php artisan config:cache"
-if errorlevel 1 exit /b 1
+REM Do not config:cache — breaks Livewire signed URLs / env on this host.
 call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && php artisan view:cache"
 if errorlevel 1 exit /b 1
 call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && php artisan storage:link --force && chmod -R ug+rwx storage bootstrap/cache && rm -f storage/app/public/livewire-tmp/*.json"

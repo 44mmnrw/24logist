@@ -56,9 +56,13 @@ chmod -R ug+rwx storage bootstrap/cache 2>/dev/null || true
 log "clear caches"
 php artisan optimize:clear
 
-log "rebuild caches"
-php artisan config:cache
+log "livewire upload patch"
+sed -i 's/\r$//' script_ai/patch-livewire-upload.sh
+bash script_ai/patch-livewire-upload.sh
+
+log "rebuild caches (no route:cache / config:cache — breaks Livewire uploads)"
 php artisan route:clear
+php artisan config:clear
 php artisan view:cache
 
 log "done: $(git log -1 --oneline)"

@@ -26,7 +26,16 @@ final class LandingMedia
             return asset($path);
         }
 
-        return Storage::disk('public')->url($path);
+        if (Storage::disk('public')->exists($path)) {
+            $url = Storage::disk('public')->url($path);
+            $relative = parse_url($url, PHP_URL_PATH);
+
+            if (is_string($relative) && $relative !== '' && str_starts_with($relative, '/storage/')) {
+                return $relative;
+            }
+        }
+
+        return '/storage/'.ltrim($path, '/');
     }
 
     public static function normalizePath(string|array|null $path): ?string

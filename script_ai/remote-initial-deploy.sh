@@ -40,7 +40,7 @@ FILESYSTEM_PUBLIC_URL=/storage
 QUEUE_CONNECTION=database
 CACHE_STORE=database
 
-LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK=public
+LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK=local
 
 MAIL_MAILER=log
 MAIL_FROM_ADDRESS="hello@24logist.ru"
@@ -60,7 +60,8 @@ php artisan migrate --force
 php artisan db:seed --force
 php artisan storage:link --force || true
 chmod -R ug+rwx storage bootstrap/cache
-php artisan config:cache
+php artisan config:clear
+php artisan route:clear
 php artisan route:clear
 php artisan view:cache
 

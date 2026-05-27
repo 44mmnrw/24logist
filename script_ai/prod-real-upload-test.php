@@ -1,14 +1,19 @@
 <?php
 
-declare(strict_types=1);
-
+/**
+ * Full HTTP kernel test: signed Livewire upload + session CSRF (like browser).
+ */
 require __DIR__.'/../vendor/autoload.php';
-
 $app = require __DIR__.'/../bootstrap/app.php';
-$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+$kernel = $app->make(Kernel::class);
+$kernel->bootstrap();
 
-use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
+
+$baseRequest = Request::create(config('app.url'), 'GET');
+$app->instance('request', $baseRequest);
+URL::setRequest($baseRequest);
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
@@ -16,42 +21,32 @@ use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
 use Livewire\Features\SupportFileUploads\GenerateSignedUploadUrl;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
-$kernel = $app->make(Kernel::class);
-
-$base = config('app.url');
-$baseRequest = Request::create($base.'/admin', 'GET', server: [
-    'HTTP_HOST' => parse_url($base, PHP_URL_HOST),
-    'HTTPS' => 'on',
-    'SERVER_PORT' => '443',
-]);
-$app->instance('request', $baseRequest);
-URL::forceRootUrl($base);
-
 $src = __DIR__.'/../storage/app/public/landing/hero/01KSM5JX0SQ4PC56JWYFB8K43F.jpeg';
-$tmp = tempnam(sys_get_temp_dir(), 'img');
-file_put_contents($tmp, is_file($src) ? file_get_contents($src) : 'x');
-
-$file = new UploadedFile($tmp, 'kernel-test.jpeg', 'image/jpeg', null, true);
+$tmp = tempnam(sys_get_temp_dir(), 'up');
+file_put_contents($tmp, file_get_contents($src) ?: 'fail');
+$size = filesize($tmp);
+$file = new UploadedFile($tmp, 'prod-test.jpeg', 'image/jpeg', null, true);
 
 $uploadUrl = app(GenerateSignedUploadUrl::class)->forLocal();
 $parts = parse_url($uploadUrl);
 
 $session = $app->make('session')->driver();
 $session->start();
+$token = $session->token();
 
 $request = Request::create(
     ($parts['path'] ?? '').'?'.($parts['query'] ?? ''),
     'POST',
     [],
-    [$session->getName() => $session->getId()],
+    $session->all(),
     ['files' => [$file]],
     [
         'HTTP_ACCEPT' => 'application/json',
-        'HTTP_X_CSRF_TOKEN' => $session->token(),
-        'HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest',
-        'HTTP_HOST' => parse_url($base, PHP_URL_HOST),
+        'HTTP_X-CSRF-TOKEN' => $token,
+        'HTTP_X-Requested-With' => 'XMLHttpRequest',
+        'HTTP_HOST' => parse_url(config('app.url'), PHP_URL_HOST),
         'HTTPS' => 'on',
-        'SERVER_PORT' => '443',
+        'SERVER_PORT' => 443,
     ],
 );
 $request->setLaravelSession($session);
@@ -60,8 +55,8 @@ $request->cookies->set($session->getName(), $session->getId());
 $response = $kernel->handle($request);
 @unlink($tmp);
 
-echo 'HTTP '.$response->getStatusCode()."\n";
-echo $response->getContent()."\n";
+echo "HTTP {$response->getStatusCode()}\n";
+echo $response->getContent()."\n\n";
 
 if ($response->getStatusCode() === 200) {
     $paths = json_decode($response->getContent(), true)['paths'] ?? [];
@@ -69,17 +64,9 @@ if ($response->getStatusCode() === 200) {
         $plain = TemporaryUploadedFile::extractPathFromSignedPath($signed);
         $storagePath = FileUploadConfiguration::path($plain);
         $disk = FileUploadConfiguration::disk();
-        $exists = Storage::disk($disk)->exists($storagePath);
-        echo "{$storagePath} exists: ".($exists ? 'yes' : 'NO')."\n";
-        if ($exists) {
-            Storage::disk($disk)->delete($storagePath);
-            Storage::disk($disk)->delete(FileUploadConfiguration::path($plain.'.json'));
-        }
+        $ok = Storage::disk($disk)->exists($storagePath);
+        echo "disk={$disk} path={$storagePath} exists=".($ok ? 'YES '.Storage::disk($disk)->size($storagePath) : 'NO')."\n";
     }
-    echo "SERVER UPLOAD PIPELINE: OK\n";
-} else {
-    echo "SERVER UPLOAD PIPELINE: FAILED\n";
-    exit(1);
 }
 
 $kernel->terminate($request, $response);

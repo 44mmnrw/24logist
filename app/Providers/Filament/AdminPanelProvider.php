@@ -13,6 +13,7 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Assets\Css;
+use Filament\Support\Assets\Js;
 use Filament\Support\Colors\Color;
 use Filament\Support\Enums\Width;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -30,6 +31,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->assets([
                 Css::make('filament-admin', resource_path('css/filament-admin.css')),
+                Js::make('filament-upload-debug', resource_path('js/filament-upload-debug.js')),
             ])
             ->id('admin')
             ->path('admin')

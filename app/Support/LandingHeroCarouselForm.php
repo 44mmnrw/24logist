@@ -38,7 +38,7 @@ final class LandingHeroCarouselForm
                 $path = LandingMedia::normalizePath($slide['image'] ?? null);
 
                 return [
-                    'image' => $path ? [$path] : [],
+                    'image' => $path ?? '',
                     'alt' => (string) ($slide['alt'] ?? ''),
                 ];
             })

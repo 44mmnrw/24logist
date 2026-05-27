@@ -4,6 +4,7 @@ namespace App\Support;
 
 use Filament\Forms\Components\FileUpload;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Throwable;
@@ -51,7 +52,9 @@ final class FilamentUploadPreview
         $disk = FileUploadConfiguration::disk();
         $storagePath = FileUploadConfiguration::path($plainPath);
 
-        if (! \Illuminate\Support\Facades\Storage::disk($disk)->exists($storagePath)) {
+        $storage = Storage::disk($disk);
+
+        if (! $storage->exists($storagePath)) {
             Log::warning('Livewire temp upload missing on disk', [
                 'signed' => $signedPath,
                 'path' => $storagePath,
@@ -63,8 +66,23 @@ final class FilamentUploadPreview
 
         try {
             $temp = TemporaryUploadedFile::createFromLivewire($plainPath);
-            $url = $temp->temporaryUrl();
             $meta = $temp->metaFileData();
+
+            // Public disk: same as local — direct /storage URL (no signed preview-file route).
+            if ($disk === 'public') {
+                $url = self::publicStoragePathOnly($storage->url($storagePath));
+
+                return [
+                    'name' => (string) ($meta['name'] ?? $temp->getClientOriginalName()),
+                    'size' => (int) ($meta['size'] ?? $temp->getSize()),
+                    'type' => (string) ($meta['type'] ?? $temp->getMimeType()),
+                    'url' => $url,
+                    'openableUrl' => $url,
+                    'downloadableUrl' => $url,
+                ];
+            }
+
+            $url = $temp->temporaryUrl();
 
             return [
                 'name' => (string) ($meta['name'] ?? $temp->getClientOriginalName()),
