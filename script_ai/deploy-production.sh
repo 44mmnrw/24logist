@@ -36,13 +36,9 @@ php composer.phar install --no-dev --optimize-autoloader --no-interaction --no-p
 [[ -f .env ]] || die '.env missing on server'
 
 if [[ "$SKIP_FRONTEND_BUILD" != "1" ]]; then
-    log "npm install + build"
-    if ! command -v npm >/dev/null 2>&1; then
-        die 'npm not found on server'
-    fi
-    npm ci --ignore-scripts 2>/dev/null || npm install --ignore-scripts
-    npm run build
-    [[ -f public/build/manifest.json ]] || die 'npm run build failed'
+    log "frontend build (isolated)"
+    chmod +x script_ai/remote_frontend_build.sh
+    bash script_ai/remote_frontend_build.sh
 else
     log "skip npm build (uploaded from local machine)"
 fi
@@ -54,15 +50,12 @@ php artisan storage:link --force 2>/dev/null || true
 chmod -R ug+rwx storage bootstrap/cache 2>/dev/null || true
 
 log "clear caches"
-php artisan optimize:clear
+php artisan view:clear
 
 log "livewire upload patch"
 sed -i 's/\r$//' script_ai/patch-livewire-upload.sh
 bash script_ai/patch-livewire-upload.sh
 
-log "rebuild caches (no route:cache / config:cache — breaks Livewire uploads)"
-php artisan route:clear
-php artisan config:clear
 php artisan view:cache
 
 log "done: $(git log -1 --oneline)"

@@ -18,12 +18,9 @@ fi
 
 echo "[REMOTE] node: $(command -v node) $(node -v)"
 echo "[REMOTE] npm:  $(command -v npm) $(npm -v)"
-echo "[REMOTE] clear view/config caches before build (keep routes uncached for Livewire)..."
-php artisan view:clear
-php artisan config:clear
-php artisan route:clear
+echo "[REMOTE] frontend-only build mode (no artisan/cache reset)..."
 rm -f public/hot
-rm -rf public/build node_modules/.vite
+rm -rf node_modules/.vite public/build.__new
 
 echo "[REMOTE] npm ci (max ${BUILD_NPM_CI_TIMEOUT_MINUTES:-25}m)..."
 (
@@ -50,7 +47,7 @@ fi
 echo "[REMOTE] vite build (max ${BUILD_TIMEOUT_MINUTES:-20}m)..."
 timeout --foreground -k 30s "${BUILD_TIMEOUT_MINUTES:-20}m" bash -c "
   export PATH=\"$PATH\"
-  npm run build -- --logLevel info &
+  npm run build -- --outDir public/build.__new --logLevel info &
   BUILD_PID=\$!
   while kill -0 \"\$BUILD_PID\" 2>/dev/null; do
     echo '[REMOTE] vite build in progress...'
@@ -59,10 +56,18 @@ timeout --foreground -k 30s "${BUILD_TIMEOUT_MINUTES:-20}m" bash -c "
   wait \"\$BUILD_PID\"
 "
 
-if [[ ! -f public/build/manifest.json ]]; then
-  echo "[ERROR] public/build/manifest.json missing"
+if [[ ! -f public/build.__new/manifest.json ]]; then
+  echo "[ERROR] public/build.__new/manifest.json missing"
   exit 1
 fi
+
+echo "[REMOTE] swap build directory atomically..."
+rm -rf public/build.__old
+if [[ -d public/build ]]; then
+  mv public/build public/build.__old
+fi
+mv public/build.__new public/build
+rm -rf public/build.__old
 
 echo "[REMOTE] Frontend build OK"
 stat -c "%y %n" public/build/manifest.json 2>/dev/null || ls -la public/build/manifest.json

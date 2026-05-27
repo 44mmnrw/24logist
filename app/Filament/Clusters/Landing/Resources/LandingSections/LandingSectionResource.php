@@ -275,6 +275,7 @@ class LandingSectionResource extends Resource
             ->visibility('public')
             ->image()
             ->imagePreviewHeight('200')
+            ->maxFiles(1)
             ->required()
             ->maxSize(8192)
             ->fetchFileInformation(false)
@@ -284,10 +285,10 @@ class LandingSectionResource extends Resource
             ->columnSpan(1)
             ->extraAttributes(['class' => 'hero-carousel-upload'], true)
             ->helperText('Дождитесь превью, затем нажмите «Сохранить». PNG, JPG или WebP до 8 МБ.')
-            ->formatStateUsing(function (mixed $state): ?string {
+            ->formatStateUsing(function (mixed $state): array {
                 $path = LandingMedia::normalizePath($state);
 
-                return $path ?: null;
+                return $path ? [$path] : [];
             })
             ->dehydrateStateUsing(fn (mixed $state): mixed => $state)
             ->getUploadedFileUsing(static::uploadPreview(...));
@@ -307,6 +308,7 @@ class LandingSectionResource extends Resource
             ->visibility('public')
             ->image()
             ->imagePreviewHeight('200')
+            ->maxFiles(1)
             ->maxSize(8192)
             ->fetchFileInformation(false)
             ->orientImagesFromExif(false)
