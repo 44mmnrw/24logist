@@ -22,11 +22,13 @@
             @if ($section?->description)
                 <p>{{ $section->description }}</p>
             @endif
-            <ul>
+            <ul class="hero-list mobile-copy__list">
                 @foreach ($bullets as $bullet)
                     <li>
                         @if ($bullet->icon)
-                            <x-landing.icon :name="$bullet->icon" />
+                            <span class="hero-list__icon" aria-hidden="true">
+                                <x-landing.icon :name="$bullet->icon" />
+                            </span>
                         @endif
                         {{ $bullet->title }}
                     </li>

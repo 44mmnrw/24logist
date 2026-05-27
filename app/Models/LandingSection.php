@@ -54,6 +54,37 @@ class LandingSection extends Model
                 }
             }
 
+            if (isset($extra['carousel_slides']) && is_array($extra['carousel_slides'])) {
+                $extra['carousel_slides'] = collect($extra['carousel_slides'])
+                    ->map(function ($slide): ?array {
+                        if (! is_array($slide)) {
+                            return null;
+                        }
+
+                        $image = \App\Support\LandingHeroCarouselForm::persistImage($slide['image'] ?? null)
+                            ?? LandingMedia::normalizePath($slide['image'] ?? null);
+
+                        if ($image === null) {
+                            return null;
+                        }
+
+                        return [
+                            'image' => $image,
+                            'alt' => trim((string) ($slide['alt'] ?? '')),
+                        ];
+                    })
+                    ->filter()
+                    ->values()
+                    ->all();
+            }
+
+            $delayMs = (int) ($extra['carousel_delay_ms'] ?? 5000);
+            $extra['carousel_delay_ms'] = max(2000, min(60_000, $delayMs > 0 ? $delayMs : 5000));
+
+            if (! empty($extra['carousel_slides'])) {
+                $section->dashboard_image = $extra['carousel_slides'][0]['image'];
+            }
+
             $section->extra = $extra;
         });
     }

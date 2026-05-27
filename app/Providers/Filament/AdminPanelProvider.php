@@ -12,6 +12,7 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\Support\Assets\Css;
 use Filament\Support\Colors\Color;
 use Filament\Support\Enums\Width;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -27,6 +28,9 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
+            ->assets([
+                Css::make('filament-admin', resource_path('css/filament-admin.css')),
+            ])
             ->id('admin')
             ->path('admin')
             ->login(Login::class)

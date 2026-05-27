@@ -21,8 +21,10 @@
                         @endif
                     </summary>
                     @if ($item->description)
-                        <div class="faq-item__answer">
-                            <p>{{ $item->description }}</p>
+                        <div class="faq-item__panel">
+                            <div class="faq-item__answer">
+                                <p>{{ $item->description }}</p>
+                            </div>
                         </div>
                     @endif
                 </details>

@@ -12,6 +12,7 @@ use BackedEnum;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -85,25 +86,42 @@ class LandingSectionResource extends Resource
                 TextInput::make('button_secondary_url')
                     ->label('Ссылка второй кнопки')
                     ->maxLength(255),
-                FileUpload::make('dashboard_image')
-                    ->label('Изображение дашборда')
-                    ->disk('public')
-                    ->directory('landing/hero')
-                    ->visibility('public')
-                    ->image()
-                    ->imagePreviewHeight('200')
-                    ->maxFiles(1)
-                    ->maxSize(8192)
-                    ->orientImagesFromExif(false)
-                    ->openable()
-                    ->downloadable()
-                    ->getUploadedFileUsing(static::relativeUploadUrl(...))
-                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'hero')
-                    ->helperText('Дождитесь превью, затем нажмите «Сохранить». PNG, JPG или WebP до 8 МБ.'),
-                TextInput::make('extra.dashboard_image_alt')
-                    ->label('Alt-текст изображения дашборда')
-                    ->maxLength(255)
+                TextInput::make('extra.carousel_delay_ms')
+                    ->label('Задержка карусели (сек)')
+                    ->numeric()
+                    ->minValue(2)
+                    ->maxValue(60)
+                    ->default(5)
+                    ->suffix('сек')
+                    ->helperText('Пауза между слайдами при автопрокрутке (2–60 сек).')
+                    ->formatStateUsing(fn ($state): int => (int) round(((int) ($state ?? 5000)) / 1000) ?: 5)
+                    ->dehydrateStateUsing(fn ($state): int => max(2000, ((int) ($state ?: 5)) * 1000))
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'hero'),
+                Repeater::make('hero_carousel_slides')
+                    ->label('Слайды баннера')
+                    ->dehydrated(true)
+                    ->extraAttributes(['class' => 'hero-carousel-repeater'], true)
+                    ->columns(2)
+                    ->schema([
+                        static::heroCarouselImageUpload(),
+                        TextInput::make('alt')
+                            ->label('Alt-текст')
+                            ->maxLength(255)
+                            ->placeholder('Интерфейс ЛогистРу')
+                            ->columnSpan(1)
+                            ->extraAttributes(['class' => 'hero-carousel-alt'], true),
+                    ])
+                    ->minItems(1)
+                    ->maxItems(12)
+                    ->reorderable()
+                    ->collapsible()
+                    ->itemLabel(fn (array $state): string => filled($state['alt'] ?? null)
+                        ? (string) $state['alt']
+                        : 'Слайд')
+                    ->addActionLabel('Добавить слайд')
+                    ->columnSpanFull()
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'hero')
+                    ->helperText('Загрузите одно или несколько изображений. Дождитесь превью, затем «Сохранить». PNG, JPG или WebP до 8 МБ.'),
                 static::publicImageUpload(
                     name: 'mobile_image',
                     label: 'Изображение в рамке телефона',
@@ -244,6 +262,33 @@ class LandingSectionResource extends Resource
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
         return parent::getEloquentQuery()->withCount('allBlocks');
+    }
+
+    protected static function heroCarouselImageUpload(): FileUpload
+    {
+        return FileUpload::make('image')
+            ->label('Изображение')
+            ->disk('public')
+            ->directory('landing/hero')
+            ->visibility('public')
+            ->image()
+            ->imagePreviewHeight('112')
+            ->panelLayout('compact')
+            ->maxFiles(1)
+            ->required()
+            ->maxSize(8192)
+            ->orientImagesFromExif(false)
+            ->openable()
+            ->downloadable()
+            ->columnSpan(1)
+            ->extraAttributes(['class' => 'hero-carousel-upload'], true)
+            ->formatStateUsing(function (mixed $state): array {
+                $path = LandingMedia::normalizePath($state);
+
+                return $path ? [$path] : [];
+            })
+            ->dehydrateStateUsing(fn (mixed $state): mixed => $state)
+            ->getUploadedFileUsing(static::relativeUploadUrl(...));
     }
 
     protected static function publicImageUpload(

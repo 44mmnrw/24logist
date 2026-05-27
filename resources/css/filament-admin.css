@@ -1,0 +1,94 @@
+/* Hero carousel slides — компактная строка: превью слева, alt справа */
+.hero-carousel-repeater .fi-fo-repeater-item {
+    padding-block: 0.5rem;
+}
+
+.hero-carousel-repeater .fi-fo-repeater-item > .grid {
+    display: grid !important;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 0.75rem 1.25rem;
+    align-items: start;
+}
+
+.hero-carousel-repeater .hero-carousel-upload.fi-fo-file-upload {
+    max-width: 200px;
+}
+
+.hero-carousel-repeater .hero-carousel-upload .fi-fo-file-upload-panel,
+.hero-carousel-repeater .hero-carousel-upload .filepond--root {
+    max-width: 200px;
+    max-height: 176px;
+    min-height: 0 !important;
+}
+
+.hero-carousel-repeater .hero-carousel-upload .filepond--panel-root,
+.hero-carousel-repeater .hero-carousel-upload .filepond--panel-center,
+.hero-carousel-repeater .hero-carousel-upload .filepond--panel-top,
+.hero-carousel-repeater .hero-carousel-upload .filepond--panel-bottom {
+    min-height: 0 !important;
+}
+
+.hero-carousel-repeater .hero-carousel-upload .filepond--list,
+.hero-carousel-repeater .hero-carousel-upload .filepond--list-scroller {
+    min-height: 0 !important;
+}
+
+.hero-carousel-repeater .hero-carousel-upload .filepond--item {
+    width: 100% !important;
+    max-width: 200px;
+    margin: 0;
+}
+
+.hero-carousel-repeater .hero-carousel-upload .filepond--file {
+    max-width: 200px;
+    padding: 0.25rem 0.375rem;
+    min-height: 0;
+}
+
+.hero-carousel-repeater .hero-carousel-upload .filepond--file-info-main {
+    font-size: 0.6875rem;
+    line-height: 1.2;
+}
+
+.hero-carousel-repeater .hero-carousel-upload .filepond--file-info-sub {
+    font-size: 0.625rem;
+}
+
+.hero-carousel-repeater .hero-carousel-upload .filepond--image-preview-wrapper,
+.hero-carousel-repeater .hero-carousel-upload .filepond--image-preview {
+    max-height: 112px !important;
+    min-height: 0 !important;
+    height: 112px !important;
+}
+
+.hero-carousel-repeater .hero-carousel-upload .filepond--image-preview img,
+.hero-carousel-repeater .hero-carousel-upload .filepond--image-bitmap,
+.hero-carousel-repeater .hero-carousel-upload .filepond--image-bitmap canvas {
+    max-height: 112px !important;
+    object-fit: contain;
+}
+
+.hero-carousel-repeater .hero-carousel-upload .filepond--drop-label {
+    min-height: 112px;
+    padding-block: 0.5rem;
+}
+
+.hero-carousel-repeater .hero-carousel-alt {
+    align-self: start;
+}
+
+.hero-carousel-repeater .hero-carousel-alt .fi-input-wrp {
+    margin-top: 0;
+}
+
+@media (max-width: 640px) {
+    .hero-carousel-repeater .fi-fo-repeater-item > .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-carousel-repeater .hero-carousel-upload.fi-fo-file-upload,
+    .hero-carousel-repeater .hero-carousel-upload .fi-fo-file-upload-panel,
+    .hero-carousel-repeater .hero-carousel-upload .filepond--root {
+        max-width: 100%;
+    }
+}

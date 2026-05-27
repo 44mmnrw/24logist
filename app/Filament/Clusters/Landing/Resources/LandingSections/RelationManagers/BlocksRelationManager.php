@@ -44,6 +44,7 @@ class BlocksRelationManager extends RelationManager
             'quiz' => 'Вопросы квиза',
             'faq' => 'Вопросы FAQ',
             'mobile' => 'Пункты списка',
+            'hero' => 'Пункты списка',
             'footer' => 'Колонки подвала',
             default => static::$title ?? 'Блоки секции',
         };

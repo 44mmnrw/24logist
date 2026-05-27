@@ -88,6 +88,8 @@ class LandingContentSeeder extends Seeder
                 'hint_icon' => $this->icon('info-circle'),
                 'primary_button_icon' => $this->icon('arrow-right'),
                 'dashboard_image_alt' => 'Интерфейс ЛогистРу',
+                'carousel_delay_ms' => 5000,
+                'carousel_slides' => [],
             ],
         ]);
 

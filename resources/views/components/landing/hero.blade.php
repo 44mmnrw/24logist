@@ -3,7 +3,8 @@
         $section = $landing->section('hero');
         $extra = $section?->extra ?? [];
         $bullets = $landing->blocks('hero', 'bullet');
-        $dashboardImage = \App\Support\LandingMedia::url($section?->dashboard_image ?? $extra['dashboard_image'] ?? null);
+        $carouselSlides = \App\Support\LandingHeroCarousel::slides($section);
+        $carouselDelayMs = \App\Support\LandingHeroCarousel::delayMs($section);
     @endphp
 
     <div class="landing-shell landing-hero__shell">
@@ -29,7 +30,9 @@
                 @foreach ($bullets as $bullet)
                     <li>
                         @if ($bullet->icon)
-                            <x-landing.icon :name="$bullet->icon" />
+                            <span class="hero-list__icon" aria-hidden="true">
+                                <x-landing.icon :name="$bullet->icon" />
+                            </span>
                         @endif
                         {{ $bullet->title }}
                     </li>
@@ -73,16 +76,43 @@
             @endif
         </div>
 
-        @if ($dashboardImage)
-            <figure class="dashboard-card">
-                <img
-                    src="{{ $dashboardImage }}"
-                    alt="{{ $extra['dashboard_image_alt'] ?? 'Интерфейс ЛогистРу' }}"
-                    width="640"
-                    height="480"
-                    loading="lazy"
-                    decoding="async"
-                >
+        @if ($carouselSlides !== [])
+            <figure
+                class="dashboard-card hero-carousel"
+                data-hero-carousel
+                data-delay="{{ $carouselDelayMs }}"
+            >
+                <div class="hero-carousel__viewport">
+                    @foreach ($carouselSlides as $index => $slide)
+                        <div
+                            class="hero-carousel__slide{{ $index === 0 ? ' is-active' : '' }}"
+                            data-hero-carousel-slide
+                        >
+                            <img
+                                src="{{ $slide['url'] }}"
+                                alt="{{ $slide['alt'] }}"
+                                width="640"
+                                height="480"
+                                loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
+                                decoding="async"
+                            >
+                        </div>
+                    @endforeach
+                </div>
+                @if (count($carouselSlides) > 1)
+                    <div class="hero-carousel__dots" role="tablist" aria-label="Слайды баннера">
+                        @foreach ($carouselSlides as $index => $slide)
+                            <button
+                                type="button"
+                                class="hero-carousel__dot{{ $index === 0 ? ' is-active' : '' }}"
+                                data-hero-carousel-dot
+                                role="tab"
+                                aria-label="Слайд {{ $index + 1 }}"
+                                aria-selected="{{ $index === 0 ? 'true' : 'false' }}"
+                            ></button>
+                        @endforeach
+                    </div>
+                @endif
             </figure>
         @endif
     </div>
