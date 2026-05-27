@@ -251,6 +251,9 @@ echo [OK] Server code updated.
 echo.
 echo [3] composer install on server...
 call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && php composer.phar install --no-dev --optimize-autoloader --no-interaction"
+if not errorlevel 1 (
+	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && sed -i 's/\r$//' script_ai/patch-livewire-upload.sh && bash script_ai/patch-livewire-upload.sh"
+)
 if errorlevel 1 (
 	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && composer install --no-dev --optimize-autoloader --no-interaction"
 	if errorlevel 1 (
@@ -297,7 +300,7 @@ call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && php artisan 
 if errorlevel 1 exit /b 1
 call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && php artisan view:cache"
 if errorlevel 1 exit /b 1
-call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && php artisan storage:link --force && chmod -R ug+rwx storage bootstrap/cache"
+call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && php artisan storage:link --force && chmod -R ug+rwx storage bootstrap/cache && rm -f storage/app/public/livewire-tmp/*.json"
 if errorlevel 1 exit /b 1
 call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && php artisan queue:restart"
 if errorlevel 1 exit /b 1

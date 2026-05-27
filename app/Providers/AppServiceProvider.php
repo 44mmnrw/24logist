@@ -2,9 +2,12 @@
 
 namespace App\Providers;
 
+use App\Services\LandingPageService;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Features\SupportFileUploads\FileUploadController;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,7 +16,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(
+            FileUploadController::class,
+            \App\Http\Livewire\FileUploadController::class,
+        );
     }
 
     /**
@@ -33,8 +39,8 @@ class AppServiceProvider extends ServiceProvider
             app()->setLocale('ru');
         });
 
-        \Illuminate\Support\Facades\View::composer('components.landing.*', function ($view): void {
-            $view->with('landing', app(\App\Services\LandingPageService::class));
+        View::composer('components.landing.*', function ($view): void {
+            $view->with('landing', app(LandingPageService::class));
         });
     }
 }
