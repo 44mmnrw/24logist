@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Runs ON production server after git push from deploy.bat
+# Runs on production server (called from deploy.sh)
 set -euo pipefail
 
 APP_DIR="${DEPLOY_APP_DIR:-/var/www/logist_sys/data/24logistru}"
 BRANCH="${DEPLOY_BRANCH:-main}"
 REPO="${DEPLOY_REPO:-https://github.com/44mmnrw/24logist.git}"
+SKIP_FRONTEND_BUILD="${SKIP_FRONTEND_BUILD:-0}"
 
 log() { printf '[deploy] %s\n' "$*"; }
 die() { printf '[deploy] ERROR: %s\n' "$*" >&2; exit 1; }
@@ -34,13 +35,17 @@ php composer.phar install --no-dev --optimize-autoloader --no-interaction --no-p
 
 [[ -f .env ]] || die '.env missing on server'
 
-log "npm install + build (frontend)"
-if ! command -v npm >/dev/null 2>&1; then
-    die 'npm not found on server — install Node.js for production build'
+if [[ "$SKIP_FRONTEND_BUILD" != "1" ]]; then
+    log "npm install + build"
+    if ! command -v npm >/dev/null 2>&1; then
+        die 'npm not found on server'
+    fi
+    npm ci --ignore-scripts 2>/dev/null || npm install --ignore-scripts
+    npm run build
+    [[ -f public/build/manifest.json ]] || die 'npm run build failed'
+else
+    log "skip npm build (uploaded from local machine)"
 fi
-npm ci --ignore-scripts 2>/dev/null || npm install --ignore-scripts
-npm run build
-[[ -f public/build/manifest.json ]] || die 'npm run build failed (no manifest.json)'
 
 log "artisan migrate"
 php artisan migrate --force
