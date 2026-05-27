@@ -239,17 +239,17 @@ call :fn_unlock_ssh_key
 if errorlevel 1 exit /b 1
 
 echo.
-echo [2] git pull on server...
+echo [2] git sync on server ^(fetch + reset to origin/%GIT_BRANCH%^)...
 if defined SERVER_GIT_SSH_COMMAND (
-	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "test -d %SERVER_APP%/.git || (echo [ERROR] No git in %SERVER_APP% && exit 1); cd %SERVER_APP% && git pull --ff-only %GIT_REMOTE% %GIT_BRANCH%"
+	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "test -d %SERVER_APP%/.git || (echo [ERROR] No git in %SERVER_APP% && exit 1); cd %SERVER_APP% && GIT_SSH_COMMAND='%SERVER_GIT_SSH_COMMAND%' git fetch %GIT_REMOTE% %GIT_BRANCH% && git reset --hard %GIT_REMOTE%/%GIT_BRANCH% && git clean -fd"
 ) else (
-	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "test -d %SERVER_APP%/.git || (echo [ERROR] No git in %SERVER_APP% && exit 1); cd %SERVER_APP% && git pull --ff-only %GIT_REMOTE% %GIT_BRANCH%"
+	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "test -d %SERVER_APP%/.git || (echo [ERROR] No git in %SERVER_APP% && exit 1); cd %SERVER_APP% && git fetch %GIT_REMOTE% %GIT_BRANCH% && git reset --hard %GIT_REMOTE%/%GIT_BRANCH% && git clean -fd"
 )
 if errorlevel 1 (
-	echo [ERROR] git pull failed on server.
+	echo [ERROR] git sync failed on server.
 	exit /b 1
 )
-echo [OK] Server code updated.
+echo [OK] Server code = origin/%GIT_BRANCH% ^(.env not touched^).
 
 echo.
 echo [3] composer install on server...
