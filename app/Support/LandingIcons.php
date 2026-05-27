@@ -7,11 +7,12 @@ final class LandingIcons
     /** @var array<string, string> */
     private const ICON_ALIASES = [
         'map-pin' => 'rotes',
+        'check-green' => 'check-blue',
     ];
 
     /** @var array<string, string> */
     private const LEGACY_URL_MAP = [
-        '4a52bb50-381b-4e51-9404-3a9d2ca17c85' => 'check-green',
+        '4a52bb50-381b-4e51-9404-3a9d2ca17c85' => 'check-blue',
         '2fcbc75e-2d93-44aa-8d9e-1e692f633f06' => 'check-circle',
         '066376e7-72a9-4e53-8d21-623a41ded2ad' => 'check',
         '41728557-50f0-4280-8e1d-ba9e0a44d6b9' => 'brand-logo',
@@ -38,7 +39,7 @@ final class LandingIcons
         'f3747d7f-f26c-4467-817f-b90c087479a9' => 'users-card',
         'b13d37dd-b731-40df-b92c-f6c92715dcd8' => 'rotes',
         '9f5dbdda-a27d-4da8-8d5e-559f2aa8309b' => 'sliders',
-        '48bd66e6-ed63-46a3-8ff6-e7f285997bd7' => 'check-green',
+        '48bd66e6-ed63-46a3-8ff6-e7f285997bd7' => 'check-blue',
         '2afefcd1-5854-4df1-8caf-77ef412052ce' => 'smartphone',
         '3f6fdc5d-d097-494a-b9a3-e41b891b09c5' => 'browser',
         'be291b50-e608-43c5-9166-d4ef099cdfb9' => 'brand-mark',
@@ -56,7 +57,7 @@ final class LandingIcons
         'brand-mark' => 'Марк логотипа',
         'badge-star' => 'Бейдж (звезда)',
         'check' => 'Галочка',
-        'check-green' => 'Галочка (зелёная)',
+        'check-blue' => 'Галочка (синяя)',
         'check-circle' => 'Галочка в круге',
         'arrow-right' => 'Стрелка вправо',
         'chevron-down' => 'Шеврон вниз',
@@ -139,7 +140,7 @@ final class LandingIcons
     public static function viewBox(string $name): string
     {
         return match ($name) {
-            'document-fast', 'chart-bar', 'lifebuoy', 'shield-check', 'document-signed', 'truck', 'user-driver', 'calendar-alert', 'calculator', 'banknotes', 'rotes', 'folder-archive', 'bell', 'users-card' => '0 0 20 20',
+            'check-blue', 'document-fast', 'chart-bar', 'lifebuoy', 'shield-check', 'document-signed', 'truck', 'user-driver', 'calendar-alert', 'calculator', 'banknotes', 'rotes', 'folder-archive', 'bell', 'users-card' => '0 0 20 20',
             default => '0 0 24 24',
         };
     }
