@@ -105,7 +105,7 @@ class LandingSectionResource extends Resource
                     ->schema([
                         static::heroCarouselImageUpload(),
                         TextInput::make('alt')
-                            ->label('Alt-текст')
+                            ->label('Alt-текст изображения')
                             ->maxLength(255)
                             ->placeholder('Интерфейс ЛогистРу')
                             ->columnSpan(1)
@@ -272,8 +272,7 @@ class LandingSectionResource extends Resource
             ->directory('landing/hero')
             ->visibility('public')
             ->image()
-            ->imagePreviewHeight('112')
-            ->panelLayout('compact')
+            ->imagePreviewHeight('200')
             ->maxFiles(1)
             ->required()
             ->maxSize(8192)
@@ -282,6 +281,7 @@ class LandingSectionResource extends Resource
             ->downloadable()
             ->columnSpan(1)
             ->extraAttributes(['class' => 'hero-carousel-upload'], true)
+            ->helperText('Дождитесь превью, затем нажмите «Сохранить». PNG, JPG или WebP до 8 МБ.')
             ->formatStateUsing(function (mixed $state): array {
                 $path = LandingMedia::normalizePath($state);
 
