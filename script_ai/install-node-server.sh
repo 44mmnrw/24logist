@@ -24,7 +24,7 @@ mv "node-${NODE_VER}-${ARCH}" node
 rm -f "${TARBALL}"
 
 echo "[install] node: $("${INSTALL_DIR}/bin/node" -v)"
-echo "[install] npm:  $("${INSTALL_DIR}/bin/npm" -v)"
+echo "[install] npm:  $(PATH="${INSTALL_DIR}/bin:${PATH}" "${INSTALL_DIR}/bin/npm" -v)"
 
 if ! grep -q 'opt/node/bin' "${HOME}/.bashrc" 2>/dev/null; then
   echo 'export PATH="$HOME/opt/node/bin:$PATH"' >> "${HOME}/.bashrc"

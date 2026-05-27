@@ -21,6 +21,10 @@
                 <h1>{{ $section->title }}</h1>
             @endif
 
+            @if ($section?->subtitle)
+                <h2 class="landing-hero__subtitle">{{ $section->subtitle }}</h2>
+            @endif
+
             <ul class="hero-list">
                 @foreach ($bullets as $bullet)
                     <li>

@@ -10,8 +10,14 @@ export PATH="$HOME/bin:$HOME/opt/node/bin:$HOME/.nvm/versions/node/v24.13.1/bin:
 export NODE_OPTIONS="--max-old-space-size=${BUILD_NODE_MAX_OLD_SPACE:-512}"
 export CI=1
 
-echo "[REMOTE] node: $(command -v node && node -v || echo missing)"
-echo "[REMOTE] npm: $(command -v npm && npm -v || echo missing)"
+if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
+  echo "[ERROR] node/npm not found. PATH=$PATH"
+  echo "[HINT] Run once: bash script_ai/install-node-server.sh"
+  exit 127
+fi
+
+echo "[REMOTE] node: $(command -v node) $(node -v)"
+echo "[REMOTE] npm:  $(command -v npm) $(npm -v)"
 echo "[REMOTE] clear caches before build..."
 php artisan optimize:clear
 rm -f public/hot
@@ -40,15 +46,16 @@ if [[ "${NPM_EXIT}" -ne 0 ]]; then
 fi
 
 echo "[REMOTE] vite build (max ${BUILD_TIMEOUT_MINUTES:-20}m)..."
-timeout --foreground -k 30s "${BUILD_TIMEOUT_MINUTES:-20}m" bash -lc '
+timeout --foreground -k 30s "${BUILD_TIMEOUT_MINUTES:-20}m" bash -c "
+  export PATH=\"$PATH\"
   npm run build -- --logLevel info &
-  BUILD_PID=$!
-  while kill -0 "$BUILD_PID" 2>/dev/null; do
-    echo "[REMOTE] vite build in progress..."
+  BUILD_PID=\$!
+  while kill -0 \"\$BUILD_PID\" 2>/dev/null; do
+    echo '[REMOTE] vite build in progress...'
     sleep 30
   done
-  wait "$BUILD_PID"
-'
+  wait \"\$BUILD_PID\"
+"
 
 if [[ ! -f public/build/manifest.json ]]; then
   echo "[ERROR] public/build/manifest.json missing"

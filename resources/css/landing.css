@@ -171,6 +171,20 @@ body {
     line-height: 1.1;
     color: #0f172b;
 }
+.landing-hero h1:has(+ .landing-hero__subtitle) {
+    margin-bottom: 12px;
+}
+.landing-hero .landing-hero__subtitle {
+    margin: 0;
+    max-width: 640px;
+    font-size: 40px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: #0f172b;
+}
+.landing-hero .landing-hero__subtitle + .hero-list {
+    margin-top: 56px;
+}
 .hero-list {
     margin-top: 0;
     display: grid;
@@ -680,6 +694,8 @@ body {
     .mobile-copy h2,
     .landing-hero h1,
     .final-cta h2 { font-size: 34px; }
+    .landing-hero .landing-hero__subtitle { font-size: 26px; }
+    .landing-hero .landing-hero__subtitle + .hero-list { margin-top: 40px; }
 
     .pricing-grid,
     .why-grid,

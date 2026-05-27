@@ -275,6 +275,11 @@ call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && php artisan 
 if errorlevel 1 exit /b 1
 
 echo.
+echo [4.9] Ensure Node.js on server ^($HOME/opt/node^)...
+call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "test -x $HOME/opt/node/bin/node || (test -f %SERVER_PATH%/script_ai/install-node-server.sh && sed -i 's/\r$//' %SERVER_PATH%/script_ai/install-node-server.sh && bash %SERVER_PATH%/script_ai/install-node-server.sh) || (echo [ERROR] Node missing. Install: bash script_ai/install-node-server.sh && exit 1)"
+if errorlevel 1 exit /b 1
+
+echo.
 echo [5] Frontend build on server...
 if "%SKIP_FRONTEND_BUILD%"=="1" (
 	echo [WARN] Skipped ^(--skip-build^).
