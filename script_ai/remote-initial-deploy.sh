@@ -14,6 +14,10 @@ fi
 
 cd "${APP}"
 
+if [[ ! -f composer.phar ]]; then
+  curl -sS https://getcomposer.org/installer | php
+fi
+
 php composer.phar install --no-dev --optimize-autoloader --no-interaction
 
 if [[ ! -f .env ]]; then

@@ -241,9 +241,9 @@ if errorlevel 1 exit /b 1
 echo.
 echo [2] git sync on server ^(fetch + reset to origin/%GIT_BRANCH%^)...
 if defined SERVER_GIT_SSH_COMMAND (
-	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "test -d %SERVER_APP%/.git || (echo [ERROR] No git in %SERVER_APP% && exit 1); cd %SERVER_APP% && GIT_SSH_COMMAND='%SERVER_GIT_SSH_COMMAND%' git fetch %GIT_REMOTE% %GIT_BRANCH% && git reset --hard %GIT_REMOTE%/%GIT_BRANCH% && git clean -fd"
+	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "test -d %SERVER_APP%/.git || (echo [ERROR] No git in %SERVER_APP% && exit 1); cd %SERVER_APP% && GIT_SSH_COMMAND='%SERVER_GIT_SSH_COMMAND%' git fetch %GIT_REMOTE% %GIT_BRANCH% && git reset --hard %GIT_REMOTE%/%GIT_BRANCH% && git clean -fd -e composer.phar"
 ) else (
-	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "test -d %SERVER_APP%/.git || (echo [ERROR] No git in %SERVER_APP% && exit 1); cd %SERVER_APP% && git fetch %GIT_REMOTE% %GIT_BRANCH% && git reset --hard %GIT_REMOTE%/%GIT_BRANCH% && git clean -fd"
+	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "test -d %SERVER_APP%/.git || (echo [ERROR] No git in %SERVER_APP% && exit 1); cd %SERVER_APP% && git fetch %GIT_REMOTE% %GIT_BRANCH% && git reset --hard %GIT_REMOTE%/%GIT_BRANCH% && git clean -fd -e composer.phar"
 )
 if errorlevel 1 (
 	echo [ERROR] git sync failed on server.
@@ -253,16 +253,15 @@ echo [OK] Server code = origin/%GIT_BRANCH% ^(.env not touched^).
 
 echo.
 echo [3] composer install on server...
-call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_APP% && php composer.phar install --no-dev --optimize-autoloader --no-interaction"
-if not errorlevel 1 (
-	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_APP% && sed -i 's/\r$//' script_ai/patch-livewire-upload.sh && bash script_ai/patch-livewire-upload.sh"
-)
+call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_APP% && (test -f composer.phar || (curl -sS https://getcomposer.org/installer | php)) && php composer.phar install --no-dev --optimize-autoloader --no-interaction"
 if errorlevel 1 (
-	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_APP% && composer install --no-dev --optimize-autoloader --no-interaction"
-	if errorlevel 1 (
-		echo [ERROR] composer install failed.
-		exit /b 1
-	)
+	echo [ERROR] composer install failed.
+	exit /b 1
+)
+call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_APP% && sed -i 's/\r$//' script_ai/patch-livewire-upload.sh && bash script_ai/patch-livewire-upload.sh"
+if errorlevel 1 (
+	echo [ERROR] patch-livewire-upload failed.
+	exit /b 1
 )
 
 echo.
