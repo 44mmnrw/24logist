@@ -129,7 +129,7 @@ return [
     */
 
     'temporary_file_upload' => [
-        'disk' => env('LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK', 'public'),
+        'disk' => env('LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK', 'local'),
         'rules' => null,
         'directory' => 'livewire-tmp',
         'middleware' => null,                                 // Example: 'throttle:5,1'            | Default: 'throttle:60,1'

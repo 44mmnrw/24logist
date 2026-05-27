@@ -6,6 +6,7 @@ use App\Filament\Clusters\Landing\Resources\LandingSections\Pages\EditLandingSec
 use App\Filament\Clusters\Landing\Resources\LandingSections\Pages\ListLandingSections;
 use App\Filament\Clusters\Landing\Resources\LandingSections\RelationManagers\BlocksRelationManager;
 use App\Models\LandingSection;
+use App\Support\FilamentUploadPreview;
 use App\Support\LandingIcons;
 use App\Support\LandingMedia;
 use BackedEnum;
@@ -23,6 +24,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class LandingSectionResource extends Resource
 {
@@ -259,7 +261,7 @@ class LandingSectionResource extends Resource
         return false;
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->withCount('allBlocks');
     }
@@ -276,6 +278,7 @@ class LandingSectionResource extends Resource
             ->maxFiles(1)
             ->required()
             ->maxSize(8192)
+            ->fetchFileInformation(false)
             ->orientImagesFromExif(false)
             ->openable()
             ->downloadable()
@@ -288,7 +291,7 @@ class LandingSectionResource extends Resource
                 return $path ? [$path] : [];
             })
             ->dehydrateStateUsing(fn (mixed $state): mixed => $state)
-            ->getUploadedFileUsing(static::relativeUploadUrl(...));
+            ->getUploadedFileUsing(static::uploadPreview(...));
     }
 
     protected static function publicImageUpload(
@@ -307,40 +310,21 @@ class LandingSectionResource extends Resource
             ->imagePreviewHeight('200')
             ->maxFiles(1)
             ->maxSize(8192)
+            ->fetchFileInformation(false)
             ->orientImagesFromExif(false)
             ->openable()
             ->downloadable()
-            ->getUploadedFileUsing(static::relativeUploadUrl(...))
+            ->getUploadedFileUsing(static::uploadPreview(...))
             ->visible(fn (?LandingSection $record): bool => $record?->slug === $visibleSlug)
             ->helperText($helperText);
     }
 
-    protected static function relativeUploadUrl(FileUpload $component, string $file, string|array|null $storedFileNames): ?array
+    /**
+     * @param  string|array<string, string>|null  $storedFileNames
+     * @return array{name: string, size: int, type: ?string, url: ?string}|null
+     */
+    protected static function uploadPreview(FileUpload $component, string $file, string|array|null $storedFileNames): ?array
     {
-        $info = $component->getUploadedFile($file, $storedFileNames);
-
-        if ($info === null || ! isset($info['url'])) {
-            return $info;
-        }
-
-        $path = parse_url($info['url'], PHP_URL_PATH);
-
-        if (is_string($path) && $path !== '') {
-            $info['url'] = $path;
-        }
-
-        foreach (['openableUrl', 'downloadableUrl'] as $key) {
-            if (! isset($info[$key])) {
-                continue;
-            }
-
-            $urlPath = parse_url($info[$key], PHP_URL_PATH);
-
-            if (is_string($urlPath) && $urlPath !== '') {
-                $info[$key] = $urlPath;
-            }
-        }
-
-        return $info;
+        return FilamentUploadPreview::resolve($component, $file, $storedFileNames);
     }
 }
