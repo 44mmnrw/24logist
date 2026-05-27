@@ -1,0 +1,119 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    height: 100%;
+    font-size: var(--app-font-size, 100%);
+    scrollbar-gutter: stable;
+    scroll-behavior: smooth;
+}
+
+body,
+blockquote[class],
+figure[class],
+fieldset[class] {
+    margin: 0;
+}
+
+ul[class],
+ol[class] {
+    margin: 0;
+    padding-left: 0;
+}
+
+ul[class] {
+    list-style: none;
+}
+
+h1[class],
+h2[class],
+h3[class],
+h4[class],
+h5[class],
+h6[class],
+p[class],
+dl[class],
+dd[class] {
+    margin: 0;
+}
+
+fieldset[class] {
+    border: 0;
+    padding: 0;
+}
+
+address[class] {
+    font-style: normal;
+}
+
+body {
+    min-height: 100%;
+    line-height: 1.5;
+    font-family: var(--font-family, "Inter", sans-serif);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+img,
+svg,
+video {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+a[class] {
+    display: inline-flex;
+}
+
+button,
+label {
+    cursor: pointer;
+}
+
+button {
+    -webkit-tap-highlight-color: transparent;
+}
+
+:where([fill]:not([fill="none"], [fill^="url"], [fill^="#"], [fill^="rgb"], [fill^="hsl"])) {
+    fill: currentColor;
+}
+
+:where([stroke]:not([stroke="none"], [stroke^="url"], [stroke^="#"], [stroke^="rgb"], [stroke^="hsl"])) {
+    stroke: currentColor;
+}
+
+table {
+    border-collapse: collapse;
+    border-color: currentColor;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

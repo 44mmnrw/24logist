@@ -1,0 +1,539 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\LandingBlock;
+use App\Models\LandingSection;
+use App\Support\LandingIcons;
+use Illuminate\Database\Seeder;
+
+class LandingContentSeeder extends Seeder
+{
+    private function icon(string $name): string
+    {
+        return LandingIcons::toStorage($name);
+    }
+
+    public function run(): void
+    {
+        LandingBlock::query()->delete();
+        LandingSection::query()->delete();
+
+        $this->seedHeader();
+        $this->seedHero();
+        $this->seedWhy();
+        $this->seedPlatform();
+        $this->seedFeatures();
+        $this->seedPricing();
+        $this->seedMobile();
+        $this->seedQuiz();
+        $this->seedFaq();
+        $this->seedFinalCta();
+        $this->seedFooter();
+    }
+
+    private function section(array $data): LandingSection
+    {
+        return LandingSection::query()->create($data);
+    }
+
+    private function block(array $data): LandingBlock
+    {
+        return LandingBlock::query()->create($data);
+    }
+
+    private function seedHeader(): void
+    {
+        $section = $this->section([
+            'slug' => 'header',
+            'name' => 'Шапка',
+            'sort_order' => 1,
+            'extra' => [
+                'demo_button_text' => 'Получить демо',
+                'logo_icon' => $this->icon('brand-logo'),
+                'brand_name' => 'ЛогистРу',
+            ],
+        ]);
+
+        foreach ([
+            ['title' => 'Возможности', 'link' => '#features'],
+            ['title' => 'Почему мы', 'link' => '#why'],
+            ['title' => 'Тарифы', 'link' => '#pricing'],
+            ['title' => 'Кейсы', 'link' => '#pricing'],
+            ['title' => 'Квиз', 'link' => '#quiz'],
+        ] as $index => $item) {
+            $this->block([
+                'section_slug' => $section->slug,
+                'block_type' => 'nav_link',
+                'title' => $item['title'],
+                'link' => $item['link'],
+                'sort_order' => $index + 1,
+            ]);
+        }
+    }
+
+    private function seedHero(): void
+    {
+        $section = $this->section([
+            'slug' => 'hero',
+            'name' => 'Главный экран',
+            'sort_order' => 2,
+            'badge_text' => 'Лучший сервис для экспедиторов в России',
+            'badge_icon' => $this->icon('badge-star'),
+            'title' => 'ЛогистРу — заявки, рейсы и ЭДО в одном кабинете',
+            'button_primary_text' => 'Подобрать тариф',
+            'button_secondary_text' => 'Посмотреть возможности',
+            'extra' => [
+                'hint_text' => 'Удобно для экспедитора, просто для перевозчика',
+                'hint_icon' => $this->icon('info-circle'),
+                'primary_button_icon' => $this->icon('arrow-right'),
+                'dashboard_image_alt' => 'Интерфейс ЛогистРу',
+            ],
+        ]);
+
+        foreach ([
+            'Создавайте заявки',
+            'Контролируйте оплаты',
+            'Следите за статусом доставки',
+            'Формируйте перевозочные документы согласно ФЗ',
+        ] as $index => $title) {
+            $this->block([
+                'section_slug' => $section->slug,
+                'block_type' => 'bullet',
+                'title' => $title,
+                'icon' => $this->icon('check-green'),
+                'sort_order' => $index + 1,
+            ]);
+        }
+
+    }
+
+    private function seedWhy(): void
+    {
+        $section = $this->section([
+            'slug' => 'why',
+            'name' => 'Преимущества',
+            'sort_order' => 3,
+            'title' => 'Преимущества',
+            'subtitle' => 'Делаем работу логиста предсказуемой: меньше звонков, чатов и потерянных задач — больше прозрачности.',
+        ]);
+
+        foreach ([
+            ['icon' => $this->icon('document-fast'), 'title' => 'Договор-заявка за 5 минут', 'description' => 'Автозаполнение реквизитов и шаблоны — оформление в несколько кликов.'],
+            ['icon' => $this->icon('chart-bar'), 'title' => 'Аналитика и отчёты', 'description' => 'Следите за прибылью и эффективностью работы с каждым заказчиком.'],
+            ['icon' => $this->icon('lifebuoy'), 'title' => 'Тех. поддержка', 'description' => 'Помогаем настроить процессы и оперативно отвечаем на вопросы.'],
+            ['icon' => $this->icon('shield-check'), 'title' => 'Безопасность данных', 'description' => 'Серверы в РФ и соответствие требованиям ФЗ №140 от 07.06.2025 г.'],
+            ['icon' => $this->icon('document-signed'), 'title' => 'Встроенный ЭДО', 'description' => 'Электронные перевозочные документы внутри сервиса — без дополнительных оплат.'],
+        ] as $index => $card) {
+            $this->block([
+                'section_slug' => $section->slug,
+                'block_type' => 'card',
+                'title' => $card['title'],
+                'description' => $card['description'],
+                'icon' => $card['icon'],
+                'sort_order' => $index + 1,
+            ]);
+        }
+
+        foreach ([
+            ['title' => '−60%', 'subtitle' => 'времени на оформление заявки'],
+            ['title' => '100%', 'subtitle' => 'прозрачность статусов рейса'],
+            ['title' => '0', 'subtitle' => 'потерянных задач в почте'],
+        ] as $index => $stat) {
+            $this->block([
+                'section_slug' => $section->slug,
+                'block_type' => 'stat',
+                'title' => $stat['title'],
+                'subtitle' => $stat['subtitle'],
+                'sort_order' => $index + 1,
+            ]);
+        }
+    }
+
+    private function seedPlatform(): void
+    {
+        $section = $this->section([
+            'slug' => 'platform',
+            'name' => 'Платформа',
+            'sort_order' => 4,
+            'kicker' => 'Что внутри ЛогистРу',
+            'title' => 'Четыре опоры сервиса для экспедитора',
+            'description' => 'От первой заявки до электронных перевозочных документов и безопасного хранения данных — всё, что нужно, чтобы вести перевозки без потерь.',
+            'extra' => [
+                'deadline_kicker' => 'ДЕДЛАЙН',
+                'deadline_date' => '1 сентября 2026',
+                'deadline_icon' => $this->icon('calendar-alert'),
+                'deadline_text' => 'С этой даты транспортный ЭДО становится обязательным. Подключитесь к ЛогистРу заранее — настроим обмен ЭТрН и сопутствующими документами без простоев в работе.',
+                'deadline_button_text' => 'Подготовиться к ЭДО',
+            ],
+        ]);
+
+        $cards = [
+            [
+                'icon' => $this->icon('clipboard-list'),
+                'subtitle' => '01 · Заявки',
+                'title' => 'Заявки с клиентами и перевозчиками',
+                'description' => 'Экспедитор оформляет в среднем 4–8 заявок в день. Мы автоматизировали заполнение данных по контрагенту — теперь на одну заявку уходит 4–5 минут.',
+                'note' => ['icon' => $this->icon('clock'), 'text' => '<strong>4–5 минут</strong> на оформление заявки вместо ручного ввода реквизитов'],
+            ],
+            [
+                'tag' => 'ВАЖНО · с 01.09.2026',
+                'icon' => $this->icon('documents'),
+                'subtitle' => '02 · ЭДО',
+                'title' => 'Электронные перевозочные документы в один клик',
+                'description' => 'С 1 сентября 2026 года транспортный ЭДО станет обязательным. В одном окне формируйте, храните и обменивайтесь со всеми участниками:',
+                'list' => ['ЭТрН', 'Доверенность на получение груза', 'Заказ-заявка', 'Экспедиторская расписка'],
+            ],
+            [
+                'icon' => $this->icon('server'),
+                'subtitle' => '03 · Безопасность',
+                'title' => 'Хранение данных на российских серверах',
+                'description' => 'Все данные клиентов, перевозчиков и документов размещены в российском облаке в соответствии с требованиями ФЗ №140 от 07.06.2025 г.',
+                'pills' => ['ФЗ №140', 'Серверы в РФ', 'Шифрование', 'Резервные копии'],
+            ],
+            [
+                'icon' => $this->icon('route'),
+                'subtitle' => '04 · Гибкость',
+                'title' => 'Любые сценарии перевозки',
+                'description' => 'Поддерживаем разные роли грузоотправителя — это может быть заказчик перевозки, экспедитор при подписании экспедиторской записки или грузополучатель при самовывозе.',
+                'roles' => [
+                    ['title' => 'Экспедитор', 'subtitle' => 'при подписании экспедиторской записки'],
+                    ['title' => 'Грузоотправитель', 'subtitle' => 'когда заказчик перевозки оформляет документы сам'],
+                ],
+            ],
+        ];
+
+        foreach ($cards as $index => $card) {
+            $block = $this->block([
+                'section_slug' => $section->slug,
+                'block_type' => 'card',
+                'tag' => $card['tag'] ?? null,
+                'icon' => $card['icon'],
+                'subtitle' => $card['subtitle'],
+                'title' => $card['title'],
+                'description' => $card['description'],
+                'sort_order' => $index + 1,
+            ]);
+
+            if (isset($card['note'])) {
+                $this->block([
+                    'section_slug' => $section->slug,
+                    'block_type' => 'note',
+                    'parent_id' => $block->id,
+                    'icon' => $card['note']['icon'],
+                    'description' => $card['note']['text'],
+                    'sort_order' => 1,
+                ]);
+            }
+
+            foreach ($card['list'] ?? [] as $listIndex => $item) {
+                $this->block([
+                    'section_slug' => $section->slug,
+                    'block_type' => 'list_item',
+                    'parent_id' => $block->id,
+                    'title' => $item,
+                    'icon' => $this->icon('check-circle'),
+                    'sort_order' => $listIndex + 1,
+                ]);
+            }
+
+            foreach ($card['pills'] ?? [] as $pillIndex => $pill) {
+                $this->block([
+                    'section_slug' => $section->slug,
+                    'block_type' => 'pill',
+                    'parent_id' => $block->id,
+                    'title' => $pill,
+                    'sort_order' => $pillIndex + 1,
+                ]);
+            }
+
+            foreach ($card['roles'] ?? [] as $roleIndex => $role) {
+                $this->block([
+                    'section_slug' => $section->slug,
+                    'block_type' => 'role',
+                    'parent_id' => $block->id,
+                    'title' => $role['title'],
+                    'subtitle' => $role['subtitle'],
+                    'sort_order' => $roleIndex + 1,
+                ]);
+            }
+        }
+    }
+
+    private function seedFeatures(): void
+    {
+        $section = $this->section([
+            'slug' => 'features',
+            'name' => 'Возможности',
+            'sort_order' => 5,
+            'title' => 'Возможности',
+            'subtitle' => 'Полный цикл работы: от первого расчёта стоимости до финансовой отчётности и архива документов.',
+        ]);
+
+        foreach ([
+            ['icon' => $this->icon('calculator'), 'title' => 'Калькулятор просчёта стоимости направлений', 'description' => 'Быстрый расчёт ставок и маржи по направлениям перед отправкой заявки клиенту.'],
+            ['icon' => $this->icon('folder-archive'), 'title' => 'Архив документов', 'description' => 'Все договоры, ТТН, акты и доверенности по рейсам — в одном поиске.'],
+            ['icon' => $this->icon('bell'), 'title' => 'Уведомления о сроках оплат', 'description' => 'Напоминания по дебиторке и кредиторке — без просрочек и забытых счетов.'],
+            ['icon' => $this->icon('banknotes'), 'title' => 'Финансовые отчёты и банковские выписки', 'description' => 'Сводки по выручке, расходам и сверка с выписками банка в одном окне.'],
+            ['icon' => $this->icon('users-card'), 'title' => 'Карточки контрагентов', 'description' => 'Реквизиты, история рейсов и взаиморасчётов по каждому клиенту и перевозчику.'],
+            ['icon' => $this->icon('rotes'), 'title' => 'Контроль статусов перевозок по этапам исполнения', 'description' => 'У каждой заявки — своя страница трекинга: события рейса, отметки прибытия и доступ для всех участников.'],
+        ] as $index => $card) {
+            $this->block([
+                'section_slug' => $section->slug,
+                'block_type' => 'card',
+                'title' => $card['title'],
+                'description' => $card['description'],
+                'icon' => $card['icon'],
+                'sort_order' => $index + 1,
+            ]);
+        }
+    }
+
+    private function seedPricing(): void
+    {
+        $section = $this->section([
+            'slug' => 'pricing',
+            'name' => 'Тарифы',
+            'sort_order' => 6,
+            'title' => 'Выберите масштаб под ваш парк и поток заявок',
+            'subtitle' => 'Прозрачные уровни — начните с малого и перейдите на корпоративный режим, когда вырастете.',
+            'extra' => [
+                'footnote' => 'Не уверены, что подойдёт?',
+                'footnote_link_text' => 'Подобрать тариф через квиз →',
+                'footnote_link' => '#quiz',
+            ],
+        ]);
+
+        $plans = [
+            ['title' => 'Старт', 'subtitle' => 'Для малой команды и первых заявок', 'price' => 'от 2 900 ₽', 'button_text' => 'Подобрать тариф', 'button_style' => 'ghost', 'features' => ['Базовые заказы', 'До 3 пользователей', 'Ключевые справочники', 'Поддержка по почте']],
+            ['title' => 'Профи', 'subtitle' => 'Для растущей логистики', 'price' => 'от 7 900 ₽', 'button_text' => 'Подобрать тариф', 'button_style' => 'primary', 'is_highlighted' => true, 'tag' => 'Хит', 'features' => ['Полный цикл заказа', 'Водители и транспорт', 'Стандартные отчёты', 'Ссылка водителю']],
+            ['title' => 'Профи+', 'subtitle' => 'Несколько направлений и филиалов', 'price' => 'от 14 900 ₽', 'button_text' => 'Подобрать тариф', 'button_style' => 'ghost', 'features' => ['Расширенные права', 'Больше интеграций', 'Приоритетная поддержка', 'Кастомные отчёты']],
+            ['title' => 'Корпорация', 'subtitle' => 'Индивидуально под компанию', 'price' => 'Запросить расчёт', 'button_text' => 'Связаться с нами', 'button_style' => 'ghost', 'features' => ['Индивидуальные лимиты', 'SSO и безопасность', 'SLA и онбординг', 'Выделенный менеджер']],
+        ];
+
+        foreach ($plans as $index => $plan) {
+            $block = $this->block([
+                'section_slug' => $section->slug,
+                'block_type' => 'plan',
+                'title' => $plan['title'],
+                'subtitle' => $plan['subtitle'],
+                'price' => $plan['price'],
+                'tag' => $plan['tag'] ?? null,
+                'button_text' => $plan['button_text'],
+                'button_style' => $plan['button_style'],
+                'is_highlighted' => $plan['is_highlighted'] ?? false,
+                'sort_order' => $index + 1,
+            ]);
+
+            foreach ($plan['features'] as $featureIndex => $feature) {
+                $this->block([
+                    'section_slug' => $section->slug,
+                    'block_type' => 'feature',
+                    'parent_id' => $block->id,
+                    'title' => $feature,
+                    'icon' => $this->icon('check'),
+                    'sort_order' => $featureIndex + 1,
+                ]);
+            }
+        }
+    }
+
+    private function seedMobile(): void
+    {
+        $section = $this->section([
+            'slug' => 'mobile',
+            'name' => 'Мобильная версия',
+            'sort_order' => 7,
+            'badge_text' => 'Настройка интерфейса',
+            'badge_icon' => $this->icon('sliders'),
+            'title' => 'Удобная мобильная версия',
+            'description' => 'Создавайте и редактируйте заявки прямо с телефона — без установки приложения, в привычном браузере и с полным функционалом кабинета.',
+            'extra' => [
+                'pill_left_text' => 'Mobile-first',
+                'pill_left_icon' => $this->icon('smartphone'),
+                'pill_right_text' => 'Без приложения',
+                'pill_right_icon' => $this->icon('browser'),
+            ],
+        ]);
+
+        foreach ([
+            'Создание и редактирование заявок на ходу',
+            'Гибкая настройка колонок и фильтров под себя',
+            'Те же данные, что и на компьютере — без задержек',
+        ] as $index => $title) {
+            $this->block([
+                'section_slug' => $section->slug,
+                'block_type' => 'bullet',
+                'title' => $title,
+                'icon' => $this->icon('check-green'),
+                'sort_order' => $index + 1,
+            ]);
+        }
+    }
+
+    private function seedQuiz(): void
+    {
+        $section = $this->section([
+            'slug' => 'quiz',
+            'name' => 'Квиз',
+            'sort_order' => 8,
+            'kicker' => 'Квиз · 1 минута',
+            'title' => 'Подберём тариф под вашу логистику',
+            'description' => 'Ответьте на 4 коротких вопроса — пришлём подходящий тариф и расчёт за 15 минут в рабочее время.',
+            'extra' => [
+                'next_button_icon' => $this->icon('arrow-right'),
+                'finish_title' => 'Куда прислать расчёт?',
+                'finish_description' => 'Оставьте контакты — пришлём подходящий тариф и расчёт в рабочее время.',
+                'success_title' => 'Спасибо!',
+                'success_description' => 'Мы получили ваши ответы и свяжемся с вами в ближайшее время.',
+            ],
+        ]);
+
+        $questions = [
+            [
+                'title' => 'Сколько заявок в месяц?',
+                'options' => ['до 50', '50–200', '200–1000', 'более 1000'],
+            ],
+            [
+                'title' => 'Сколько юрлиц и контрагентов в работе?',
+                'options' => ['1–3', '4–10', '11–30', 'более 30'],
+            ],
+            [
+                'title' => 'Нужны ли интеграции с ЭДО или банками?',
+                'options' => ['Да, обязательно', 'Желательно', 'Пока нет', 'Пока не знаю'],
+            ],
+            [
+                'title' => 'Когда планируете запуск?',
+                'options' => ['В этом месяце', 'В ближайшие 3 месяца', 'Позже', 'Только смотрю варианты'],
+            ],
+        ];
+
+        foreach ($questions as $index => $item) {
+            $question = $this->block([
+                'section_slug' => $section->slug,
+                'block_type' => 'question',
+                'title' => $item['title'],
+                'sort_order' => $index + 1,
+            ]);
+
+            foreach ($item['options'] as $optionIndex => $option) {
+                $this->block([
+                    'section_slug' => $section->slug,
+                    'block_type' => 'option',
+                    'parent_id' => $question->id,
+                    'title' => $option,
+                    'sort_order' => $optionIndex + 1,
+                ]);
+            }
+        }
+    }
+
+    private function seedFaq(): void
+    {
+        $section = $this->section([
+            'slug' => 'faq',
+            'name' => 'FAQ',
+            'sort_order' => 9,
+            'title' => 'Частые вопросы',
+            'extra' => [
+                'toggle_icon' => $this->icon('chevron-down'),
+            ],
+        ]);
+
+        foreach ([
+            ['title' => 'Насколько безопасна ссылка водителю?', 'description' => 'Ссылка одноразовая и ограничена по времени. Водитель видит только данные конкретного рейса.'],
+            ['title' => 'Где хранятся данные?', 'description' => 'На серверах в России в соответствии с требованиями законодательства.'],
+            ['title' => 'Есть ли мобильная версия?', 'description' => 'Да, кабинет полностью адаптирован под смартфоны без установки приложения.'],
+            ['title' => 'Какие интеграции уже есть?', 'description' => 'Поддерживаем обмен с банками, ЭДО-провайдерами и популярными CRM.'],
+            ['title' => 'Можно ли попробовать бесплатно?', 'description' => 'Да, проведём демо и дадим тестовый доступ на 14 дней.'],
+        ] as $index => $item) {
+            $this->block([
+                'section_slug' => $section->slug,
+                'block_type' => 'faq',
+                'title' => $item['title'],
+                'description' => $item['description'],
+                'sort_order' => $index + 1,
+            ]);
+        }
+    }
+
+    private function seedFinalCta(): void
+    {
+        $this->section([
+            'slug' => 'final_cta',
+            'name' => 'Финальный CTA',
+            'sort_order' => 10,
+            'title' => 'Подключите ЛОГИСТ этой неделе',
+            'description' => 'Демо за 30 минут, настройка под ваши процессы, понятный счёт. Без долгих внедрений.',
+            'button_primary_text' => 'Подобрать тариф',
+            'button_secondary_text' => 'Получить демо',
+        ]);
+    }
+
+    private function seedFooter(): void
+    {
+        $section = $this->section([
+            'slug' => 'footer',
+            'name' => 'Подвал',
+            'sort_order' => 11,
+            'description' => 'Лучший сервис для экспедиторов в России. Заявки, ЭДО и рейсы в одном кабинете.',
+            'extra' => [
+                'logo_icon' => $this->icon('brand-logo'),
+                'brand_name' => 'ЛогистРу',
+                'copyright' => '© 2026 ЛогистРу. Все права защищены.',
+                'tagline' => 'Сделано для логистов',
+            ],
+        ]);
+
+        $columns = [
+            'product' => [
+                'title' => 'Продукт',
+                'links' => [
+                    ['title' => 'Возможности', 'link' => '#features'],
+                    ['title' => 'Тарифы', 'link' => '#pricing'],
+                    ['title' => 'Кейсы', 'link' => '#pricing'],
+                    ['title' => 'Подобрать тариф', 'link' => '#pricing'],
+                ],
+            ],
+            'company' => [
+                'title' => 'Компания',
+                'links' => [
+                    ['title' => 'О нас', 'link' => '#about'],
+                    ['title' => 'Блог', 'link' => '#blog'],
+                    ['title' => 'Документы', 'link' => '#docs'],
+                    ['title' => 'Политика конфиденциальности', 'link' => '/pages/privacy-policy'],
+                ],
+            ],
+            'contacts' => [
+                'title' => 'Контакты',
+                'links' => [
+                    ['title' => 'hello@логист.ру', 'link' => 'mailto:hello@логист.ру', 'icon' => $this->icon('mail')],
+                    ['title' => '+7 (495) 000-00-00', 'link' => 'tel:+74950000000', 'icon' => $this->icon('phone')],
+                ],
+            ],
+        ];
+
+        $sort = 1;
+        foreach ($columns as $key => $column) {
+            $parent = $this->block([
+                'section_slug' => $section->slug,
+                'block_type' => 'footer_column',
+                'title' => $column['title'],
+                'extra' => ['column' => $key],
+                'sort_order' => $sort++,
+            ]);
+
+            foreach ($column['links'] as $linkIndex => $link) {
+                $this->block([
+                    'section_slug' => $section->slug,
+                    'block_type' => 'footer_link',
+                    'parent_id' => $parent->id,
+                    'title' => $link['title'],
+                    'link' => $link['link'],
+                    'icon' => $link['icon'] ?? null,
+                    'sort_order' => $linkIndex + 1,
+                ]);
+            }
+        }
+    }
+}
