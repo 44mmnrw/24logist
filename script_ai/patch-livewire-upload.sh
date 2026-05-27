@@ -69,6 +69,25 @@ php <<'PHP'
 $file = 'vendor/livewire/livewire/src/Mechanisms/HandleRequests/EndpointResolver.php';
 $content = file_get_contents($file);
 $updated = str_replace(
+    "return '/livewire-' . $hash;",
+    "return '/lw-' . $hash;",
+    $content,
+    $count,
+);
+
+if ($count > 0) {
+    file_put_contents($file, $updated);
+    echo "[patch] fixed: endpoint prefix /livewire- -> /lw-\n";
+} else {
+    echo "[patch] endpoint prefix already patched\n";
+}
+PHP
+
+php <<'PHP'
+<?php
+$file = 'vendor/livewire/livewire/src/Mechanisms/HandleRequests/EndpointResolver.php';
+$content = file_get_contents($file);
+$updated = str_replace(
     "return static::prefix() . '/upload-file';",
     "return static::prefix() . '/upload';",
     $content,
