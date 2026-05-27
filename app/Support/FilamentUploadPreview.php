@@ -82,7 +82,7 @@ final class FilamentUploadPreview
                 ];
             }
 
-            $url = $temp->temporaryUrl();
+            $url = self::browserRelativeUrl($temp->temporaryUrl());
 
             return [
                 'name' => (string) ($meta['name'] ?? $temp->getClientOriginalName()),
@@ -112,5 +112,18 @@ final class FilamentUploadPreview
         }
 
         return $path;
+    }
+
+    private static function browserRelativeUrl(string $url): string
+    {
+        $path = parse_url($url, PHP_URL_PATH);
+
+        if (! is_string($path) || $path === '') {
+            return $url;
+        }
+
+        $query = parse_url($url, PHP_URL_QUERY);
+
+        return is_string($query) && $query !== '' ? "{$path}?{$query}" : $path;
     }
 }

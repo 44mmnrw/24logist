@@ -102,6 +102,7 @@ class LandingSectionResource extends Resource
                 Repeater::make('hero_carousel_slides')
                     ->label('Слайды баннера')
                     ->dehydrated(true)
+                    ->live()
                     ->extraAttributes(['class' => 'hero-carousel-repeater'], true)
                     ->columns(2)
                     ->schema([
@@ -268,37 +269,25 @@ class LandingSectionResource extends Resource
 
     protected static function heroCarouselImageUpload(): FileUpload
     {
-        return FileUpload::make('image')
-            ->label('Изображение')
-            ->disk('public')
-            ->directory('landing/hero')
-            ->visibility('public')
-            ->image()
-            ->imagePreviewHeight('200')
-            ->maxFiles(1)
+        // Same options as mobile_image (works on prod). Do not use formatStateUsing here:
+        // in a repeater it runs on TemporaryUploadedFile and wipes upload state to [].
+        return static::publicImageUpload(
+            name: 'image',
+            label: 'Изображение',
+            directory: 'landing/hero',
+            visibleSlug: null,
+            helperText: 'Дождитесь превью, затем нажмите «Сохранить». PNG, JPG или WebP до 8 МБ.',
+        )
             ->required()
-            ->maxSize(8192)
-            ->fetchFileInformation(false)
-            ->orientImagesFromExif(false)
-            ->openable()
-            ->downloadable()
             ->columnSpan(1)
-            ->extraAttributes(['class' => 'hero-carousel-upload'], true)
-            ->helperText('Дождитесь превью, затем нажмите «Сохранить». PNG, JPG или WebP до 8 МБ.')
-            ->formatStateUsing(function (mixed $state): array {
-                $path = LandingMedia::normalizePath($state);
-
-                return $path ? [$path] : [];
-            })
-            ->dehydrateStateUsing(fn (mixed $state): mixed => $state)
-            ->getUploadedFileUsing(static::uploadPreview(...));
+            ->extraAttributes(['class' => 'hero-carousel-upload'], true);
     }
 
     protected static function publicImageUpload(
         string $name,
         string $label,
         string $directory,
-        string $visibleSlug,
+        ?string $visibleSlug,
         ?string $helperText = null,
     ): FileUpload {
         return FileUpload::make($name)
@@ -315,7 +304,8 @@ class LandingSectionResource extends Resource
             ->openable()
             ->downloadable()
             ->getUploadedFileUsing(static::uploadPreview(...))
-            ->visible(fn (?LandingSection $record): bool => $record?->slug === $visibleSlug)
+            ->visible(fn (?LandingSection $record): bool => $visibleSlug === null
+                || $record?->slug === $visibleSlug)
             ->helperText($helperText);
     }
 

@@ -12,6 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
+
+        // Livewire upload uses a signed URL; CSRF on the same request often fails in admin (session / multipart).
+        $middleware->validateCsrfTokens(except: [
+            'livewire-*/upload',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

@@ -109,6 +109,15 @@ final class LandingHeroCarouselForm
             return null;
         }
 
+        if (is_string($state)) {
+            $plainPath = TemporaryUploadedFile::extractPathFromSignedPath($state);
+
+            if ($plainPath !== false) {
+                return TemporaryUploadedFile::createFromLivewire($plainPath)
+                    ->store('landing/hero', 'public');
+            }
+        }
+
         $path = LandingMedia::normalizePath($state);
 
         if ($path === null) {

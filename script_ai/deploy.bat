@@ -11,7 +11,7 @@ REM ================================================================
 
 set "SERVER_HOST=24logist.ru"
 set "SERVER_USER=logist_sys"
-set "SERVER_PATH=/var/www/logist_sys/data/24logistru"
+set "SERVER_PATH=/var/www/logist_sys/data/www/24logist.ru/.app"
 set "GIT_BRANCH=main"
 set "GIT_REMOTE=origin"
 set "GIT_REPO_SSH_URL=git@github.com:44mmnrw/24logist.git"
@@ -238,9 +238,9 @@ if errorlevel 1 exit /b 1
 echo.
 echo [2] git pull on server...
 if defined SERVER_GIT_SSH_COMMAND (
-	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && git stash push -u -m deploy-auto-stash >/dev/null 2>&1 || true; GIT_SSH_COMMAND='%SERVER_GIT_SSH_COMMAND%' git pull --ff-only %GIT_REMOTE% %GIT_BRANCH%"
+	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && git pull --ff-only %GIT_REMOTE% %GIT_BRANCH%"
 ) else (
-	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && git stash push -u -m deploy-auto-stash >/dev/null 2>&1 || true; git pull --ff-only %GIT_REMOTE% %GIT_BRANCH%"
+	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && git pull --ff-only %GIT_REMOTE% %GIT_BRANCH%"
 )
 if errorlevel 1 (
 	echo [ERROR] git pull failed on server.
@@ -296,7 +296,8 @@ echo [6] Laravel cache on server...
 REM Frontend build is isolated; do not touch route/config caches during deploy.
 call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && php artisan view:clear && php artisan view:cache"
 if errorlevel 1 exit /b 1
-call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && php artisan storage:link --force && chmod -R ug+rwx storage bootstrap/cache && rm -f storage/app/public/livewire-tmp/*.json"
+call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && sed -i 's/^LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK=.*/LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK=public/' .env 2>/dev/null || true"
+call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && php artisan storage:link --force && chmod -R ug+rwx storage bootstrap/cache && mkdir -p storage/app/public/livewire-tmp && chmod 775 storage/app/public/livewire-tmp"
 if errorlevel 1 exit /b 1
 call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && php artisan queue:restart"
 if errorlevel 1 exit /b 1
