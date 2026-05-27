@@ -7,9 +7,18 @@ use Filament\Facades\Filament;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Features\SupportFileUploads\FileUploadController;
 
 class AppServiceProvider extends ServiceProvider
 {
+    public function register(): void
+    {
+        $this->app->bind(
+            FileUploadController::class,
+            \App\Http\Livewire\FileUploadController::class,
+        );
+    }
+
     /**
      * Bootstrap any application services.
      */

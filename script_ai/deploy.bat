@@ -11,7 +11,9 @@ REM ================================================================
 
 set "SERVER_HOST=24logist.ru"
 set "SERVER_USER=logist_sys"
-set "SERVER_PATH=/var/www/logist_sys/data/www/24logist.ru/.app"
+REM Document root (nginx). Laravel + git live in .app below.
+set "SERVER_WEB=/var/www/logist_sys/data/www/24logist.ru"
+set "SERVER_APP=/var/www/logist_sys/data/www/24logist.ru/.app"
 set "GIT_BRANCH=main"
 set "GIT_REMOTE=origin"
 set "GIT_REPO_SSH_URL=git@github.com:44mmnrw/24logist.git"
@@ -124,7 +126,8 @@ if not defined CHOICE (
 	echo %C_CYAN%==============================================%C_RESET%
 	echo %C_BOLD%%C_WHITE%  24logist.ru - Deploy%C_RESET%
 	echo %C_DIM%  Server : %C_YELLOW%%SERVER_HOST%%C_RESET%
-	echo %C_DIM%  Path   : %C_YELLOW%%SERVER_PATH%%C_RESET%
+	echo %C_DIM%  Web    : %C_YELLOW%%SERVER_WEB%%C_RESET%
+	echo %C_DIM%  App    : %C_YELLOW%%SERVER_APP%%C_RESET%
 	echo %C_DIM%  Branch : %C_GREEN%%GIT_BRANCH%%C_RESET%
 	echo %C_CYAN%==============================================%C_RESET%
 	echo.
@@ -238,9 +241,9 @@ if errorlevel 1 exit /b 1
 echo.
 echo [2] git pull on server...
 if defined SERVER_GIT_SSH_COMMAND (
-	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && git pull --ff-only %GIT_REMOTE% %GIT_BRANCH%"
+	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "test -d %SERVER_APP%/.git || (echo [ERROR] No git in %SERVER_APP% && exit 1); cd %SERVER_APP% && git pull --ff-only %GIT_REMOTE% %GIT_BRANCH%"
 ) else (
-	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && git pull --ff-only %GIT_REMOTE% %GIT_BRANCH%"
+	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "test -d %SERVER_APP%/.git || (echo [ERROR] No git in %SERVER_APP% && exit 1); cd %SERVER_APP% && git pull --ff-only %GIT_REMOTE% %GIT_BRANCH%"
 )
 if errorlevel 1 (
 	echo [ERROR] git pull failed on server.
@@ -250,12 +253,12 @@ echo [OK] Server code updated.
 
 echo.
 echo [3] composer install on server...
-call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && php composer.phar install --no-dev --optimize-autoloader --no-interaction"
+call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_APP% && php composer.phar install --no-dev --optimize-autoloader --no-interaction"
 if not errorlevel 1 (
-	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && sed -i 's/\r$//' script_ai/patch-livewire-upload.sh && bash script_ai/patch-livewire-upload.sh"
+	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_APP% && sed -i 's/\r$//' script_ai/patch-livewire-upload.sh && bash script_ai/patch-livewire-upload.sh"
 )
 if errorlevel 1 (
-	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && composer install --no-dev --optimize-autoloader --no-interaction"
+	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_APP% && composer install --no-dev --optimize-autoloader --no-interaction"
 	if errorlevel 1 (
 		echo [ERROR] composer install failed.
 		exit /b 1
@@ -264,17 +267,17 @@ if errorlevel 1 (
 
 echo.
 echo [4] php artisan migrate on server...
-call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && php artisan migrate --force --no-interaction -v"
+call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_APP% && php artisan migrate --force --no-interaction -v"
 if errorlevel 1 (
 	echo [ERROR] migrate failed on server.
-	echo [HINT] ssh %SERVER_USER%@%SERVER_HOST% "cd %SERVER_PATH% && php artisan migrate --force -v"
+	echo [HINT] ssh %SERVER_USER%@%SERVER_HOST% "cd %SERVER_APP% && php artisan migrate --force -v"
 	exit /b 1
 )
 echo [OK] Migrations applied.
 
 echo.
 echo [4.9] Ensure Node.js on server ^($HOME/opt/node^)...
-call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "test -x $HOME/opt/node/bin/node || (test -f %SERVER_PATH%/script_ai/install-node-server.sh && sed -i 's/\r$//' %SERVER_PATH%/script_ai/install-node-server.sh && bash %SERVER_PATH%/script_ai/install-node-server.sh) || (echo [ERROR] Node missing. Install: bash script_ai/install-node-server.sh && exit 1)"
+call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "test -x $HOME/opt/node/bin/node || (test -f %SERVER_APP%/script_ai/install-node-server.sh && sed -i 's/\r$//' %SERVER_APP%/script_ai/install-node-server.sh && bash %SERVER_APP%/script_ai/install-node-server.sh) || (echo [ERROR] Node missing. Install: bash script_ai/install-node-server.sh && exit 1)"
 if errorlevel 1 exit /b 1
 
 echo.
@@ -282,7 +285,7 @@ echo [5] Frontend build on server...
 if "%SKIP_FRONTEND_BUILD%"=="1" (
 	echo [WARN] Skipped ^(--skip-build^).
 ) else (
-	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && chmod +x script_ai/remote_frontend_build.sh && BUILD_NODE_MAX_OLD_SPACE=%BUILD_NODE_MAX_OLD_SPACE% BUILD_TIMEOUT_MINUTES=%BUILD_TIMEOUT_MINUTES% BUILD_NPM_CI_TIMEOUT_MINUTES=%BUILD_NPM_CI_TIMEOUT_MINUTES% bash script_ai/remote_frontend_build.sh"
+	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_APP% && chmod +x script_ai/remote_frontend_build.sh && BUILD_NODE_MAX_OLD_SPACE=%BUILD_NODE_MAX_OLD_SPACE% BUILD_TIMEOUT_MINUTES=%BUILD_TIMEOUT_MINUTES% BUILD_NPM_CI_TIMEOUT_MINUTES=%BUILD_NPM_CI_TIMEOUT_MINUTES% bash script_ai/remote_frontend_build.sh"
 	if errorlevel 1 (
 		echo [ERROR] Frontend build failed.
 		echo [HINT] Backend migrated; fix Vite and re-run, or: deploy.bat --skip-build --auto
@@ -292,14 +295,19 @@ if "%SKIP_FRONTEND_BUILD%"=="1" (
 )
 
 echo.
+echo [5.5] Sync public assets to web root...
+call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_APP% && sed -i 's/\r$//' script_ai/sync-public-to-webroot.sh && chmod +x script_ai/sync-public-to-webroot.sh && bash script_ai/sync-public-to-webroot.sh"
+if errorlevel 1 exit /b 1
+echo [OK] build/css/js synced to %SERVER_WEB%
+
+echo.
 echo [6] Laravel cache on server...
-REM Frontend build is isolated; do not touch route/config caches during deploy.
-call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && php artisan view:clear && php artisan view:cache"
+call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_APP% && grep -q '^LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK=public' .env 2>/dev/null || (grep -q '^LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK=' .env && sed -i 's/^LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK=.*/LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK=public/' .env || echo LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK=public>>.env)"
+call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_APP% && php artisan optimize:clear && php artisan view:clear && php artisan view:cache"
 if errorlevel 1 exit /b 1
-call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && sed -i 's/^LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK=.*/LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK=public/' .env 2>/dev/null || true"
-call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && php artisan storage:link --force && chmod -R ug+rwx storage bootstrap/cache && mkdir -p storage/app/public/livewire-tmp && chmod 775 storage/app/public/livewire-tmp"
+call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_APP% && php artisan storage:link --force && mkdir -p storage/app/public/livewire-tmp && chmod -R ug+rwx storage bootstrap/cache && chmod 775 storage/app/public/livewire-tmp"
 if errorlevel 1 exit /b 1
-call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_PATH% && php artisan queue:restart"
+call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_APP% && php artisan queue:restart"
 if errorlevel 1 exit /b 1
 
 echo.

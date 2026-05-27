@@ -3,6 +3,7 @@
 @{
     SshHost      = '24logist.ru'
     SshUser      = 'logist_sys'
-    RemoteAppDir = '/var/www/logist_sys/data/24logistru'
+    RemoteWebDir = '/var/www/logist_sys/data/www/24logist.ru'
+    RemoteAppDir = '/var/www/logist_sys/data/www/24logist.ru/.app'
     GitBranch    = 'main'
 }

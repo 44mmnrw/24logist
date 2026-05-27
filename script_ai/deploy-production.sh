@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
-# Runs on production server (called from deploy.sh)
+# Runs on production server. Layout:
+#   WEB=/var/www/logist_sys/data/www/24logist.ru   (document root)
+#   APP=$WEB/.app                                  (Laravel + git)
 set -euo pipefail
 
-APP_DIR="${DEPLOY_APP_DIR:-/var/www/logist_sys/data/24logistru}"
+WEB_DIR="${DEPLOY_WEB_DIR:-/var/www/logist_sys/data/www/24logist.ru}"
+APP_DIR="${DEPLOY_APP_DIR:-${WEB_DIR}/.app}"
 BRANCH="${DEPLOY_BRANCH:-main}"
 REPO="${DEPLOY_REPO:-https://github.com/44mmnrw/24logist.git}"
 SKIP_FRONTEND_BUILD="${SKIP_FRONTEND_BUILD:-0}"
@@ -10,10 +13,13 @@ SKIP_FRONTEND_BUILD="${SKIP_FRONTEND_BUILD:-0}"
 log() { printf '[deploy] %s\n' "$*"; }
 die() { printf '[deploy] ERROR: %s\n' "$*" >&2; exit 1; }
 
-cd "$APP_DIR" || die "App not found: $APP_DIR"
+[[ -d "$APP_DIR" ]] || die "App not found: $APP_DIR"
+[[ -d "$WEB_DIR" ]] || die "Web root not found: $WEB_DIR"
+
+cd "$APP_DIR"
 
 if [[ ! -d .git ]]; then
-    log "git clone"
+    log "git clone into $APP_DIR"
     git clone --branch "$BRANCH" "$REPO" "$APP_DIR"
 fi
 
@@ -35,27 +41,38 @@ php composer.phar install --no-dev --optimize-autoloader --no-interaction --no-p
 
 [[ -f .env ]] || die '.env missing on server'
 
-if [[ "$SKIP_FRONTEND_BUILD" != "1" ]]; then
-    log "frontend build (isolated)"
-    chmod +x script_ai/remote_frontend_build.sh
-    bash script_ai/remote_frontend_build.sh
+if grep -q '^LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK=' .env; then
+    sed -i 's/^LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK=.*/LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK=public/' .env
 else
-    log "skip npm build (uploaded from local machine)"
+    echo 'LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK=public' >> .env
 fi
-
-log "artisan migrate"
-php artisan migrate --force
-
-php artisan storage:link --force 2>/dev/null || true
-chmod -R ug+rwx storage bootstrap/cache 2>/dev/null || true
-
-log "clear caches"
-php artisan view:clear
 
 log "livewire upload patch"
 sed -i 's/\r$//' script_ai/patch-livewire-upload.sh
 bash script_ai/patch-livewire-upload.sh
 
+if [[ "$SKIP_FRONTEND_BUILD" != "1" ]]; then
+    log "frontend build"
+    chmod +x script_ai/remote_frontend_build.sh
+    bash script_ai/remote_frontend_build.sh
+else
+    log "skip npm build"
+fi
+
+log "sync public -> web root"
+chmod +x script_ai/sync-public-to-webroot.sh
+bash script_ai/sync-public-to-webroot.sh
+
+log "artisan migrate"
+php artisan migrate --force
+
+php artisan storage:link --force 2>/dev/null || true
+mkdir -p storage/app/public/livewire-tmp
+chmod -R ug+rwx storage bootstrap/cache
+chmod 775 storage/app/public/livewire-tmp
+
+log "clear caches"
+php artisan optimize:clear
 php artisan view:cache
 
 log "done: $(git log -1 --oneline)"

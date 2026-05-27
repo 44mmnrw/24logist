@@ -1,18 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP="/var/www/logist_sys/data/24logistru"
 WEB="/var/www/logist_sys/data/www/24logist.ru"
+APP="${WEB}/.app"
 REPO="https://github.com/44mmnrw/24logist.git"
 
-mkdir -p "/var/www/logist_sys/data"
+mkdir -p "${WEB}"
 
-if [[ ! -d "$APP/.git" ]]; then
-  rm -rf "$APP"
-  git clone --branch main "$REPO" "$APP"
+if [[ ! -d "${APP}/.git" ]]; then
+  rm -rf "${APP}"
+  mkdir -p "${APP}"
+  git clone --branch main "$REPO" "${APP}"
 fi
 
-cd "$APP"
+cd "${APP}"
 
 chmod +x script_ai/install-node-server.sh script_ai/patch-livewire-upload.sh script_ai/remote_frontend_build.sh
 
@@ -53,7 +54,8 @@ set_kv "SESSION_SECURE_COOKIE" "true"
 
 php artisan key:generate --force
 
-ln -sfn "$APP/public" "$WEB"
+chmod +x script_ai/sync-public-to-webroot.sh
+bash script_ai/sync-public-to-webroot.sh
 
 php artisan migrate --force --no-interaction
 php artisan db:seed --force --no-interaction

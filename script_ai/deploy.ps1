@@ -26,7 +26,8 @@ $ProjectRoot = (Resolve-Path (Join-Path $ScriptDir '..')).Path
 $config = @{
     SshHost      = '24logist.ru'
     SshUser      = 'logist_sys'
-    RemoteAppDir = '/var/www/logist_sys/data/24logistru'
+    RemoteWebDir = '/var/www/logist_sys/data/www/24logist.ru'
+    RemoteAppDir = '/var/www/logist_sys/data/www/24logist.ru/.app'
     GitBranch    = 'main'
 }
 
@@ -77,7 +78,8 @@ scp -o BatchMode=yes $localScript "${sshTarget}:${remoteScript}"
 ssh -o BatchMode=yes $sshTarget "sed -i 's/\r$//' $remoteScript"
 
 $maintFlag = if ($Maintenance) { '1' } else { '0' }
-$remoteCmd = "DEPLOY_APP_DIR='$remoteDir' DEPLOY_BRANCH='$branch' DEPLOY_MAINTENANCE='$maintFlag' bash $remoteScript"
+$remoteWeb = $config.RemoteWebDir.TrimEnd('/')
+$remoteCmd = "DEPLOY_WEB_DIR='$remoteWeb' DEPLOY_APP_DIR='$remoteDir' DEPLOY_BRANCH='$branch' DEPLOY_MAINTENANCE='$maintFlag' bash $remoteScript"
 
 Write-Step 'Remote deploy'
 & ssh -o BatchMode=yes $sshTarget $remoteCmd 2>&1 | ForEach-Object { Write-Host $_ }
