@@ -21,8 +21,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if ($this->app->environment('local') && ! $this->app->runningInConsole()) {
-            URL::forceRootUrl(request()->getSchemeAndHttpHost());
+        if (! $this->app->runningInConsole()) {
+            if ($this->app->environment('local')) {
+                URL::forceRootUrl(request()->getSchemeAndHttpHost());
+            } elseif ($this->app->environment('production')) {
+                URL::forceScheme('https');
+            }
         }
 
         Filament::serving(function (): void {

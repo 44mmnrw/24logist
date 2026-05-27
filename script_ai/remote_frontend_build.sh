@@ -18,8 +18,10 @@ fi
 
 echo "[REMOTE] node: $(command -v node) $(node -v)"
 echo "[REMOTE] npm:  $(command -v npm) $(npm -v)"
-echo "[REMOTE] clear caches before build..."
-php artisan optimize:clear
+echo "[REMOTE] clear view/config caches before build (keep routes uncached for Livewire)..."
+php artisan view:clear
+php artisan config:clear
+php artisan route:clear
 rm -f public/hot
 rm -rf public/build node_modules/.vite
 

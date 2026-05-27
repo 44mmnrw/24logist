@@ -58,7 +58,7 @@ php artisan optimize:clear
 
 log "rebuild caches"
 php artisan config:cache
-php artisan route:cache
+php artisan route:clear
 php artisan view:cache
 
 log "done: $(git log -1 --oneline)"

@@ -61,7 +61,7 @@ php artisan db:seed --force
 php artisan storage:link --force || true
 chmod -R ug+rwx storage bootstrap/cache
 php artisan config:cache
-php artisan route:cache
+php artisan route:clear
 php artisan view:cache
 
 echo DEPLOY_OK
