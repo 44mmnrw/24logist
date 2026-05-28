@@ -139,29 +139,36 @@ class LandingSectionResource extends Resource
                     visibleSlug: 'mobile',
                     helperText: 'Скриншот экрана внутри рамки телефона. Дождитесь превью, затем нажмите «Сохранить». PNG, JPG или WebP до 8 МБ.',
                 ),
+                static::publicImageUpload(
+                    name: 'mobile_image',
+                    label: 'Изображение в рамке телефона',
+                    directory: 'landing/driver-cabinet',
+                    visibleSlug: 'driver_cabinet',
+                    helperText: 'Скриншот экрана личного кабинета водителя. Дождитесь превью, затем нажмите «Сохранить». PNG, JPG или WebP до 8 МБ.',
+                ),
                 TextInput::make('extra.mobile_image_alt')
                     ->label('Alt-текст скриншота')
                     ->maxLength(255)
-                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'mobile'),
+                    ->visible(fn (?LandingSection $record): bool => in_array($record?->slug, ['mobile', 'driver_cabinet'], true)),
                 TextInput::make('mobile_pill_left_text')
                     ->label('Левая плашка — текст')
                     ->helperText('На сайте: mobile-pill mobile-pill--left')
                     ->maxLength(255)
-                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'mobile'),
+                    ->visible(fn (?LandingSection $record): bool => in_array($record?->slug, ['mobile', 'driver_cabinet'], true)),
                 static::iconSelect(
                     'mobile_pill_left_icon',
                     'Левая плашка — иконка',
-                    fn (?LandingSection $record): bool => $record?->slug === 'mobile',
+                    fn (?LandingSection $record): bool => in_array($record?->slug, ['mobile', 'driver_cabinet'], true),
                 ),
                 TextInput::make('mobile_pill_right_text')
                     ->label('Правая плашка — текст')
                     ->helperText('На сайте: mobile-pill mobile-pill--right')
                     ->maxLength(255)
-                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'mobile'),
+                    ->visible(fn (?LandingSection $record): bool => in_array($record?->slug, ['mobile', 'driver_cabinet'], true)),
                 static::iconSelect(
                     'mobile_pill_right_icon',
                     'Правая плашка — иконка',
-                    fn (?LandingSection $record): bool => $record?->slug === 'mobile',
+                    fn (?LandingSection $record): bool => in_array($record?->slug, ['mobile', 'driver_cabinet'], true),
                 ),
                 TextInput::make('extra.finish_title')
                     ->label('Заголовок финального шага')
@@ -240,7 +247,7 @@ class LandingSectionResource extends Resource
                     ->keyLabel('Ключ')
                     ->valueLabel('Значение')
                     ->reorderable()
-                    ->visible(fn (?LandingSection $record): bool => ! in_array($record?->slug, ['hero', 'mobile', 'quiz', 'footer', 'faq', 'platform', 'header'], true)),
+                    ->visible(fn (?LandingSection $record): bool => ! in_array($record?->slug, ['hero', 'mobile', 'driver_cabinet', 'quiz', 'footer', 'faq', 'platform', 'header'], true)),
                 Toggle::make('is_active')
                     ->label('Активна')
                     ->default(true),

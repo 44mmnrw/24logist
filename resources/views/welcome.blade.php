@@ -21,6 +21,7 @@
             <x-landing.features />
             <x-landing.pricing />
             <x-landing.mobile />
+            <x-landing.driver-cabinet />
             <x-landing.quiz />
             <x-landing.faq />
             <x-landing.final-cta />

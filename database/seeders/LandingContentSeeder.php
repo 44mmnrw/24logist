@@ -26,6 +26,7 @@ class LandingContentSeeder extends Seeder
         $this->seedFeatures();
         $this->seedPricing();
         $this->seedMobile();
+        $this->seedDriverCabinet();
         $this->seedQuiz();
         $this->seedFaq();
         $this->seedFinalCta();
@@ -378,7 +379,7 @@ class LandingContentSeeder extends Seeder
         $section = $this->section([
             'slug' => 'quiz',
             'name' => 'Квиз',
-            'sort_order' => 8,
+            'sort_order' => 9,
             'kicker' => 'Квиз · 1 минута',
             'title' => 'Подберём тариф под вашу логистику',
             'description' => 'Ответьте на 4 коротких вопроса — пришлём подходящий тариф и расчёт за 15 минут в рабочее время.',
@@ -435,7 +436,7 @@ class LandingContentSeeder extends Seeder
         $section = $this->section([
             'slug' => 'faq',
             'name' => 'FAQ',
-            'sort_order' => 9,
+            'sort_order' => 10,
             'title' => 'Частые вопросы',
             'extra' => [
                 'toggle_icon' => $this->icon('chevron-down'),
@@ -464,7 +465,7 @@ class LandingContentSeeder extends Seeder
         $this->section([
             'slug' => 'final_cta',
             'name' => 'Финальный CTA',
-            'sort_order' => 10,
+            'sort_order' => 11,
             'title' => 'Подключите ЛОГИСТ этой неделе',
             'description' => 'Демо за 30 минут, настройка под ваши процессы, понятный счёт. Без долгих внедрений.',
             'button_primary_text' => 'Подобрать тариф',
@@ -477,7 +478,7 @@ class LandingContentSeeder extends Seeder
         $section = $this->section([
             'slug' => 'footer',
             'name' => 'Подвал',
-            'sort_order' => 11,
+            'sort_order' => 12,
             'description' => 'Лучший сервис для экспедиторов в России. Заявки, ЭДО и рейсы в одном кабинете.',
             'extra' => [
                 'logo_icon' => $this->icon('brand-logo'),
@@ -536,6 +537,39 @@ class LandingContentSeeder extends Seeder
                     'sort_order' => $linkIndex + 1,
                 ]);
             }
+        }
+    }
+
+    private function seedDriverCabinet(): void
+    {
+        $section = $this->section([
+            'slug' => 'driver_cabinet',
+            'name' => 'Личный кабинет водителя',
+            'sort_order' => 8,
+            'badge_text' => 'Для водителя',
+            'badge_icon' => $this->icon('user-driver'),
+            'title' => 'Личный кабинет водителя',
+            'description' => 'Водитель видит рейсы, статусы и ключевые документы в одном окне. Всё под рукой без лишних звонков и чатов.',
+            'extra' => [
+                'pill_left_text' => 'Ссылка в один клик',
+                'pill_left_icon' => $this->icon('link'),
+                'pill_right_text' => 'Статусы в реальном времени',
+                'pill_right_icon' => $this->icon('clock'),
+            ],
+        ]);
+
+        foreach ([
+            'Просмотр назначенных рейсов и адресов загрузки/выгрузки',
+            'Подтверждение этапов перевозки прямо с телефона',
+            'Доступ к документам по рейсу без установки приложения',
+        ] as $index => $title) {
+            $this->block([
+                'section_slug' => $section->slug,
+                'block_type' => 'bullet',
+                'title' => $title,
+                'icon' => $this->icon('check-blue'),
+                'sort_order' => $index + 1,
+            ]);
         }
     }
 }

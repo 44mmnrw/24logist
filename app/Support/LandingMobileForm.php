@@ -12,7 +12,7 @@ final class LandingMobileForm
      */
     public static function hydrate(array $data): array
     {
-        if (($data['slug'] ?? null) !== 'mobile') {
+        if (! in_array($data['slug'] ?? null, ['mobile', 'driver_cabinet'], true)) {
             return $data;
         }
 
@@ -33,7 +33,7 @@ final class LandingMobileForm
      */
     public static function dehydrate(array $data): array
     {
-        if (($data['slug'] ?? null) !== 'mobile') {
+        if (! in_array($data['slug'] ?? null, ['mobile', 'driver_cabinet'], true)) {
             return $data;
         }
 

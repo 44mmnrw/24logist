@@ -46,6 +46,7 @@ class BlocksRelationManager extends RelationManager
             'quiz' => 'Вопросы квиза',
             'faq' => 'Вопросы FAQ',
             'mobile' => 'Пункты списка',
+            'driver_cabinet' => 'Пункты списка',
             'hero' => 'Пункты списка',
             'platform' => 'Карточки платформы',
             'footer' => 'Колонки подвала',
@@ -691,7 +692,7 @@ class BlocksRelationManager extends RelationManager
 
     protected function isMobileSection(): bool
     {
-        return $this->getOwnerRecord()->slug === 'mobile';
+        return in_array($this->getOwnerRecord()->slug, ['mobile', 'driver_cabinet'], true);
     }
 
     protected function isPlatformSection(): bool

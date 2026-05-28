@@ -667,6 +667,8 @@ body {
     gap: 32px;
     align-items: center;
 }
+.mobile-section__shell--reverse .mobile-showcase { order: 1; }
+.mobile-section__shell--reverse .mobile-copy { order: 2; }
 .mobile-copy h2 { margin-top: 20px; font-size: 52px; line-height: 1.1; color: #1f2a3d; }
 .mobile-copy p { margin-top: 16px; font-size: 18px; line-height: 1.55; color: #45556c; max-width: 576px; }
 .mobile-copy .hero-list {
