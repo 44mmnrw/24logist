@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\LandingIcons;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -34,6 +35,17 @@ class LandingBlock extends Model
             'is_active' => 'boolean',
             'is_highlighted' => 'boolean',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (self $block): void {
+            $block->icon = LandingIcons::normalize($block->icon);
+
+            if (is_array($block->extra)) {
+                $block->extra = LandingIcons::normalizeExtraIcons($block->extra);
+            }
+        });
     }
 
     public function parent(): BelongsTo

@@ -132,6 +132,30 @@ final class LandingIcons
         return str_starts_with($name, 'icon:') ? $name : 'icon:'.$name;
     }
 
+    public static function normalize(?string $value): ?string
+    {
+        $resolved = self::resolve($value);
+
+        return $resolved !== null ? self::toStorage($resolved) : null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $extra
+     * @return array<string, mixed>
+     */
+    public static function normalizeExtraIcons(array $extra): array
+    {
+        foreach ($extra as $key => $value) {
+            if (! is_string($value) || ! str_ends_with($key, '_icon')) {
+                continue;
+            }
+
+            $extra[$key] = self::normalize($value);
+        }
+
+        return $extra;
+    }
+
     public static function symbolHref(string $name): string
     {
         return '#icon-'.$name;

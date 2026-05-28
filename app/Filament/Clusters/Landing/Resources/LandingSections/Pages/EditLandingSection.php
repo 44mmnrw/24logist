@@ -5,6 +5,7 @@ namespace App\Filament\Clusters\Landing\Resources\LandingSections\Pages;
 use App\Filament\Clusters\Landing\Resources\LandingSections\LandingSectionResource;
 use App\Services\LandingPageService;
 use App\Support\LandingHeroCarouselForm;
+use App\Support\LandingMobileForm;
 use Filament\Resources\Pages\EditRecord;
 
 class EditLandingSection extends EditRecord
@@ -18,12 +19,16 @@ class EditLandingSection extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        return LandingHeroCarouselForm::hydrate($data);
+        return LandingMobileForm::hydrate(
+            LandingHeroCarouselForm::hydrate($data),
+        );
     }
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        return LandingHeroCarouselForm::dehydrate($data);
+        return LandingMobileForm::dehydrate(
+            LandingHeroCarouselForm::dehydrate($data),
+        );
     }
 
     protected function afterSave(): void

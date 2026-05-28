@@ -97,7 +97,7 @@ class LandingBlockResource extends Resource
                     ->label('Иконка')
                     ->options(LandingIcons::OPTIONS)
                     ->searchable()
-                    ->dehydrateStateUsing(fn (?string $state) => filled($state) ? LandingIcons::toStorage($state) : null)
+                    ->dehydrateStateUsing(fn (?string $state) => LandingIcons::normalize($state))
                     ->formatStateUsing(fn (?string $state) => LandingIcons::resolve($state)),
                 TextInput::make('price')
                     ->label('Цена')

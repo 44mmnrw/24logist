@@ -23,9 +23,7 @@ final class LandingFooter
                 continue;
             }
 
-            $icon = filled($link['icon'] ?? null)
-                ? LandingIcons::toStorage((string) $link['icon'])
-                : null;
+            $icon = LandingIcons::normalize($link['icon'] ?? null);
 
             LandingBlock::query()->create([
                 'section_slug' => $column->section_slug,

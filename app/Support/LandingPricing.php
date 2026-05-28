@@ -32,7 +32,7 @@ final class LandingPricing
                 'block_type' => 'feature',
                 'parent_id' => $plan->id,
                 'title' => $title,
-                'icon' => LandingIcons::toStorage($iconKey),
+                'icon' => LandingIcons::normalize($iconKey),
                 'sort_order' => $index + 1,
                 'is_active' => true,
             ]);

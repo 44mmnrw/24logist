@@ -72,10 +72,17 @@ class LandingSectionResource extends Resource
                 TextInput::make('badge_text')
                     ->label('Текст бейджа')
                     ->maxLength(255),
-                TextInput::make('badge_icon')
-                    ->label('Иконка бейджа')
-                    ->helperText('Ключ из спрайта, например icon:badge-star')
-                    ->datalist(array_map(fn ($key) => LandingIcons::toStorage($key), array_keys(LandingIcons::OPTIONS))),
+                static::iconSelect('badge_icon', 'Иконка бейджа'),
+                static::iconSelect(
+                    'extra.hint_icon',
+                    'Иконка подсказки под кнопками',
+                    fn (?LandingSection $record): bool => $record?->slug === 'hero',
+                ),
+                static::iconSelect(
+                    'extra.primary_button_icon',
+                    'Иконка на кнопках',
+                    fn (?LandingSection $record): bool => $record?->slug === 'hero',
+                ),
                 TextInput::make('button_primary_text')
                     ->label('Текст основной кнопки')
                     ->maxLength(255),
@@ -136,28 +143,26 @@ class LandingSectionResource extends Resource
                     ->label('Alt-текст скриншота')
                     ->maxLength(255)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'mobile'),
-                TextInput::make('extra.pill_left_text')
-                    ->label('Текст левой плашки')
+                TextInput::make('mobile_pill_left_text')
+                    ->label('Левая плашка — текст')
+                    ->helperText('На сайте: mobile-pill mobile-pill--left')
                     ->maxLength(255)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'mobile'),
-                Select::make('extra.pill_left_icon')
-                    ->label('Иконка левой плашки')
-                    ->options(LandingIcons::OPTIONS)
-                    ->searchable()
-                    ->dehydrateStateUsing(fn (?string $state) => filled($state) ? LandingIcons::toStorage($state) : null)
-                    ->formatStateUsing(fn (?string $state) => LandingIcons::resolve($state))
-                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'mobile'),
-                TextInput::make('extra.pill_right_text')
-                    ->label('Текст правой плашки')
+                static::iconSelect(
+                    'mobile_pill_left_icon',
+                    'Левая плашка — иконка',
+                    fn (?LandingSection $record): bool => $record?->slug === 'mobile',
+                ),
+                TextInput::make('mobile_pill_right_text')
+                    ->label('Правая плашка — текст')
+                    ->helperText('На сайте: mobile-pill mobile-pill--right')
                     ->maxLength(255)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'mobile'),
-                Select::make('extra.pill_right_icon')
-                    ->label('Иконка правой плашки')
-                    ->options(LandingIcons::OPTIONS)
-                    ->searchable()
-                    ->dehydrateStateUsing(fn (?string $state) => filled($state) ? LandingIcons::toStorage($state) : null)
-                    ->formatStateUsing(fn (?string $state) => LandingIcons::resolve($state))
-                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'mobile'),
+                static::iconSelect(
+                    'mobile_pill_right_icon',
+                    'Правая плашка — иконка',
+                    fn (?LandingSection $record): bool => $record?->slug === 'mobile',
+                ),
                 TextInput::make('extra.finish_title')
                     ->label('Заголовок финального шага')
                     ->maxLength(255)
@@ -178,13 +183,50 @@ class LandingSectionResource extends Resource
                     ->label('Текст кнопки отправки')
                     ->maxLength(255)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'quiz'),
-                Select::make('extra.next_button_icon')
-                    ->label('Иконка кнопки «Далее»')
-                    ->options(LandingIcons::OPTIONS)
-                    ->searchable()
-                    ->dehydrateStateUsing(fn (?string $state) => filled($state) ? LandingIcons::toStorage($state) : null)
-                    ->formatStateUsing(fn (?string $state) => LandingIcons::resolve($state))
-                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'quiz'),
+                static::iconSelect(
+                    'extra.next_button_icon',
+                    'Иконка кнопки «Далее»',
+                    fn (?LandingSection $record): bool => $record?->slug === 'quiz',
+                ),
+                TextInput::make('extra.deadline_kicker')
+                    ->label('Дедлайн — надзаголовок')
+                    ->maxLength(255)
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'platform'),
+                TextInput::make('extra.deadline_date')
+                    ->label('Дедлайн — дата')
+                    ->maxLength(255)
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'platform'),
+                static::iconSelect(
+                    'extra.deadline_icon',
+                    'Дедлайн — иконка',
+                    fn (?LandingSection $record): bool => $record?->slug === 'platform',
+                ),
+                Textarea::make('extra.deadline_text')
+                    ->label('Дедлайн — текст')
+                    ->rows(3)
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'platform'),
+                TextInput::make('extra.deadline_button_text')
+                    ->label('Дедлайн — кнопка')
+                    ->maxLength(255)
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'platform'),
+                static::iconSelect(
+                    'extra.toggle_icon',
+                    'Иконка раскрытия вопроса',
+                    fn (?LandingSection $record): bool => $record?->slug === 'faq',
+                ),
+                TextInput::make('extra.brand_name')
+                    ->label('Название бренда')
+                    ->maxLength(255)
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'header'),
+                static::iconSelect(
+                    'extra.logo_icon',
+                    'Иконка бренда',
+                    fn (?LandingSection $record): bool => in_array($record?->slug, ['header', 'footer'], true),
+                ),
+                TextInput::make('extra.demo_button_text')
+                    ->label('Текст кнопки «Демо»')
+                    ->maxLength(255)
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'header'),
                 TextInput::make('extra.copyright')
                     ->label('Копирайт')
                     ->maxLength(255)
@@ -198,7 +240,7 @@ class LandingSectionResource extends Resource
                     ->keyLabel('Ключ')
                     ->valueLabel('Значение')
                     ->reorderable()
-                    ->visible(fn (?LandingSection $record): bool => ! in_array($record?->slug, ['hero', 'mobile', 'quiz', 'footer'], true)),
+                    ->visible(fn (?LandingSection $record): bool => ! in_array($record?->slug, ['hero', 'mobile', 'quiz', 'footer', 'faq', 'platform', 'header'], true)),
                 Toggle::make('is_active')
                     ->label('Активна')
                     ->default(true),
@@ -316,5 +358,23 @@ class LandingSectionResource extends Resource
     protected static function uploadPreview(FileUpload $component, string $file, string|array|null $storedFileNames): ?array
     {
         return FilamentUploadPreview::resolve($component, $file, $storedFileNames);
+    }
+
+    protected static function iconSelect(string $name, string $label, ?callable $visible = null): Select
+    {
+        $field = Select::make($name)
+            ->label($label)
+            ->options(LandingIcons::OPTIONS)
+            ->searchable()
+            ->nullable()
+            ->helperText('Иконка из SVG-спрайта (public/images/icons/sprite.svg)')
+            ->dehydrateStateUsing(fn (?string $state) => LandingIcons::normalize($state))
+            ->formatStateUsing(fn (?string $state) => LandingIcons::resolve($state));
+
+        if ($visible !== null) {
+            $field->visible($visible);
+        }
+
+        return $field;
     }
 }

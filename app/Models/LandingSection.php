@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\LandingIcons;
 use App\Support\LandingMedia;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -41,12 +42,13 @@ class LandingSection extends Model
         static::saving(function (self $section): void {
             $section->dashboard_image = LandingMedia::normalizePath($section->dashboard_image);
             $section->mobile_image = LandingMedia::normalizePath($section->mobile_image);
+            $section->badge_icon = LandingIcons::normalize($section->badge_icon);
 
             if (! is_array($section->extra)) {
                 return;
             }
 
-            $extra = $section->extra;
+            $extra = LandingIcons::normalizeExtraIcons($section->extra);
 
             foreach (['dashboard_image', 'mobile_image'] as $key) {
                 if (array_key_exists($key, $extra)) {

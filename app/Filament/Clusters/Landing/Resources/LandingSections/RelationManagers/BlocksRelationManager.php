@@ -120,7 +120,7 @@ class BlocksRelationManager extends RelationManager
                         ->label('Иконка')
                         ->options(LandingIcons::OPTIONS)
                         ->searchable()
-                        ->dehydrateStateUsing(fn (?string $state) => filled($state) ? LandingIcons::toStorage($state) : null)
+                        ->dehydrateStateUsing(fn (?string $state) => LandingIcons::normalize($state))
                         ->formatStateUsing(fn (?string $state) => LandingIcons::resolve($state)),
                     Toggle::make('is_active')
                         ->label('Активен')

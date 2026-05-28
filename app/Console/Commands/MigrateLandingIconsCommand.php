@@ -24,8 +24,10 @@ class MigrateLandingIconsCommand extends Command
         }
 
         foreach (LandingBlock::query()->cursor() as $block) {
-            if ($this->migrateValue($block->icon)) {
-                $block->icon = LandingIcons::toStorage(LandingIcons::resolve($block->icon));
+            $normalized = LandingIcons::normalize($block->icon);
+
+            if ($normalized !== $block->icon) {
+                $block->icon = $normalized;
                 $block->save();
                 $updated++;
             }
@@ -53,7 +55,7 @@ class MigrateLandingIconsCommand extends Command
         $updated = 0;
 
         if ($changes['badge_icon']) {
-            $section->badge_icon = LandingIcons::toStorage(LandingIcons::resolve($section->badge_icon));
+            $section->badge_icon = LandingIcons::normalize($section->badge_icon);
             $updated++;
         }
 
@@ -92,7 +94,7 @@ class MigrateLandingIconsCommand extends Command
             $resolved = LandingIcons::resolve($value);
 
             if ($resolved) {
-                $extra[$key] = LandingIcons::toStorage($resolved);
+                $extra[$key] = LandingIcons::normalize($value);
             }
         }
 
