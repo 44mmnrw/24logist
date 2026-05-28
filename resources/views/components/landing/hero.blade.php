@@ -1,6 +1,10 @@
+@php
+    $section = $landing->section('hero');
+@endphp
+
+@if ($section)
 <section class="landing-hero" id="hero">
     @php
-        $section = $landing->section('hero');
         $extra = $section?->extra ?? [];
         $bullets = $landing->blocks('hero', 'bullet');
         $carouselSlides = \App\Support\LandingHeroCarousel::slides($section);
@@ -117,3 +121,4 @@
         @endif
     </div>
 </section>
+@endif

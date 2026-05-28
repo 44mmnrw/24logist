@@ -1,6 +1,10 @@
+@php
+    $section = $landing->section('quiz');
+@endphp
+
+@if ($section)
 <section class="quiz-section" id="quiz">
     @php
-        $section = $landing->section('quiz');
         $extra = $section?->extra ?? [];
         $questions = $landing->blocks('quiz', 'question')->map(function ($question) {
             return [
@@ -65,3 +69,4 @@
         @endif
     </div>
 </section>
+@endif

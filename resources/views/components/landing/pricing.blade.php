@@ -1,6 +1,10 @@
+@php
+    $section = $landing->section('pricing');
+@endphp
+
+@if ($section)
 <section class="pricing-section" id="pricing">
     @php
-        $section = $landing->section('pricing');
         $extra = $section?->extra ?? [];
         $plans = $landing->blocks('pricing', 'plan');
     @endphp
@@ -53,3 +57,4 @@
         @endif
     </div>
 </section>
+@endif

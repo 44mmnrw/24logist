@@ -1,6 +1,10 @@
+@php
+    $section = $landing->section('features');
+@endphp
+
+@if ($section)
 <section class="features-section" id="features">
     @php
-        $section = $landing->section('features');
         $cards = $landing->blocks('features', 'card');
     @endphp
 
@@ -27,3 +31,4 @@
         </div>
     </div>
 </section>
+@endif

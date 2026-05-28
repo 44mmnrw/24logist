@@ -1,6 +1,10 @@
+@php
+    $section = $landing->section('why');
+@endphp
+
+@if ($section)
 <section class="why-section" id="why">
     @php
-        $section = $landing->section('why');
         $cards = $landing->blocks('why', 'card');
         $stats = $landing->blocks('why', 'stat');
     @endphp
@@ -37,3 +41,4 @@
         </div>
     </div>
 </section>
+@endif

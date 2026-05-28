@@ -1,6 +1,10 @@
+@php
+    $section = $landing->section('footer');
+@endphp
+
+@if ($section)
 <footer class="landing-footer">
     @php
-        $section = $landing->section('footer');
         $extra = $section?->extra ?? [];
         $columns = $landing->blocks('footer', 'footer_column');
     @endphp
@@ -37,3 +41,4 @@
         </div>
     </div>
 </footer>
+@endif

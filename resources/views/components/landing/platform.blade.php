@@ -1,6 +1,10 @@
+@php
+    $section = $landing->section('platform');
+@endphp
+
+@if ($section)
 <section class="platform-section">
     @php
-        $section = $landing->section('platform');
         $extra = $section?->extra ?? [];
         $cards = $landing->blocks('platform', 'card');
     @endphp
@@ -105,3 +109,4 @@
         @endif
     </div>
 </section>
+@endif

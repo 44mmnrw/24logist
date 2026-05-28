@@ -1,6 +1,10 @@
+@php
+    $section = $landing->section('mobile');
+@endphp
+
+@if ($section)
 <section class="mobile-section">
     @php
-        $section = $landing->section('mobile');
         $extra = $section?->extra ?? [];
         $bullets = $landing->blocks('mobile', 'bullet');
         $mobileImage = \App\Support\LandingMedia::url($section?->mobile_image ?? $extra['mobile_image'] ?? null);
@@ -70,3 +74,4 @@
         </div>
     </div>
 </section>
+@endif

@@ -1,6 +1,7 @@
-<section class="final-cta" id="final-cta">
-    @php $section = $landing->section('final_cta'); @endphp
+@php $section = $landing->section('final_cta'); @endphp
 
+@if ($section)
+<section class="final-cta" id="final-cta">
     <div class="landing-shell">
         <div class="final-cta__box">
             <div class="final-cta__text">
@@ -22,3 +23,4 @@
         </div>
     </div>
 </section>
+@endif

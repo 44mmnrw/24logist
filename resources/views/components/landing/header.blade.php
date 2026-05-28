@@ -1,6 +1,10 @@
+@php
+    $section = $landing->section('header');
+@endphp
+
+@if ($section)
 <header class="landing-header">
     @php
-        $section = $landing->section('header');
         $extra = $section?->extra ?? [];
         $navLinks = $landing->blocks('header', 'nav_link');
     @endphp
@@ -22,3 +26,4 @@
         </div>
     </div>
 </header>
+@endif
