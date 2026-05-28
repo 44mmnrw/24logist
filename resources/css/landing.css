@@ -585,10 +585,33 @@ body {
 .pricing-card h3 { font-size: 30px; line-height: 1; color: #0a0a0a; }
 .pricing-card__desc { margin-top: 28px; color: #45556c; font-size: 14px; line-height: 21px; min-height: 42px; }
 .pricing-card__price { margin-top: 36px; padding-bottom: 36px; border-bottom: 1px solid rgba(0, 0, 0, 0.1); font-size: 36px; line-height: 1; color: #0a0a0a; font-weight: 700; }
-.pricing-card ul { margin-top: 24px; display: grid; gap: 10px; color: #314158; font-size: 14px; line-height: 21px; min-height: 116px; }
-.pricing-card li { display: inline-flex; align-items: center; gap: 8px; }
+.pricing-card ul {
+    margin-top: 24px;
+    margin-inline: 0;
+    padding-inline: 0;
+    list-style: none;
+    display: grid;
+    gap: 10px;
+    justify-items: start;
+    color: #314158;
+    font-size: 14px;
+    line-height: 21px;
+    min-height: 116px;
+}
+.pricing-card li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 100%;
+    text-align: left;
+}
 .pricing-card li img,
-.pricing-card li .landing-icon { width: 16px; height: 16px; }
+.pricing-card li .landing-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
 .pricing-card .btn { margin-top: 24px; }
 .pricing-foot { margin-top: 24px; text-align: center; color: #62748e; font-size: 16px; line-height: 24px; }
 .pricing-foot a { color: #16a34a; text-decoration: underline; }
