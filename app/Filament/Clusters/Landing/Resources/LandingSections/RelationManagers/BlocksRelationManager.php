@@ -8,6 +8,7 @@ use App\Models\LandingSection;
 use App\Services\LandingPageService;
 use App\Support\LandingFooter;
 use App\Support\LandingIcons;
+use App\Support\LandingPricing;
 use App\Support\LandingQuiz;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -46,6 +47,7 @@ class BlocksRelationManager extends RelationManager
             'mobile' => 'Пункты списка',
             'hero' => 'Пункты списка',
             'footer' => 'Колонки подвала',
+            'pricing' => 'Тарифы',
             default => static::$title ?? 'Блоки секции',
         };
     }
@@ -130,6 +132,67 @@ class BlocksRelationManager extends RelationManager
                 ]);
         }
 
+        if ($this->isPricingSection()) {
+            return $schema
+                ->components([
+                    TextInput::make('title')
+                        ->label('Название тарифа')
+                        ->required()
+                        ->maxLength(255)
+                        ->columnSpanFull(),
+                    TextInput::make('subtitle')
+                        ->label('Описание под названием')
+                        ->maxLength(255)
+                        ->columnSpanFull(),
+                    TextInput::make('price')
+                        ->label('Цена')
+                        ->required()
+                        ->maxLength(255),
+                    TextInput::make('tag')
+                        ->label('Тег на карточке')
+                        ->maxLength(255)
+                        ->placeholder('Хит'),
+                    TextInput::make('button_text')
+                        ->label('Текст кнопки')
+                        ->maxLength(255),
+                    Select::make('button_style')
+                        ->label('Стиль кнопки')
+                        ->options([
+                            'primary' => 'Primary',
+                            'ghost' => 'Ghost',
+                        ])
+                        ->default('ghost'),
+                    Toggle::make('is_highlighted')
+                        ->label('Выделить карточку')
+                        ->default(false),
+                    Repeater::make('plan_features')
+                        ->label('Пункты списка')
+                        ->schema([
+                            TextInput::make('title')
+                                ->label('Пункт')
+                                ->required()
+                                ->maxLength(255),
+                            Select::make('icon')
+                                ->label('Иконка')
+                                ->options(LandingIcons::OPTIONS)
+                                ->searchable()
+                                ->default('check'),
+                        ])
+                        ->defaultItems(1)
+                        ->minItems(1)
+                        ->addActionLabel('Добавить пункт')
+                        ->reorderable()
+                        ->columnSpanFull(),
+                    Toggle::make('is_active')
+                        ->label('Активен')
+                        ->default(true),
+                    TextInput::make('sort_order')
+                        ->label('Порядок')
+                        ->numeric()
+                        ->default(0),
+                ]);
+        }
+
         if ($this->isFooterSection()) {
             return $schema
                 ->components([
@@ -178,6 +241,7 @@ class BlocksRelationManager extends RelationManager
         $isFaq = $this->isFaqSection();
         $isMobile = $this->isMobileSection();
         $isFooter = $this->isFooterSection();
+        $isPricing = $this->isPricingSection();
 
         $table = $isQuiz
             ? $table
@@ -253,16 +317,44 @@ class BlocksRelationManager extends RelationManager
                                     ->sortable(),
                             ])
                             ->defaultSort('sort_order')
-                        : LandingBlockResource::table($table))));
+                        : ($isPricing
+                            ? $table
+                                ->columns([
+                                    TextColumn::make('title')
+                                        ->label('Тариф')
+                                        ->searchable()
+                                        ->limit(40),
+                                    TextColumn::make('price')
+                                        ->label('Цена')
+                                        ->limit(30),
+                                    TextColumn::make('features_count')
+                                        ->label('Пунктов')
+                                        ->counts('children'),
+                                    IconColumn::make('is_highlighted')
+                                        ->label('Хит')
+                                        ->boolean(),
+                                    IconColumn::make('is_active')
+                                        ->label('Активен')
+                                        ->boolean(),
+                                    TextColumn::make('sort_order')
+                                        ->label('Порядок')
+                                        ->sortable(),
+                                ])
+                                ->defaultSort('sort_order')
+                            : LandingBlockResource::table($table)))));
 
         return $table
-            ->modifyQueryUsing(function ($query) use ($isMobile, $isFooter): void {
+            ->modifyQueryUsing(function ($query) use ($isMobile, $isFooter, $isPricing): void {
                 if ($isMobile) {
                     $query->where('block_type', 'bullet');
                 }
 
                 if ($isFooter) {
                     $query->where('block_type', 'footer_column');
+                }
+
+                if ($isPricing) {
+                    $query->where('block_type', 'plan');
                 }
             })
             ->headerActions([
@@ -272,9 +364,10 @@ class BlocksRelationManager extends RelationManager
                         $isFaq => 'Добавить вопрос',
                         $isMobile => 'Добавить пункт',
                         $isFooter => 'Добавить колонку',
+                        $isPricing => 'Добавить тариф',
                         default => null,
                     })
-                    ->mutateFormDataUsing(function (array $data) use ($isQuiz, $isFaq, $isMobile, $isFooter): array {
+                    ->mutateFormDataUsing(function (array $data) use ($isQuiz, $isFaq, $isMobile, $isFooter, $isPricing): array {
                         $data['section_slug'] = $this->getOwnerRecord()->slug;
 
                         if ($isQuiz) {
@@ -293,9 +386,13 @@ class BlocksRelationManager extends RelationManager
                             $data['block_type'] = 'footer_column';
                         }
 
+                        if ($isPricing) {
+                            $data['block_type'] = 'plan';
+                        }
+
                         return $data;
                     })
-                    ->using(function (array $data) use ($isQuiz, $isFooter): Model {
+                    ->using(function (array $data) use ($isQuiz, $isFooter, $isPricing): Model {
                         if ($isQuiz) {
                             $options = $data['quiz_options'] ?? [];
                             unset($data['quiz_options']);
@@ -330,6 +427,29 @@ class BlocksRelationManager extends RelationManager
                             return $column;
                         }
 
+                        if ($isPricing) {
+                            $features = $data['plan_features'] ?? [];
+                            unset($data['plan_features']);
+
+                            $plan = LandingBlock::query()->create([
+                                'section_slug' => $this->getOwnerRecord()->slug,
+                                'block_type' => 'plan',
+                                'title' => $data['title'] ?? '',
+                                'subtitle' => $data['subtitle'] ?? null,
+                                'price' => $data['price'] ?? '',
+                                'tag' => $data['tag'] ?? null,
+                                'button_text' => $data['button_text'] ?? null,
+                                'button_style' => $data['button_style'] ?? 'ghost',
+                                'is_highlighted' => $data['is_highlighted'] ?? false,
+                                'sort_order' => $data['sort_order'] ?? 0,
+                                'is_active' => $data['is_active'] ?? true,
+                            ]);
+
+                            LandingPricing::syncFeatures($plan, $features);
+
+                            return $plan;
+                        }
+
                         $record = new LandingBlock;
                         $record->fill($data);
                         $this->getRelationship()->save($record);
@@ -340,7 +460,7 @@ class BlocksRelationManager extends RelationManager
             ])
             ->recordActions([
                 EditAction::make()
-                    ->mutateRecordDataUsing(function (array $data, LandingBlock $record) use ($isQuiz, $isFooter): array {
+                    ->mutateRecordDataUsing(function (array $data, LandingBlock $record) use ($isQuiz, $isFooter, $isPricing): array {
                         if ($isQuiz && $record->block_type === 'question') {
                             $data['quiz_options'] = LandingQuiz::optionsFormState($record);
                         }
@@ -349,9 +469,13 @@ class BlocksRelationManager extends RelationManager
                             $data['footer_links'] = LandingFooter::linksFormState($record);
                         }
 
+                        if ($isPricing && $record->block_type === 'plan') {
+                            $data['plan_features'] = LandingPricing::featuresFormState($record);
+                        }
+
                         return $data;
                     })
-                    ->using(function (array $data, LandingBlock $record) use ($isQuiz, $isFooter): void {
+                    ->using(function (array $data, LandingBlock $record) use ($isQuiz, $isFooter, $isPricing): void {
                         if ($isQuiz && $record->block_type === 'question') {
                             $options = $data['quiz_options'] ?? [];
                             $record->update([
@@ -378,9 +502,30 @@ class BlocksRelationManager extends RelationManager
                             return;
                         }
 
+                        if ($isPricing && $record->block_type === 'plan') {
+                            $features = $data['plan_features'] ?? [];
+                            $record->update([
+                                'title' => $data['title'] ?? $record->title,
+                                'subtitle' => $data['subtitle'] ?? $record->subtitle,
+                                'price' => $data['price'] ?? $record->price,
+                                'tag' => $data['tag'] ?? $record->tag,
+                                'button_text' => $data['button_text'] ?? $record->button_text,
+                                'button_style' => $data['button_style'] ?? $record->button_style,
+                                'is_highlighted' => $data['is_highlighted'] ?? $record->is_highlighted,
+                                'sort_order' => $data['sort_order'] ?? $record->sort_order,
+                                'is_active' => $data['is_active'] ?? $record->is_active,
+                            ]);
+
+                            LandingPricing::syncFeatures($record, $features);
+
+                            return;
+                        }
+
                         $record->update(
-                            LandingFooter::stripVirtualFields(
-                                LandingQuiz::stripVirtualFields($data),
+                            LandingPricing::stripVirtualFields(
+                                LandingFooter::stripVirtualFields(
+                                    LandingQuiz::stripVirtualFields($data),
+                                ),
                             ),
                         );
                     })
@@ -393,6 +538,10 @@ class BlocksRelationManager extends RelationManager
 
                         if ($record->block_type === 'footer_column') {
                             $record->children()->where('block_type', 'footer_link')->delete();
+                        }
+
+                        if ($record->block_type === 'plan') {
+                            $record->children()->where('block_type', 'feature')->delete();
                         }
                     })
                     ->after(fn () => app(LandingPageService::class)->clearCache()),
@@ -417,5 +566,10 @@ class BlocksRelationManager extends RelationManager
     protected function isFooterSection(): bool
     {
         return $this->getOwnerRecord()->slug === 'footer';
+    }
+
+    protected function isPricingSection(): bool
+    {
+        return $this->getOwnerRecord()->slug === 'pricing';
     }
 }

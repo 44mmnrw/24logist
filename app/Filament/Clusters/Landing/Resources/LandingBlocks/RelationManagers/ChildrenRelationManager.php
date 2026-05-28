@@ -25,7 +25,7 @@ class ChildrenRelationManager extends RelationManager
 
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
-        if ($ownerRecord instanceof LandingBlock && in_array($ownerRecord->block_type, ['question', 'footer_column'], true)) {
+        if ($ownerRecord instanceof LandingBlock && in_array($ownerRecord->block_type, ['question', 'footer_column', 'plan'], true)) {
             return false;
         }
 

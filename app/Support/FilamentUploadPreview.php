@@ -3,7 +3,6 @@
 namespace App\Support;
 
 use Filament\Forms\Components\FileUpload;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -55,12 +54,6 @@ final class FilamentUploadPreview
         $storage = Storage::disk($disk);
 
         if (! $storage->exists($storagePath)) {
-            Log::warning('Livewire temp upload missing on disk', [
-                'signed' => $signedPath,
-                'path' => $storagePath,
-                'disk' => $disk,
-            ]);
-
             return null;
         }
 
@@ -92,13 +85,7 @@ final class FilamentUploadPreview
                 'openableUrl' => $url,
                 'downloadableUrl' => $url,
             ];
-        } catch (Throwable $exception) {
-            Log::warning('Livewire temp preview URL failed', [
-                'signed' => $signedPath,
-                'path' => $storagePath,
-                'error' => $exception->getMessage(),
-            ]);
-
+        } catch (Throwable) {
             return null;
         }
     }

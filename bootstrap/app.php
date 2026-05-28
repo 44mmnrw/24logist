@@ -14,8 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
 
         // Livewire upload uses a signed URL; CSRF on the same request often fails in admin (session / multipart).
+        // Patched Livewire endpoint: /lw-{hash}/upload (see script_ai/patch-livewire-upload.sh).
         $middleware->validateCsrfTokens(except: [
-            'livewire-*/upload',
+            'lw-*/upload',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
