@@ -63,6 +63,7 @@ final class LandingIcons
         'chevron-down' => 'Шеврон вниз',
         'info-circle' => 'Информация',
         'user-driver' => 'Водитель',
+        'manager-avatar' => 'Аватар менеджера',
         'truck' => 'Транспорт',
         'document-fast' => 'Быстрый документ',
         'document-signed' => 'Подписанный документ',
@@ -165,6 +166,7 @@ final class LandingIcons
     {
         return match ($name) {
             'check-blue', 'document-fast', 'chart-bar', 'lifebuoy', 'shield-check', 'document-signed', 'truck', 'user-driver', 'calendar-alert', 'calculator', 'banknotes', 'rotes', 'folder-archive', 'bell', 'users-card' => '0 0 20 20',
+            'manager-avatar' => '0 0 32 32',
             default => '0 0 24 24',
         };
     }

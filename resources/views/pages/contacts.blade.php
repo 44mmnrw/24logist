@@ -69,7 +69,7 @@
                             $tel = preg_replace('/[^0-9+]/', '', $phone ?? '');
                         @endphp
                         <article class="contacts-v2-manager">
-                            <div class="contacts-v2-manager__avatar contacts-v2-manager__avatar--{{ $color }}"><x-landing.icon name="icon:user-driver" /></div>
+                            <div class="contacts-v2-manager__avatar contacts-v2-manager__avatar--{{ $color }}"><x-landing.icon name="icon:manager-avatar" /></div>
                             <div class="contacts-v2-manager__body">
                                 <h3>{{ $name }}</h3>
                                 @if ($position !== '')
