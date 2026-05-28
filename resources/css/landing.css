@@ -202,7 +202,11 @@ body {
 .landing-header__actions { display: flex; align-items: center; gap: 12px; }
 .landing-header__login { font-size: 16px; color: #45556c; }
 
-.landing-hero { padding-top: 48px; }
+.landing-hero {
+    padding-top: 48px;
+    padding-bottom: 80px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
 .landing-hero__shell {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -369,16 +373,38 @@ body {
 }
 
 .why-section {
-    padding-top: 48px;
+    padding-block: 80px;
+    background: #ffffff;
 }
 
-.platform-section,
-.features-section,
-.pricing-section,
-.mobile-section,
-.quiz-section,
+.platform-section {
+    padding-block: 80px;
+    background: #f1f5f9;
+}
+
+.features-section {
+    padding-block: 80px;
+    background: #ffffff;
+}
+
+.pricing-section {
+    padding-block: 80px;
+    background: #eef2f6;
+}
+
+.mobile-section {
+    padding-block: 80px;
+    background: #ffffff;
+}
+
+.quiz-section {
+    padding-block: 80px;
+    background: #f1f5f9;
+}
+
 .faq-section {
-    padding-top: 80px;
+    padding-block: 80px;
+    background: #ffffff;
 }
 
 .why-grid {
@@ -558,7 +584,6 @@ body {
 }
 .feature-card { min-height: 259px; }
 
-.pricing-section { background: rgba(248, 250, 252, 0.6); }
 .pricing-head h2 { max-width: 672px; }
 .pricing-grid {
     margin-top: 48px;
@@ -859,7 +884,11 @@ body {
     }
 }
 
-.final-cta { padding-top: 64px; }
+.final-cta {
+    padding-top: 64px;
+    padding-bottom: 80px;
+    background: #f1f5f9;
+}
 .final-cta__box {
     position: relative;
     overflow: hidden;
@@ -879,7 +908,7 @@ body {
 .final-cta__actions { position: relative; z-index: 1; display: flex; gap: 12px; }
 
 .landing-footer {
-    margin-top: 56px;
+    margin-top: 0;
     background: #0f172b;
     color: #fff;
 }
