@@ -11,6 +11,8 @@ class PageController extends Controller
     {
         $page = $pages->findPublished($slug) ?? abort(404);
 
-        return view('pages.show', compact('page'));
+        $template = $slug === 'contacts' ? 'pages.contacts' : 'pages.show';
+
+        return view($template, compact('page'));
     }
 }

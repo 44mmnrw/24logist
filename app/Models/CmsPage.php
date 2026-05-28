@@ -12,6 +12,7 @@ class CmsPage extends Model
         'slug',
         'title',
         'body',
+        'extra',
         'meta_title',
         'meta_description',
         'is_published',
@@ -22,6 +23,7 @@ class CmsPage extends Model
     {
         return [
             'is_published' => 'boolean',
+            'extra' => 'array',
         ];
     }
 
