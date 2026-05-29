@@ -4,6 +4,7 @@ namespace App\Filament\Clusters\Landing\Resources\LandingSections\Pages;
 
 use App\Filament\Clusters\Landing\Resources\LandingSections\LandingSectionResource;
 use App\Services\LandingPageService;
+use App\Support\LandingFooterForm;
 use App\Support\LandingHeroCarouselForm;
 use App\Support\LandingMobileForm;
 use Filament\Resources\Pages\EditRecord;
@@ -19,15 +20,19 @@ class EditLandingSection extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        return LandingMobileForm::hydrate(
-            LandingHeroCarouselForm::hydrate($data),
+        return LandingFooterForm::hydrate(
+            LandingMobileForm::hydrate(
+                LandingHeroCarouselForm::hydrate($data),
+            ),
         );
     }
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        return LandingMobileForm::dehydrate(
-            LandingHeroCarouselForm::dehydrate($data),
+        return LandingFooterForm::dehydrate(
+            LandingMobileForm::dehydrate(
+                LandingHeroCarouselForm::dehydrate($data),
+            ),
         );
     }
 

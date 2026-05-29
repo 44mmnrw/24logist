@@ -234,13 +234,17 @@ class LandingSectionResource extends Resource
                     ->label('Текст кнопки «Демо»')
                     ->maxLength(255)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'header'),
-                TextInput::make('extra.copyright')
-                    ->label('Копирайт')
+                TextInput::make('footer_copyright')
+                    ->label('Нижняя строка — текст слева')
+                    ->helperText('Блок landing-footer__bottom-shell, левый span (копирайт)')
                     ->maxLength(255)
+                    ->columnSpanFull()
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'footer'),
-                TextInput::make('extra.tagline')
-                    ->label('Слоган в нижней строке')
+                TextInput::make('footer_tagline')
+                    ->label('Нижняя строка — текст справа')
+                    ->helperText('Блок landing-footer__bottom-shell, правый span (слоган)')
                     ->maxLength(255)
+                    ->columnSpanFull()
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'footer'),
                 KeyValue::make('extra')
                     ->label('Дополнительные поля')
