@@ -23,6 +23,7 @@
         })->values();
 
         $quizPayload = [
+            'submitUrl' => route('leads.quiz.store'),
             'questions' => $questions->all(),
             'finish' => [
                 'title' => $extra['finish_title'] ?? 'Куда прислать расчёт?',

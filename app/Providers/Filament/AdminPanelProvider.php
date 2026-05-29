@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Auth\Login;
 use App\Filament\Clusters\Landing\Resources\CmsPages\CmsPageResource;
 use App\Filament\Clusters\Landing\Resources\LandingBlocks\LandingBlockResource;
+use App\Filament\Clusters\Landing\Resources\LandingLeads\LandingLeadResource;
 use App\Filament\Clusters\Landing\Resources\LandingSections\LandingSectionResource;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -45,6 +46,7 @@ class AdminPanelProvider extends PanelProvider
             ->resources([
                 LandingSectionResource::class,
                 CmsPageResource::class,
+                LandingLeadResource::class,
                 LandingBlockResource::class,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')

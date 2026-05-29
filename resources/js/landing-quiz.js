@@ -1,3 +1,5 @@
+import { postJson } from './landing-forms.js';
+
 function escapeHtml(value) {
     return String(value)
         .replaceAll('&', '&amp;')
@@ -147,7 +149,7 @@ function initLandingQuiz(root) {
             render();
         });
 
-        nextButton?.addEventListener('click', () => {
+        nextButton?.addEventListener('click', async () => {
             showError('');
 
             if (isFinishStep) {
@@ -168,8 +170,35 @@ function initLandingQuiz(root) {
                     return;
                 }
 
-                step = totalSteps;
-                render();
+                if (!data.submitUrl) {
+                    showError('Форма не настроена. Обновите страницу или свяжитесь с нами по телефону.');
+
+                    return;
+                }
+
+                if (Object.keys(answers).length < questions.length) {
+                    showError('Ответьте на все вопросы квиза.');
+
+                    return;
+                }
+
+                nextButton.disabled = true;
+
+                try {
+                    await postJson(data.submitUrl, {
+                        name,
+                        phone,
+                        email: email || null,
+                        answers,
+                        website: '',
+                    });
+
+                    step = totalSteps;
+                    render();
+                } catch (error) {
+                    showError(error instanceof Error ? error.message : 'Не удалось отправить заявку.');
+                    nextButton.disabled = false;
+                }
 
                 return;
             }

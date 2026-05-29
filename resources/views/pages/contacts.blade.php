@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <x-csrf-meta />
     <title>{{ $page->displayTitle() }} — ЛогистРу</title>
     @if ($page->meta_description)
         <meta name="description" content="{{ $page->meta_description }}">
@@ -36,6 +37,7 @@
         $submitText = (string) ($extra['contacts_submit_text'] ?? 'Отправить сообщение');
         $privacyPrefix = (string) ($extra['contacts_privacy_prefix'] ?? 'Нажимая кнопку, вы соглашаетесь с');
         $privacyLinkText = (string) ($extra['contacts_privacy_link_text'] ?? 'политикой конфиденциальности');
+        $successMessage = (string) ($extra['contacts_success_message'] ?? 'Сообщение отправлено. Мы свяжемся с вами в ближайшее время.');
     @endphp
 
     <div class="landing-page contacts-page-v2">
@@ -100,12 +102,19 @@
                 <section class="contacts-v2-form">
                     <h2>{{ $formTitle }}</h2>
                     <p>{{ $formSubtitle }}</p>
-                    <form>
-                        <label>{{ $nameLabel }}<input type="text" placeholder="{{ $namePlaceholder }}"></label>
-                        <label>{{ $phoneLabel }}<input type="text" placeholder="{{ $phonePlaceholder }}"></label>
-                        <label>{{ $emailLabel }}<input type="email" placeholder="{{ $emailPlaceholder }}"></label>
-                        <label>{{ $messageLabel }}<textarea rows="4" placeholder="{{ $messagePlaceholder }}"></textarea></label>
-                        <button type="button" class="btn btn--primary btn--full"><x-landing.icon name="icon:arrow-right" />{{ $submitText }}</button>
+                    <form
+                        data-landing-contact-form
+                        data-submit-url="{{ route('leads.contact.store') }}"
+                        novalidate
+                    >
+                        <input type="text" name="website" value="" tabindex="-1" autocomplete="off" class="landing-form-honeypot" aria-hidden="true">
+                        <label>{{ $nameLabel }}<input type="text" name="name" autocomplete="name" required placeholder="{{ $namePlaceholder }}"></label>
+                        <label>{{ $phoneLabel }}<input type="tel" name="phone" autocomplete="tel" required placeholder="{{ $phonePlaceholder }}"></label>
+                        <label>{{ $emailLabel }}<input type="email" name="email" autocomplete="email" placeholder="{{ $emailPlaceholder }}"></label>
+                        <label>{{ $messageLabel }}<textarea name="message" rows="4" placeholder="{{ $messagePlaceholder }}"></textarea></label>
+                        <p class="contacts-v2-form__error" data-contact-error hidden></p>
+                        <p class="contacts-v2-form__success" data-contact-success hidden data-default-success="{{ $successMessage }}"></p>
+                        <button type="submit" class="btn btn--primary btn--full"><x-landing.icon name="icon:arrow-right" />{{ $submitText }}</button>
                     </form>
                     <small>{{ $privacyPrefix }} <a href="/pages/privacy-policy">{{ $privacyLinkText }}</a></small>
                 </section>

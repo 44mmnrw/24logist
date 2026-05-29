@@ -188,6 +188,11 @@ class CmsPageResource extends Resource
                     ->maxLength(255)
                     ->default('Отправить сообщение')
                     ->visible(fn (Get $get): bool => $get('slug') === 'contacts'),
+                TextInput::make('extra.contacts_success_message')
+                    ->label('Contacts: сообщение после отправки')
+                    ->maxLength(255)
+                    ->default('Сообщение отправлено. Мы свяжемся с вами в ближайшее время.')
+                    ->visible(fn (Get $get): bool => $get('slug') === 'contacts'),
                 TextInput::make('extra.contacts_privacy_prefix')
                     ->label('Contacts: текст перед ссылкой политики')
                     ->maxLength(500)
