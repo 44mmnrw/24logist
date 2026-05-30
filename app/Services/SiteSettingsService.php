@@ -7,11 +7,21 @@ use Illuminate\Support\Facades\Cache;
 
 class SiteSettingsService
 {
-    private const CACHE_KEY = 'site.settings.v1';
+    private const CACHE_KEY = 'site.settings.v2';
 
     public function get(): SiteSetting
     {
-        return Cache::remember(self::CACHE_KEY, now()->addHour(), fn (): SiteSetting => SiteSetting::instance());
+        $cached = Cache::get(self::CACHE_KEY);
+
+        if (is_array($cached)) {
+            return (new SiteSetting)->newFromBuilder($cached);
+        }
+
+        $settings = SiteSetting::instance();
+
+        Cache::put(self::CACHE_KEY, $settings->getAttributes(), now()->addHour());
+
+        return $settings;
     }
 
     /**
@@ -49,5 +59,6 @@ class SiteSettingsService
     public function clearCache(): void
     {
         Cache::forget(self::CACHE_KEY);
+        Cache::forget('site.settings.v1');
     }
 }
