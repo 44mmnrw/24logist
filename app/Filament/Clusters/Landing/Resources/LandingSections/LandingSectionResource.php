@@ -269,12 +269,31 @@ class LandingSectionResource extends Resource
                     ->maxLength(255)
                     ->columnSpanFull()
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'footer'),
+                TextInput::make('extra.footnote')
+                    ->label('Текст под тарифами')
+                    ->maxLength(255)
+                    ->default('Не уверены, что подойдёт?')
+                    ->columnSpanFull()
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'pricing'),
+                TextInput::make('extra.footnote_link_text')
+                    ->label('Текст ссылки под тарифами')
+                    ->maxLength(255)
+                    ->default('Подобрать тариф через квиз →')
+                    ->columnSpanFull()
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'pricing'),
+                TextInput::make('extra.footnote_link')
+                    ->label('Ссылка под тарифами')
+                    ->maxLength(255)
+                    ->placeholder('#quiz')
+                    ->helperText(fn (): string => 'Пусто — ссылка на квиз. '.LandingSectionAnchor::adminHint())
+                    ->columnSpanFull()
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'pricing'),
                 KeyValue::make('extra')
                     ->label('Дополнительные поля')
                     ->keyLabel('Ключ')
                     ->valueLabel('Значение')
                     ->reorderable()
-                    ->visible(fn (?LandingSection $record): bool => ! in_array($record?->slug, ['hero', 'mobile', 'driver_cabinet', 'quiz', 'footer', 'faq', 'platform', 'header'], true)),
+                    ->visible(fn (?LandingSection $record): bool => ! in_array($record?->slug, ['hero', 'mobile', 'driver_cabinet', 'quiz', 'footer', 'faq', 'platform', 'header', 'pricing'], true)),
                 Toggle::make('is_active')
                     ->label('Активна')
                     ->default(true),

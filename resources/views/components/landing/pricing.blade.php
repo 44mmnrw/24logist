@@ -60,7 +60,7 @@
             <p class="pricing-foot">
                 {{ $extra['footnote'] }}
                 @if (! empty($extra['footnote_link_text']))
-                    <a href="{{ $extra['footnote_link'] ?? $quizLink }}">{{ $extra['footnote_link_text'] }}</a>
+                    <a href="{{ \App\Support\LandingLinks::resolve($extra['footnote_link'] ?? $quizLink) }}">{{ $extra['footnote_link_text'] }}</a>
                 @endif
             </p>
         @endif
