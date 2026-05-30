@@ -39,9 +39,15 @@
                         @endforeach
                     </ul>
                     @if ($plan->button_text)
-                        <button type="button" @class(['btn', 'btn--full', 'btn--primary' => $plan->button_style === 'primary', 'btn--ghost' => $plan->button_style !== 'primary'])>
-                            {{ $plan->button_text }}
-                        </button>
+                        @if (filled($plan->link))
+                            <a href="{{ \App\Support\LandingLinks::resolve($plan->link) }}" @class(['btn', 'btn--full', 'btn--primary' => $plan->button_style === 'primary', 'btn--ghost' => $plan->button_style !== 'primary'])>
+                                {{ $plan->button_text }}
+                            </a>
+                        @else
+                            <button type="button" @class(['btn', 'btn--full', 'btn--primary' => $plan->button_style === 'primary', 'btn--ghost' => $plan->button_style !== 'primary'])>
+                                {{ $plan->button_text }}
+                            </button>
+                        @endif
                     @endif
                 </article>
             @endforeach
