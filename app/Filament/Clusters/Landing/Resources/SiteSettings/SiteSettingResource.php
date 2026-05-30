@@ -7,10 +7,13 @@ use App\Models\SiteSetting;
 use BackedEnum;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Navigation\NavigationItem;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+
+use function Filament\Support\original_request;
 
 class SiteSettingResource extends Resource
 {
@@ -71,6 +74,38 @@ class SiteSettingResource extends Resource
     public static function getNavigationUrl(): string
     {
         return static::getUrl('edit');
+    }
+
+    /**
+     * @param  array<mixed>  $parameters
+     */
+    public static function getIndexUrl(array $parameters = [], bool $isAbsolute = true, ?string $panel = null, ?\Illuminate\Database\Eloquent\Model $tenant = null, bool $shouldGuessMissingParameters = false): string
+    {
+        return static::getUrl('edit', $parameters, $isAbsolute, $panel, $tenant, $shouldGuessMissingParameters);
+    }
+
+    /**
+     * @return array<NavigationItem>
+     */
+    public static function getNavigationItems(): array
+    {
+        if (! static::shouldRegisterNavigation() || ! static::canAccess()) {
+            return [];
+        }
+
+        return [
+            NavigationItem::make(static::getNavigationLabel())
+                ->icon(static::getNavigationIcon())
+                ->activeIcon(static::getActiveNavigationIcon())
+                ->isActiveWhen(fn (): bool => original_request()->routeIs(static::getRouteBaseName().'.*'))
+                ->sort(static::getNavigationSort())
+                ->url(static::getNavigationUrl()),
+        ];
+    }
+
+    public static function canViewAny(): bool
+    {
+        return static::canEdit(SiteSetting::instance());
     }
 
     public static function canCreate(): bool
