@@ -53,7 +53,7 @@
             @endforeach
         </div>
 
-        @if (! empty($extra['footnote']))
+        @if (! empty($extra['footnote']) || ! empty($extra['footnote_link_text']))
             @php
                 $quizLink = \App\Support\LandingLinks::resolve($landing->section('quiz')?->anchorLink() ?? '#quiz');
             @endphp

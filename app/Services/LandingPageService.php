@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Cache;
 
 class LandingPageService
 {
-    private const CACHE_KEY = 'landing.page.content.v2';
+    private const CACHE_KEY = 'landing.page.content.v3';
 
     /** @var array<string, LandingSection>|null */
     private ?array $sections = null;
@@ -150,12 +150,12 @@ class LandingPageService
     /** @param array{section: array<string, mixed>, blocks: array<int, array{block: array<string, mixed>, children: array<int, array<string, mixed>>}>} $data */
     private function sectionFromCache(array $data): LandingSection
     {
-        $section = (new LandingSection)->newFromBuilder($data['section']);
+        $section = (new LandingSection)->newFromBuilder($this->attributesForBuilder($data['section']));
 
         $blocks = collect($data['blocks'])->map(function (array $blockData): LandingBlock {
-            $block = (new LandingBlock)->newFromBuilder($blockData['block']);
+            $block = (new LandingBlock)->newFromBuilder($this->attributesForBuilder($blockData['block']));
             $children = collect($blockData['children'])->map(
-                fn (array $attributes): LandingBlock => (new LandingBlock)->newFromBuilder($attributes),
+                fn (array $attributes): LandingBlock => (new LandingBlock)->newFromBuilder($this->attributesForBuilder($attributes)),
             );
             $block->setRelation('children', $children);
 
@@ -165,5 +165,18 @@ class LandingPageService
         $section->setRelation('blocks', $blocks);
 
         return $section;
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     * @return array<string, mixed>
+     */
+    private function attributesForBuilder(array $attributes): array
+    {
+        if (isset($attributes['extra']) && is_array($attributes['extra'])) {
+            $attributes['extra'] = json_encode($attributes['extra'], JSON_THROW_ON_ERROR);
+        }
+
+        return $attributes;
     }
 }

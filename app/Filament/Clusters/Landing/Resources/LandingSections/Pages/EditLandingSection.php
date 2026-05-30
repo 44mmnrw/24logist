@@ -7,6 +7,8 @@ use App\Services\LandingPageService;
 use App\Support\LandingFooterForm;
 use App\Support\LandingHeroCarouselForm;
 use App\Support\LandingMobileForm;
+use App\Support\LandingPricingForm;
+use App\Support\LandingQuizForm;
 use Filament\Resources\Pages\EditRecord;
 
 class EditLandingSection extends EditRecord
@@ -20,18 +22,26 @@ class EditLandingSection extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        return LandingFooterForm::hydrate(
-            LandingMobileForm::hydrate(
-                LandingHeroCarouselForm::hydrate($data),
+        return LandingQuizForm::hydrate(
+            LandingPricingForm::hydrate(
+                LandingFooterForm::hydrate(
+                    LandingMobileForm::hydrate(
+                        LandingHeroCarouselForm::hydrate($data),
+                    ),
+                ),
             ),
         );
     }
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        return LandingFooterForm::dehydrate(
-            LandingMobileForm::dehydrate(
-                LandingHeroCarouselForm::dehydrate($data),
+        return LandingQuizForm::dehydrate(
+            LandingPricingForm::dehydrate(
+                LandingFooterForm::dehydrate(
+                    LandingMobileForm::dehydrate(
+                        LandingHeroCarouselForm::dehydrate($data),
+                    ),
+                ),
             ),
         );
     }

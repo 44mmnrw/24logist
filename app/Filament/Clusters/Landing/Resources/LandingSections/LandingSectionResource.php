@@ -179,43 +179,43 @@ class LandingSectionResource extends Resource
                     'Правая плашка — иконка',
                     fn (?LandingSection $record): bool => in_array($record?->slug, ['mobile', 'driver_cabinet'], true),
                 ),
-                TextInput::make('extra.finish_title')
+                TextInput::make('quiz_finish_title')
                     ->label('Заголовок финального шага')
                     ->maxLength(255)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'quiz'),
-                Textarea::make('extra.finish_description')
+                Textarea::make('quiz_finish_description')
                     ->label('Текст финального шага')
                     ->rows(2)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'quiz'),
-                TextInput::make('extra.recommendation_title')
+                TextInput::make('quiz_recommendation_title')
                     ->label('Заголовок шага с тарифом')
                     ->maxLength(255)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'quiz'),
-                Textarea::make('extra.recommendation_description')
+                Textarea::make('quiz_recommendation_description')
                     ->label('Текст шага с тарифом')
                     ->rows(2)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'quiz'),
-                TextInput::make('extra.success_title')
+                TextInput::make('quiz_success_title')
                     ->label('Заголовок после отправки')
                     ->maxLength(255)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'quiz'),
-                Textarea::make('extra.success_description')
+                Textarea::make('quiz_success_description')
                     ->label('Текст после отправки')
                     ->rows(2)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'quiz'),
-                TextInput::make('extra.submit_button_text')
+                TextInput::make('quiz_submit_button_text')
                     ->label('Текст кнопки отправки')
                     ->maxLength(255)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'quiz'),
-                TextInput::make('extra.privacy_prefix')
+                TextInput::make('quiz_privacy_prefix')
                     ->label('Согласие — текст перед ссылкой')
                     ->maxLength(255)
-                    ->default('Нажимая кнопку, вы соглашаетесь с')
+                    ->placeholder('Нажимая кнопку, вы соглашаетесь с')
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'quiz'),
-                TextInput::make('extra.privacy_link_text')
+                TextInput::make('quiz_privacy_link_text')
                     ->label('Согласие — текст ссылки')
                     ->maxLength(255)
-                    ->default('политикой конфиденциальности')
+                    ->placeholder('политикой конфиденциальности')
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'quiz'),
                 static::iconSelect(
                     'extra.next_button_icon',
@@ -269,19 +269,19 @@ class LandingSectionResource extends Resource
                     ->maxLength(255)
                     ->columnSpanFull()
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'footer'),
-                TextInput::make('extra.footnote')
+                TextInput::make('pricing_footnote')
                     ->label('Текст под тарифами')
                     ->maxLength(255)
-                    ->default('Не уверены, что подойдёт?')
+                    ->placeholder('Не уверены, что подойдёт?')
                     ->columnSpanFull()
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'pricing'),
-                TextInput::make('extra.footnote_link_text')
+                TextInput::make('pricing_footnote_link_text')
                     ->label('Текст ссылки под тарифами')
                     ->maxLength(255)
-                    ->default('Подобрать тариф через квиз →')
+                    ->placeholder('Подобрать тариф через квиз →')
                     ->columnSpanFull()
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'pricing'),
-                TextInput::make('extra.footnote_link')
+                TextInput::make('pricing_footnote_link')
                     ->label('Ссылка под тарифами')
                     ->maxLength(255)
                     ->placeholder('#quiz')
