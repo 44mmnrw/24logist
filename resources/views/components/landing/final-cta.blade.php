@@ -14,10 +14,18 @@
             </div>
             <div class="final-cta__actions">
                 @if ($section?->button_primary_text)
-                    <button type="button" class="btn btn--primary">{{ $section->button_primary_text }}</button>
+                    @if (filled($section->button_primary_url))
+                        <a href="{{ \App\Support\LandingLinks::resolve($section->button_primary_url) }}" class="btn btn--primary">{{ $section->button_primary_text }}</a>
+                    @else
+                        <button type="button" class="btn btn--primary">{{ $section->button_primary_text }}</button>
+                    @endif
                 @endif
                 @if ($section?->button_secondary_text)
-                    <button type="button" class="btn btn--ghost-dark">{{ $section->button_secondary_text }}</button>
+                    @if (filled($section->button_secondary_url))
+                        <a href="{{ \App\Support\LandingLinks::resolve($section->button_secondary_url) }}" class="btn btn--ghost-dark">{{ $section->button_secondary_text }}</a>
+                    @else
+                        <button type="button" class="btn btn--ghost-dark">{{ $section->button_secondary_text }}</button>
+                    @endif
                 @endif
             </div>
         </div>

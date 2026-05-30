@@ -482,7 +482,9 @@ class LandingContentSeeder extends Seeder
             'title' => 'Подключите ЛОГИСТ этой неделе',
             'description' => 'Демо за 30 минут, настройка под ваши процессы, понятный счёт. Без долгих внедрений.',
             'button_primary_text' => 'Подобрать тариф',
+            'button_primary_url' => '#pricing',
             'button_secondary_text' => 'Получить демо',
+            'button_secondary_url' => '#quiz',
         ]);
     }
 
