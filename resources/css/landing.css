@@ -794,6 +794,18 @@ body {
     outline: 2px solid rgba(29, 78, 216, 0.25);
     border-color: #1d4ed8;
 }
+.quiz-consent {
+    margin-top: 12px;
+    display: block;
+    text-align: center;
+    color: #90a1b9;
+    font-size: 12px;
+    line-height: 18px;
+}
+.quiz-consent a {
+    color: inherit;
+    text-decoration: underline;
+}
 .quiz-error {
     margin-top: 16px;
     color: #dc2626;

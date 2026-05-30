@@ -207,6 +207,16 @@ class LandingSectionResource extends Resource
                     ->label('Текст кнопки отправки')
                     ->maxLength(255)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'quiz'),
+                TextInput::make('extra.privacy_prefix')
+                    ->label('Согласие — текст перед ссылкой')
+                    ->maxLength(255)
+                    ->default('Нажимая кнопку, вы соглашаетесь с')
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'quiz'),
+                TextInput::make('extra.privacy_link_text')
+                    ->label('Согласие — текст ссылки')
+                    ->maxLength(255)
+                    ->default('политикой конфиденциальности')
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'quiz'),
                 static::iconSelect(
                     'extra.next_button_icon',
                     'Иконка кнопки «Далее»',

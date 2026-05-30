@@ -40,6 +40,9 @@
             'finish' => [
                 'title' => $extra['finish_title'] ?? 'Куда прислать расчёт?',
                 'description' => $extra['finish_description'] ?? 'Оставьте контакты — пришлём подходящий тариф и расчёт в рабочее время.',
+                'privacyPrefix' => $extra['privacy_prefix'] ?? 'Нажимая кнопку, вы соглашаетесь с',
+                'privacyLinkText' => $extra['privacy_link_text'] ?? 'политикой конфиденциальности',
+                'privacyUrl' => url('/pages/privacy-policy'),
             ],
             'success' => [
                 'title' => $extra['success_title'] ?? 'Спасибо!',

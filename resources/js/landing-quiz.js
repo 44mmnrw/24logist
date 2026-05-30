@@ -152,6 +152,10 @@ function initLandingQuiz(root) {
             ? (labels.submit ?? 'Получить расчёт')
             : (labels.next ?? 'Далее');
 
+        const consentHtml = isFinishStep
+            ? `<small class="quiz-consent">${escapeHtml(finish.privacyPrefix ?? 'Нажимая кнопку, вы соглашаетесь с')} <a href="${escapeHtml(finish.privacyUrl ?? '/pages/privacy-policy')}">${escapeHtml(finish.privacyLinkText ?? 'политикой конфиденциальности')}</a></small>`
+            : '';
+
         root.innerHTML = `
             <div class="quiz-card__head">
                 <span>${escapeHtml(stepLabel)}</span>
@@ -169,6 +173,7 @@ function initLandingQuiz(root) {
                     ${escapeHtml(nextLabel)}
                 </button>
             </div>
+            ${consentHtml}
             <p class="quiz-error" data-quiz-error hidden></p>
         `;
 
