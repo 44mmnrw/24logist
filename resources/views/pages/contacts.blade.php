@@ -123,5 +123,6 @@
 
         <x-landing.footer />
     </div>
+    <x-analytics.yandex-metrika />
 </body>
 </html>

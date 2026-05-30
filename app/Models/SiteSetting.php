@@ -1,0 +1,42 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class SiteSetting extends Model
+{
+    protected $fillable = [
+        'yandex_metrika_enabled',
+        'yandex_metrika_counter_id',
+        'yandex_metrika_webvisor',
+        'yandex_metrika_clickmap',
+        'yandex_metrika_track_links',
+        'yandex_metrika_accurate_track_bounce',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'yandex_metrika_enabled' => 'boolean',
+            'yandex_metrika_webvisor' => 'boolean',
+            'yandex_metrika_clickmap' => 'boolean',
+            'yandex_metrika_track_links' => 'boolean',
+            'yandex_metrika_accurate_track_bounce' => 'boolean',
+        ];
+    }
+
+    public static function instance(): self
+    {
+        return static::query()->firstOrCreate(
+            ['id' => 1],
+            [
+                'yandex_metrika_enabled' => false,
+                'yandex_metrika_webvisor' => true,
+                'yandex_metrika_clickmap' => true,
+                'yandex_metrika_track_links' => true,
+                'yandex_metrika_accurate_track_bounce' => true,
+            ],
+        );
+    }
+}
