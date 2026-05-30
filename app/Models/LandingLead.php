@@ -34,6 +34,8 @@ class LandingLead extends Model
         'email',
         'message',
         'quiz_answers',
+        'recommended_plan_id',
+        'recommended_plan_title',
         'source_url',
         'ip',
         'user_agent',

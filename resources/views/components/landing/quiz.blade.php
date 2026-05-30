@@ -1,4 +1,6 @@
 @php
+    use App\Support\LandingQuizRecommendation;
+
     $section = $landing->section('quiz');
 @endphp
 
@@ -22,9 +24,18 @@
             ];
         })->values();
 
+        $firstQuestion = $questions->first();
+
         $quizPayload = [
             'submitUrl' => route('leads.quiz.store'),
             'questions' => $questions->all(),
+            'firstQuestionId' => $firstQuestion['id'] ?? null,
+            'plans' => LandingQuizRecommendation::plansPayload(),
+            'optionPlans' => LandingQuizRecommendation::optionPlanMap(),
+            'recommendation' => [
+                'title' => $extra['recommendation_title'] ?? 'Вам подходит тариф',
+                'description' => $extra['recommendation_description'] ?? 'На основе вашего ответа мы подобрали оптимальный план — оставьте контакты, и мы пришлём расчёт.',
+            ],
             'finish' => [
                 'title' => $extra['finish_title'] ?? 'Куда прислать расчёт?',
                 'description' => $extra['finish_description'] ?? 'Оставьте контакты — пришлём подходящий тариф и расчёт в рабочее время.',

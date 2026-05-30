@@ -11,6 +11,7 @@ use App\Support\LandingIcons;
 use App\Support\LandingPlatform;
 use App\Support\LandingPricing;
 use App\Support\LandingQuiz;
+use App\Support\LandingQuizRecommendation;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -73,6 +74,12 @@ class BlocksRelationManager extends RelationManager
                                 ->label('Вариант')
                                 ->required()
                                 ->maxLength(255),
+                            Select::make('recommended_plan_id')
+                                ->label('Рекомендуемый тариф')
+                                ->helperText('Для 1-го вопроса: какой тариф показать при выборе этого варианта.')
+                                ->options(fn (): array => LandingQuizRecommendation::planSelectOptions())
+                                ->nullable()
+                                ->searchable(),
                         ])
                         ->minItems(2)
                         ->defaultItems(2)

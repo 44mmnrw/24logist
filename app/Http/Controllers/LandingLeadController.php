@@ -31,6 +31,8 @@ class LandingLeadController extends Controller
             'phone' => $request->string('phone')->toString(),
             'email' => $request->string('email')->toString() ?: null,
             'quiz_answers' => $answers,
+            'recommended_plan_id' => $request->integer('recommended_plan_id') ?: null,
+            'recommended_plan_title' => $request->string('recommended_plan_title')->toString() ?: null,
             'source_url' => $request->headers->get('referer'),
             'ip' => $request->ip(),
             'user_agent' => $request->userAgent(),

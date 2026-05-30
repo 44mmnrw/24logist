@@ -60,6 +60,10 @@ class LandingLeadResource extends Resource
                     ->placeholder('—')
                     ->columnSpanFull()
                     ->visible(fn (LandingLead $record): bool => $record->type === LandingLead::TYPE_CONTACT),
+                TextEntry::make('recommended_plan_title')
+                    ->label('Рекомендованный тариф')
+                    ->placeholder('—')
+                    ->visible(fn (LandingLead $record): bool => $record->type === LandingLead::TYPE_QUIZ),
                 RepeatableEntry::make('quiz_answers')
                     ->label('Ответы квиза')
                     ->schema([
@@ -92,6 +96,10 @@ class LandingLeadResource extends Resource
                 TextColumn::make('phone')
                     ->label('Телефон')
                     ->searchable(),
+                TextColumn::make('recommended_plan_title')
+                    ->label('Тариф')
+                    ->placeholder('—')
+                    ->toggleable(),
                 TextColumn::make('email')
                     ->label('Email')
                     ->placeholder('—')

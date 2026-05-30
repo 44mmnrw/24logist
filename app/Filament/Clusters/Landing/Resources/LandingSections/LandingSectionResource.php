@@ -179,6 +179,14 @@ class LandingSectionResource extends Resource
                     ->label('Текст финального шага')
                     ->rows(2)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'quiz'),
+                TextInput::make('extra.recommendation_title')
+                    ->label('Заголовок шага с тарифом')
+                    ->maxLength(255)
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'quiz'),
+                Textarea::make('extra.recommendation_description')
+                    ->label('Текст шага с тарифом')
+                    ->rows(2)
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'quiz'),
                 TextInput::make('extra.success_title')
                     ->label('Заголовок после отправки')
                     ->maxLength(255)

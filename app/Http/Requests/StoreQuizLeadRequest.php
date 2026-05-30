@@ -22,6 +22,8 @@ class StoreQuizLeadRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:255'],
             'answers' => ['required', 'array', 'min:1'],
             'answers.*' => ['integer', 'min:1'],
+            'recommended_plan_id' => ['nullable', 'integer', 'min:1'],
+            'recommended_plan_title' => ['nullable', 'string', 'max:255'],
             'website' => ['nullable', 'max:0'],
         ];
     }

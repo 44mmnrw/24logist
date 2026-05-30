@@ -27,9 +27,34 @@ function initLandingQuiz(root) {
     const finish = data.finish ?? {};
     const success = data.success ?? {};
     const labels = data.labels ?? {};
-    const totalSteps = questions.length + 1;
+    const recommendation = data.recommendation ?? {};
+    const recommendationStep = questions.length;
+    const finishStep = questions.length + 1;
+    const totalSteps = questions.length + 2;
     const answers = {};
     let step = 0;
+
+    const getRecommendation = () => {
+        const firstQuestionId = data.firstQuestionId;
+
+        if (!firstQuestionId) {
+            return null;
+        }
+
+        const optionId = answers[firstQuestionId];
+
+        if (!optionId) {
+            return null;
+        }
+
+        const planId = data.optionPlans?.[optionId] ?? data.optionPlans?.[String(optionId)];
+
+        if (!planId) {
+            return null;
+        }
+
+        return data.plans?.[planId] ?? data.plans?.[String(planId)] ?? null;
+    };
 
     const render = () => {
         const progress = totalSteps <= 1
@@ -48,9 +73,7 @@ function initLandingQuiz(root) {
             return;
         }
 
-        const stepLabel = step < questions.length
-            ? `${labels.step ?? 'Шаг'} ${step + 1} ${labels.of ?? 'из'} ${totalSteps}`
-            : `${labels.step ?? 'Шаг'} ${totalSteps} ${labels.of ?? 'из'} ${totalSteps}`;
+        const stepLabel = `${labels.step ?? 'Шаг'} ${step + 1} ${labels.of ?? 'из'} ${totalSteps}`;
 
         let body = '';
 
@@ -75,6 +98,31 @@ function initLandingQuiz(root) {
                     `).join('')}
                 </div>
             `;
+        } else if (step === recommendationStep) {
+            const plan = getRecommendation();
+
+            if (plan) {
+                body = `
+                    <h3>${escapeHtml(recommendation.title ?? 'Вам подходит тариф')}</h3>
+                    <p class="quiz-finish__text">${escapeHtml(recommendation.description ?? '')}</p>
+                    <article class="quiz-recommendation${plan.isHighlighted ? ' quiz-recommendation--hit' : ''}">
+                        ${plan.tag ? `<span class="quiz-recommendation__tag">${escapeHtml(plan.tag)}</span>` : ''}
+                        <h4>${escapeHtml(plan.title ?? '')}</h4>
+                        ${plan.subtitle ? `<p class="quiz-recommendation__desc">${escapeHtml(plan.subtitle)}</p>` : ''}
+                        ${plan.price ? `<div class="quiz-recommendation__price">${escapeHtml(plan.price)}</div>` : ''}
+                        ${Array.isArray(plan.features) && plan.features.length > 0
+                            ? `<ul class="quiz-recommendation__features">${plan.features.map((feature) => `<li>${escapeHtml(feature)}</li>`).join('')}</ul>`
+                            : ''}
+                    </article>
+                    <p class="quiz-recommendation__alt"><a href="#pricing">Выбрать другой тариф</a></p>
+                `;
+            } else {
+                body = `
+                    <h3>${escapeHtml(recommendation.title ?? 'Вам подходит тариф')}</h3>
+                    <p class="quiz-finish__text">Посмотрите все тарифы в разделе ниже или оставьте контакты — мы поможем подобрать план.</p>
+                    <p class="quiz-recommendation__alt"><a href="#pricing" class="btn btn--ghost btn--sm">Смотреть тарифы</a></p>
+                `;
+            }
         } else {
             body = `
                 <h3>${escapeHtml(finish.title ?? 'Куда прислать расчёт?')}</h3>
@@ -96,7 +144,7 @@ function initLandingQuiz(root) {
             `;
         }
 
-        const isFinishStep = step === questions.length;
+        const isFinishStep = step === finishStep;
         const nextLabel = isFinishStep
             ? (labels.submit ?? 'Получить расчёт')
             : (labels.next ?? 'Далее');
@@ -163,6 +211,7 @@ function initLandingQuiz(root) {
                 const name = String(formData.get('name') ?? '').trim();
                 const phone = String(formData.get('phone') ?? '').trim();
                 const email = String(formData.get('email') ?? '').trim();
+                const recommendedPlan = getRecommendation();
 
                 if (name === '' || phone === '') {
                     showError('Укажите имя и телефон, чтобы мы могли связаться с вами.');
@@ -190,6 +239,8 @@ function initLandingQuiz(root) {
                         phone,
                         email: email || null,
                         answers,
+                        recommended_plan_id: recommendedPlan?.id ?? null,
+                        recommended_plan_title: recommendedPlan?.title ?? null,
                         website: '',
                     });
 
