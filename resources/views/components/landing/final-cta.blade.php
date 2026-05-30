@@ -1,7 +1,7 @@
 @php $section = $landing->section('final_cta'); @endphp
 
 @if ($section)
-<section class="final-cta" id="final-cta">
+<section class="final-cta" @if($section->anchorId()) id="{{ $section->anchorId() }}" @endif>
     <div class="landing-shell">
         <div class="final-cta__box">
             <div class="final-cta__text">

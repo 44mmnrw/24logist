@@ -10,6 +10,7 @@ use App\Models\LandingSection;
 use App\Support\FilamentUploadPreview;
 use App\Support\LandingIcons;
 use App\Support\LandingMedia;
+use App\Support\LandingSectionAnchor;
 use BackedEnum;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
@@ -55,6 +56,13 @@ class LandingSectionResource extends Resource
                     ->label('Ключ секции')
                     ->disabled()
                     ->dehydrated(),
+                TextInput::make('anchor')
+                    ->label('Якорь секции')
+                    ->prefix('/#')
+                    ->maxLength(64)
+                    ->placeholder('why')
+                    ->helperText('Ссылка на секцию с главной: /#why. Укажите только якорь без # — why, pricing, quiz.')
+                    ->visible(fn (?LandingSection $record): bool => LandingSectionAnchor::supports($record)),
                 TextInput::make('kicker')
                     ->label('Надзаголовок')
                     ->maxLength(255),
@@ -278,6 +286,13 @@ class LandingSectionResource extends Resource
                 TextColumn::make('slug')
                     ->label('Ключ')
                     ->badge(),
+                TextColumn::make('anchor')
+                    ->label('Ссылка')
+                    ->formatStateUsing(function (?string $state, LandingSection $record): string {
+                        $anchor = LandingSectionAnchor::id($record);
+
+                        return $anchor !== null ? '/#'.$anchor : '—';
+                    }),
                 TextColumn::make('title')
                     ->label('Заголовок')
                     ->limit(40),

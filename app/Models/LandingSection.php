@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Support\LandingIcons;
 use App\Support\LandingMedia;
+use App\Support\LandingSectionAnchor;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -12,6 +13,7 @@ class LandingSection extends Model
     protected $fillable = [
         'slug',
         'name',
+        'anchor',
         'kicker',
         'title',
         'subtitle',
@@ -43,6 +45,7 @@ class LandingSection extends Model
             $section->dashboard_image = LandingMedia::normalizePath($section->dashboard_image);
             $section->mobile_image = LandingMedia::normalizePath($section->mobile_image);
             $section->badge_icon = LandingIcons::normalize($section->badge_icon);
+            $section->anchor = LandingSectionAnchor::normalize($section->anchor);
 
             if (! is_array($section->extra)) {
                 return;
@@ -102,5 +105,15 @@ class LandingSection extends Model
     {
         return $this->hasMany(LandingBlock::class, 'section_slug', 'slug')
             ->orderBy('sort_order');
+    }
+
+    public function anchorId(): ?string
+    {
+        return LandingSectionAnchor::id($this);
+    }
+
+    public function anchorLink(): ?string
+    {
+        return LandingSectionAnchor::hash($this);
     }
 }

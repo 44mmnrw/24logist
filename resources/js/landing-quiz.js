@@ -28,6 +28,9 @@ function initLandingQuiz(root) {
     const success = data.success ?? {};
     const labels = data.labels ?? {};
     const recommendation = data.recommendation ?? {};
+    const pageLinks = data.links ?? {};
+    const pricingLink = pageLinks.pricing ?? '#pricing';
+    const finalCtaLink = pageLinks.finalCta ?? '#final-cta';
     const recommendationStep = questions.length;
     const finishStep = questions.length + 1;
     const totalSteps = questions.length + 2;
@@ -66,7 +69,7 @@ function initLandingQuiz(root) {
                 <div class="quiz-result">
                     <h3>${escapeHtml(success.title ?? 'Спасибо!')}</h3>
                     <p>${escapeHtml(success.description ?? '')}</p>
-                    <a class="btn btn--primary btn--sm" href="#final-cta">Перейти к подключению</a>
+                    <a class="btn btn--primary btn--sm" href="${escapeHtml(finalCtaLink)}">Перейти к подключению</a>
                 </div>
             `;
 
@@ -114,13 +117,13 @@ function initLandingQuiz(root) {
                             ? `<ul class="quiz-recommendation__features">${plan.features.map((feature) => `<li>${escapeHtml(feature)}</li>`).join('')}</ul>`
                             : ''}
                     </article>
-                    <p class="quiz-recommendation__alt"><a href="#pricing">Выбрать другой тариф</a></p>
+                    <p class="quiz-recommendation__alt"><a href="${escapeHtml(pricingLink)}">Выбрать другой тариф</a></p>
                 `;
             } else {
                 body = `
                     <h3>${escapeHtml(recommendation.title ?? 'Вам подходит тариф')}</h3>
                     <p class="quiz-finish__text">Посмотрите все тарифы в разделе ниже или оставьте контакты — мы поможем подобрать план.</p>
-                    <p class="quiz-recommendation__alt"><a href="#pricing" class="btn btn--ghost btn--sm">Смотреть тарифы</a></p>
+                    <p class="quiz-recommendation__alt"><a href="${escapeHtml(pricingLink)}" class="btn btn--ghost btn--sm">Смотреть тарифы</a></p>
                 `;
             }
         } else {

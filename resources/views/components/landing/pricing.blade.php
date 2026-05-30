@@ -3,7 +3,7 @@
 @endphp
 
 @if ($section)
-<section class="pricing-section" id="pricing">
+<section class="pricing-section" @if($section->anchorId()) id="{{ $section->anchorId() }}" @endif>
     @php
         $extra = $section?->extra ?? [];
         $plans = $landing->blocks('pricing', 'plan');
@@ -54,10 +54,13 @@
         </div>
 
         @if (! empty($extra['footnote']))
+            @php
+                $quizLink = \App\Support\LandingLinks::resolve($landing->section('quiz')?->anchorLink() ?? '#quiz');
+            @endphp
             <p class="pricing-foot">
                 {{ $extra['footnote'] }}
                 @if (! empty($extra['footnote_link_text']))
-                    <a href="{{ $extra['footnote_link'] ?? '#quiz' }}">{{ $extra['footnote_link_text'] }}</a>
+                    <a href="{{ $extra['footnote_link'] ?? $quizLink }}">{{ $extra['footnote_link_text'] }}</a>
                 @endif
             </p>
         @endif

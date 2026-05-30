@@ -3,7 +3,7 @@
 @endphp
 
 @if ($section)
-<section class="features-section" id="features">
+<section class="features-section" @if($section->anchorId()) id="{{ $section->anchorId() }}" @endif>
     @php
         $cards = $landing->blocks('features', 'card');
     @endphp

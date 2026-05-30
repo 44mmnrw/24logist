@@ -5,6 +5,7 @@ namespace App\Filament\Clusters\Landing\Resources\LandingSections\RelationManage
 use App\Models\LandingBlock;
 use App\Models\LandingSection;
 use App\Services\LandingPageService;
+use App\Support\LandingSectionAnchor;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -12,6 +13,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -47,6 +49,20 @@ class HeaderButtonsRelationManager extends RelationManager
                     ->required()
                     ->maxLength(255)
                     ->placeholder('#quiz или /admin/login')
+                    ->helperText(fn (): string => LandingSectionAnchor::adminHint())
+                    ->columnSpanFull(),
+                Select::make('section_anchor')
+                    ->label('Быстрый выбор секции')
+                    ->options(fn (): array => LandingSectionAnchor::linkSelectOptions())
+                    ->searchable()
+                    ->dehydrated(false)
+                    ->live()
+                    ->afterStateUpdated(function (?string $state, Set $set): void {
+                        if (filled($state)) {
+                            $set('link', $state);
+                        }
+                    })
+                    ->placeholder('Выберите секцию')
                     ->columnSpanFull(),
                 Select::make('button_style')
                     ->label('Стиль')
@@ -105,6 +121,13 @@ class HeaderButtonsRelationManager extends RelationManager
             ])
             ->recordActions([
                 EditAction::make()
+                    ->mutateRecordDataUsing(function (array $data, LandingBlock $record): array {
+                        $link = (string) ($data['link'] ?? '');
+                        $sectionLinks = array_keys(LandingSectionAnchor::linkSelectOptions());
+                        $data['section_anchor'] = in_array($link, $sectionLinks, true) ? $link : null;
+
+                        return $data;
+                    })
                     ->after(fn () => app(LandingPageService::class)->clearCache()),
                 DeleteAction::make()
                     ->after(fn () => app(LandingPageService::class)->clearCache()),

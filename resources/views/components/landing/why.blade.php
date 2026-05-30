@@ -3,7 +3,7 @@
 @endphp
 
 @if ($section)
-<section class="why-section" id="why">
+<section class="why-section" @if($section->anchorId()) id="{{ $section->anchorId() }}" @endif>
     @php
         $cards = $landing->blocks('why', 'card');
         $stats = $landing->blocks('why', 'stat');

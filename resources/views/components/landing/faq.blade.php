@@ -3,7 +3,7 @@
 @endphp
 
 @if ($section)
-<section class="faq-section" id="faq">
+<section class="faq-section" @if($section->anchorId()) id="{{ $section->anchorId() }}" @endif>
     @php
         $extra = $section?->extra ?? [];
         $items = $landing->blocks('faq', 'faq');

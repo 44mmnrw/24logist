@@ -3,7 +3,7 @@
 @endphp
 
 @if ($section)
-<section class="platform-section">
+<section class="platform-section" @if($section->anchorId()) id="{{ $section->anchorId() }}" @endif>
     @php
         $extra = $section?->extra ?? [];
         $cards = $landing->blocks('platform', 'card');

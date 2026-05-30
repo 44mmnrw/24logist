@@ -12,6 +12,7 @@ use App\Support\LandingPlatform;
 use App\Support\LandingPricing;
 use App\Support\LandingQuiz;
 use App\Support\LandingQuizRecommendation;
+use App\Support\LandingSectionAnchor;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -21,6 +22,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -271,6 +273,20 @@ class BlocksRelationManager extends RelationManager
                         ->required()
                         ->maxLength(255)
                         ->placeholder('#features')
+                        ->helperText(fn (): string => LandingSectionAnchor::adminHint())
+                        ->columnSpanFull(),
+                    Select::make('section_anchor')
+                        ->label('Быстрый выбор секции')
+                        ->options(fn (): array => LandingSectionAnchor::linkSelectOptions())
+                        ->searchable()
+                        ->dehydrated(false)
+                        ->live()
+                        ->afterStateUpdated(function (?string $state, Set $set): void {
+                            if (filled($state)) {
+                                $set('link', $state);
+                            }
+                        })
+                        ->placeholder('Выберите секцию')
                         ->columnSpanFull(),
                     Toggle::make('is_active')
                         ->label('Активна')
@@ -630,7 +646,7 @@ class BlocksRelationManager extends RelationManager
             ])
             ->recordActions([
                 EditAction::make()
-                    ->mutateRecordDataUsing(function (array $data, LandingBlock $record) use ($isQuiz, $isPlatform, $isFooter, $isPricing): array {
+                    ->mutateRecordDataUsing(function (array $data, LandingBlock $record) use ($isQuiz, $isPlatform, $isFooter, $isPricing, $isHeader): array {
                         if ($isQuiz && $record->block_type === 'question') {
                             $data['quiz_options'] = LandingQuiz::optionsFormState($record);
                         }
@@ -645,6 +661,12 @@ class BlocksRelationManager extends RelationManager
 
                         if ($isPricing && $record->block_type === 'plan') {
                             $data['plan_features'] = LandingPricing::featuresFormState($record);
+                        }
+
+                        if ($isHeader && $record->block_type === 'nav_link') {
+                            $link = (string) ($data['link'] ?? '');
+                            $sectionLinks = array_keys(LandingSectionAnchor::linkSelectOptions());
+                            $data['section_anchor'] = in_array($link, $sectionLinks, true) ? $link : null;
                         }
 
                         return $data;

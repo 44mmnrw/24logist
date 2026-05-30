@@ -1,11 +1,12 @@
 @php
+    use App\Support\LandingLinks;
     use App\Support\LandingQuizRecommendation;
 
     $section = $landing->section('quiz');
 @endphp
 
 @if ($section)
-<section class="quiz-section" id="quiz">
+<section class="quiz-section" @if($section->anchorId()) id="{{ $section->anchorId() }}" @endif>
     @php
         $extra = $section?->extra ?? [];
         $questions = $landing->blocks('quiz', 'question')->map(function ($question) {
@@ -52,6 +53,10 @@
                 'of' => $extra['of_label'] ?? 'из',
             ],
             'nextButtonIcon' => $extra['next_button_icon'] ?? null,
+            'links' => [
+                'pricing' => LandingLinks::resolve($landing->section('pricing')?->anchorLink() ?? '#pricing'),
+                'finalCta' => LandingLinks::resolve($landing->section('final_cta')?->anchorLink() ?? '#final-cta'),
+            ],
         ];
     @endphp
 

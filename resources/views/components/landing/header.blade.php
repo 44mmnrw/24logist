@@ -7,10 +7,11 @@
     @php
         $navLinks = $landing->blocks('header', 'nav_link');
         $headerButtons = $landing->blocks('header', 'header_button');
+        $heroSection = $landing->section('hero');
     @endphp
 
     <div class="landing-shell landing-header__shell">
-        <a class="brand" href="{{ \App\Support\LandingLinks::resolve('#hero') }}">
+        <a class="brand" href="{{ \App\Support\LandingLinks::resolve($heroSection?->anchorLink() ?? '#hero') }}">
             <x-landing.logo />
         </a>
 

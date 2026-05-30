@@ -3,7 +3,7 @@
 @endphp
 
 @if ($section)
-<section class="landing-hero" id="hero">
+<section class="landing-hero" @if($section->anchorId()) id="{{ $section->anchorId() }}" @endif>
     @php
         $extra = $section?->extra ?? [];
         $bullets = $landing->blocks('hero', 'bullet');
