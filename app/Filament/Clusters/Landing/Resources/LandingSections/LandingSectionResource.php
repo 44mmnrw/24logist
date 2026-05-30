@@ -5,6 +5,7 @@ namespace App\Filament\Clusters\Landing\Resources\LandingSections;
 use App\Filament\Clusters\Landing\Resources\LandingSections\Pages\EditLandingSection;
 use App\Filament\Clusters\Landing\Resources\LandingSections\Pages\ListLandingSections;
 use App\Filament\Clusters\Landing\Resources\LandingSections\RelationManagers\BlocksRelationManager;
+use App\Filament\Clusters\Landing\Resources\LandingSections\RelationManagers\HeaderButtonsRelationManager;
 use App\Models\LandingSection;
 use App\Support\FilamentUploadPreview;
 use App\Support\LandingIcons;
@@ -230,10 +231,6 @@ class LandingSectionResource extends Resource
                     'Иконка бренда',
                     fn (?LandingSection $record): bool => in_array($record?->slug, ['header', 'footer'], true),
                 ),
-                TextInput::make('extra.demo_button_text')
-                    ->label('Текст кнопки «Демо»')
-                    ->maxLength(255)
-                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'header'),
                 TextInput::make('footer_copyright')
                     ->label('Нижняя строка — текст слева')
                     ->helperText('Блок landing-footer__bottom-shell, левый span (копирайт)')
@@ -294,6 +291,7 @@ class LandingSectionResource extends Resource
     {
         return [
             BlocksRelationManager::class,
+            HeaderButtonsRelationManager::class,
         ];
     }
 

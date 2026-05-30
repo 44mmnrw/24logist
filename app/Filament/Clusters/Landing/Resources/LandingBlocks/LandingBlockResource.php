@@ -58,6 +58,7 @@ class LandingBlockResource extends Resource
                     ->label('Тип блока')
                     ->options([
                         'nav_link' => 'Ссылка навигации',
+                        'header_button' => 'Кнопка шапки',
                         'bullet' => 'Пункт списка',
                         'card' => 'Карточка',
                         'stat' => 'Статистика',
@@ -171,6 +172,7 @@ class LandingBlockResource extends Resource
                     ->label('Тип блока')
                     ->options([
                         'nav_link' => 'Ссылка навигации',
+                        'header_button' => 'Кнопка шапки',
                         'bullet' => 'Пункт списка',
                         'card' => 'Карточка',
                         'stat' => 'Статистика',

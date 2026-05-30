@@ -50,7 +50,6 @@ class LandingContentSeeder extends Seeder
             'name' => 'Шапка',
             'sort_order' => 1,
             'extra' => [
-                'demo_button_text' => 'Получить демо',
                 'logo_icon' => $this->icon('brand-logo'),
                 'brand_name' => 'ЛогистРу',
             ],
@@ -68,6 +67,20 @@ class LandingContentSeeder extends Seeder
                 'block_type' => 'nav_link',
                 'title' => $item['title'],
                 'link' => $item['link'],
+                'sort_order' => $index + 1,
+            ]);
+        }
+
+        foreach ([
+            ['title' => 'Войти', 'link' => '/admin/login', 'button_style' => 'link'],
+            ['title' => 'Получить демо', 'link' => '#quiz', 'button_style' => 'primary'],
+        ] as $index => $button) {
+            $this->block([
+                'section_slug' => $section->slug,
+                'block_type' => 'header_button',
+                'title' => $button['title'],
+                'link' => $button['link'],
+                'button_style' => $button['button_style'],
                 'sort_order' => $index + 1,
             ]);
         }

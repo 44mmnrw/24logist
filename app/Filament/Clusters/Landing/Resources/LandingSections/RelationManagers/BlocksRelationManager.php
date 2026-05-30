@@ -50,6 +50,7 @@ class BlocksRelationManager extends RelationManager
             'hero' => 'Пункты списка',
             'platform' => 'Карточки платформы',
             'footer' => 'Колонки подвала',
+            'header' => 'Ссылки меню',
             'pricing' => 'Тарифы',
             default => static::$title ?? 'Блоки секции',
         };
@@ -246,6 +247,30 @@ class BlocksRelationManager extends RelationManager
                 ]);
         }
 
+        if ($this->isHeaderSection()) {
+            return $schema
+                ->components([
+                    TextInput::make('title')
+                        ->label('Текст ссылки')
+                        ->required()
+                        ->maxLength(255)
+                        ->columnSpanFull(),
+                    TextInput::make('link')
+                        ->label('URL')
+                        ->required()
+                        ->maxLength(255)
+                        ->placeholder('#features')
+                        ->columnSpanFull(),
+                    Toggle::make('is_active')
+                        ->label('Активна')
+                        ->default(true),
+                    TextInput::make('sort_order')
+                        ->label('Порядок')
+                        ->numeric()
+                        ->default(0),
+                ]);
+        }
+
         if ($this->isFooterSection()) {
             return $schema
                 ->components([
@@ -294,6 +319,7 @@ class BlocksRelationManager extends RelationManager
         $isFaq = $this->isFaqSection();
         $isMobile = $this->isMobileSection();
         $isPlatform = $this->isPlatformSection();
+        $isHeader = $this->isHeaderSection();
         $isFooter = $this->isFooterSection();
         $isPricing = $this->isPricingSection();
 
@@ -374,6 +400,24 @@ class BlocksRelationManager extends RelationManager
                                     ->sortable(),
                             ])
                             ->defaultSort('sort_order')
+                    : ($isHeader
+                        ? $table
+                            ->columns([
+                                TextColumn::make('title')
+                                    ->label('Ссылка')
+                                    ->searchable()
+                                    ->limit(40),
+                                TextColumn::make('link')
+                                    ->label('URL')
+                                    ->limit(40),
+                                IconColumn::make('is_active')
+                                    ->label('Активна')
+                                    ->boolean(),
+                                TextColumn::make('sort_order')
+                                    ->label('Порядок')
+                                    ->sortable(),
+                            ])
+                            ->defaultSort('sort_order')
                     : ($isFooter
                         ? $table
                             ->columns([
@@ -416,16 +460,20 @@ class BlocksRelationManager extends RelationManager
                                         ->sortable(),
                                 ])
                                 ->defaultSort('sort_order')
-                            : LandingBlockResource::table($table))))));
+                            : LandingBlockResource::table($table)))))));
 
         return $table
-            ->modifyQueryUsing(function ($query) use ($isMobile, $isPlatform, $isFooter, $isPricing): void {
+            ->modifyQueryUsing(function ($query) use ($isMobile, $isPlatform, $isHeader, $isFooter, $isPricing): void {
                 if ($isMobile) {
                     $query->where('block_type', 'bullet');
                 }
 
                 if ($isPlatform) {
                     $query->where('block_type', 'card');
+                }
+
+                if ($isHeader) {
+                    $query->where('block_type', 'nav_link');
                 }
 
                 if ($isFooter) {
@@ -443,11 +491,12 @@ class BlocksRelationManager extends RelationManager
                         $isFaq => 'Добавить вопрос',
                         $isMobile => 'Добавить пункт',
                         $isPlatform => 'Добавить карточку',
+                        $isHeader => 'Добавить ссылку',
                         $isFooter => 'Добавить колонку',
                         $isPricing => 'Добавить тариф',
                         default => null,
                     })
-                    ->mutateFormDataUsing(function (array $data) use ($isQuiz, $isFaq, $isMobile, $isPlatform, $isFooter, $isPricing): array {
+                    ->mutateFormDataUsing(function (array $data) use ($isQuiz, $isFaq, $isMobile, $isPlatform, $isHeader, $isFooter, $isPricing): array {
                         $data['section_slug'] = $this->getOwnerRecord()->slug;
 
                         if ($isQuiz) {
@@ -464,6 +513,10 @@ class BlocksRelationManager extends RelationManager
 
                         if ($isPlatform) {
                             $data['block_type'] = 'card';
+                        }
+
+                        if ($isHeader) {
+                            $data['block_type'] = 'nav_link';
                         }
 
                         if ($isFooter) {
@@ -698,6 +751,11 @@ class BlocksRelationManager extends RelationManager
     protected function isPlatformSection(): bool
     {
         return $this->getOwnerRecord()->slug === 'platform';
+    }
+
+    protected function isHeaderSection(): bool
+    {
+        return $this->getOwnerRecord()->slug === 'header';
     }
 
     protected function isFooterSection(): bool
