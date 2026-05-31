@@ -88,6 +88,7 @@ final class LandingIcons
         'menu-dots' => 'Меню',
         'mail' => 'Email',
         'phone' => 'Телефон',
+        'tech-support' => 'Техподдержка',
     ];
 
     public static function resolve(?string $value): ?string
