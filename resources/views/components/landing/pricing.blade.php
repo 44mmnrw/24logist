@@ -27,7 +27,10 @@
                     @endif
                     <h3>{{ $plan->title }}</h3>
                     <p class="pricing-card__desc">{{ $plan->subtitle }}</p>
-                    <div class="pricing-card__price">{{ $plan->price }}</div>
+                    <div @class(['pricing-card__price', 'pricing-card__price--has-note' => filled($plan->description)])>{{ $plan->price }}</div>
+                    @if (filled($plan->description))
+                        <p class="pricing-card__price-note">{{ $plan->description }}</p>
+                    @endif
                     <ul>
                         @foreach ($plan->children->where('block_type', 'feature') as $feature)
                             <li>

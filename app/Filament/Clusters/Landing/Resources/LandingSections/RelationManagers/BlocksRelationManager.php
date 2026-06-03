@@ -211,6 +211,11 @@ class BlocksRelationManager extends RelationManager
                         ->label('Цена')
                         ->required()
                         ->maxLength(255),
+                    TextInput::make('description')
+                        ->label('Текст под ценой')
+                        ->maxLength(255)
+                        ->placeholder('В тариф включено 3 рабочих места')
+                        ->columnSpanFull(),
                     TextInput::make('tag')
                         ->label('Тег на карточке')
                         ->maxLength(255)
@@ -622,6 +627,7 @@ class BlocksRelationManager extends RelationManager
                                 'title' => $data['title'] ?? '',
                                 'subtitle' => $data['subtitle'] ?? null,
                                 'price' => $data['price'] ?? '',
+                                'description' => $data['description'] ?? null,
                                 'tag' => $data['tag'] ?? null,
                                 'button_text' => $data['button_text'] ?? null,
                                 'link' => $data['link'] ?? null,
@@ -721,6 +727,7 @@ class BlocksRelationManager extends RelationManager
                                 'title' => $data['title'] ?? $record->title,
                                 'subtitle' => $data['subtitle'] ?? $record->subtitle,
                                 'price' => $data['price'] ?? $record->price,
+                                'description' => $data['description'] ?? $record->description,
                                 'tag' => $data['tag'] ?? $record->tag,
                                 'button_text' => $data['button_text'] ?? $record->button_text,
                                 'link' => $data['link'] ?? $record->link,

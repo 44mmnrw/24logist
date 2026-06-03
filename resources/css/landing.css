@@ -617,6 +617,15 @@ body {
 .pricing-card h3 { font-size: 30px; line-height: 1; color: #0a0a0a; }
 .pricing-card__desc { margin-top: 28px; color: #45556c; font-size: 14px; line-height: 21px; min-height: 42px; }
 .pricing-card__price { margin-top: 36px; padding-bottom: 36px; border-bottom: 1px solid rgba(0, 0, 0, 0.1); font-size: 36px; line-height: 1; color: #0a0a0a; font-weight: 700; }
+.pricing-card__price--has-note { padding-bottom: 8px; border-bottom: none; }
+.pricing-card__price-note {
+    margin: 0;
+    padding-bottom: 36px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    font-size: 14px;
+    line-height: 1.4;
+    color: #62748e;
+}
 .pricing-card ul {
     margin-top: 24px;
     margin-inline: 0;

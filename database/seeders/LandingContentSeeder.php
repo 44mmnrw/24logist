@@ -321,10 +321,10 @@ class LandingContentSeeder extends Seeder
         ]);
 
         $plans = [
-            ['title' => 'Старт', 'subtitle' => 'Для малой команды и первых заявок', 'price' => 'от 2 900 ₽', 'button_text' => 'Подобрать тариф', 'link' => '#quiz', 'button_style' => 'ghost', 'features' => ['Базовые заказы', 'До 3 пользователей', 'Ключевые справочники', 'Поддержка по почте']],
-            ['title' => 'Профи', 'subtitle' => 'Для растущей логистики', 'price' => 'от 7 900 ₽', 'button_text' => 'Подобрать тариф', 'link' => '#quiz', 'button_style' => 'primary', 'is_highlighted' => true, 'tag' => 'Хит', 'features' => ['Полный цикл заказа', 'Водители и транспорт', 'Стандартные отчёты', 'Ссылка водителю']],
-            ['title' => 'Профи+', 'subtitle' => 'Несколько направлений и филиалов', 'price' => 'от 14 900 ₽', 'button_text' => 'Подобрать тариф', 'link' => '#quiz', 'button_style' => 'ghost', 'features' => ['Расширенные права', 'Больше интеграций', 'Приоритетная поддержка', 'Кастомные отчёты']],
-            ['title' => 'Корпорация', 'subtitle' => 'Индивидуально под компанию', 'price' => 'Запросить расчёт', 'button_text' => 'Связаться с нами', 'link' => '/pages/contacts', 'button_style' => 'ghost', 'features' => ['Индивидуальные лимиты', 'SSO и безопасность', 'SLA и онбординг', 'Выделенный менеджер']],
+            ['title' => 'Старт', 'subtitle' => 'Для малой команды и первых заявок', 'price' => 'от 2 900 ₽', 'description' => 'В тариф включено 3 рабочих места', 'button_text' => 'Подобрать тариф', 'link' => '#quiz', 'button_style' => 'ghost', 'features' => ['Базовые заказы', 'До 3 пользователей', 'Ключевые справочники', 'Поддержка по почте']],
+            ['title' => 'Профи', 'subtitle' => 'Для растущей логистики', 'price' => 'от 7 900 ₽', 'description' => 'В тариф включено 10 рабочих мест', 'button_text' => 'Подобрать тариф', 'link' => '#quiz', 'button_style' => 'primary', 'is_highlighted' => true, 'tag' => 'Хит', 'features' => ['Полный цикл заказа', 'Водители и транспорт', 'Стандартные отчёты', 'Ссылка водителю']],
+            ['title' => 'Профи+', 'subtitle' => 'Несколько направлений и филиалов', 'price' => 'от 14 900 ₽', 'description' => 'В тариф включено 25 рабочих мест', 'button_text' => 'Подобрать тариф', 'link' => '#quiz', 'button_style' => 'ghost', 'features' => ['Расширенные права', 'Больше интеграций', 'Приоритетная поддержка', 'Кастомные отчёты']],
+            ['title' => 'Корпорация', 'subtitle' => 'Индивидуально под компанию', 'price' => 'Запросить расчёт', 'description' => 'Количество мест по договору', 'button_text' => 'Связаться с нами', 'link' => '/pages/contacts', 'button_style' => 'ghost', 'features' => ['Индивидуальные лимиты', 'SSO и безопасность', 'SLA и онбординг', 'Выделенный менеджер']],
         ];
 
         foreach ($plans as $index => $plan) {
@@ -334,6 +334,7 @@ class LandingContentSeeder extends Seeder
                 'title' => $plan['title'],
                 'subtitle' => $plan['subtitle'],
                 'price' => $plan['price'],
+                'description' => $plan['description'] ?? null,
                 'tag' => $plan['tag'] ?? null,
                 'button_text' => $plan['button_text'],
                 'link' => $plan['link'] ?? null,
