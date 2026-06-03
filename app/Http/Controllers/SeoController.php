@@ -11,6 +11,7 @@ class SeoController extends Controller
     {
         return response($sitemap->robots(), 200, [
             'Content-Type' => 'text/plain; charset=UTF-8',
+            'Cache-Control' => 'public, max-age=3600',
         ]);
     }
 

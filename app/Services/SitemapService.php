@@ -11,17 +11,60 @@ final class SitemapService
 {
     private const CACHE_KEY = 'seo.sitemap.xml';
 
+    /** @var list<string> */
+    private const DISALLOWED_PATHS = [
+        '/admin',
+        '/admin/',
+        '/lw-',
+        '/livewire/',
+        '/leads/',
+        '/up',
+        '/storage/',
+        '/vendor/',
+        '/bootstrap/',
+    ];
+
     public function robots(): string
     {
+        $siteUrl = rtrim((string) config('app.url'), '/');
+        $sitemapUrl = $siteUrl.'/sitemap.xml';
+
         $lines = [
-            'User-agent: *',
-            'Disallow: /admin',
-            'Disallow: /admin/',
+            '# robots.txt — '.($siteUrl !== '' ? $siteUrl : '24logist.ru'),
             '',
-            'Sitemap: '.url('/sitemap.xml'),
         ];
 
+        foreach (['*', 'Yandex', 'Googlebot'] as $agent) {
+            $lines = array_merge($lines, $this->robotsBlock($agent));
+
+            if ($agent === 'Yandex') {
+                $lines[] = 'Clean-param: utm_source&utm_medium&utm_campaign&utm_term&utm_content&yclid&gclid&fbclid&_openstat';
+            }
+
+            $lines[] = '';
+        }
+
+        if ($siteUrl !== '') {
+            $lines[] = 'Host: '.$siteUrl;
+        }
+
+        $lines[] = 'Sitemap: '.$sitemapUrl;
+
         return implode("\n", $lines)."\n";
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function robotsBlock(string $agent): array
+    {
+        $lines = ['User-agent: '.$agent, 'Allow: /'];
+
+        foreach (self::DISALLOWED_PATHS as $path) {
+            $lines[] = 'Disallow: '.$path;
+        }
+
+        return $lines;
     }
 
     public function xml(): string
@@ -44,7 +87,7 @@ final class SitemapService
         $homeLastmod = LandingSection::query()->max('updated_at');
 
         $urls[] = [
-            'loc' => url('/'),
+            'loc' => rtrim((string) config('app.url'), '/').'/',
             'lastmod' => $this->formatLastmod($homeLastmod),
             'changefreq' => 'weekly',
             'priority' => '1.0',

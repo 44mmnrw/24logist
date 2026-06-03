@@ -18,6 +18,13 @@ fi
 echo "[sync] app=${APP_DIR}"
 echo "[sync] web=${WEB_DIR}"
 
+for stale in robots.txt sitemap.xml; do
+  if [[ -f "${WEB_DIR}/${stale}" ]]; then
+    rm -f "${WEB_DIR}/${stale}"
+    echo "[sync] removed stale ${stale} (served by Laravel)"
+  fi
+done
+
 for name in build css js fonts; do
   if [[ ! -d "${APP_DIR}/public/${name}" ]]; then
     continue
