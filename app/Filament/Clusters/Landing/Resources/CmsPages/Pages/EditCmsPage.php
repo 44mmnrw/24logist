@@ -4,6 +4,7 @@ namespace App\Filament\Clusters\Landing\Resources\CmsPages\Pages;
 
 use App\Filament\Clusters\Landing\Resources\CmsPages\CmsPageResource;
 use App\Services\CmsPageService;
+use App\Services\SitemapService;
 use Filament\Resources\Pages\EditRecord;
 
 class EditCmsPage extends EditRecord
@@ -22,10 +23,12 @@ class EditCmsPage extends EditRecord
     protected function afterSave(): void
     {
         app(CmsPageService::class)->clearCache($this->record, $this->originalSlug);
+        app(SitemapService::class)->clearCache();
     }
 
     protected function afterDelete(): void
     {
         app(CmsPageService::class)->clearCache(null, $this->record->slug);
+        app(SitemapService::class)->clearCache();
     }
 }

@@ -4,6 +4,7 @@ namespace App\Filament\Clusters\Landing\Resources\LandingSections\Pages;
 
 use App\Filament\Clusters\Landing\Resources\LandingSections\LandingSectionResource;
 use App\Services\LandingPageService;
+use App\Services\SitemapService;
 use App\Support\LandingFooterForm;
 use App\Support\LandingHeroCarouselForm;
 use App\Support\LandingMobileForm;
@@ -49,5 +50,6 @@ class EditLandingSection extends EditRecord
     protected function afterSave(): void
     {
         app(LandingPageService::class)->clearCache();
+        app(SitemapService::class)->clearCache();
     }
 }

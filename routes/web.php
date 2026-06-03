@@ -3,7 +3,11 @@
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LandingLeadController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\SeoController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/robots.txt', [SeoController::class, 'robots'])->name('seo.robots');
+Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');
 
 Route::get('/', LandingController::class);
 
