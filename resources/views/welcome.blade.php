@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <x-csrf-meta />
     <title>ЛогистРу</title>
-    <link rel="icon" href="{{ asset('images/logo.svg') }}" type="image/svg+xml">
+    <x-site.favicon />
     <x-fonts.preload />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>

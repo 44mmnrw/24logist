@@ -7,6 +7,7 @@ use App\Filament\Clusters\Landing\Resources\CmsPages\CmsPageResource;
 use App\Filament\Clusters\Landing\Resources\LandingBlocks\LandingBlockResource;
 use App\Filament\Clusters\Landing\Resources\LandingLeads\LandingLeadResource;
 use App\Filament\Clusters\Landing\Resources\LandingSections\LandingSectionResource;
+use App\Filament\Clusters\Landing\Resources\SiteSettings\GeneralSiteSettingResource;
 use App\Filament\Clusters\Landing\Resources\SiteSettings\SiteSettingResource;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -48,6 +49,7 @@ class AdminPanelProvider extends PanelProvider
                 LandingSectionResource::class,
                 CmsPageResource::class,
                 LandingLeadResource::class,
+                GeneralSiteSettingResource::class,
                 SiteSettingResource::class,
                 LandingBlockResource::class,
             ])

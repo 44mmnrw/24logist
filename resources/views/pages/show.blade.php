@@ -7,7 +7,7 @@
     @if ($page->meta_description)
         <meta name="description" content="{{ $page->meta_description }}">
     @endif
-    <link rel="icon" href="{{ asset('images/logo.svg') }}" type="image/svg+xml">
+    <x-site.favicon />
     <x-fonts.preload />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>

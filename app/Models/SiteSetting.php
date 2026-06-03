@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Support\LandingMedia;
 use Illuminate\Database\Eloquent\Model;
 
 class SiteSetting extends Model
 {
     protected $fillable = [
+        'favicon_path',
         'yandex_metrika_enabled',
         'yandex_metrika_counter_id',
         'yandex_metrika_webvisor',
@@ -38,5 +40,12 @@ class SiteSetting extends Model
                 'yandex_metrika_accurate_track_bounce' => true,
             ],
         );
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (self $settings): void {
+            $settings->favicon_path = LandingMedia::normalizePath($settings->favicon_path);
+        });
     }
 }
