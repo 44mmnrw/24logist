@@ -83,7 +83,7 @@ class GeneralSiteSettingResource extends Resource
                     ->openable()
                     ->downloadable()
                     ->getUploadedFileUsing(static::uploadPreview(...))
-                    ->helperText('Рекомендуется 1200×630 px, PNG или JPG до 4 МБ. Пусто — logo.svg.')
+                    ->helperText('Рекомендуется 1200×630 px, PNG или JPG до 4 МБ. Пусто — og-hero.png из Hero (php artisan og:generate-hero-png) или первый слайд баннера.')
                     ->columnSpanFull(),
             ]);
     }

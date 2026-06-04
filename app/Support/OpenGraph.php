@@ -38,7 +38,9 @@ final class OpenGraph
             title: $title,
             description: $description,
             url: self::absoluteUrl('/'),
-            imagePath: $settings->og_image_path,
+            imagePath: filled($settings->og_image_path)
+                ? $settings->og_image_path
+                : self::defaultHeroImagePath(),
         );
     }
 
@@ -142,7 +144,18 @@ final class OpenGraph
         $path = LandingMedia::normalizePath($path);
 
         if ($path === null) {
+            $hero = app(LandingPageService::class)->section('hero');
+            $slides = $hero !== null ? LandingHeroCarousel::slides($hero) : [];
+
+            if ($slides !== [] && filled($slides[0]['url'] ?? null)) {
+                return self::absoluteUrl((string) $slides[0]['url']);
+            }
+
             return self::absoluteUrl(asset('images/logo.svg'));
+        }
+
+        if ($path === OpenGraphHeroCard::defaultImagePath() && ! OpenGraphHeroCard::defaultImageExists()) {
+            return self::absoluteImageUrl(null);
         }
 
         $url = LandingMedia::url($path);
@@ -152,5 +165,14 @@ final class OpenGraph
         }
 
         return self::absoluteUrl($url);
+    }
+
+    private static function defaultHeroImagePath(): ?string
+    {
+        if (OpenGraphHeroCard::defaultImageExists()) {
+            return OpenGraphHeroCard::defaultImagePath();
+        }
+
+        return null;
     }
 }
