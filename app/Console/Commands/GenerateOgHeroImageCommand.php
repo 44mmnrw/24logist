@@ -52,7 +52,7 @@ class GenerateOgHeroImageCommand extends Command
 
         if (! $process->isSuccessful()) {
             $this->newLine();
-            $this->warn('Install once: npm install puppeteer --save-dev');
+            $this->warn('Локально один раз: npm install puppeteer --no-save');
             $this->warn('Or open in browser: '.url('/__og/hero-card').' and save screenshot 1200×630.');
 
             return self::FAILURE;
