@@ -9,6 +9,9 @@ class SiteSetting extends Model
 {
     protected $fillable = [
         'favicon_path',
+        'og_title',
+        'og_description',
+        'og_image_path',
         'yandex_metrika_enabled',
         'yandex_metrika_counter_id',
         'yandex_metrika_webvisor',
@@ -46,6 +49,7 @@ class SiteSetting extends Model
     {
         static::saving(function (self $settings): void {
             $settings->favicon_path = LandingMedia::normalizePath($settings->favicon_path);
+            $settings->og_image_path = LandingMedia::normalizePath($settings->og_image_path);
         });
     }
 }

@@ -3,10 +3,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $page->displayTitle() }} — ЛогистРу</title>
-    @if ($page->meta_description)
-        <meta name="description" content="{{ $page->meta_description }}">
-    @endif
+    <x-csrf-meta />
+    @php
+        $og = \App\Support\OpenGraph::forPage($page);
+    @endphp
+    <title>{{ $og['title'] }}</title>
+    <x-seo.open-graph :page="$page" />
     <x-site.favicon />
     <x-fonts.preload />
     @vite(['resources/css/app.css', 'resources/js/app.js'])

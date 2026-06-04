@@ -4,7 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <x-csrf-meta />
-    <title>ЛогистРу</title>
+    @php
+        $og = \App\Support\OpenGraph::forLanding($landing);
+    @endphp
+    <title>{{ $og['title'] }}</title>
+    <x-seo.open-graph :landing="$landing" />
     <x-site.favicon />
     <x-fonts.preload />
     @vite(['resources/css/app.css', 'resources/js/app.js'])

@@ -55,6 +55,34 @@ class GeneralSiteSettingResource extends Resource
                     ->getUploadedFileUsing(static::uploadPreview(...))
                     ->helperText('Иконка вкладки браузера. SVG, PNG, ICO или WebP до 1 МБ. Пусто — используется images/logo.svg.')
                     ->columnSpanFull(),
+                TextInput::make('og_title')
+                    ->label('Open Graph — заголовок (главная)')
+                    ->maxLength(255)
+                    ->placeholder('ЛогистРу — платформа для логистики')
+                    ->helperText('Для главной и превью в соцсетях. Пусто — заголовок секции Hero.')
+                    ->columnSpanFull(),
+                Textarea::make('og_description')
+                    ->label('Open Graph — описание (главная)')
+                    ->rows(3)
+                    ->maxLength(500)
+                    ->helperText('Пусто — подзаголовок или описание секции Hero.')
+                    ->columnSpanFull(),
+                FileUpload::make('og_image_path')
+                    ->label('Open Graph — изображение')
+                    ->disk('public')
+                    ->directory('site/og')
+                    ->visibility('public')
+                    ->image()
+                    ->imagePreviewHeight('120')
+                    ->maxFiles(1)
+                    ->maxSize(4096)
+                    ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
+                    ->fetchFileInformation(false)
+                    ->openable()
+                    ->downloadable()
+                    ->getUploadedFileUsing(static::uploadPreview(...))
+                    ->helperText('Рекомендуется 1200×630 px, PNG или JPG до 4 МБ. Пусто — logo.svg.')
+                    ->columnSpanFull(),
             ]);
     }
 

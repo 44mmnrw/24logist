@@ -27,8 +27,10 @@ class EditGeneralSiteSetting extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        if (filled($data['favicon_path'] ?? null)) {
-            $data['favicon_path'] = [(string) $data['favicon_path']];
+        foreach (['favicon_path', 'og_image_path'] as $field) {
+            if (filled($data[$field] ?? null)) {
+                $data[$field] = [(string) $data[$field]];
+            }
         }
 
         return $data;
@@ -36,7 +38,8 @@ class EditGeneralSiteSetting extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $data['favicon_path'] = $this->persistFavicon($data['favicon_path'] ?? null);
+        $data['favicon_path'] = $this->persistUpload($data['favicon_path'] ?? null, 'site/favicon');
+        $data['og_image_path'] = $this->persistUpload($data['og_image_path'] ?? null, 'site/og');
 
         return $data;
     }
@@ -46,15 +49,15 @@ class EditGeneralSiteSetting extends EditRecord
         app(SiteSettingsService::class)->clearCache();
     }
 
-    private function persistFavicon(mixed $state): ?string
+    private function persistUpload(mixed $state, string $directory): ?string
     {
         if ($state instanceof TemporaryUploadedFile) {
-            return $state->store('site/favicon', 'public');
+            return $state->store($directory, 'public');
         }
 
         if (is_array($state)) {
             foreach ($state as $item) {
-                $stored = $this->persistFavicon($item);
+                $stored = $this->persistUpload($item, $directory);
 
                 if ($stored !== null) {
                     return $stored;

@@ -211,6 +211,15 @@ class CmsPageResource extends Resource
                     ->label('Meta description')
                     ->rows(3)
                     ->maxLength(500),
+                TextInput::make('extra.og_title')
+                    ->label('Open Graph — заголовок')
+                    ->maxLength(255)
+                    ->helperText('Пусто — meta title страницы'),
+                Textarea::make('extra.og_description')
+                    ->label('Open Graph — описание')
+                    ->rows(2)
+                    ->maxLength(500)
+                    ->helperText('Пусто — meta description'),
                 Toggle::make('is_published')
                     ->label('Опубликована')
                     ->default(true),
