@@ -25,7 +25,7 @@ for stale in robots.txt sitemap.xml; do
   fi
 done
 
-for name in build css js fonts; do
+for name in build css js fonts images; do
   if [[ ! -d "${APP_DIR}/public/${name}" ]]; then
     continue
   fi

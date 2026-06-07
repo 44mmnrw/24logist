@@ -90,6 +90,9 @@ final class OpenGraph
      *     description: ?string,
      *     url: string,
      *     image: ?string,
+     *     image_width: ?int,
+     *     image_height: ?int,
+     *     image_type: ?string,
      *     type: string,
      *     site_name: string,
      *     locale: string
@@ -97,11 +100,17 @@ final class OpenGraph
      */
     private static function build(string $title, ?string $description, string $url, mixed $imagePath): array
     {
+        $imageUrl = self::absoluteImageUrl($imagePath);
+        $imageMeta = self::imageMeta($imagePath, $imageUrl);
+
         return [
             'title' => $title,
             'description' => $description,
             'url' => self::absoluteUrl($url),
-            'image' => self::absoluteImageUrl($imagePath),
+            'image' => $imageUrl,
+            'image_width' => $imageMeta['width'],
+            'image_height' => $imageMeta['height'],
+            'image_type' => $imageMeta['type'],
             'type' => 'website',
             'site_name' => self::SITE_NAME,
             'locale' => 'ru_RU',
@@ -151,7 +160,7 @@ final class OpenGraph
                 return self::absoluteUrl((string) $slides[0]['url']);
             }
 
-            return self::absoluteUrl(asset('images/logo.svg'));
+            return null;
         }
 
         if ($path === OpenGraphHeroCard::defaultImagePath() && ! OpenGraphHeroCard::defaultImageExists()) {
@@ -161,10 +170,61 @@ final class OpenGraph
         $url = LandingMedia::url($path);
 
         if ($url === null) {
-            return self::absoluteUrl(asset('images/logo.svg'));
+            return null;
         }
 
         return self::absoluteUrl($url);
+    }
+
+    /**
+     * @return array{width: ?int, height: ?int, type: ?string}
+     */
+    private static function imageMeta(mixed $imagePath, ?string $imageUrl): array
+    {
+        $file = self::resolveImageFile($imagePath);
+
+        if ($file === null || ! is_file($file)) {
+            return ['width' => null, 'height' => null, 'type' => null];
+        }
+
+        $info = @getimagesize($file);
+
+        if ($info === false) {
+            return ['width' => null, 'height' => null, 'type' => null];
+        }
+
+        $mime = $info['mime'] ?? null;
+
+        if (! is_string($mime) || ! in_array($mime, ['image/jpeg', 'image/png', 'image/gif', 'image/webp'], true)) {
+            $mime = null;
+        }
+
+        return [
+            'width' => isset($info[0]) ? (int) $info[0] : null,
+            'height' => isset($info[1]) ? (int) $info[1] : null,
+            'type' => $mime,
+        ];
+    }
+
+    private static function resolveImageFile(mixed $imagePath): ?string
+    {
+        $path = LandingMedia::normalizePath($imagePath);
+
+        if ($path === null) {
+            return null;
+        }
+
+        if (str_starts_with($path, 'images/')) {
+            $file = public_path($path);
+
+            return is_file($file) ? $file : null;
+        }
+
+        if (\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
+            return \Illuminate\Support\Facades\Storage::disk('public')->path($path);
+        }
+
+        return null;
     }
 
     private static function defaultHeroImagePath(): ?string

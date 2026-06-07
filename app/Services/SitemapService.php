@@ -44,6 +44,10 @@ final class SitemapService
             $lines[] = '';
         }
 
+        foreach (['TelegramBot', 'Twitterbot', 'facebookexternalhit', 'LinkedInBot', 'Slackbot'] as $agent) {
+            $lines = array_merge($lines, ['User-agent: '.$agent, 'Allow: /', '']);
+        }
+
         if ($siteUrl !== '') {
             $lines[] = 'Host: '.$siteUrl;
         }
@@ -63,6 +67,11 @@ final class SitemapService
         foreach (self::DISALLOWED_PATHS as $path) {
             $lines[] = 'Disallow: '.$path;
         }
+
+        // Open Graph / link-preview crawlers must fetch public OG assets under /storage/.
+        $lines[] = 'Allow: /images/';
+        $lines[] = 'Allow: /storage/site/og/';
+        $lines[] = 'Allow: /storage/landing/';
 
         return $lines;
     }
