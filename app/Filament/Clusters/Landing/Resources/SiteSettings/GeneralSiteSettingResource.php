@@ -55,7 +55,7 @@ class GeneralSiteSettingResource extends Resource
                     ->openable()
                     ->downloadable()
                     ->getUploadedFileUsing(static::uploadPreview(...))
-                    ->helperText('Иконка вкладки браузера. SVG, PNG, ICO или WebP до 1 МБ. Пусто — используется images/logo.svg.')
+                    ->helperText('Иконка вкладки браузера. SVG, PNG, ICO или WebP до 1 МБ. Пусто — используется images/favicon.svg.')
                     ->columnSpanFull(),
                 FileUpload::make('apple_touch_icon_path')
                     ->label('Apple Touch Icon (iOS)')
@@ -73,7 +73,7 @@ class GeneralSiteSettingResource extends Resource
                     ->openable()
                     ->downloadable()
                     ->getUploadedFileUsing(static::uploadPreview(...))
-                    ->helperText('PNG или JPEG 180×180 px для «Добавить на экран» в iOS. Пусто — генерируется из Favicon (PNG) или images/apple-touch-icon.png.')
+                    ->helperText('PNG или JPEG 180×180 px для «Добавить на экран» в iOS. Пусто — генерируется из images/favicon.svg.')
                     ->columnSpanFull(),
                 TextInput::make('og_title')
                     ->label('Open Graph — заголовок (главная)')

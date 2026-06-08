@@ -25,13 +25,9 @@ final class PwaIcons
             return null;
         }
 
-        if (! extension_loaded('gd')) {
-            return self::fallbackPath($size);
-        }
-
         $source = SiteIconRasterizer::sourceFromSettings();
         $cache = self::cachePath($size);
-        $sourceMtime = $source['mtime'] ?? 0;
+        $sourceMtime = max($source['mtime'] ?? 0, SiteIconRasterizer::brandSvgMtime());
 
         if (is_file($cache) && filemtime($cache) >= $sourceMtime) {
             return $cache;
@@ -43,17 +39,15 @@ final class PwaIcons
             return $cache;
         }
 
+        if (SiteIconRasterizer::rasterizeBrandSvg($cache, $size)) {
+            return $cache;
+        }
+
         $fallback = self::fallbackPath($size);
 
         if ($fallback !== null) {
             copy($fallback, $cache);
 
-            return $cache;
-        }
-
-        $appleCache = AppleTouchIcon::ensureCached();
-
-        if ($appleCache !== null && SiteIconRasterizer::rasterizeToSquare($appleCache, $cache, $size)) {
             return $cache;
         }
 

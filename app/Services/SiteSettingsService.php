@@ -75,13 +75,13 @@ class SiteSettingsService
 
         if ($path === null) {
             return [
-                'url' => $this->absoluteUrl(asset('images/logo.svg')),
+                'url' => $this->absoluteUrl(asset('images/favicon.svg')),
                 'root_url' => $rootUrl,
                 'type' => 'image/svg+xml',
             ];
         }
 
-        $url = LandingMedia::url($path) ?? asset('images/logo.svg');
+        $url = LandingMedia::url($path) ?? asset('images/favicon.svg');
         $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
 
         $type = match ($extension) {

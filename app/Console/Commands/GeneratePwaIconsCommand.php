@@ -11,31 +11,18 @@ class GeneratePwaIconsCommand extends Command
 {
     protected $signature = 'icons:generate-pwa';
 
-    protected $description = 'Generate fallback PWA icons (192×192 and 512×512)';
+    protected $description = 'Generate PWA icons (192×192 and 512×512) from public/images/favicon.svg';
 
     public function handle(): int
     {
-        if (! extension_loaded('gd')) {
-            $this->error('GD extension is required.');
-
-            return self::FAILURE;
-        }
-
-        $source = $this->resolveSourcePath();
-
-        if ($source === null) {
-            $this->error('No source image found. Run icons:generate-apple-touch first or upload PNG in admin.');
-
-            return self::FAILURE;
-        }
-
         File::ensureDirectoryExists(public_path('images'));
 
         foreach (PwaIcons::SIZES as $size) {
             $output = public_path('images/icon-'.$size.'.png');
 
-            if (! SiteIconRasterizer::rasterizeToSquare($source, $output, $size)) {
+            if (! SiteIconRasterizer::rasterizeBrandSvg($output, $size)) {
                 $this->error('Failed: '.$output);
+                $this->warn('Run once: npm install sharp --save-dev');
 
                 return self::FAILURE;
             }
@@ -44,18 +31,5 @@ class GeneratePwaIconsCommand extends Command
         }
 
         return self::SUCCESS;
-    }
-
-    private function resolveSourcePath(): ?string
-    {
-        $apple = public_path('images/apple-touch-icon.png');
-
-        if (is_file($apple)) {
-            return $apple;
-        }
-
-        $ogHero = public_path('images/og-hero.png');
-
-        return is_file($ogHero) ? $ogHero : null;
     }
 }

@@ -25,7 +25,7 @@ class FaviconController extends Controller
             );
         }
 
-        $fallback = public_path('images/logo.svg');
+        $fallback = public_path('images/favicon.svg');
 
         if (! is_file($fallback)) {
             abort(404);

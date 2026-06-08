@@ -15,13 +15,9 @@ final class AppleTouchIcon
 
     public static function ensureCached(): ?string
     {
-        if (! extension_loaded('gd')) {
-            return self::fallbackPath();
-        }
-
         $source = SiteIconRasterizer::sourceFromSettings();
         $cache = self::cachePath();
-        $sourceMtime = $source['mtime'] ?? 0;
+        $sourceMtime = max($source['mtime'] ?? 0, SiteIconRasterizer::brandSvgMtime());
 
         if (is_file($cache) && filemtime($cache) >= $sourceMtime) {
             return $cache;
@@ -30,6 +26,10 @@ final class AppleTouchIcon
         File::ensureDirectoryExists(dirname($cache));
 
         if ($source !== null && SiteIconRasterizer::rasterizeToSquare($source['path'], $cache, self::SIZE)) {
+            return $cache;
+        }
+
+        if (SiteIconRasterizer::rasterizeBrandSvg($cache, self::SIZE)) {
             return $cache;
         }
 
