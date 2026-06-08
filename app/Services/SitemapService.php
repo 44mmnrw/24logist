@@ -71,6 +71,7 @@ final class SitemapService
         // Open Graph / link-preview crawlers must fetch public OG assets under /storage/.
         $lines[] = 'Allow: /images/';
         $lines[] = 'Allow: /storage/site/og/';
+        $lines[] = 'Allow: /storage/site/favicon/';
         $lines[] = 'Allow: /storage/landing/';
 
         return $lines;

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FaviconController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LandingLeadController;
 use App\Http\Controllers\PageController;
@@ -8,6 +9,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/__og/hero-card', \App\Http\Controllers\OgHeroCardController::class)
     ->name('og.hero.card');
+
+Route::get('/favicon.ico', FaviconController::class)->name('favicon');
 
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('seo.robots');
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');

@@ -66,15 +66,17 @@ class SiteSettingsService
     }
 
     /**
-     * @return array{url: string, type: string}
+     * @return array{url: string, root_url: string, type: string}
      */
     public function favicon(): array
     {
         $path = LandingMedia::normalizePath($this->get()->favicon_path);
+        $rootUrl = $this->absoluteUrl(route('favicon', absolute: false));
 
         if ($path === null) {
             return [
-                'url' => asset('images/logo.svg'),
+                'url' => $this->absoluteUrl(asset('images/logo.svg')),
+                'root_url' => $rootUrl,
                 'type' => 'image/svg+xml',
             ];
         }
@@ -86,13 +88,26 @@ class SiteSettingsService
             'svg' => 'image/svg+xml',
             'png' => 'image/png',
             'ico' => 'image/x-icon',
+            'gif' => 'image/gif',
+            'jpeg', 'jpg' => 'image/jpeg',
+            'bmp' => 'image/bmp',
             'webp' => 'image/webp',
             default => 'image/png',
         };
 
         return [
-            'url' => $url,
+            'url' => $this->absoluteUrl($url),
+            'root_url' => $rootUrl,
             'type' => $type,
         ];
+    }
+
+    private function absoluteUrl(string $url): string
+    {
+        if (str_starts_with($url, 'http://') || str_starts_with($url, 'https://')) {
+            return $url;
+        }
+
+        return rtrim((string) config('app.url'), '/').'/'.ltrim($url, '/');
     }
 }

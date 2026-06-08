@@ -35,8 +35,15 @@ for name in build css js fonts images; do
   echo "[sync] ${name}/ OK"
 done
 
-if [[ -f "${APP_DIR}/public/favicon.ico" ]]; then
+# Empty favicon.ico in web root blocks Laravel route and breaks Yandex indexing.
+if [[ -f "${WEB_DIR}/favicon.ico" ]] && [[ ! -s "${WEB_DIR}/favicon.ico" ]]; then
+  rm -f "${WEB_DIR}/favicon.ico"
+  echo "[sync] removed empty favicon.ico (served by Laravel /favicon.ico)"
+fi
+
+if [[ -f "${APP_DIR}/public/favicon.ico" ]] && [[ -s "${APP_DIR}/public/favicon.ico" ]]; then
   cp -f "${APP_DIR}/public/favicon.ico" "${WEB_DIR}/favicon.ico"
+  echo "[sync] favicon.ico OK"
 fi
 
 ln -sfn "${APP_DIR}/storage/app/public" "${WEB_DIR}/storage"
