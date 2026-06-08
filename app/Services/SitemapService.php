@@ -72,6 +72,7 @@ final class SitemapService
         $lines[] = 'Allow: /images/';
         $lines[] = 'Allow: /storage/site/og/';
         $lines[] = 'Allow: /storage/site/favicon/';
+        $lines[] = 'Allow: /storage/site/apple-touch-icon/';
         $lines[] = 'Allow: /storage/landing/';
 
         return $lines;

@@ -57,6 +57,24 @@ class GeneralSiteSettingResource extends Resource
                     ->getUploadedFileUsing(static::uploadPreview(...))
                     ->helperText('Иконка вкладки браузера. SVG, PNG, ICO или WebP до 1 МБ. Пусто — используется images/logo.svg.')
                     ->columnSpanFull(),
+                FileUpload::make('apple_touch_icon_path')
+                    ->label('Apple Touch Icon (iOS)')
+                    ->disk('public')
+                    ->directory('site/apple-touch-icon')
+                    ->visibility('public')
+                    ->imagePreviewHeight('64')
+                    ->maxFiles(1)
+                    ->maxSize(512)
+                    ->acceptedFileTypes([
+                        'image/png',
+                        'image/jpeg',
+                    ])
+                    ->fetchFileInformation(false)
+                    ->openable()
+                    ->downloadable()
+                    ->getUploadedFileUsing(static::uploadPreview(...))
+                    ->helperText('PNG или JPEG 180×180 px для «Добавить на экран» в iOS. Пусто — генерируется из Favicon (PNG) или images/apple-touch-icon.png.')
+                    ->columnSpanFull(),
                 TextInput::make('og_title')
                     ->label('Open Graph — заголовок (главная)')
                     ->maxLength(255)

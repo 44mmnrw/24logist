@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\AppleTouchIconController;
 use App\Http\Controllers\FaviconController;
+use App\Http\Controllers\ManifestController;
+use App\Http\Controllers\PwaIconController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LandingLeadController;
 use App\Http\Controllers\PageController;
@@ -11,6 +14,13 @@ Route::get('/__og/hero-card', \App\Http\Controllers\OgHeroCardController::class)
     ->name('og.hero.card');
 
 Route::get('/favicon.ico', FaviconController::class)->name('favicon');
+Route::get('/apple-touch-icon.png', AppleTouchIconController::class)->name('apple-touch-icon');
+Route::get('/apple-touch-icon-precomposed.png', AppleTouchIconController::class);
+
+Route::get('/site.webmanifest', ManifestController::class)->name('manifest');
+Route::get('/icons/icon-{size}.png', PwaIconController::class)
+    ->whereNumber('size')
+    ->where('size', '192|512');
 
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('seo.robots');
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');
