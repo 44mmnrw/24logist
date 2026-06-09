@@ -88,6 +88,7 @@ final class LandingIcons
         'menu-dots' => 'Меню',
         'mail' => 'Email',
         'phone' => 'Телефон',
+        'home' => 'Главная',
         'tech-support' => 'Техподдержка',
     ];
 

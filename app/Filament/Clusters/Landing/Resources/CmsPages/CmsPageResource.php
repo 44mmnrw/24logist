@@ -5,11 +5,14 @@ namespace App\Filament\Clusters\Landing\Resources\CmsPages;
 use App\Filament\Clusters\Landing\Resources\CmsPages\Pages\CreateCmsPage;
 use App\Filament\Clusters\Landing\Resources\CmsPages\Pages\EditCmsPage;
 use App\Filament\Clusters\Landing\Resources\CmsPages\Pages\ListCmsPages;
+use App\Support\FilamentUploadPreview;
 use App\Models\CmsPage;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
@@ -64,6 +67,67 @@ class CmsPageResource extends Resource
                     ->maxLength(255)
                     ->unique(ignoreRecord: true)
                     ->helperText('Страница откроется по адресу /pages/slug'),
+                Placeholder::make('seo_section')
+                    ->label('SEO и мета-теги')
+                    ->content('Title, description, Open Graph и индексация для поисковиков и соцсетей.')
+                    ->columnSpanFull(),
+                TextInput::make('meta_title')
+                    ->label('Meta title')
+                    ->maxLength(70)
+                    ->helperText('Тег <title>. Если пусто — заголовок страницы. Рекомендуется до 60–70 символов.'),
+                Textarea::make('meta_description')
+                    ->label('Meta description')
+                    ->rows(3)
+                    ->maxLength(500)
+                    ->helperText('Описание в поиске и соцсетях. Рекомендуется 120–160 символов.')
+                    ->columnSpanFull(),
+                Textarea::make('extra.meta_keywords')
+                    ->label('Meta keywords (страница)')
+                    ->rows(2)
+                    ->maxLength(500)
+                    ->helperText('Через запятую. Пусто — общие keywords из настроек сайта.')
+                    ->columnSpanFull(),
+                Select::make('extra.meta_robots')
+                    ->label('Robots')
+                    ->options([
+                        'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' => 'index, follow (по умолчанию)',
+                        'noindex, nofollow' => 'noindex, nofollow',
+                        'noindex, follow' => 'noindex, follow',
+                    ])
+                    ->placeholder('index, follow (по умолчанию)')
+                    ->native(false),
+                TextInput::make('extra.canonical_url')
+                    ->label('Canonical URL (переопределение)')
+                    ->maxLength(500)
+                    ->placeholder('https://www.24logist.ru/pages/example')
+                    ->helperText('Обычно оставьте пустым — canonical формируется автоматически.')
+                    ->columnSpanFull(),
+                TextInput::make('extra.og_title')
+                    ->label('Open Graph — заголовок')
+                    ->maxLength(255)
+                    ->helperText('Пусто — meta title страницы'),
+                Textarea::make('extra.og_description')
+                    ->label('Open Graph — описание')
+                    ->rows(2)
+                    ->maxLength(500)
+                    ->helperText('Пусто — meta description')
+                    ->columnSpanFull(),
+                FileUpload::make('extra.og_image_path')
+                    ->label('Open Graph — изображение')
+                    ->disk('public')
+                    ->directory('site/og/pages')
+                    ->visibility('public')
+                    ->image()
+                    ->imagePreviewHeight('120')
+                    ->maxFiles(1)
+                    ->maxSize(4096)
+                    ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
+                    ->fetchFileInformation(false)
+                    ->openable()
+                    ->downloadable()
+                    ->getUploadedFileUsing(static::uploadPreview(...))
+                    ->helperText('1200×630 px. Пусто — изображение из настроек сайта.')
+                    ->columnSpanFull(),
                 RichEditor::make('body')
                     ->label('Содержимое')
                     ->columnSpanFull(),
@@ -203,23 +267,6 @@ class CmsPageResource extends Resource
                     ->maxLength(255)
                     ->default('политикой конфиденциальности')
                     ->visible(fn (Get $get): bool => $get('slug') === 'contacts'),
-                TextInput::make('meta_title')
-                    ->label('Meta title')
-                    ->maxLength(255)
-                    ->helperText('Если пусто — используется заголовок страницы'),
-                Textarea::make('meta_description')
-                    ->label('Meta description')
-                    ->rows(3)
-                    ->maxLength(500),
-                TextInput::make('extra.og_title')
-                    ->label('Open Graph — заголовок')
-                    ->maxLength(255)
-                    ->helperText('Пусто — meta title страницы'),
-                Textarea::make('extra.og_description')
-                    ->label('Open Graph — описание')
-                    ->rows(2)
-                    ->maxLength(500)
-                    ->helperText('Пусто — meta description'),
                 Toggle::make('is_published')
                     ->label('Опубликована')
                     ->default(true),
@@ -279,5 +326,14 @@ class CmsPageResource extends Resource
             'create' => CreateCmsPage::route('/create'),
             'edit' => EditCmsPage::route('/{record}/edit'),
         ];
+    }
+
+    /**
+     * @param  string|array<string, string>|null  $storedFileNames
+     * @return array{name: string, size: int, type: ?string, url: ?string}|null
+     */
+    protected static function uploadPreview(FileUpload $component, string $file, string|array|null $storedFileNames): ?array
+    {
+        return FilamentUploadPreview::resolve($component, $file, $storedFileNames);
     }
 }

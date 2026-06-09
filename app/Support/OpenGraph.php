@@ -10,25 +10,23 @@ final class OpenGraph
 {
     public const SITE_NAME = 'ЛогистРу';
 
+    public const ROBOTS_INDEX = 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+
+    public const ROBOTS_NOINDEX = 'noindex, nofollow';
+
     /**
-     * @return array{
-     *     title: string,
-     *     description: ?string,
-     *     url: string,
-     *     image: ?string,
-     *     type: string,
-     *     site_name: string,
-     *     locale: string
-     * }
+     * @return array<string, mixed>
      */
     public static function forLanding(?LandingPageService $landing = null): array
     {
         $settings = app(SiteSettingsService::class)->get();
         $hero = $landing?->section('hero');
 
-        $title = filled($settings->og_title)
-            ? (string) $settings->og_title
-            : self::joinTitle($hero?->title ?: self::SITE_NAME);
+        $title = filled($settings->seo_meta_title)
+            ? (string) $settings->seo_meta_title
+            : (filled($settings->og_title)
+                ? (string) $settings->og_title
+                : self::joinTitle($hero?->title ?: self::SITE_NAME));
 
         $description = filled($settings->og_description)
             ? (string) $settings->og_description
@@ -41,19 +39,29 @@ final class OpenGraph
             imagePath: filled($settings->og_image_path)
                 ? $settings->og_image_path
                 : self::defaultHeroImagePath(),
+            type: 'website',
+            robots: self::ROBOTS_INDEX,
+            keywords: $settings->seo_keywords,
         );
     }
 
     /**
-     * @return array{
-     *     title: string,
-     *     description: ?string,
-     *     url: string,
-     *     image: ?string,
-     *     type: string,
-     *     site_name: string,
-     *     locale: string
-     * }
+     * @return array<string, mixed>
+     */
+    public static function forNotFound(): array
+    {
+        return self::build(
+            title: self::joinTitle('Страница не найдена'),
+            description: 'Запрошенный адрес не существует или был перемещён. Вернитесь на главную — там все маршруты на месте.',
+            url: url()->current(),
+            imagePath: self::defaultHeroImagePath(),
+            type: 'website',
+            robots: self::ROBOTS_NOINDEX,
+        );
+    }
+
+    /**
+     * @return array<string, mixed>
      */
     public static function forPage(CmsPage $page): array
     {
@@ -68,42 +76,69 @@ final class OpenGraph
             ? (string) $extra['og_description']
             : self::trimDescription($page->meta_description);
 
-        $url = $page->slug === 'privacy-policy'
-            ? route('legal.privacy_policy')
-            : route('pages.show', $page->slug);
+        $url = filled($extra['canonical_url'] ?? null)
+            ? (string) $extra['canonical_url']
+            : ($page->slug === 'privacy-policy'
+                ? route('legal.privacy_policy')
+                : route('pages.show', $page->slug));
 
         $imagePath = filled($extra['og_image_path'] ?? null)
             ? (string) $extra['og_image_path']
             : $settings->og_image_path;
+
+        $robots = filled($extra['meta_robots'] ?? null)
+            ? (string) $extra['meta_robots']
+            : self::ROBOTS_INDEX;
+
+        $type = filled($extra['og_type'] ?? null)
+            ? (string) $extra['og_type']
+            : 'website';
 
         return self::build(
             title: $title,
             description: $description,
             url: $url,
             imagePath: $imagePath,
+            type: $type,
+            robots: $robots,
+            keywords: $extra['meta_keywords'] ?? $settings->seo_keywords,
         );
     }
 
-    /**
-     * @return array{
-     *     title: string,
-     *     description: ?string,
-     *     url: string,
-     *     image: ?string,
-     *     image_width: ?int,
-     *     image_height: ?int,
-     *     image_type: ?string,
-     *     type: string,
-     *     site_name: string,
-     *     locale: string
-     * }
-     */
-    private static function build(string $title, ?string $description, string $url, mixed $imagePath): array
+    public static function absolutePublicUrl(mixed $path): ?string
     {
+        $path = LandingMedia::normalizePath($path);
+
+        if ($path === null) {
+            return null;
+        }
+
+        if ($path === OpenGraphHeroCard::defaultImagePath() && ! OpenGraphHeroCard::defaultImageExists()) {
+            return null;
+        }
+
+        $url = LandingMedia::url($path);
+
+        return $url !== null ? self::absoluteUrl($url) : null;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function build(
+        string $title,
+        ?string $description,
+        string $url,
+        mixed $imagePath,
+        string $type = 'website',
+        ?string $robots = self::ROBOTS_INDEX,
+        mixed $keywords = null,
+    ): array {
+        $settings = app(SiteSettingsService::class)->get();
         $imageUrl = self::absoluteImageUrl($imagePath);
         $imageMeta = self::imageMeta($imagePath, $imageUrl);
 
-        return [
+        $meta = [
             'title' => $title,
             'description' => $description,
             'url' => self::absoluteUrl($url),
@@ -111,10 +146,29 @@ final class OpenGraph
             'image_width' => $imageMeta['width'],
             'image_height' => $imageMeta['height'],
             'image_type' => $imageMeta['type'],
-            'type' => 'website',
-            'site_name' => self::SITE_NAME,
+            'type' => $type,
+            'site_name' => filled($settings->org_brand_name) ? (string) $settings->org_brand_name : self::SITE_NAME,
             'locale' => 'ru_RU',
+            'robots' => $robots,
+            'twitter_site' => self::normalizeTwitterHandle($settings->twitter_site),
+            'twitter_creator' => self::normalizeTwitterHandle($settings->twitter_creator),
+            'google_site_verification' => filled($settings->google_site_verification)
+                ? (string) $settings->google_site_verification
+                : null,
+            'yandex_site_verification' => filled($settings->yandex_site_verification)
+                ? (string) $settings->yandex_site_verification
+                : null,
+            'keywords' => self::normalizeKeywords($keywords),
+            'author' => filled($settings->org_legal_name)
+                ? (string) $settings->org_legal_name
+                : (filled($settings->org_brand_name) ? (string) $settings->org_brand_name : self::SITE_NAME),
         ];
+
+        if (filled($settings->ai_site_summary)) {
+            $meta['ai_summary'] = trim((string) $settings->ai_site_summary);
+        }
+
+        return $meta;
     }
 
     private static function joinTitle(string $title): string
@@ -139,7 +193,33 @@ final class OpenGraph
         return mb_strlen($value) > 300 ? mb_substr($value, 0, 297).'…' : $value;
     }
 
-    private static function absoluteUrl(string $url): string
+    private static function normalizeKeywords(mixed $value): ?string
+    {
+        if (! filled($value)) {
+            return null;
+        }
+
+        $value = trim(strip_tags((string) $value));
+
+        return $value !== '' ? $value : null;
+    }
+
+    private static function normalizeTwitterHandle(mixed $value): ?string
+    {
+        if (! filled($value)) {
+            return null;
+        }
+
+        $value = trim((string) $value);
+
+        if ($value === '') {
+            return null;
+        }
+
+        return str_starts_with($value, '@') ? $value : '@'.$value;
+    }
+
+    public static function absoluteUrl(string $url): string
     {
         if (str_starts_with($url, 'http://') || str_starts_with($url, 'https://')) {
             return $url;
@@ -150,30 +230,19 @@ final class OpenGraph
 
     private static function absoluteImageUrl(mixed $path): ?string
     {
-        $path = LandingMedia::normalizePath($path);
+        return self::absolutePublicUrl($path) ?? self::fallbackCarouselImage();
+    }
 
-        if ($path === null) {
-            $hero = app(LandingPageService::class)->section('hero');
-            $slides = $hero !== null ? LandingHeroCarousel::slides($hero) : [];
+    private static function fallbackCarouselImage(): ?string
+    {
+        $hero = app(LandingPageService::class)->section('hero');
+        $slides = $hero !== null ? LandingHeroCarousel::slides($hero) : [];
 
-            if ($slides !== [] && filled($slides[0]['url'] ?? null)) {
-                return self::absoluteUrl((string) $slides[0]['url']);
-            }
-
-            return null;
+        if ($slides !== [] && filled($slides[0]['url'] ?? null)) {
+            return self::absoluteUrl((string) $slides[0]['url']);
         }
 
-        if ($path === OpenGraphHeroCard::defaultImagePath() && ! OpenGraphHeroCard::defaultImageExists()) {
-            return self::absoluteImageUrl(null);
-        }
-
-        $url = LandingMedia::url($path);
-
-        if ($url === null) {
-            return null;
-        }
-
-        return self::absoluteUrl($url);
+        return null;
     }
 
     /**

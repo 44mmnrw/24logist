@@ -6,10 +6,9 @@ use App\Filament\Clusters\Landing\Resources\SiteSettings\GeneralSiteSettingResou
 use App\Models\SiteSetting;
 use App\Services\SiteSettingsService;
 use App\Support\AppleTouchIcon;
-use App\Support\LandingMedia;
+use App\Support\FilamentMediaUpload;
 use App\Support\PwaIcons;
 use Filament\Resources\Pages\EditRecord;
-use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class EditGeneralSiteSetting extends EditRecord
 {
@@ -29,7 +28,7 @@ class EditGeneralSiteSetting extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        foreach (['favicon_path', 'apple_touch_icon_path', 'og_image_path'] as $field) {
+        foreach (['favicon_path', 'apple_touch_icon_path', 'og_image_path', 'org_logo_path'] as $field) {
             if (filled($data[$field] ?? null)) {
                 $data[$field] = [(string) $data[$field]];
             }
@@ -43,6 +42,7 @@ class EditGeneralSiteSetting extends EditRecord
         $data['favicon_path'] = $this->persistUpload($data['favicon_path'] ?? null, 'site/favicon');
         $data['apple_touch_icon_path'] = $this->persistUpload($data['apple_touch_icon_path'] ?? null, 'site/apple-touch-icon');
         $data['og_image_path'] = $this->persistUpload($data['og_image_path'] ?? null, 'site/og');
+        $data['org_logo_path'] = $this->persistUpload($data['org_logo_path'] ?? null, 'site/org');
 
         return $data;
     }
@@ -60,22 +60,6 @@ class EditGeneralSiteSetting extends EditRecord
 
     private function persistUpload(mixed $state, string $directory): ?string
     {
-        if ($state instanceof TemporaryUploadedFile) {
-            return $state->store($directory, 'public');
-        }
-
-        if (is_array($state)) {
-            foreach ($state as $item) {
-                $stored = $this->persistUpload($item, $directory);
-
-                if ($stored !== null) {
-                    return $stored;
-                }
-            }
-
-            return null;
-        }
-
-        return LandingMedia::normalizePath($state);
+        return FilamentMediaUpload::persist($state, $directory);
     }
 }

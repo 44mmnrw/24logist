@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Cache;
 
 class SiteSettingsService
 {
-    private const CACHE_KEY = 'site.settings.v4';
+    private const CACHE_KEY = 'site.settings.v5';
 
     public function get(): SiteSetting
     {

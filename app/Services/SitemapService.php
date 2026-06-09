@@ -44,6 +44,10 @@ final class SitemapService
             $lines[] = '';
         }
 
+        foreach (['GPTBot', 'ChatGPT-User', 'Google-Extended', 'anthropic-ai', 'ClaudeBot', 'PerplexityBot', 'Applebot-Extended'] as $agent) {
+            $lines = array_merge($lines, ['User-agent: '.$agent, 'Allow: /', 'Allow: /llms.txt', '']);
+        }
+
         foreach (['TelegramBot', 'Twitterbot', 'facebookexternalhit', 'LinkedInBot', 'Slackbot'] as $agent) {
             $lines = array_merge($lines, ['User-agent: '.$agent, 'Allow: /', '']);
         }
@@ -70,6 +74,7 @@ final class SitemapService
 
         // Open Graph / link-preview crawlers must fetch public OG assets under /storage/.
         $lines[] = 'Allow: /images/';
+        $lines[] = 'Allow: /llms.txt';
         $lines[] = 'Allow: /storage/site/og/';
         $lines[] = 'Allow: /storage/site/favicon/';
         $lines[] = 'Allow: /storage/site/apple-touch-icon/';

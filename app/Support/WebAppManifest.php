@@ -10,10 +10,11 @@ final class WebAppManifest
     public static function data(): array
     {
         $siteUrl = rtrim((string) config('app.url'), '/');
+        $brand = app(\App\Services\SiteSettingsService::class)->get()->org_brand_name ?: OpenGraph::SITE_NAME;
 
         return [
-            'name' => OpenGraph::SITE_NAME,
-            'short_name' => OpenGraph::SITE_NAME,
+            'name' => $brand,
+            'short_name' => $brand,
             'start_url' => $siteUrl.'/',
             'scope' => $siteUrl.'/',
             'display' => 'standalone',

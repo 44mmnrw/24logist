@@ -33,7 +33,7 @@ class AppServiceProvider extends ServiceProvider
             app()->setLocale('ru');
         });
 
-        View::composer('components.landing.*', function ($view): void {
+        View::composer(['components.landing.*', 'errors.*'], function ($view): void {
             $view->with('landing', app(LandingPageService::class));
         });
     }

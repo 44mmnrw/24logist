@@ -9,6 +9,7 @@
     @endphp
     <title>{{ $og['title'] }}</title>
     <x-seo.open-graph :landing="$landing" />
+    <x-seo.structured-data :landing="$landing" />
     <x-site.favicon />
     <x-fonts.preload />
     @vite(['resources/css/app.css', 'resources/js/app.js'])

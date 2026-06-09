@@ -24,6 +24,7 @@ Route::get('/icons/icon-{size}.png', PwaIconController::class)
 
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('seo.robots');
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');
+Route::get('/llms.txt', [SeoController::class, 'llms'])->name('seo.llms');
 
 Route::get('/', LandingController::class);
 
