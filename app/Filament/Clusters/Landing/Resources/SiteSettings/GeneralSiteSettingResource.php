@@ -91,6 +91,13 @@ class GeneralSiteSettingResource extends Resource
                     ->placeholder('ЛогистРу — платформа для логистики')
                     ->helperText('Тег <title> и заголовок в поиске. Рекомендуется до 60–70 символов. Пусто — Open Graph title или Hero.')
                     ->columnSpanFull(),
+                Textarea::make('og_description')
+                    ->label('Meta description (главная)')
+                    ->rows(3)
+                    ->maxLength(500)
+                    ->placeholder('CRM для экспедиторов: заявки, рейсы, ЭДО и документы. Серверы в РФ, тарифы от 2 900 ₽/мес.')
+                    ->helperText('Описание в Google/Яндекс и в соцсетях. Рекомендуется 120–160 символов. Пусто — подзаголовок Hero.')
+                    ->columnSpanFull(),
                 Textarea::make('seo_keywords')
                     ->label('Meta keywords (общие)')
                     ->rows(2)
@@ -98,16 +105,10 @@ class GeneralSiteSettingResource extends Resource
                     ->helperText('Через запятую. Необязательно — используется как fallback для страниц без своих keywords.')
                     ->columnSpanFull(),
                 TextInput::make('og_title')
-                    ->label('Open Graph — заголовок (главная)')
+                    ->label('Open Graph — заголовок (необязательно)')
                     ->maxLength(255)
                     ->placeholder('ЛогистРу — платформа для логистики')
-                    ->helperText('Пусто — заголовок секции Hero.')
-                    ->columnSpanFull(),
-                Textarea::make('og_description')
-                    ->label('Open Graph — описание (главная)')
-                    ->rows(3)
-                    ->maxLength(500)
-                    ->helperText('Meta description и og:description. Пусто — подзаголовок Hero.')
+                    ->helperText('Отдельный заголовок для соцсетей. Обычно оставляют пустым — используется Meta title или Hero.')
                     ->columnSpanFull(),
                 FileUpload::make('og_image_path')
                     ->label('Open Graph — изображение (по умолчанию)')
@@ -223,12 +224,14 @@ class GeneralSiteSettingResource extends Resource
                     ->label('Краткое описание для AI')
                     ->rows(4)
                     ->maxLength(1000)
+                    ->placeholder(SiteSetting::defaultAiSiteSummary())
                     ->helperText('Используется в meta abstract и в /llms.txt. 2–3 предложения о продукте.')
                     ->columnSpanFull(),
                 Textarea::make('llms_txt_extra')
                     ->label('Дополнительный блок в llms.txt')
-                    ->rows(4)
-                    ->helperText('Markdown-блок, добавляется в конец /llms.txt (тарифы, API, инструкции).')
+                    ->rows(12)
+                    ->placeholder(SiteSetting::defaultLlmsTxtExtra())
+                    ->helperText('Markdown-блок: возможности, тарифы, инструкции. Добавляется в /llms.txt перед разделом «Дополнительно».')
                     ->columnSpanFull(),
             ]);
     }
