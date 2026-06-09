@@ -1102,6 +1102,28 @@ body {
     text-decoration: underline;
 }
 .cms-page__body strong { color: #1f2a3d; }
+.cms-page__body table {
+    width: 100%;
+    margin-top: 16px;
+    border-collapse: collapse;
+    font-size: 15px;
+}
+.cms-page__body th,
+.cms-page__body td {
+    padding: 12px 14px;
+    border: 1px solid #e2e8f0;
+    text-align: left;
+    vertical-align: top;
+}
+.cms-page__body th {
+    background: #f8fafc;
+    color: #1f2a3d;
+    font-weight: 600;
+}
+.cms-page__body .cms-page__table-wrap {
+    margin-top: 16px;
+    overflow-x: auto;
+}
 
 .contacts-page-v2 {
     background: #f8fafc;
