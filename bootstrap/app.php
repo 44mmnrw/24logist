@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnforceCanonicalUrl;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,6 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
+        $middleware->web(prepend: [
+            EnforceCanonicalUrl::class,
+        ]);
 
         // Livewire upload uses a signed URL; CSRF on the same request often fails in admin (session / multipart).
         // Patched Livewire endpoint: /lw-{hash}/upload (see script_ai/patch-livewire-upload.sh).

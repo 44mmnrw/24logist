@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\LandingPageService;
+use App\Support\CanonicalUrl;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
@@ -24,9 +25,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Same as Laragon locally: signed Livewire upload URLs must match the browser host.
-        if (! $this->app->runningInConsole() && request()->hasHeader('Host')) {
-            URL::forceRootUrl(request()->getSchemeAndHttpHost());
+        // Production: canonical URLs from APP_URL (24logist.ru без www).
+        // Local: match browser host (Laragon / *.test).
+        if (! $this->app->runningInConsole()) {
+            if (CanonicalUrl::shouldEnforce()) {
+                URL::forceRootUrl(CanonicalUrl::root());
+
+                if (CanonicalUrl::scheme() === 'https') {
+                    URL::forceScheme('https');
+                }
+            } elseif (request()->hasHeader('Host')) {
+                URL::forceRootUrl(request()->getSchemeAndHttpHost());
+            }
         }
 
         Filament::serving(function (): void {

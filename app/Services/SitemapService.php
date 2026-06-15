@@ -53,7 +53,11 @@ final class SitemapService
         }
 
         if ($siteUrl !== '') {
-            $lines[] = 'Host: '.$siteUrl;
+            $host = parse_url($siteUrl, PHP_URL_HOST);
+
+            if (is_string($host) && $host !== '') {
+                $lines[] = 'Host: '.$host;
+            }
         }
 
         $lines[] = 'Sitemap: '.$sitemapUrl;

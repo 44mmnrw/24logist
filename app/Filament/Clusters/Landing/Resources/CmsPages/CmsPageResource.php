@@ -99,7 +99,7 @@ class CmsPageResource extends Resource
                 TextInput::make('extra.canonical_url')
                     ->label('Canonical URL (переопределение)')
                     ->maxLength(500)
-                    ->placeholder('https://www.24logist.ru/pages/example')
+                    ->placeholder('https://24logist.ru/pages/example')
                     ->helperText('Обычно оставьте пустым — canonical формируется автоматически.')
                     ->columnSpanFull(),
                 TextInput::make('extra.og_title')
