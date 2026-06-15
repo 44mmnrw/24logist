@@ -128,6 +128,11 @@ MD;
 TEXT;
     }
 
+    public function hasMailPassword(): bool
+    {
+        return filled($this->attributes['mail_password'] ?? null);
+    }
+
     public static function instance(): self
     {
         return static::query()->firstOrCreate(

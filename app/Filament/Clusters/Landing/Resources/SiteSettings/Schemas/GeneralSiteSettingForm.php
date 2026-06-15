@@ -308,10 +308,11 @@ final class GeneralSiteSettingForm
                     Select::make('mail_encryption')
                         ->label('Шифрование')
                         ->options([
-                            'smtps' => 'SSL (smtps, обычно 465)',
-                            'smtp' => 'STARTTLS (smtp, обычно 587)',
+                            'ssl' => 'SSL (порт 465)',
+                            'tls' => 'TLS / STARTTLS (порт 587)',
+                            'none' => 'Без шифрования',
                         ])
-                        ->default('smtps')
+                        ->default('ssl')
                         ->native(false),
                     TextInput::make('mail_username')
                         ->label('Логин (email)')
@@ -319,18 +320,31 @@ final class GeneralSiteSettingForm
                         ->maxLength(255)
                         ->placeholder('info@24logist.ru')
                         ->columnSpanFull(),
+                    Placeholder::make('mail_password_status')
+                        ->label('Статус пароля')
+                        ->content(function (?SiteSetting $record): string {
+                            if ($record?->hasMailPassword()) {
+                                return '✓ Пароль сохранён в базе. В поле ниже пароль намеренно не показывается — так безопаснее.';
+                            }
+
+                            return '✗ Пароль не задан. Введите ниже и нажмите «Сохранить» внизу страницы.';
+                        })
+                        ->columnSpanFull(),
                     TextInput::make('mail_password')
-                        ->label('Пароль')
+                        ->label('Новый пароль (только для смены)')
                         ->password()
                         ->revealable()
-                        ->dehydrated(fn (?string $state): bool => filled($state))
-                        ->placeholder('Пароль приложения SMTP')
-                        ->helperText('Оставьте пустым, чтобы не менять сохранённый пароль.')
+                        ->autocomplete('new-password')
+                        ->dehydrated()
+                        ->placeholder(fn (?SiteSetting $record): string => $record?->hasMailPassword()
+                            ? 'Оставьте пустым, если не меняете пароль'
+                            : 'Пароль почтового ящика')
+                        ->helperText('После ввода нажмите «Сохранить». Появится уведомление «Пароль почты сохранён».')
                         ->columnSpanFull(),
                     Toggle::make('mail_verify_ssl')
                         ->label('Проверять SSL-сертификат SMTP')
                         ->default(true)
-                        ->helperText('Отключите только если хостинг выдаёт самоподписанный сертификат и соединение падает с ошибкой SSL.')
+                        ->helperText('Обычно оставляйте включённым. Отключайте только если хостинг явно требует этого.')
                         ->columnSpanFull(),
                 ])
                 ->columns(2)

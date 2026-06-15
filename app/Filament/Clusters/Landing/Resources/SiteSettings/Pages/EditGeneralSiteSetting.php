@@ -21,6 +21,10 @@ class EditGeneralSiteSetting extends EditRecord
 
     protected static ?string $title = 'Настройки сайта';
 
+    private bool $mailPasswordUpdated = false;
+
+    private ?string $pendingMailPassword = null;
+
     public function mount(int|string|null $record = null): void
     {
         parent::mount(SiteSetting::instance()->getKey());
@@ -52,9 +56,14 @@ class EditGeneralSiteSetting extends EditRecord
                             ->success()
                             ->send();
                     } catch (Throwable $exception) {
+                        $site = SiteSetting::query()->find(SiteSetting::instance()->getKey());
+                        $details = $site ? ' SMTP: '.$site->mail_host.':'.$site->mail_port
+                            .', логин: '.($site->mail_username ?: '—')
+                            .', пароль в базе: '.($site->hasMailPassword() ? 'да' : 'нет').'.' : '';
+
                         Notification::make()
                             ->title('Не удалось отправить письмо')
-                            ->body($exception->getMessage())
+                            ->body($exception->getMessage().$details)
                             ->danger()
                             ->send();
                     }
@@ -70,7 +79,7 @@ class EditGeneralSiteSetting extends EditRecord
             }
         }
 
-        $data['mail_password'] = null;
+        $data['mail_password'] = '';
 
         return $data;
     }
@@ -82,9 +91,11 @@ class EditGeneralSiteSetting extends EditRecord
         $data['og_image_path'] = $this->persistUpload($data['og_image_path'] ?? null, 'site/og');
         $data['org_logo_path'] = $this->persistUpload($data['org_logo_path'] ?? null, 'site/org');
 
-        if (! array_key_exists('mail_password', $data) || blank($data['mail_password'])) {
-            unset($data['mail_password']);
+        if (filled($data['mail_password'] ?? null)) {
+            $this->pendingMailPassword = (string) $data['mail_password'];
         }
+
+        unset($data['mail_password']);
 
         return $data;
     }
@@ -97,7 +108,27 @@ class EditGeneralSiteSetting extends EditRecord
             }
         }
 
+        if ($this->pendingMailPassword !== null) {
+            $this->record->mail_password = $this->pendingMailPassword;
+            $this->record->save();
+            $this->mailPasswordUpdated = true;
+            $this->pendingMailPassword = null;
+        }
+
         app(SiteSettingsService::class)->clearCache();
+
+        if ($this->mailPasswordUpdated) {
+            Notification::make()
+                ->title('Пароль почты сохранён')
+                ->body('В поле пароль не показывается — это нормально. Для отправки используется значение из базы.')
+                ->success()
+                ->send();
+
+            $this->mailPasswordUpdated = false;
+        }
+
+        $this->record->refresh();
+        $this->fillForm();
     }
 
     private function persistUpload(mixed $state, string $directory): ?string
