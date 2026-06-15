@@ -37,6 +37,10 @@ final class LandingLeadNotificationService
             return;
         }
 
+        if (! $this->mail->isConfigured()) {
+            return;
+        }
+
         try {
             $this->mail->apply();
 
@@ -71,6 +75,10 @@ final class LandingLeadNotificationService
         $subject = LandingLeadMailTemplate::render($subjectTemplate, $lead, $site);
         $body = LandingLeadMailTemplate::render($bodyTemplate, $lead, $site);
 
+        if (! $this->mail->isConfigured()) {
+            return;
+        }
+
         try {
             $this->mail->apply();
 
@@ -97,12 +105,6 @@ final class LandingLeadNotificationService
 
         if (filled($site->mail_from_address)) {
             return [(string) $site->mail_from_address];
-        }
-
-        $from = (string) config('mail.from.address');
-
-        if ($from !== '' && $from !== 'hello@example.com') {
-            return [$from];
         }
 
         return [];

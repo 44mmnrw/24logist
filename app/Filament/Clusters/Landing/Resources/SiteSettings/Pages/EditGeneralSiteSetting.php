@@ -57,9 +57,14 @@ class EditGeneralSiteSetting extends EditRecord
                             ->send();
                     } catch (Throwable $exception) {
                         $site = SiteSetting::query()->find(SiteSetting::instance()->getKey());
-                        $details = $site ? ' SMTP: '.$site->mail_host.':'.$site->mail_port
+                        $scheme = match (mb_strtolower((string) ($site?->mail_encryption ?? 'ssl'))) {
+                            'ssl', 'smtps' => 'smtps',
+                            'tls', 'smtp' => 'smtp',
+                            default => 'none',
+                        };
+                        $details = $site ? ' ['.$scheme.'://'.$site->mail_host.':'.($site->mail_port ?: 465)
                             .', логин: '.($site->mail_username ?: '—')
-                            .', пароль в базе: '.($site->hasMailPassword() ? 'да' : 'нет').'.' : '';
+                            .', пароль в базе: '.($site->hasMailPassword() ? 'да' : 'нет').']' : '';
 
                         Notification::make()
                             ->title('Не удалось отправить письмо')

@@ -25,6 +25,12 @@ class LandingLeadNotificationTest extends TestCase
                 'leads_welcome_enabled' => true,
                 'leads_welcome_subject' => 'Спасибо, {name}!',
                 'leads_welcome_body' => 'Здравствуйте, {name}! Мы получили заявку.',
+                'mail_host' => 'smtp.example.com',
+                'mail_port' => 465,
+                'mail_encryption' => 'ssl',
+                'mail_username' => 'mailer@example.com',
+                'mail_password' => 'secret',
+                'mail_from_address' => 'mailer@example.com',
             ],
         );
 
@@ -101,5 +107,24 @@ class LandingLeadNotificationTest extends TestCase
 
         Mail::assertSent(LandingLeadReceived::class);
         Mail::assertNotSent(LandingLeadWelcome::class);
+    }
+
+    public function test_emails_are_not_sent_when_smtp_is_not_configured(): void
+    {
+        Mail::fake();
+
+        SiteSetting::query()->where('id', 1)->update([
+            'mail_host' => null,
+            'mail_password' => null,
+        ]);
+        app(\App\Services\SiteSettingsService::class)->clearCache();
+
+        $this->postJson(route('leads.contact.store'), [
+            'name' => 'Иван',
+            'phone' => '+7 900 000-00-00',
+            'email' => 'client@example.com',
+        ])->assertCreated();
+
+        Mail::assertNothingSent();
     }
 }

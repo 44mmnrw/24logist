@@ -291,13 +291,13 @@ final class GeneralSiteSettingForm
     {
         return [
             Section::make('SMTP-сервер')
-                ->description('Параметры исходящей почты. Если SMTP не задан — используется конфигурация из .env на сервере.')
+                ->description('Параметры исходящей почты. Все письма отправляются только через эти настройки.')
                 ->schema([
                     TextInput::make('mail_host')
                         ->label('SMTP-сервер')
                         ->maxLength(255)
                         ->placeholder('24logist.ru')
-                        ->helperText('Хост SMTP из панели хостинга или проверки (например 24logist.ru, mail.24logist.ru). Порт 465 + SSL.')
+                        ->helperText('Как в панели хостинга. Обычно: 24logist.ru, порт 465, шифрование SSL.')
                         ->columnSpanFull(),
                     TextInput::make('mail_port')
                         ->label('Порт')
@@ -340,11 +340,6 @@ final class GeneralSiteSettingForm
                             ? 'Оставьте пустым, если не меняете пароль'
                             : 'Пароль почтового ящика')
                         ->helperText('После ввода нажмите «Сохранить». Появится уведомление «Пароль почты сохранён».')
-                        ->columnSpanFull(),
-                    Toggle::make('mail_verify_ssl')
-                        ->label('Проверять SSL-сертификат SMTP')
-                        ->default(true)
-                        ->helperText('Обычно оставляйте включённым. Отключайте только если хостинг явно требует этого.')
                         ->columnSpanFull(),
                 ])
                 ->columns(2)

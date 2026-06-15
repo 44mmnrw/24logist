@@ -14,50 +14,35 @@ final class SiteMailService
         private readonly SiteSettingsService $settings,
     ) {}
 
-    public function apply(): bool
+    public function apply(): void
     {
-        $site = $this->mailSettings();
-
-        if (! filled($site->mail_host)) {
-            return false;
+        if (! $this->isConfigured()) {
+            throw new \RuntimeException('SMTP не настроен в разделе «Настройки сайта» → «Почта».');
         }
 
+        $site = $this->mailSettings();
         $host = MailHost::normalize((string) $site->mail_host);
 
         if ($host === null) {
-            return false;
+            throw new \RuntimeException('Укажите корректный SMTP-сервер в настройках почты.');
         }
 
         $password = $this->resolvePassword($site);
-
-        $smtpConfig = [
-            'transport' => 'smtp',
-            'scheme' => $this->mapEncryptionToScheme((string) ($site->mail_encryption ?? 'ssl')),
-            'host' => $host,
-            'port' => (int) ($site->mail_port ?: 465),
-            'username' => filled($site->mail_username) ? (string) $site->mail_username : null,
-            'password' => $password,
-            'timeout' => 30,
-        ];
-
-        if (! ($site->mail_verify_ssl ?? true)) {
-            $smtpConfig['stream'] = [
-                'ssl' => [
-                    'verify_peer' => false,
-                    'verify_peer_name' => false,
-                    'allow_self_signed' => true,
-                ],
-            ];
-        }
+        $scheme = $this->mapEncryptionToScheme((string) ($site->mail_encryption ?? 'ssl'));
 
         config([
             'mail.default' => 'smtp',
             'mail.from.address' => $this->fromAddress($site),
             'mail.from.name' => $this->fromName($site),
-            'mail.mailers.smtp' => array_merge(
-                (array) config('mail.mailers.smtp', []),
-                $smtpConfig,
-            ),
+            'mail.mailers.smtp.transport' => 'smtp',
+            'mail.mailers.smtp.scheme' => $scheme,
+            'mail.mailers.smtp.url' => null,
+            'mail.mailers.smtp.host' => $host,
+            'mail.mailers.smtp.port' => (int) ($site->mail_port ?: 465),
+            'mail.mailers.smtp.username' => filled($site->mail_username) ? (string) $site->mail_username : null,
+            'mail.mailers.smtp.password' => $password,
+            'mail.mailers.smtp.timeout' => 30,
+            'mail.mailers.smtp.stream' => null,
         ]);
 
         $mailManager = app('mail.manager');
@@ -67,36 +52,22 @@ final class SiteMailService
         } elseif (method_exists($mailManager, 'forgetDrivers')) {
             $mailManager->forgetDrivers();
         }
-
-        return true;
     }
 
     public function sendTest(string $recipient): void
     {
         $site = $this->mailSettings();
 
-        if (! filled($site->mail_host)) {
-            throw new \RuntimeException('Укажите SMTP-сервер в настройках почты.');
-        }
-
-        if (! $site->hasMailPassword()) {
-            throw new \RuntimeException(
-                'Пароль SMTP не сохранён в базе. Введите пароль, нажмите «Сохранить» внизу страницы, дождитесь уведомления «Пароль почты сохранён».'
-            );
-        }
-
         if (! filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
             throw new \InvalidArgumentException('Укажите корректный email для теста.');
         }
 
-        if (! $this->apply()) {
-            throw new \RuntimeException('Не удалось применить настройки SMTP.');
-        }
+        $this->apply();
 
         try {
             Mail::to($recipient)->send(new SiteMailTestMessage());
         } catch (\Throwable $exception) {
-            throw new \RuntimeException($this->humanizeMailError($exception, $site), 0, $exception);
+            throw new \RuntimeException($this->formatMailError($exception, $site), 0, $exception);
         }
     }
 
@@ -106,7 +77,7 @@ final class SiteMailService
 
         return filled($site->mail_host)
             && $site->hasMailPassword()
-            && filled($this->fromAddress($site));
+            && filled($site->mail_from_address ?: $site->mail_username);
     }
 
     private function mailSettings(): SiteSetting
@@ -150,7 +121,7 @@ final class SiteMailService
             return (string) $site->mail_username;
         }
 
-        return (string) config('mail.from.address');
+        throw new \RuntimeException('Укажите адрес отправителя в настройках почты.');
     }
 
     private function fromName(SiteSetting $site): string
@@ -159,27 +130,16 @@ final class SiteMailService
             return (string) $site->mail_from_name;
         }
 
-        return (string) config('mail.from.name', config('app.name'));
+        return (string) config('app.name', 'ЛогистРу');
     }
 
-    private function humanizeMailError(\Throwable $exception, SiteSetting $site): string
+    private function formatMailError(\Throwable $exception, SiteSetting $site): string
     {
         $message = trim($exception->getMessage());
         $host = MailHost::normalize((string) $site->mail_host) ?? (string) $site->mail_host;
+        $scheme = $this->mapEncryptionToScheme((string) ($site->mail_encryption ?? 'ssl')) ?? 'none';
 
-        if (str_contains($message, 'Authentication failed') || str_contains($message, '535') || str_contains($message, '534')) {
-            return 'Ошибка авторизации SMTP: проверьте логин (полный email) и пароль почтового ящика.';
-        }
-
-        if (str_contains($message, 'Connection could not be established') || str_contains($message, 'Connection timed out')) {
-            return 'Не удалось подключиться к '.$host.':'.$site->mail_port.'. Проверьте хост, порт и тип шифрования.';
-        }
-
-        if (str_contains($message, 'certificate verify failed') || str_contains($message, 'SSL operation failed')) {
-            return $message.' (SMTP: '.$host.':'.$site->mail_port.')';
-        }
-
-        return $message;
+        return $message.' ['.$scheme.'://'.$host.':'.($site->mail_port ?: 465).']';
     }
 }
 

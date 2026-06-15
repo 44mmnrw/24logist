@@ -30,14 +30,39 @@ class SiteMailServiceTest extends TestCase
 
         app(\App\Services\SiteSettingsService::class)->clearCache();
 
-        $applied = app(SiteMailService::class)->apply();
+        app(SiteMailService::class)->apply();
 
-        $this->assertTrue($applied);
         $this->assertSame('smtp', config('mail.default'));
         $this->assertSame('smtp.example.com', config('mail.mailers.smtp.host'));
         $this->assertSame('smtp', config('mail.mailers.smtp.scheme'));
         $this->assertSame('mailer@example.com', config('mail.from.address'));
+        $this->assertNull(config('mail.mailers.smtp.url'));
         $this->assertNull(config('mail.mailers.smtp.stream'));
+    }
+
+    public function test_apply_clears_mail_url_from_env_template(): void
+    {
+        config(['mail.mailers.smtp.url' => 'smtp://127.0.0.1:2525']);
+
+        SiteSetting::query()->updateOrCreate(
+            ['id' => 1],
+            [
+                'mail_host' => '24logist.ru',
+                'mail_port' => 465,
+                'mail_encryption' => 'ssl',
+                'mail_username' => 'info@24logist.ru',
+                'mail_password' => 'secret',
+                'mail_from_address' => 'info@24logist.ru',
+            ],
+        );
+
+        app(\App\Services\SiteSettingsService::class)->clearCache();
+
+        app(SiteMailService::class)->apply();
+
+        $this->assertNull(config('mail.mailers.smtp.url'));
+        $this->assertSame('24logist.ru', config('mail.mailers.smtp.host'));
+        $this->assertSame('smtps', config('mail.mailers.smtp.scheme'));
     }
 
     public function test_apply_maps_legacy_smtps_encryption_value(): void
@@ -49,6 +74,7 @@ class SiteMailServiceTest extends TestCase
                 'mail_port' => 465,
                 'mail_encryption' => 'smtps',
                 'mail_password' => 'secret',
+                'mail_from_address' => 'info@24logist.ru',
             ],
         );
 
@@ -82,25 +108,6 @@ class SiteMailServiceTest extends TestCase
         Mail::assertSent(SiteMailTestMessage::class);
     }
 
-    public function test_apply_disables_ssl_verification_when_configured(): void
-    {
-        SiteSetting::query()->updateOrCreate(
-            ['id' => 1],
-            [
-                'mail_host' => 'mail.example.com',
-                'mail_port' => 465,
-                'mail_encryption' => 'ssl',
-                'mail_verify_ssl' => false,
-            ],
-        );
-
-        app(\App\Services\SiteSettingsService::class)->clearCache();
-
-        app(SiteMailService::class)->apply();
-
-        $this->assertFalse(config('mail.mailers.smtp.stream.ssl.verify_peer'));
-    }
-
     public function test_send_test_requires_saved_password(): void
     {
         SiteSetting::query()->updateOrCreate(
@@ -116,12 +123,12 @@ class SiteMailServiceTest extends TestCase
         app(\App\Services\SiteSettingsService::class)->clearCache();
 
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Пароль SMTP не сохранён');
+        $this->expectExceptionMessage('SMTP не настроен');
 
         app(SiteMailService::class)->sendTest('admin@example.com');
     }
 
-    public function test_send_test_shows_real_error_on_failure(): void
+    public function test_send_test_includes_real_error_message_on_failure(): void
     {
         SiteSetting::query()->updateOrCreate(
             ['id' => 1],
@@ -130,7 +137,6 @@ class SiteMailServiceTest extends TestCase
                 'mail_port' => 465,
                 'mail_encryption' => 'ssl',
                 'mail_password' => 'secret',
-                'mail_verify_ssl' => true,
                 'mail_from_address' => 'info@24logist.ru',
             ],
         );
@@ -143,7 +149,7 @@ class SiteMailServiceTest extends TestCase
             app(SiteMailService::class)->sendTest('admin@example.com');
         } catch (\RuntimeException $exception) {
             $this->assertStringNotContainsString('Undefined variable', $exception->getMessage());
-            $this->assertStringNotContainsString('самоподписанный', $exception->getMessage());
+            $this->assertStringContainsString('[smtps://24logist.ru:465]', $exception->getMessage());
 
             throw $exception;
         }
