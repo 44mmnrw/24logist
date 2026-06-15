@@ -70,6 +70,8 @@ final class SiteMailService
             throw new \InvalidArgumentException('Укажите корректный email для теста.');
         }
 
+        $site = $this->settings->get();
+
         try {
             Mail::to($recipient)->send(new SiteMailTestMessage());
         } catch (\Throwable $exception) {

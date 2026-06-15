@@ -79,4 +79,31 @@ class SiteMailServiceTest extends TestCase
 
         $this->assertFalse(config('mail.mailers.site_smtp.stream.ssl.verify_peer'));
     }
+
+    public function test_send_test_shows_humanized_error_on_failure(): void
+    {
+        SiteSetting::query()->updateOrCreate(
+            ['id' => 1],
+            [
+                'mail_host' => '24logist.ru',
+                'mail_port' => 465,
+                'mail_encryption' => 'smtps',
+                'mail_verify_ssl' => true,
+                'mail_from_address' => 'info@24logist.ru',
+            ],
+        );
+
+        app(\App\Services\SiteSettingsService::class)->clearCache();
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('24logist.ru');
+
+        try {
+            app(SiteMailService::class)->sendTest('admin@example.com');
+        } catch (\RuntimeException $exception) {
+            $this->assertStringNotContainsString('Undefined variable', $exception->getMessage());
+
+            throw $exception;
+        }
+    }
 }
