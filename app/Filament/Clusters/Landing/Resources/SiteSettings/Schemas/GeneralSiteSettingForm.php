@@ -296,7 +296,8 @@ final class GeneralSiteSettingForm
                     TextInput::make('mail_host')
                         ->label('SMTP-сервер')
                         ->maxLength(255)
-                        ->placeholder('smtp.yandex.ru')
+                        ->placeholder('mail.24logist.ru')
+                        ->helperText('Домен почты @24logist.ru — это не SMTP. Укажите сервер исходящей почты: mail.24logist.ru (хостинг), smtp.yandex.ru (Яндекс для домена) — из панели почты.')
                         ->columnSpanFull(),
                     TextInput::make('mail_port')
                         ->label('Порт')
@@ -325,6 +326,11 @@ final class GeneralSiteSettingForm
                         ->dehydrated(fn (?string $state): bool => filled($state))
                         ->placeholder('Пароль приложения SMTP')
                         ->helperText('Оставьте пустым, чтобы не менять сохранённый пароль.')
+                        ->columnSpanFull(),
+                    Toggle::make('mail_verify_ssl')
+                        ->label('Проверять SSL-сертификат SMTP')
+                        ->default(true)
+                        ->helperText('Отключите только если хостинг выдаёт самоподписанный сертификат и соединение падает с ошибкой SSL.')
                         ->columnSpanFull(),
                 ])
                 ->columns(2)

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Mail\SiteMailTestMessage;
 use App\Models\SiteSetting;
+use App\Support\MailHost;
 use Illuminate\Support\Facades\Mail;
 
 final class SiteMailService
@@ -20,13 +21,36 @@ final class SiteMailService
             return false;
         }
 
+        $host = MailHost::normalize((string) $site->mail_host);
+
+        if ($host === null) {
+            return false;
+        }
+
+        $mailerConfig = [
+            'transport' => 'smtp',
+            'scheme' => filled($site->mail_encryption) ? (string) $site->mail_encryption : null,
+            'host' => $host,
+            'port' => (int) ($site->mail_port ?: 465),
+            'username' => filled($site->mail_username) ? (string) $site->mail_username : null,
+            'password' => filled($site->mail_password) ? (string) $site->mail_password : null,
+            'timeout' => null,
+            'local_domain' => $host,
+        ];
+
+        if (! ($site->mail_verify_ssl ?? true)) {
+            $mailerConfig['stream'] = [
+                'ssl' => [
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                    'allow_self_signed' => true,
+                ],
+            ];
+        }
+
         config([
             'mail.default' => 'site_smtp',
-            'mail.mailers.site_smtp.host' => (string) $site->mail_host,
-            'mail.mailers.site_smtp.port' => (int) ($site->mail_port ?: 465),
-            'mail.mailers.site_smtp.scheme' => filled($site->mail_encryption) ? (string) $site->mail_encryption : null,
-            'mail.mailers.site_smtp.username' => filled($site->mail_username) ? (string) $site->mail_username : null,
-            'mail.mailers.site_smtp.password' => filled($site->mail_password) ? (string) $site->mail_password : null,
+            'mail.mailers.site_smtp' => $mailerConfig,
             'mail.from.address' => $this->fromAddress($site),
             'mail.from.name' => $this->fromName($site),
         ]);
@@ -46,7 +70,21 @@ final class SiteMailService
             throw new \InvalidArgumentException('Укажите корректный email для теста.');
         }
 
-        Mail::to($recipient)->send(new SiteMailTestMessage());
+        $site = $this->settings->get();
+        $host = MailHost::normalize((string) $site->mail_host);
+
+        if ($host !== null && MailHost::looksLikeWebsiteHost($host)) {
+            throw new \RuntimeException(
+                '«'.$host.'» — это домен сайта, а не SMTP-сервер. '
+                .'Для почты @24logist.ru укажите mail.24logist.ru (хостинг) или smtp.yandex.ru (Яндекс 360).'
+            );
+        }
+
+        try {
+            Mail::to($recipient)->send(new SiteMailTestMessage());
+        } catch (\Throwable $exception) {
+            throw new \RuntimeException($this->humanizeMailError($exception, $site), 0, $exception);
+        }
     }
 
     public function isConfigured(): bool
@@ -77,5 +115,34 @@ final class SiteMailService
         }
 
         return (string) config('mail.from.name', config('app.name'));
+    }
+
+    private function humanizeMailError(\Throwable $exception, SiteSetting $site): string
+    {
+        $message = $exception->getMessage();
+        $host = MailHost::normalize((string) $site->mail_host) ?? (string) $site->mail_host;
+
+        if (str_contains($message, 'certificate verify failed') || str_contains($message, 'SSL operation failed')) {
+            $hints = [
+                'Проверьте SMTP-сервер: это должен быть smtp.yandex.ru, smtp.mail.ru или mail.ваш-домен.ru — не адрес сайта.',
+                'Если сервер верный, но хостинг выдаёт самоподписанный сертификат — отключите «Проверять SSL-сертификат» и сохраните настройки.',
+            ];
+
+            if (MailHost::looksLikeWebsiteHost($host)) {
+                array_unshift($hints, 'Сейчас указан «'.$host.'» — это домен сайта, а не почтовый сервер.');
+            }
+
+            return implode(' ', $hints);
+        }
+
+        if (str_contains($message, 'Authentication failed') || str_contains($message, '535')) {
+            return 'Ошибка авторизации SMTP: проверьте логин и пароль. Для Яндекса нужен пароль приложения, не пароль от аккаунта.';
+        }
+
+        if (str_contains($message, 'Connection could not be established')) {
+            return 'Не удалось подключиться к '.$host.'. Проверьте хост, порт и шифрование (465 + SSL или 587 + STARTTLS).';
+        }
+
+        return $message;
     }
 }

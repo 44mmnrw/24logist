@@ -36,6 +36,7 @@ class SiteMailServiceTest extends TestCase
         $this->assertSame('site_smtp', config('mail.default'));
         $this->assertSame('smtp.example.com', config('mail.mailers.site_smtp.host'));
         $this->assertSame('mailer@example.com', config('mail.from.address'));
+        $this->assertArrayNotHasKey('stream', config('mail.mailers.site_smtp'));
     }
 
     public function test_send_test_uses_configured_mailer(): void
@@ -58,5 +59,24 @@ class SiteMailServiceTest extends TestCase
         app(SiteMailService::class)->sendTest('admin@example.com');
 
         Mail::assertSent(SiteMailTestMessage::class);
+    }
+
+    public function test_apply_disables_ssl_verification_when_configured(): void
+    {
+        SiteSetting::query()->updateOrCreate(
+            ['id' => 1],
+            [
+                'mail_host' => 'mail.example.com',
+                'mail_port' => 465,
+                'mail_encryption' => 'smtps',
+                'mail_verify_ssl' => false,
+            ],
+        );
+
+        app(\App\Services\SiteSettingsService::class)->clearCache();
+
+        app(SiteMailService::class)->apply();
+
+        $this->assertFalse(config('mail.mailers.site_smtp.stream.ssl.verify_peer'));
     }
 }

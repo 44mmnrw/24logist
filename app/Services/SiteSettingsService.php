@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Cache;
 
 class SiteSettingsService
 {
-    private const CACHE_KEY = 'site.settings.v8';
+    private const CACHE_KEY = 'site.settings.v9';
 
     public function get(): SiteSetting
     {
@@ -60,8 +60,8 @@ class SiteSettingsService
     public function clearCache(): void
     {
         Cache::forget(self::CACHE_KEY);
+        Cache::forget('site.settings.v8');
         Cache::forget('site.settings.v7');
-        Cache::forget('site.settings.v6');
         Cache::forget('site.settings.v5');
         Cache::forget('site.settings.v3');
         Cache::forget('site.settings.v2');
