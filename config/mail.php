@@ -88,6 +88,17 @@ return [
             'retry_after' => 60,
         ],
 
+        'site_smtp' => [
+            'transport' => 'smtp',
+            'scheme' => null,
+            'host' => '',
+            'port' => 465,
+            'username' => null,
+            'password' => null,
+            'timeout' => null,
+            'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
+        ],
+
         'roundrobin' => [
             'transport' => 'roundrobin',
             'mailers' => [

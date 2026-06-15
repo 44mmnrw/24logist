@@ -4,11 +4,16 @@ namespace App\Filament\Clusters\Landing\Resources\SiteSettings\Pages;
 
 use App\Filament\Clusters\Landing\Resources\SiteSettings\GeneralSiteSettingResource;
 use App\Models\SiteSetting;
+use App\Services\SiteMailService;
 use App\Services\SiteSettingsService;
 use App\Support\AppleTouchIcon;
 use App\Support\FilamentMediaUpload;
 use App\Support\PwaIcons;
+use Filament\Actions\Action;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Throwable;
 
 class EditGeneralSiteSetting extends EditRecord
 {
@@ -23,7 +28,38 @@ class EditGeneralSiteSetting extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        return [];
+        return [
+            Action::make('sendTestMail')
+                ->label('Тестовое письмо')
+                ->icon('heroicon-o-paper-airplane')
+                ->color('gray')
+                ->modalHeading('Отправка тестового письма')
+                ->modalDescription('Проверьте SMTP: письмо уйдёт с текущими настройками. Сначала сохраните форму, если меняли поля.')
+                ->schema([
+                    TextInput::make('test_email')
+                        ->label('Email получателя')
+                        ->email()
+                        ->required()
+                        ->default(fn (): ?string => auth()->user()?->email),
+                ])
+                ->action(function (array $data, SiteMailService $mail): void {
+                    try {
+                        $mail->sendTest((string) $data['test_email']);
+
+                        Notification::make()
+                            ->title('Тестовое письмо отправлено')
+                            ->body('Проверьте почтовый ящик '.$data['test_email'].'.')
+                            ->success()
+                            ->send();
+                    } catch (Throwable $exception) {
+                        Notification::make()
+                            ->title('Не удалось отправить письмо')
+                            ->body($exception->getMessage())
+                            ->danger()
+                            ->send();
+                    }
+                }),
+        ];
     }
 
     protected function mutateFormDataBeforeFill(array $data): array
@@ -34,6 +70,8 @@ class EditGeneralSiteSetting extends EditRecord
             }
         }
 
+        $data['mail_password'] = null;
+
         return $data;
     }
 
@@ -43,6 +81,10 @@ class EditGeneralSiteSetting extends EditRecord
         $data['apple_touch_icon_path'] = $this->persistUpload($data['apple_touch_icon_path'] ?? null, 'site/apple-touch-icon');
         $data['og_image_path'] = $this->persistUpload($data['og_image_path'] ?? null, 'site/og');
         $data['org_logo_path'] = $this->persistUpload($data['org_logo_path'] ?? null, 'site/org');
+
+        if (! array_key_exists('mail_password', $data) || blank($data['mail_password'])) {
+            unset($data['mail_password']);
+        }
 
         return $data;
     }

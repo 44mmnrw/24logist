@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\LandingLead;
+use App\Observers\LandingLeadObserver;
 use App\Services\LandingPageService;
 use App\Support\CanonicalUrl;
 use Filament\Facades\Filament;
@@ -46,5 +48,7 @@ class AppServiceProvider extends ServiceProvider
         View::composer(['components.landing.*', 'errors.*'], function ($view): void {
             $view->with('landing', app(LandingPageService::class));
         });
+
+        LandingLead::observe(LandingLeadObserver::class);
     }
 }

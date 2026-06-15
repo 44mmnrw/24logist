@@ -34,6 +34,18 @@ class SiteSetting extends Model
         'yandex_site_verification',
         'ai_site_summary',
         'llms_txt_extra',
+        'leads_notifications_enabled',
+        'leads_notification_emails',
+        'leads_welcome_enabled',
+        'leads_welcome_subject',
+        'leads_welcome_body',
+        'mail_host',
+        'mail_port',
+        'mail_encryption',
+        'mail_username',
+        'mail_password',
+        'mail_from_address',
+        'mail_from_name',
         'yandex_metrika_enabled',
         'yandex_metrika_counter_id',
         'yandex_metrika_webvisor',
@@ -45,6 +57,10 @@ class SiteSetting extends Model
     protected function casts(): array
     {
         return [
+            'leads_notifications_enabled' => 'boolean',
+            'leads_welcome_enabled' => 'boolean',
+            'mail_port' => 'integer',
+            'mail_password' => 'encrypted',
             'yandex_metrika_enabled' => 'boolean',
             'yandex_metrika_webvisor' => 'boolean',
             'yandex_metrika_clickmap' => 'boolean',
@@ -89,6 +105,27 @@ class SiteSetting extends Model
 MD;
     }
 
+    public static function defaultLeadsWelcomeSubject(): string
+    {
+        return 'Спасибо за заявку, {name}!';
+    }
+
+    public static function defaultLeadsWelcomeBody(): string
+    {
+        return <<<'TEXT'
+Здравствуйте, {name}!
+
+Мы получили вашу заявку на сайте {brand}. Менеджер свяжется с вами в рабочее время.
+
+Ваш телефон: {phone}
+Тип заявки: {type}
+
+С уважением,
+Команда {brand}
+{company_email} · {company_phone}
+TEXT;
+    }
+
     public static function instance(): self
     {
         return static::query()->firstOrCreate(
@@ -107,6 +144,15 @@ MD;
                 'org_ogrn' => '1235000051824',
                 'ai_site_summary' => static::defaultAiSiteSummary(),
                 'llms_txt_extra' => static::defaultLlmsTxtExtra(),
+                'leads_notifications_enabled' => true,
+                'leads_notification_emails' => 'info@24logist.ru',
+                'leads_welcome_enabled' => true,
+                'leads_welcome_subject' => static::defaultLeadsWelcomeSubject(),
+                'leads_welcome_body' => static::defaultLeadsWelcomeBody(),
+                'mail_port' => 465,
+                'mail_encryption' => 'smtps',
+                'mail_from_address' => 'info@24logist.ru',
+                'mail_from_name' => 'ЛогистРу',
                 'yandex_metrika_enabled' => false,
                 'yandex_metrika_webvisor' => true,
                 'yandex_metrika_clickmap' => true,
