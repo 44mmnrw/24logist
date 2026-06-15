@@ -37,7 +37,8 @@ class SiteMailServiceTest extends TestCase
         $this->assertSame('smtp', config('mail.mailers.smtp.scheme'));
         $this->assertSame('mailer@example.com', config('mail.from.address'));
         $this->assertNull(config('mail.mailers.smtp.url'));
-        $this->assertFalse(config('mail.mailers.smtp.stream.ssl.verify_peer'));
+        $this->assertFalse(config('mail.mailers.smtp.verify_peer'));
+        $this->assertNull(config('mail.mailers.smtp.stream'));
     }
 
     public function test_apply_clears_mail_url_from_env_template(): void
@@ -155,4 +156,4 @@ class SiteMailServiceTest extends TestCase
         }
     }
 }
-
+

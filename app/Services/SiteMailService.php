@@ -36,19 +36,14 @@ final class SiteMailService
             'mail.from.name' => $this->fromName($site),
             'mail.mailers.smtp.transport' => 'smtp',
             'mail.mailers.smtp.scheme' => $scheme,
+            'mail.mailers.smtp.verify_peer' => false,
             'mail.mailers.smtp.url' => null,
             'mail.mailers.smtp.host' => $host,
             'mail.mailers.smtp.port' => (int) ($site->mail_port ?: 465),
             'mail.mailers.smtp.username' => filled($site->mail_username) ? (string) $site->mail_username : null,
             'mail.mailers.smtp.password' => $password,
             'mail.mailers.smtp.timeout' => 30,
-            'mail.mailers.smtp.stream' => [
-                'ssl' => [
-                    'verify_peer' => false,
-                    'verify_peer_name' => false,
-                    'allow_self_signed' => true,
-                ],
-            ],
+            'mail.mailers.smtp.stream' => null,
         ]);
 
         $mailManager = app('mail.manager');
@@ -148,4 +143,4 @@ final class SiteMailService
         return $message.' ['.$scheme.'://'.$host.':'.($site->mail_port ?: 465).']';
     }
 }
-
+
