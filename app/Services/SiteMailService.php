@@ -70,16 +70,6 @@ final class SiteMailService
             throw new \InvalidArgumentException('Укажите корректный email для теста.');
         }
 
-        $site = $this->settings->get();
-        $host = MailHost::normalize((string) $site->mail_host);
-
-        if ($host !== null && MailHost::looksLikeWebsiteHost($host)) {
-            throw new \RuntimeException(
-                '«'.$host.'» — это домен сайта, а не SMTP-сервер. '
-                .'Для почты @24logist.ru укажите mail.24logist.ru (хостинг) или smtp.yandex.ru (Яндекс 360).'
-            );
-        }
-
         try {
             Mail::to($recipient)->send(new SiteMailTestMessage());
         } catch (\Throwable $exception) {
@@ -123,16 +113,9 @@ final class SiteMailService
         $host = MailHost::normalize((string) $site->mail_host) ?? (string) $site->mail_host;
 
         if (str_contains($message, 'certificate verify failed') || str_contains($message, 'SSL operation failed')) {
-            $hints = [
-                'Проверьте SMTP-сервер: это должен быть smtp.yandex.ru, smtp.mail.ru или mail.ваш-домен.ru — не адрес сайта.',
-                'Если сервер верный, но хостинг выдаёт самоподписанный сертификат — отключите «Проверять SSL-сертификат» и сохраните настройки.',
-            ];
-
-            if (MailHost::looksLikeWebsiteHost($host)) {
-                array_unshift($hints, 'Сейчас указан «'.$host.'» — это домен сайта, а не почтовый сервер.');
-            }
-
-            return implode(' ', $hints);
+            return 'Ошибка SSL при подключении к '.$host.'. '
+                .'На многих серверах с почтой на том же домене (например 24logist.ru) стоит самоподписанный сертификат — '
+                .'отключите «Проверять SSL-сертификат SMTP», сохраните настройки и повторите тест.';
         }
 
         if (str_contains($message, 'Authentication failed') || str_contains($message, '535')) {

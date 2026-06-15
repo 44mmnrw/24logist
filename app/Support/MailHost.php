@@ -29,16 +29,4 @@ final class MailHost
 
         return strtolower($host);
     }
-
-    public static function looksLikeWebsiteHost(string $mailHost, ?string $appHost = null): bool
-    {
-        $mailHost = self::normalize($mailHost);
-        $appHost = self::normalize($appHost ?? (string) parse_url((string) config('app.url'), PHP_URL_HOST));
-
-        if ($mailHost === null || $appHost === null) {
-            return false;
-        }
-
-        return $mailHost === $appHost;
-    }
 }

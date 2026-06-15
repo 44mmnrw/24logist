@@ -296,8 +296,8 @@ final class GeneralSiteSettingForm
                     TextInput::make('mail_host')
                         ->label('SMTP-сервер')
                         ->maxLength(255)
-                        ->placeholder('mail.24logist.ru')
-                        ->helperText('Домен почты @24logist.ru — это не SMTP. Укажите сервер исходящей почты: mail.24logist.ru (хостинг), smtp.yandex.ru (Яндекс для домена) — из панели почты.')
+                        ->placeholder('24logist.ru')
+                        ->helperText('Хост SMTP из панели хостинга или проверки (например 24logist.ru, mail.24logist.ru). Порт 465 + SSL.')
                         ->columnSpanFull(),
                     TextInput::make('mail_port')
                         ->label('Порт')
