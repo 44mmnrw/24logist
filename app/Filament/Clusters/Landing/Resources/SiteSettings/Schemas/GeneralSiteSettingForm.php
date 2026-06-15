@@ -371,6 +371,17 @@ final class GeneralSiteSettingForm
                                 ->rows(2)
                                 ->placeholder('info@24logist.ru, sales@24logist.ru')
                                 ->helperText('Через запятую. Пусто — публичный email компании.'),
+                            TextInput::make('leads_notification_subject')
+                                ->label('Тема письма')
+                                ->maxLength(255)
+                                ->placeholder(SiteSetting::defaultLeadsNotificationSubject())
+                                ->columnSpanFull(),
+                            Textarea::make('leads_notification_body')
+                                ->label('Текст письма')
+                                ->rows(10)
+                                ->placeholder(SiteSetting::defaultLeadsNotificationBody())
+                                ->helperText('Подстановки: {name}, {email}, {phone}, {type}, {plan}, {brand}, {company_email}, {company_phone}, {admin_url}')
+                                ->columnSpanFull(),
                         ])
                         ->columns(1)
                         ->compact(),

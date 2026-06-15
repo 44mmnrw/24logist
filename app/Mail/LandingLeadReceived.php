@@ -2,7 +2,6 @@
 
 namespace App\Mail;
 
-use App\Filament\Clusters\Landing\Resources\LandingLeads\LandingLeadResource;
 use App\Models\LandingLead;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
@@ -16,21 +15,23 @@ class LandingLeadReceived extends Mailable
 
     public function __construct(
         public LandingLead $lead,
+        public string $subjectLine,
+        public string $bodyText,
     ) {}
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Новая заявка: '.$this->lead->typeLabel().' — '.$this->lead->name,
+            subject: $this->subjectLine,
         );
     }
 
     public function content(): Content
     {
         return new Content(
-            markdown: 'mail.landing-lead-received',
+            text: 'mail.landing-lead-received-custom',
             with: [
-                'adminUrl' => LandingLeadResource::getUrl('view', ['record' => $this->lead], isAbsolute: true),
+                'bodyText' => $this->bodyText,
             ],
         );
     }

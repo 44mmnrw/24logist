@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Filament\Clusters\Landing\Resources\LandingLeads\LandingLeadResource;
 use App\Mail\LandingLeadReceived;
 use App\Mail\LandingLeadWelcome;
 use App\Models\LandingLead;
@@ -41,10 +42,22 @@ final class LandingLeadNotificationService
             return;
         }
 
+        $subjectTemplate = filled($site->leads_notification_subject)
+            ? (string) $site->leads_notification_subject
+            : SiteSetting::defaultLeadsNotificationSubject();
+
+        $bodyTemplate = filled($site->leads_notification_body)
+            ? (string) $site->leads_notification_body
+            : SiteSetting::defaultLeadsNotificationBody();
+
+        $adminUrl = LandingLeadResource::getUrl('view', ['record' => $lead], isAbsolute: true);
+        $subject = LandingLeadMailTemplate::render($subjectTemplate, $lead, $site, ['{admin_url}' => $adminUrl]);
+        $body = LandingLeadMailTemplate::render($bodyTemplate, $lead, $site, ['{admin_url}' => $adminUrl]);
+
         try {
             $this->mail->apply();
 
-            Mail::to($recipients)->send(new LandingLeadReceived($lead));
+            Mail::to($recipients)->send(new LandingLeadReceived($lead, $subject, $body));
         } catch (Throwable $exception) {
             report($exception);
         }

@@ -19,9 +19,13 @@ final class LandingLeadMailTemplate
         '{brand}',
         '{company_email}',
         '{company_phone}',
+        '{admin_url}',
     ];
 
-    public static function render(string $template, LandingLead $lead, SiteSetting $site): string
+    /**
+     * @param  array<string, string>  $extraReplacements
+     */
+    public static function render(string $template, LandingLead $lead, SiteSetting $site, array $extraReplacements = []): string
     {
         $replacements = [
             '{name}' => trim((string) $lead->name),
@@ -32,7 +36,10 @@ final class LandingLeadMailTemplate
             '{brand}' => trim((string) ($site->org_brand_name ?? '')) ?: 'ЛогистРу',
             '{company_email}' => trim((string) ($site->org_email ?? '')),
             '{company_phone}' => trim((string) ($site->org_phone ?? '')),
+            '{admin_url}' => '',
         ];
+
+        $replacements = array_merge($replacements, $extraReplacements);
 
         return str_replace(array_keys($replacements), array_values($replacements), $template);
     }

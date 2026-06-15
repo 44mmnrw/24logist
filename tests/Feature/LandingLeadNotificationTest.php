@@ -22,6 +22,8 @@ class LandingLeadNotificationTest extends TestCase
             [
                 'leads_notifications_enabled' => true,
                 'leads_notification_emails' => 'leads@example.com',
+                'leads_notification_subject' => 'Новая заявка от {name}',
+                'leads_notification_body' => 'Телефон: {phone}. Открыть: {admin_url}',
                 'leads_welcome_enabled' => true,
                 'leads_welcome_subject' => 'Спасибо, {name}!',
                 'leads_welcome_body' => 'Здравствуйте, {name}! Мы получили заявку.',
@@ -52,7 +54,10 @@ class LandingLeadNotificationTest extends TestCase
 
         Mail::assertSent(LandingLeadReceived::class, function (LandingLeadReceived $mail): bool {
             return $mail->hasTo('leads@example.com')
-                && $mail->lead->name === 'Иван Тестов';
+                && $mail->lead->name === 'Иван Тестов'
+                && str_contains($mail->subjectLine, 'Иван Тестов')
+                && str_contains($mail->bodyText, '+7 900 000-00-00')
+                && str_contains($mail->bodyText, '/landing-leads/');
         });
 
         Mail::assertSent(LandingLeadWelcome::class, function (LandingLeadWelcome $mail): bool {

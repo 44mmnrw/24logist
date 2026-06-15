@@ -36,6 +36,8 @@ class SiteSetting extends Model
         'llms_txt_extra',
         'leads_notifications_enabled',
         'leads_notification_emails',
+        'leads_notification_subject',
+        'leads_notification_body',
         'leads_welcome_enabled',
         'leads_welcome_subject',
         'leads_welcome_body',
@@ -112,6 +114,26 @@ MD;
         return 'Спасибо за заявку, {name}!';
     }
 
+    public static function defaultLeadsNotificationSubject(): string
+    {
+        return 'Новая заявка: {type} — {name}';
+    }
+
+    public static function defaultLeadsNotificationBody(): string
+    {
+        return <<<'TEXT'
+Новая заявка с сайта {brand}
+
+Тип: {type}
+Имя: {name}
+Телефон: {phone}
+Email: {email}
+Тариф: {plan}
+
+Открыть в админке: {admin_url}
+TEXT;
+    }
+
     public static function defaultLeadsWelcomeBody(): string
     {
         return <<<'TEXT'
@@ -153,6 +175,8 @@ TEXT;
                 'llms_txt_extra' => static::defaultLlmsTxtExtra(),
                 'leads_notifications_enabled' => true,
                 'leads_notification_emails' => 'info@24logist.ru',
+                'leads_notification_subject' => static::defaultLeadsNotificationSubject(),
+                'leads_notification_body' => static::defaultLeadsNotificationBody(),
                 'leads_welcome_enabled' => true,
                 'leads_welcome_subject' => static::defaultLeadsWelcomeSubject(),
                 'leads_welcome_body' => static::defaultLeadsWelcomeBody(),
