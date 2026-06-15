@@ -297,7 +297,7 @@ final class GeneralSiteSettingForm
                         ->label('SMTP-сервер')
                         ->maxLength(255)
                         ->placeholder('24logist.ru')
-                        ->helperText('Как в панели хостинга. Обычно: 24logist.ru, порт 465, шифрование SSL.')
+                        ->helperText('Как в панели хостинга. Обычно: 24logist.ru, порт 465, шифрование SSL. Соединение шифруется; на shared-хостинге PHP часто не может проверить SMTP-сертификат — это нормально.')
                         ->columnSpanFull(),
                     TextInput::make('mail_port')
                         ->label('Порт')
