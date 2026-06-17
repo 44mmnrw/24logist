@@ -1,0 +1,385 @@
+<?php
+
+namespace App\Filament\Clusters\Landing\Resources\BlogPosts;
+
+use App\Filament\Clusters\Landing\Resources\BlogPosts\Pages\CreateBlogPost;
+use App\Filament\Clusters\Landing\Resources\BlogPosts\Pages\EditBlogPost;
+use App\Filament\Clusters\Landing\Resources\BlogPosts\Pages\ListBlogPosts;
+use App\Models\BlogPost;
+use App\Support\FilamentUploadPreview;
+use App\Support\OpenGraph;
+use BackedEnum;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TagsInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Support\Str;
+
+class BlogPostResource extends Resource
+{
+    protected static ?string $model = BlogPost::class;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedNewspaper;
+
+    protected static ?string $navigationLabel = 'Блог';
+
+    protected static ?string $modelLabel = 'статья';
+
+    protected static ?string $pluralModelLabel = 'Статьи блога';
+
+    protected static ?string $recordTitleAttribute = 'title';
+
+    protected static ?int $navigationSort = 3;
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Tabs::make('blog_post_tabs')
+                    ->tabs([
+                        Tab::make('content')
+                            ->label('Контент')
+                            ->icon('heroicon-o-document-text')
+                            ->schema(self::contentTab()),
+                        Tab::make('media')
+                            ->label('Изображения')
+                            ->icon('heroicon-o-photo')
+                            ->schema(self::mediaTab()),
+                        Tab::make('seo')
+                            ->label('SEO')
+                            ->icon('heroicon-o-magnifying-glass')
+                            ->schema(self::seoTab()),
+                        Tab::make('publishing')
+                            ->label('Публикация')
+                            ->icon('heroicon-o-calendar-days')
+                            ->schema(self::publishingTab()),
+                    ])
+                    ->persistTabInQueryString()
+                    ->columnSpanFull(),
+            ]);
+    }
+
+    /**
+     * @return array<int, mixed>
+     */
+    private static function contentTab(): array
+    {
+        return [
+            Section::make('Основное')
+                ->schema([
+                    TextInput::make('title')
+                        ->label('Заголовок')
+                        ->required()
+                        ->maxLength(255)
+                        ->live(onBlur: true)
+                        ->afterStateUpdated(function (Set $set, Get $get, ?string $state): void {
+                            if (filled($get('slug'))) {
+                                return;
+                            }
+
+                            $set('slug', Str::slug((string) $state));
+                        }),
+                    TextInput::make('slug')
+                        ->label('URL-адрес')
+                        ->required()
+                        ->maxLength(255)
+                        ->unique(ignoreRecord: true)
+                        ->helperText('Статья откроется по адресу /blog/slug. Используйте латиницу, цифры и дефисы.'),
+                    Textarea::make('subtitle')
+                        ->label('Подзаголовок')
+                        ->rows(2)
+                        ->maxLength(500)
+                        ->columnSpanFull(),
+                    Textarea::make('excerpt')
+                        ->label('Краткое описание')
+                        ->rows(3)
+                        ->maxLength(700)
+                        ->helperText('Показывается в карточках и используется как fallback для meta description.')
+                        ->columnSpanFull(),
+                    RichEditor::make('body')
+                        ->label('Текст статьи')
+                        ->required()
+                        ->columnSpanFull(),
+                ])
+                ->columns(2)
+                ->columnSpanFull(),
+            Section::make('Классификация')
+                ->schema([
+                    TextInput::make('category')
+                        ->label('Рубрика')
+                        ->maxLength(255)
+                        ->placeholder('Автоматизация'),
+                    TagsInput::make('tags')
+                        ->label('Теги')
+                        ->placeholder('Добавьте тег')
+                        ->columnSpanFull(),
+                    TextInput::make('author_name')
+                        ->label('Автор')
+                        ->maxLength(255)
+                        ->placeholder('Команда 24Logist'),
+                    TextInput::make('reading_time_minutes')
+                        ->label('Время чтения')
+                        ->numeric()
+                        ->minValue(1)
+                        ->maxValue(999)
+                        ->suffix('мин'),
+                ])
+                ->columns(2)
+                ->columnSpanFull(),
+        ];
+    }
+
+    /**
+     * @return array<int, mixed>
+     */
+    private static function mediaTab(): array
+    {
+        return [
+            Section::make('Обложка статьи')
+                ->description('Используется на странице статьи и в карточках блога.')
+                ->schema([
+                    FileUpload::make('cover_image_path')
+                        ->label('Изображение обложки')
+                        ->disk('public')
+                        ->directory('blog/covers')
+                        ->visibility('public')
+                        ->image()
+                        ->imagePreviewHeight('220')
+                        ->maxFiles(1)
+                        ->maxSize(8192)
+                        ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
+                        ->fetchFileInformation(false)
+                        ->openable()
+                        ->downloadable()
+                        ->getUploadedFileUsing(static::uploadPreview(...))
+                        ->helperText('Рекомендуется 1600x900 или 1200x675 px. PNG, JPG или WebP до 8 МБ.')
+                        ->columnSpanFull(),
+                    TextInput::make('cover_image_alt')
+                        ->label('Alt-текст обложки')
+                        ->maxLength(255)
+                        ->columnSpanFull(),
+                ])
+                ->columnSpanFull(),
+        ];
+    }
+
+    /**
+     * @return array<int, mixed>
+     */
+    private static function seoTab(): array
+    {
+        return [
+            Section::make('Meta-теги')
+                ->schema([
+                    TextInput::make('meta_title')
+                        ->label('Meta title')
+                        ->maxLength(70)
+                        ->helperText('Тег <title>. Если пусто, используется заголовок статьи. Рекомендуется до 60-70 символов.'),
+                    Textarea::make('meta_description')
+                        ->label('Meta description')
+                        ->rows(3)
+                        ->maxLength(500)
+                        ->helperText('Описание в поиске и соцсетях. Рекомендуется 120-160 символов.')
+                        ->columnSpanFull(),
+                    Textarea::make('meta_keywords')
+                        ->label('Meta keywords')
+                        ->rows(2)
+                        ->maxLength(500)
+                        ->helperText('Через запятую. Необязательно.')
+                        ->columnSpanFull(),
+                    Select::make('meta_robots')
+                        ->label('Robots')
+                        ->options([
+                            OpenGraph::ROBOTS_INDEX => 'index, follow (по умолчанию)',
+                            'noindex, nofollow' => 'noindex, nofollow',
+                            'noindex, follow' => 'noindex, follow',
+                            'index, nofollow' => 'index, nofollow',
+                        ])
+                        ->placeholder('index, follow (по умолчанию)')
+                        ->native(false),
+                    TextInput::make('canonical_url')
+                        ->label('Canonical URL')
+                        ->maxLength(500)
+                        ->placeholder('https://24logist.ru/blog/example')
+                        ->helperText('Оставьте пустым, если canonical должен совпадать с URL статьи.')
+                        ->columnSpanFull(),
+                ])
+                ->columns(2)
+                ->columnSpanFull(),
+            Section::make('Open Graph и соцсети')
+                ->schema([
+                    TextInput::make('og_title')
+                        ->label('OG title')
+                        ->maxLength(255)
+                        ->helperText('Пусто — используется meta title или заголовок статьи.'),
+                    Select::make('og_type')
+                        ->label('OG type')
+                        ->options([
+                            'article' => 'article',
+                            'website' => 'website',
+                        ])
+                        ->default('article')
+                        ->native(false),
+                    Textarea::make('og_description')
+                        ->label('OG description')
+                        ->rows(2)
+                        ->maxLength(500)
+                        ->helperText('Пусто — используется meta description или краткое описание.')
+                        ->columnSpanFull(),
+                    FileUpload::make('og_image_path')
+                        ->label('OG image')
+                        ->disk('public')
+                        ->directory('blog/og')
+                        ->visibility('public')
+                        ->image()
+                        ->imagePreviewHeight('120')
+                        ->maxFiles(1)
+                        ->maxSize(4096)
+                        ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
+                        ->fetchFileInformation(false)
+                        ->openable()
+                        ->downloadable()
+                        ->getUploadedFileUsing(static::uploadPreview(...))
+                        ->helperText('Рекомендуется 1200x630 px. Пусто — используется обложка статьи или OG сайта.')
+                        ->columnSpanFull(),
+                ])
+                ->columns(2)
+                ->columnSpanFull(),
+        ];
+    }
+
+    /**
+     * @return array<int, mixed>
+     */
+    private static function publishingTab(): array
+    {
+        return [
+            Section::make('Статус')
+                ->schema([
+                    Toggle::make('is_published')
+                        ->label('Опубликована')
+                        ->default(false)
+                        ->helperText('Неопубликованные статьи не видны на сайте и не попадают в sitemap.'),
+                    Toggle::make('is_featured')
+                        ->label('Выделить в блоге')
+                        ->default(false)
+                        ->helperText('Выделенная статья показывается крупным блоком первой на странице блога.'),
+                    DateTimePicker::make('published_at')
+                        ->label('Дата публикации')
+                        ->seconds(false)
+                        ->helperText('Если статья опубликована, но дата пустая, она заполнится автоматически при сохранении. Будущая дата скрывает статью до наступления времени.'),
+                    TextInput::make('sort_order')
+                        ->label('Порядок')
+                        ->numeric()
+                        ->default(0)
+                        ->helperText('Меньшее число выводится выше при одинаковой дате.'),
+                ])
+                ->columns(2)
+                ->columnSpanFull(),
+        ];
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('title')
+                    ->label('Заголовок')
+                    ->searchable()
+                    ->sortable()
+                    ->limit(48),
+                TextColumn::make('slug')
+                    ->label('Slug')
+                    ->badge()
+                    ->copyable()
+                    ->copyMessage('Slug скопирован'),
+                TextColumn::make('category')
+                    ->label('Рубрика')
+                    ->searchable()
+                    ->toggleable(),
+                IconColumn::make('is_published')
+                    ->label('Опубликована')
+                    ->boolean(),
+                IconColumn::make('is_featured')
+                    ->label('Featured')
+                    ->boolean()
+                    ->toggleable(),
+                TextColumn::make('published_at')
+                    ->label('Дата')
+                    ->dateTime('d.m.Y H:i')
+                    ->sortable(),
+                TextColumn::make('url')
+                    ->label('URL')
+                    ->state(fn (BlogPost $record): string => '/blog/'.$record->slug)
+                    ->copyable()
+                    ->copyableState(fn (BlogPost $record): string => $record->getUrl())
+                    ->copyMessage('Ссылка скопирована')
+                    ->toggleable(),
+                TextColumn::make('updated_at')
+                    ->label('Обновлена')
+                    ->dateTime('d.m.Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->defaultSort('published_at', 'desc')
+            ->filters([
+                SelectFilter::make('is_published')
+                    ->label('Статус')
+                    ->options([
+                        '1' => 'Опубликованные',
+                        '0' => 'Черновики',
+                    ]),
+                SelectFilter::make('category')
+                    ->label('Рубрика')
+                    ->options(fn () => BlogPost::query()
+                        ->whereNotNull('category')
+                        ->orderBy('category')
+                        ->pluck('category', 'category')),
+            ])
+            ->recordActions([
+                EditAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListBlogPosts::route('/'),
+            'create' => CreateBlogPost::route('/create'),
+            'edit' => EditBlogPost::route('/{record}/edit'),
+        ];
+    }
+
+    /**
+     * @param  string|array<string, string>|null  $storedFileNames
+     * @return array{name: string, size: int, type: ?string, url: ?string}|null
+     */
+    protected static function uploadPreview(FileUpload $component, string $file, string|array|null $storedFileNames): ?array
+    {
+        return FilamentUploadPreview::resolve($component, $file, $storedFileNames);
+    }
+}

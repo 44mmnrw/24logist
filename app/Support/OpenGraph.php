@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\BlogPost;
 use App\Models\CmsPage;
 use App\Services\LandingPageService;
 use App\Services\SiteSettingsService;
@@ -102,6 +103,54 @@ final class OpenGraph
             type: $type,
             robots: $robots,
             keywords: $extra['meta_keywords'] ?? $settings->seo_keywords,
+        );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function forBlogIndex(): array
+    {
+        $settings = app(SiteSettingsService::class)->get();
+
+        return self::build(
+            title: self::joinTitle('Блог о цифровой логистике'),
+            description: 'Материалы 24Logist о перевозках, автоматизации логистики, документообороте, контроле рейсов и управлении автопарком.',
+            url: route('blog.index'),
+            imagePath: $settings->og_image_path ?: self::defaultHeroImagePath(),
+            type: 'website',
+            robots: self::ROBOTS_INDEX,
+            keywords: 'логистика, грузоперевозки, автоматизация логистики, TMS, управление автопарком',
+        );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function forBlogPost(BlogPost $post): array
+    {
+        $settings = app(SiteSettingsService::class)->get();
+
+        $title = filled($post->og_title)
+            ? (string) $post->og_title
+            : self::joinTitle($post->displayTitle());
+
+        $description = filled($post->og_description)
+            ? (string) $post->og_description
+            : self::trimDescription($post->meta_description ?: $post->displayExcerpt());
+
+        $imagePath = filled($post->og_image_path)
+            ? $post->og_image_path
+            : ($post->cover_image_path ?: $settings->og_image_path);
+
+        return self::build(
+            title: $title,
+            description: $description,
+            url: filled($post->canonical_url) ? (string) $post->canonical_url : $post->getUrl(),
+            imagePath: $imagePath,
+            type: $post->og_type ?: 'article',
+            robots: filled($post->meta_robots) ? (string) $post->meta_robots : self::ROBOTS_INDEX,
+            keywords: $post->meta_keywords ?: $settings->seo_keywords,
         );
     }
 

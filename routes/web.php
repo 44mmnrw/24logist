@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AppleTouchIconController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\FaviconController;
 use App\Http\Controllers\ManifestController;
 use App\Http\Controllers\PwaIconController;
@@ -35,6 +36,13 @@ Route::post('/leads/quiz', [LandingLeadController::class, 'storeQuiz'])
 Route::post('/leads/contact', [LandingLeadController::class, 'storeContact'])
     ->middleware('throttle:12,1')
     ->name('leads.contact.store');
+
+Route::get('/blog', [BlogController::class, 'index'])
+    ->name('blog.index');
+
+Route::get('/blog/{slug}', [BlogController::class, 'show'])
+    ->name('blog.show')
+    ->where('slug', '[a-z0-9\-]+');
 
 Route::get('/privacy-policy', [PageController::class, 'show'])
     ->defaults('slug', 'privacy-policy')

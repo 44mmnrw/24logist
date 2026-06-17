@@ -1,11 +1,15 @@
 @props([
     'landing' => null,
     'page' => null,
+    'blogPost' => null,
+    'blogIndex' => false,
     'notFound' => false,
 ])
 
 @php
     $meta = match (true) {
+        $blogPost !== null => \App\Support\OpenGraph::forBlogPost($blogPost),
+        $blogIndex => \App\Support\OpenGraph::forBlogIndex(),
         $page !== null => \App\Support\OpenGraph::forPage($page),
         $notFound => \App\Support\OpenGraph::forNotFound(),
         default => \App\Support\OpenGraph::forLanding($landing),
@@ -74,6 +78,26 @@
 
 @if (filled($meta['description']))
     <meta name="twitter:description" content="{{ $meta['description'] }}">
+@endif
+
+@if ($blogPost !== null)
+    @if ($blogPost->published_at)
+        <meta property="article:published_time" content="{{ $blogPost->published_at->toIso8601String() }}">
+    @endif
+    @if ($blogPost->updated_at)
+        <meta property="article:modified_time" content="{{ $blogPost->updated_at->toIso8601String() }}">
+    @endif
+    @if (filled($blogPost->author_name))
+        <meta property="article:author" content="{{ $blogPost->author_name }}">
+    @endif
+    @if (filled($blogPost->category))
+        <meta property="article:section" content="{{ $blogPost->category }}">
+    @endif
+    @foreach ((array) ($blogPost->tags ?? []) as $tag)
+        @if (filled($tag))
+            <meta property="article:tag" content="{{ $tag }}">
+        @endif
+    @endforeach
 @endif
 
 @if (filled($meta['twitter_site'] ?? null))

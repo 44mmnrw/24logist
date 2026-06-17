@@ -1,12 +1,16 @@
 @props([
     'landing' => null,
     'page' => null,
+    'blogPost' => null,
+    'blogIndex' => false,
     'notFound' => false,
 ])
 
 @php
     $graphs = match (true) {
         $notFound => [],
+        $blogPost !== null => \App\Support\StructuredData::forBlogPost($blogPost),
+        $blogIndex => \App\Support\StructuredData::forBlogIndex(),
         $page !== null => \App\Support\StructuredData::forPage($page),
         default => \App\Support\StructuredData::forLanding($landing),
     };

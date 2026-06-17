@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\BlogPost;
 use App\Models\CmsPage;
 use App\Services\LandingPageService;
 use App\Services\SiteSettingsService;
@@ -49,6 +50,41 @@ final class StructuredData
                 type: $pageType,
             ),
             self::breadcrumbList($page, $meta['url']),
+        ]));
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public static function forBlogIndex(): array
+    {
+        $meta = OpenGraph::forBlogIndex();
+
+        return array_values(array_filter([
+            self::organization(),
+            self::website(),
+            self::webPage(
+                name: self::pageTitle($meta['title']),
+                description: $meta['description'],
+                url: $meta['url'],
+                type: 'Blog',
+            ),
+            self::breadcrumbListForBlog($meta['url']),
+        ]));
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public static function forBlogPost(BlogPost $post): array
+    {
+        $meta = OpenGraph::forBlogPost($post);
+
+        return array_values(array_filter([
+            self::organization(),
+            self::website(),
+            self::article($post, $meta),
+            self::breadcrumbListForBlogPost($post, $meta['url']),
         ]));
     }
 
@@ -212,6 +248,118 @@ final class StructuredData
                     '@type' => 'ListItem',
                     'position' => 2,
                     'name' => $page->title,
+                    'item' => $url,
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private static function article(BlogPost $post, array $meta): ?array
+    {
+        $data = [
+            '@context' => self::CONTEXT,
+            '@type' => 'Article',
+            '@id' => $meta['url'].'#article',
+            'mainEntityOfPage' => [
+                '@id' => $meta['url'].'#webpage',
+            ],
+            'headline' => self::pageTitle($post->title),
+            'url' => $meta['url'],
+            'inLanguage' => 'ru-RU',
+            'publisher' => [
+                '@id' => self::siteUrl().'#organization',
+            ],
+        ];
+
+        if (filled($meta['description'] ?? null)) {
+            $data['description'] = $meta['description'];
+        }
+
+        if (filled($meta['image'] ?? null)) {
+            $data['image'] = $meta['image'];
+        }
+
+        if ($post->published_at !== null) {
+            $data['datePublished'] = $post->published_at->toIso8601String();
+        }
+
+        if ($post->updated_at !== null) {
+            $data['dateModified'] = $post->updated_at->toIso8601String();
+        }
+
+        if (filled($post->author_name)) {
+            $data['author'] = [
+                '@type' => 'Person',
+                'name' => (string) $post->author_name,
+            ];
+        }
+
+        if (filled($post->category)) {
+            $data['articleSection'] = (string) $post->category;
+        }
+
+        $tags = array_values(array_filter((array) $post->tags, fn ($tag): bool => filled($tag)));
+
+        if ($tags !== []) {
+            $data['keywords'] = implode(', ', $tags);
+        }
+
+        return $data;
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private static function breadcrumbListForBlog(string $url): ?array
+    {
+        return [
+            '@context' => self::CONTEXT,
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => [
+                [
+                    '@type' => 'ListItem',
+                    'position' => 1,
+                    'name' => 'Главная',
+                    'item' => self::siteUrl(),
+                ],
+                [
+                    '@type' => 'ListItem',
+                    'position' => 2,
+                    'name' => 'Блог',
+                    'item' => $url,
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private static function breadcrumbListForBlogPost(BlogPost $post, string $url): ?array
+    {
+        return [
+            '@context' => self::CONTEXT,
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => [
+                [
+                    '@type' => 'ListItem',
+                    'position' => 1,
+                    'name' => 'Главная',
+                    'item' => self::siteUrl(),
+                ],
+                [
+                    '@type' => 'ListItem',
+                    'position' => 2,
+                    'name' => 'Блог',
+                    'item' => route('blog.index'),
+                ],
+                [
+                    '@type' => 'ListItem',
+                    'position' => 3,
+                    'name' => $post->title,
                     'item' => $url,
                 ],
             ],

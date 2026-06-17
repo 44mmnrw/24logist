@@ -37,7 +37,12 @@
     <div class="landing-footer__bottom">
         <div class="landing-shell landing-footer__bottom-shell">
             <span>{{ $extra['copyright'] ?? '' }}</span>
-            <span>{{ $extra['tagline'] ?? '' }}</span>
+            <span>
+                <a href="{{ route('blog.index') }}">Блог</a>
+                @if (! empty($extra['tagline']))
+                    <span aria-hidden="true"> · </span>{{ $extra['tagline'] }}
+                @endif
+            </span>
         </div>
     </div>
 </footer>

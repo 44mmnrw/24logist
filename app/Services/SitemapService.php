@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\BlogPost;
 use App\Models\CmsPage;
 use App\Models\LandingSection;
 use Illuminate\Support\Carbon;
@@ -128,6 +129,31 @@ final class SitemapService
                 'lastmod' => $this->formatLastmod($page->updated_at),
                 'changefreq' => 'monthly',
                 'priority' => $page->slug === 'contacts' ? '0.9' : '0.7',
+            ];
+        }
+
+        $blogLastmod = BlogPost::query()
+            ->published()
+            ->max('updated_at');
+
+        $urls[] = [
+            'loc' => route('blog.index'),
+            'lastmod' => $this->formatLastmod($blogLastmod),
+            'changefreq' => 'weekly',
+            'priority' => '0.8',
+        ];
+
+        $posts = BlogPost::query()
+            ->published()
+            ->orderByDesc('published_at')
+            ->get();
+
+        foreach ($posts as $post) {
+            $urls[] = [
+                'loc' => $post->getUrl(),
+                'lastmod' => $this->formatLastmod($post->updated_at),
+                'changefreq' => 'monthly',
+                'priority' => $post->is_featured ? '0.8' : '0.6',
             ];
         }
 
