@@ -32,6 +32,10 @@ final class GeneralSiteSettingForm
                         ->label('SEO')
                         ->icon('heroicon-o-magnifying-glass')
                         ->schema(self::seoTab()),
+                    Tab::make('blog')
+                        ->label('Блог')
+                        ->icon('heroicon-o-newspaper')
+                        ->schema(self::blogTab()),
                     Tab::make('organization')
                         ->label('Компания')
                         ->icon('heroicon-o-building-office-2')
@@ -150,6 +154,37 @@ final class GeneralSiteSettingForm
                         ->downloadable()
                         ->getUploadedFileUsing(static::uploadPreview(...))
                         ->helperText('1200×630 px. Главная и fallback для CMS.')
+                        ->columnSpanFull(),
+                ])
+                ->columns(2)
+                ->columnSpanFull(),
+        ];
+    }
+
+    /**
+     * @return array<int, mixed>
+     */
+    private static function blogTab(): array
+    {
+        return [
+            Section::make('Главная страница блога')
+                ->description('Тексты hero-блока на странице /blog и fallback для SEO-описания блога.')
+                ->schema([
+                    TextInput::make('blog_kicker')
+                        ->label('Плашка над заголовком')
+                        ->maxLength(255)
+                        ->placeholder('Блог 24Logist')
+                        ->helperText('Небольшой текст над H1.'),
+                    TextInput::make('blog_title')
+                        ->label('H1 блога')
+                        ->maxLength(255)
+                        ->placeholder('Практика цифровой логистики')
+                        ->helperText('Главный заголовок страницы /blog.'),
+                    Textarea::make('blog_description')
+                        ->label('Описание под заголовком')
+                        ->rows(3)
+                        ->maxLength(700)
+                        ->placeholder('Разбираем перевозки, автоматизацию, документооборот, контроль рейсов и управленческие процессы без лишней теории.')
                         ->columnSpanFull(),
                 ])
                 ->columns(2)

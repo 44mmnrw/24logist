@@ -20,12 +20,25 @@
     <div class="landing-page blog-page">
         <x-landing.header />
 
+        @php
+            $siteSettings = app(\App\Services\SiteSettingsService::class)->get();
+            $blogKicker = filled($siteSettings->blog_kicker) ? (string) $siteSettings->blog_kicker : 'Блог 24Logist';
+            $blogTitle = filled($siteSettings->blog_title) ? (string) $siteSettings->blog_title : 'Практика цифровой логистики';
+            $blogDescription = filled($siteSettings->blog_description)
+                ? (string) $siteSettings->blog_description
+                : 'Разбираем перевозки, автоматизацию, документооборот, контроль рейсов и управленческие процессы без лишней теории.';
+        @endphp
+
         <main>
             <section class="blog-hero">
                 <div class="landing-shell blog-hero__shell">
-                    <div class="section-kicker">Блог 24Logist</div>
-                    <h1>Практика цифровой логистики</h1>
-                    <p>Разбираем перевозки, автоматизацию, документооборот, контроль рейсов и управленческие процессы без лишней теории.</p>
+                    @if ($blogKicker !== '')
+                        <div class="section-kicker">{{ $blogKicker }}</div>
+                    @endif
+                    <h1>{{ $blogTitle }}</h1>
+                    @if ($blogDescription !== '')
+                        <p>{{ $blogDescription }}</p>
+                    @endif
                 </div>
             </section>
 

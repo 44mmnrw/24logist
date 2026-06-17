@@ -112,10 +112,17 @@ final class OpenGraph
     public static function forBlogIndex(): array
     {
         $settings = app(SiteSettingsService::class)->get();
+        $title = filled($settings->blog_title)
+            ? (string) $settings->blog_title
+            : 'Блог о цифровой логистике';
+
+        $description = filled($settings->blog_description)
+            ? (string) $settings->blog_description
+            : 'Материалы 24Logist о перевозках, автоматизации логистики, документообороте, контроле рейсов и управлении автопарком.';
 
         return self::build(
-            title: self::joinTitle('Блог о цифровой логистике'),
-            description: 'Материалы 24Logist о перевозках, автоматизации логистики, документообороте, контроле рейсов и управлении автопарком.',
+            title: self::joinTitle($title),
+            description: $description,
             url: route('blog.index'),
             imagePath: $settings->og_image_path ?: self::defaultHeroImagePath(),
             type: 'website',
