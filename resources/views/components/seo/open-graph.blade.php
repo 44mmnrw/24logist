@@ -67,17 +67,17 @@
     @if (filled($meta['image_type'] ?? null))
         <meta property="og:image:type" content="{{ $meta['image_type'] }}">
     @endif
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="{{ $meta['image'] }}">
+    <meta name="twitter:card" content="{{ $meta['twitter_card'] ?? 'summary_large_image' }}">
+    <meta name="twitter:image" content="{{ $meta['twitter_image'] ?? $meta['image'] }}">
 @else
-    <meta name="twitter:card" content="summary">
+    <meta name="twitter:card" content="{{ $meta['twitter_card'] ?? 'summary' }}">
 @endif
 
-<meta name="twitter:title" content="{{ $meta['title'] }}">
+<meta name="twitter:title" content="{{ $meta['twitter_title'] ?? $meta['title'] }}">
 <meta name="twitter:url" content="{{ $meta['url'] }}">
 
-@if (filled($meta['description']))
-    <meta name="twitter:description" content="{{ $meta['description'] }}">
+@if (filled($meta['twitter_description'] ?? $meta['description']))
+    <meta name="twitter:description" content="{{ $meta['twitter_description'] ?? $meta['description'] }}">
 @endif
 
 @if ($blogPost !== null)
@@ -87,11 +87,13 @@
     @if ($blogPost->updated_at)
         <meta property="article:modified_time" content="{{ $blogPost->updated_at->toIso8601String() }}">
     @endif
-    @if (filled($blogPost->author_name))
+    @if (filled($blogPost->author_url))
+        <meta property="article:author" content="{{ $blogPost->author_url }}">
+    @elseif (filled($blogPost->author_name))
         <meta property="article:author" content="{{ $blogPost->author_name }}">
     @endif
-    @if (filled($blogPost->category))
-        <meta property="article:section" content="{{ $blogPost->category }}">
+    @if (filled($blogPost->displayCategory()))
+        <meta property="article:section" content="{{ $blogPost->displayCategory() }}">
     @endif
     @foreach ((array) ($blogPost->tags ?? []) as $tag)
         @if (filled($tag))

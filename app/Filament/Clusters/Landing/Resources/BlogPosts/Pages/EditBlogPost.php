@@ -15,6 +15,8 @@ class EditBlogPost extends EditRecord
     {
         $data = FilamentMediaUpload::wrapPathForFill($data, 'cover_image_path');
         $data = FilamentMediaUpload::wrapPathForFill($data, 'og_image_path');
+        $data = FilamentMediaUpload::wrapPathForFill($data, 'twitter_image_path');
+        $data = FilamentMediaUpload::wrapPathForFill($data, 'schema_image_path');
 
         return $data;
     }
@@ -23,6 +25,8 @@ class EditBlogPost extends EditRecord
     {
         $data['cover_image_path'] = FilamentMediaUpload::persist($data['cover_image_path'] ?? null, 'blog/covers');
         $data['og_image_path'] = FilamentMediaUpload::persist($data['og_image_path'] ?? null, 'blog/og');
+        $data['twitter_image_path'] = FilamentMediaUpload::persist($data['twitter_image_path'] ?? null, 'blog/twitter');
+        $data['schema_image_path'] = FilamentMediaUpload::persist($data['schema_image_path'] ?? null, 'blog/schema');
 
         return $data;
     }

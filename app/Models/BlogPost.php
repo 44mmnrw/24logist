@@ -6,6 +6,7 @@ use App\Support\LandingMedia;
 use Filament\Forms\Components\RichEditor\RichContentRenderer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
@@ -20,7 +21,10 @@ class BlogPost extends Model
         'cover_image_path',
         'cover_image_alt',
         'author_name',
+        'author_type',
+        'author_url',
         'category',
+        'blog_category_id',
         'tags',
         'reading_time_minutes',
         'meta_title',
@@ -32,6 +36,14 @@ class BlogPost extends Model
         'og_description',
         'og_image_path',
         'og_type',
+        'twitter_title',
+        'twitter_description',
+        'twitter_image_path',
+        'twitter_card',
+        'schema_type',
+        'schema_headline',
+        'schema_description',
+        'schema_image_path',
         'is_published',
         'is_featured',
         'published_at',
@@ -51,6 +63,14 @@ class BlogPost extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    /**
+     * @return BelongsTo<BlogCategory, BlogPost>
+     */
+    public function blogCategory(): BelongsTo
+    {
+        return $this->belongsTo(BlogCategory::class);
     }
 
     public function scopePublished(Builder $query): Builder
@@ -85,6 +105,19 @@ class BlogPost extends Model
         return $body !== '' ? Str::limit($body, 220) : null;
     }
 
+    public function displayCategory(): ?string
+    {
+        $name = trim((string) ($this->blogCategory?->name ?? ''));
+
+        if ($name !== '') {
+            return $name;
+        }
+
+        $legacyCategory = trim((string) $this->category);
+
+        return $legacyCategory !== '' ? $legacyCategory : null;
+    }
+
     public function renderBody(): string
     {
         return RichContentRenderer::make($this->body ?? '')->toHtml();
@@ -106,6 +139,8 @@ class BlogPost extends Model
             $post->slug = Str::slug($post->slug);
             $post->cover_image_path = LandingMedia::normalizePath($post->cover_image_path);
             $post->og_image_path = LandingMedia::normalizePath($post->og_image_path);
+            $post->twitter_image_path = LandingMedia::normalizePath($post->twitter_image_path);
+            $post->schema_image_path = LandingMedia::normalizePath($post->schema_image_path);
 
             if ($post->is_published && $post->published_at === null) {
                 $post->published_at = now();

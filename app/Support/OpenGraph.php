@@ -150,7 +150,7 @@ final class OpenGraph
             ? $post->og_image_path
             : ($post->cover_image_path ?: $settings->og_image_path);
 
-        return self::build(
+        $meta = self::build(
             title: $title,
             description: $description,
             url: filled($post->canonical_url) ? (string) $post->canonical_url : $post->getUrl(),
@@ -159,6 +159,26 @@ final class OpenGraph
             robots: filled($post->meta_robots) ? (string) $post->meta_robots : self::ROBOTS_INDEX,
             keywords: $post->meta_keywords ?: $settings->seo_keywords,
         );
+
+        $twitterImagePath = filled($post->twitter_image_path)
+            ? $post->twitter_image_path
+            : $imagePath;
+
+        $meta['twitter_card'] = filled($post->twitter_card)
+            ? (string) $post->twitter_card
+            : (filled($meta['image']) ? 'summary_large_image' : 'summary');
+
+        $meta['twitter_title'] = filled($post->twitter_title)
+            ? (string) $post->twitter_title
+            : $meta['title'];
+
+        $meta['twitter_description'] = filled($post->twitter_description)
+            ? self::trimDescription($post->twitter_description)
+            : $meta['description'];
+
+        $meta['twitter_image'] = self::absoluteImageUrl($twitterImagePath) ?? $meta['image'];
+
+        return $meta;
     }
 
     public static function absolutePublicUrl(mixed $path): ?string

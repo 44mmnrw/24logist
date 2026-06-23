@@ -26,8 +26,8 @@
                     <div class="landing-shell blog-post-hero__shell">
                         <a class="cms-page__back" href="{{ route('blog.index') }}">← Все статьи</a>
                         <div class="blog-card__meta">
-                            @if ($post->category)
-                                <span>{{ $post->category }}</span>
+                            @if ($post->displayCategory())
+                                <span>{{ $post->displayCategory() }}</span>
                             @endif
                             @if ($post->publishedDate())
                                 <time datetime="{{ $post->publishedDate()->toDateString() }}">{{ $post->publishedDate()->format('d.m.Y') }}</time>
@@ -76,7 +76,7 @@
                     <aside class="blog-post-aside">
                         <div class="blog-post-aside__box">
                             <span>Материал</span>
-                            <strong>{{ $post->category ?: 'Блог' }}</strong>
+                            <strong>{{ $post->displayCategory() ?: 'Блог' }}</strong>
                             @if ($post->publishedDate())
                                 <p>Опубликовано {{ $post->publishedDate()->format('d.m.Y') }}</p>
                             @endif
@@ -103,8 +103,8 @@
                                     </a>
                                     <div class="blog-card__body">
                                         <div class="blog-card__meta">
-                                            @if ($relatedPost->category)
-                                                <span>{{ $relatedPost->category }}</span>
+                                            @if ($relatedPost->displayCategory())
+                                                <span>{{ $relatedPost->displayCategory() }}</span>
                                             @endif
                                             @if ($relatedPost->publishedDate())
                                                 <time datetime="{{ $relatedPost->publishedDate()->toDateString() }}">{{ $relatedPost->publishedDate()->format('d.m.Y') }}</time>

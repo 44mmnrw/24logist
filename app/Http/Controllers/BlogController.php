@@ -10,6 +10,7 @@ class BlogController extends Controller
     public function index(): View
     {
         $featuredPost = BlogPost::query()
+            ->with('blogCategory')
             ->published()
             ->where('is_featured', true)
             ->orderBy('sort_order')
@@ -17,6 +18,7 @@ class BlogController extends Controller
             ->first();
 
         $posts = BlogPost::query()
+            ->with('blogCategory')
             ->published()
             ->when($featuredPost, fn ($query) => $query->whereKeyNot($featuredPost->getKey()))
             ->orderBy('sort_order')
@@ -29,14 +31,20 @@ class BlogController extends Controller
     public function show(string $slug): View
     {
         $post = BlogPost::query()
+            ->with('blogCategory')
             ->published()
             ->where('slug', $slug)
             ->firstOrFail();
 
         $relatedPosts = BlogPost::query()
+            ->with('blogCategory')
             ->published()
             ->whereKeyNot($post->getKey())
-            ->when($post->category, fn ($query) => $query->where('category', $post->category))
+            ->when(
+                $post->blog_category_id,
+                fn ($query) => $query->where('blog_category_id', $post->blog_category_id),
+                fn ($query) => $query->when($post->category, fn ($query) => $query->where('category', $post->category)),
+            )
             ->orderBy('sort_order')
             ->latest('published_at')
             ->limit(3)
@@ -44,6 +52,7 @@ class BlogController extends Controller
 
         if ($relatedPosts->count() < 3) {
             $fallback = BlogPost::query()
+                ->with('blogCategory')
                 ->published()
                 ->whereKeyNot($post->getKey())
                 ->whereNotIn('id', $relatedPosts->pluck('id'))

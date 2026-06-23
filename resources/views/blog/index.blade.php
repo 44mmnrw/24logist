@@ -55,8 +55,8 @@
                             </a>
                             <div class="blog-featured__body">
                                 <div class="blog-card__meta">
-                                    @if ($featuredPost->category)
-                                        <span>{{ $featuredPost->category }}</span>
+                                    @if ($featuredPost->displayCategory())
+                                        <span>{{ $featuredPost->displayCategory() }}</span>
                                     @endif
                                     @if ($featuredPost->publishedDate())
                                         <time datetime="{{ $featuredPost->publishedDate()->toDateString() }}">{{ $featuredPost->publishedDate()->format('d.m.Y') }}</time>
@@ -90,8 +90,8 @@
                                     </a>
                                     <div class="blog-card__body">
                                         <div class="blog-card__meta">
-                                            @if ($post->category)
-                                                <span>{{ $post->category }}</span>
+                                            @if ($post->displayCategory())
+                                                <span>{{ $post->displayCategory() }}</span>
                                             @endif
                                             @if ($post->publishedDate())
                                                 <time datetime="{{ $post->publishedDate()->toDateString() }}">{{ $post->publishedDate()->format('d.m.Y') }}</time>

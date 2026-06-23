@@ -259,27 +259,44 @@ final class StructuredData
      */
     private static function article(BlogPost $post, array $meta): ?array
     {
+        $type = in_array($post->schema_type, ['Article', 'BlogPosting', 'NewsArticle', 'TechArticle'], true)
+            ? (string) $post->schema_type
+            : 'Article';
+
+        $headline = filled($post->schema_headline)
+            ? (string) $post->schema_headline
+            : $post->title;
+
+        $description = filled($post->schema_description)
+            ? (string) $post->schema_description
+            : ($meta['description'] ?? null);
+
+        $image = filled($post->schema_image_path)
+            ? OpenGraph::absolutePublicUrl($post->schema_image_path)
+            : ($meta['image'] ?? null);
+
         $data = [
             '@context' => self::CONTEXT,
-            '@type' => 'Article',
+            '@type' => $type,
             '@id' => $meta['url'].'#article',
             'mainEntityOfPage' => [
                 '@id' => $meta['url'].'#webpage',
             ],
-            'headline' => self::pageTitle($post->title),
+            'headline' => self::pageTitle($headline),
             'url' => $meta['url'],
             'inLanguage' => 'ru-RU',
+            'isAccessibleForFree' => true,
             'publisher' => [
                 '@id' => self::siteUrl().'#organization',
             ],
         ];
 
-        if (filled($meta['description'] ?? null)) {
-            $data['description'] = $meta['description'];
+        if (filled($description)) {
+            $data['description'] = $description;
         }
 
-        if (filled($meta['image'] ?? null)) {
-            $data['image'] = $meta['image'];
+        if (filled($image)) {
+            $data['image'] = $image;
         }
 
         if ($post->published_at !== null) {
@@ -292,19 +309,35 @@ final class StructuredData
 
         if (filled($post->author_name)) {
             $data['author'] = [
-                '@type' => 'Person',
+                '@type' => $post->author_type === 'Organization' ? 'Organization' : 'Person',
                 'name' => (string) $post->author_name,
             ];
+
+            if (filled($post->author_url)) {
+                $data['author']['url'] = (string) $post->author_url;
+            }
         }
 
-        if (filled($post->category)) {
-            $data['articleSection'] = (string) $post->category;
+        if (filled($post->displayCategory())) {
+            $data['articleSection'] = (string) $post->displayCategory();
+        }
+
+        if ($post->reading_time_minutes !== null) {
+            $data['timeRequired'] = 'PT'.max(1, (int) $post->reading_time_minutes).'M';
         }
 
         $tags = array_values(array_filter((array) $post->tags, fn ($tag): bool => filled($tag)));
 
         if ($tags !== []) {
             $data['keywords'] = implode(', ', $tags);
+        }
+
+        $body = trim(strip_tags($post->renderBody()));
+
+        if ($body !== '') {
+            preg_match_all('/[\pL\pN]+/u', $body, $words);
+
+            $data['wordCount'] = count($words[0] ?? []);
         }
 
         return $data;

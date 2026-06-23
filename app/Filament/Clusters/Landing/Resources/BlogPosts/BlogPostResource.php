@@ -5,6 +5,7 @@ namespace App\Filament\Clusters\Landing\Resources\BlogPosts;
 use App\Filament\Clusters\Landing\Resources\BlogPosts\Pages\CreateBlogPost;
 use App\Filament\Clusters\Landing\Resources\BlogPosts\Pages\EditBlogPost;
 use App\Filament\Clusters\Landing\Resources\BlogPosts\Pages\ListBlogPosts;
+use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Support\FilamentUploadPreview;
 use App\Support\OpenGraph;
@@ -32,6 +33,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
 class BlogPostResource extends Resource
@@ -48,7 +50,7 @@ class BlogPostResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4;
 
     public static function form(Schema $schema): Schema
     {
@@ -124,10 +126,19 @@ class BlogPostResource extends Resource
                 ->columnSpanFull(),
             Section::make('Классификация')
                 ->schema([
-                    TextInput::make('category')
+                    Select::make('blog_category_id')
                         ->label('Рубрика')
-                        ->maxLength(255)
-                        ->placeholder('Автоматизация'),
+                        ->relationship(
+                            name: 'blogCategory',
+                            titleAttribute: 'name',
+                            modifyQueryUsing: fn (Builder $query): Builder => $query
+                                ->orderBy('sort_order')
+                                ->orderBy('name'),
+                        )
+                        ->searchable()
+                        ->preload()
+                        ->native(false)
+                        ->helperText('Список рубрик создается отдельно в разделе «Рубрики блога».'),
                     TagsInput::make('tags')
                         ->label('Теги')
                         ->placeholder('Добавьте тег')
@@ -136,6 +147,18 @@ class BlogPostResource extends Resource
                         ->label('Автор')
                         ->maxLength(255)
                         ->placeholder('Команда 24Logist'),
+                    Select::make('author_type')
+                        ->label('Тип автора')
+                        ->options([
+                            'Person' => 'Person',
+                            'Organization' => 'Organization',
+                        ])
+                        ->default('Person')
+                        ->native(false),
+                    TextInput::make('author_url')
+                        ->label('URL автора')
+                        ->maxLength(500)
+                        ->placeholder('https://24logist.ru/pages/about'),
                     TextInput::make('reading_time_minutes')
                         ->label('Время чтения')
                         ->numeric()
@@ -264,6 +287,88 @@ class BlogPostResource extends Resource
                 ])
                 ->columns(2)
                 ->columnSpanFull(),
+            Section::make('Twitter / X Card')
+                ->description('Поля для отдельного превью в Twitter / X. Если пусто, используются Open Graph данные.')
+                ->schema([
+                    Select::make('twitter_card')
+                        ->label('Twitter card')
+                        ->options([
+                            'summary_large_image' => 'summary_large_image',
+                            'summary' => 'summary',
+                        ])
+                        ->default('summary_large_image')
+                        ->native(false),
+                    TextInput::make('twitter_title')
+                        ->label('Twitter title')
+                        ->maxLength(255)
+                        ->helperText('Пусто — используется OG title или meta title.'),
+                    Textarea::make('twitter_description')
+                        ->label('Twitter description')
+                        ->rows(2)
+                        ->maxLength(500)
+                        ->helperText('Пусто — используется OG description или meta description.')
+                        ->columnSpanFull(),
+                    FileUpload::make('twitter_image_path')
+                        ->label('Twitter image')
+                        ->disk('public')
+                        ->directory('blog/twitter')
+                        ->visibility('public')
+                        ->image()
+                        ->imagePreviewHeight('120')
+                        ->maxFiles(1)
+                        ->maxSize(4096)
+                        ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
+                        ->fetchFileInformation(false)
+                        ->openable()
+                        ->downloadable()
+                        ->getUploadedFileUsing(static::uploadPreview(...))
+                        ->helperText('Пусто — используется OG image, обложка статьи или OG сайта.')
+                        ->columnSpanFull(),
+                ])
+                ->columns(2)
+                ->columnSpanFull(),
+            Section::make('Schema.org')
+                ->description('JSON-LD разметка статьи для поисковых систем.')
+                ->schema([
+                    Select::make('schema_type')
+                        ->label('Тип статьи')
+                        ->options([
+                            'Article' => 'Article',
+                            'BlogPosting' => 'BlogPosting',
+                            'NewsArticle' => 'NewsArticle',
+                            'TechArticle' => 'TechArticle',
+                        ])
+                        ->default('Article')
+                        ->native(false),
+                    TextInput::make('schema_headline')
+                        ->label('Schema headline')
+                        ->maxLength(255)
+                        ->helperText('Пусто — используется заголовок статьи.'),
+                    Textarea::make('schema_description')
+                        ->label('Schema description')
+                        ->rows(2)
+                        ->maxLength(500)
+                        ->helperText('Пусто — используется meta/OG description.')
+                        ->columnSpanFull(),
+                    FileUpload::make('schema_image_path')
+                        ->label('Schema image')
+                        ->disk('public')
+                        ->directory('blog/schema')
+                        ->visibility('public')
+                        ->image()
+                        ->imagePreviewHeight('120')
+                        ->maxFiles(1)
+                        ->maxSize(4096)
+                        ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
+                        ->fetchFileInformation(false)
+                        ->openable()
+                        ->downloadable()
+                        ->getUploadedFileUsing(static::uploadPreview(...))
+                        ->helperText('Пусто — используется OG image или обложка статьи.')
+                        ->columnSpanFull(),
+                ])
+                ->columns(2)
+                ->columnSpanFull(),
         ];
     }
 
@@ -312,9 +417,9 @@ class BlogPostResource extends Resource
                     ->badge()
                     ->copyable()
                     ->copyMessage('Slug скопирован'),
-                TextColumn::make('category')
+                TextColumn::make('category_label')
                     ->label('Рубрика')
-                    ->searchable()
+                    ->state(fn (BlogPost $record): string => $record->displayCategory() ?: '—')
                     ->toggleable(),
                 IconColumn::make('is_published')
                     ->label('Опубликована')
@@ -348,12 +453,12 @@ class BlogPostResource extends Resource
                         '1' => 'Опубликованные',
                         '0' => 'Черновики',
                     ]),
-                SelectFilter::make('category')
+                SelectFilter::make('blog_category_id')
                     ->label('Рубрика')
-                    ->options(fn () => BlogPost::query()
-                        ->whereNotNull('category')
-                        ->orderBy('category')
-                        ->pluck('category', 'category')),
+                    ->options(fn () => BlogCategory::query()
+                        ->orderBy('sort_order')
+                        ->orderBy('name')
+                        ->pluck('name', 'id')),
             ])
             ->recordActions([
                 EditAction::make(),
@@ -372,6 +477,11 @@ class BlogPostResource extends Resource
             'create' => CreateBlogPost::route('/create'),
             'edit' => EditBlogPost::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with('blogCategory');
     }
 
     /**
