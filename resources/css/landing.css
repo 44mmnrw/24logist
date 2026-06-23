@@ -1676,7 +1676,7 @@ body {
 }
 
 .blog-post-body {
-    margin-top: 24px;
+    margin-top: 0;
     border: 1px solid #e2e8f0;
     border-radius: 14px;
     background: #fff;
@@ -1687,6 +1687,7 @@ body {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+    margin-top: 18px;
 }
 
 .blog-tags span {

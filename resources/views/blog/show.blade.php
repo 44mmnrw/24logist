@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
@@ -24,7 +24,7 @@
             <article>
                 <header class="blog-post-hero">
                     <div class="landing-shell blog-post-hero__shell">
-                        <a class="cms-page__back" href="{{ route('blog.index') }}">← Все статьи</a>
+                        <a class="cms-page__back" href="{{ route('blog.index') }}">в†ђ Р’СЃРµ СЃС‚Р°С‚СЊРё</a>
                         <div class="blog-card__meta">
                             @if ($post->displayCategory())
                                 <span>{{ $post->displayCategory() }}</span>
@@ -36,7 +36,7 @@
                                 <span>{{ $post->author_name }}</span>
                             @endif
                             @if ($post->reading_time_minutes)
-                                <span>{{ $post->reading_time_minutes }} мин чтения</span>
+                                <span>{{ $post->reading_time_minutes }} РјРёРЅ С‡С‚РµРЅРёСЏ</span>
                             @endif
                         </div>
                         <h1>{{ $post->title }}</h1>
@@ -58,6 +58,10 @@
 
                 <div class="landing-shell blog-post-layout">
                     <div class="blog-post-main">
+                        <div class="cms-page__body blog-post-body">
+                            {!! $post->renderBody() !!}
+                        </div>
+
                         @if ($post->tags)
                             <div class="blog-tags" aria-label="Теги статьи">
                                 @foreach ($post->tags as $tag)
@@ -67,18 +71,14 @@
                                 @endforeach
                             </div>
                         @endif
-
-                        <div class="cms-page__body blog-post-body">
-                            {!! $post->renderBody() !!}
-                        </div>
                     </div>
 
                     <aside class="blog-post-aside">
                         <div class="blog-post-aside__box">
-                            <span>Материал</span>
-                            <strong>{{ $post->displayCategory() ?: 'Блог' }}</strong>
+                            <span>РњР°С‚РµСЂРёР°Р»</span>
+                            <strong>{{ $post->displayCategory() ?: 'Р‘Р»РѕРі' }}</strong>
                             @if ($post->publishedDate())
-                                <p>Опубликовано {{ $post->publishedDate()->format('d.m.Y') }}</p>
+                                <p>РћРїСѓР±Р»РёРєРѕРІР°РЅРѕ {{ $post->publishedDate()->format('d.m.Y') }}</p>
                             @endif
                         </div>
                     </aside>
@@ -89,7 +89,7 @@
                 <section class="blog-related">
                     <div class="landing-shell">
                         <div class="section-head">
-                            <h2>Похожие материалы</h2>
+                            <h2>РџРѕС…РѕР¶РёРµ РјР°С‚РµСЂРёР°Р»С‹</h2>
                         </div>
                         <div class="blog-grid blog-grid--related">
                             @foreach ($relatedPosts as $relatedPost)
