@@ -91,6 +91,9 @@ final class LandingIcons
         'phone' => 'Телефон',
         'home' => 'Главная',
         'tech-support' => 'Техподдержка',
+        'additional-seat' => 'Дополнительное рабочее место',
+        'additional-epd' => 'Дополнительный пакет ЭПД',
+        'additional-cloud' => 'Дополнительное место в облаке',
     ];
 
     public static function resolve(?string $value): ?string
@@ -169,6 +172,7 @@ final class LandingIcons
     {
         return match ($name) {
             'check-blue', 'document-fast', 'chart-bar', 'lifebuoy', 'shield-check', 'document-signed', 'truck', 'user-driver', 'calendar-alert', 'calculator', 'banknotes', 'rotes', 'folder-archive', 'bell', 'users-card' => '0 0 20 20',
+            'additional-seat', 'additional-epd', 'additional-cloud' => '0 0 18 18',
             'manager-avatar' => '0 0 32 32',
             default => '0 0 24 24',
         };

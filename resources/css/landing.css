@@ -757,7 +757,8 @@ body {
     border-radius: 10px;
     background: rgba(29, 78, 216, 0.07);
 }
-.additional-option__icon img {
+.additional-option__icon img,
+.additional-option__icon .landing-icon {
     width: 18px;
     height: 18px;
 }

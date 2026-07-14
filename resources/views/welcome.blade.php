@@ -27,6 +27,7 @@
                     'platform' => 'components.landing.platform',
                     'features' => 'components.landing.features',
                     'pricing' => 'components.landing.pricing',
+                    'additional_options' => 'components.landing.additional-options',
                     'epd_platform' => 'components.landing.epd-platform',
                     'mobile' => 'components.landing.mobile',
                     'driver_cabinet' => 'components.landing.driver-cabinet',

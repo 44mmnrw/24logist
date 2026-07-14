@@ -25,6 +25,7 @@ class LandingContentSeeder extends Seeder
         $this->seedPlatform();
         $this->seedFeatures();
         $this->seedPricing();
+        $this->seedAdditionalOptions();
         $this->seedEpdPlatform();
         $this->seedMobile();
         $this->seedDriverCabinet();
@@ -357,13 +358,41 @@ class LandingContentSeeder extends Seeder
         }
     }
 
+    private function seedAdditionalOptions(): void
+    {
+        $section = $this->section([
+            'slug' => 'additional_options',
+            'name' => 'Дополнительные возможности',
+            'sort_order' => 7,
+            'kicker' => 'Подключаются отдельно',
+            'title' => 'Дополнительные возможности',
+            'subtitle' => 'Расширяйте систему по мере роста — подключайте только то, что нужно именно вам, и платите только за это.',
+        ]);
+
+        foreach ([
+            ['title' => 'Дополнительное рабочее место', 'description' => 'Каждое место сверх тарифного лимита оплачивается отдельно.', 'price' => '1 200 ₽/мес', 'icon' => 'additional-seat'],
+            ['title' => 'Дополнительный пакет ЭПД', 'description' => 'Докупите пакет электронных перевозочных документов сверх включённого объёма.', 'price' => 'по пакетам', 'icon' => 'additional-epd'],
+            ['title' => 'Дополнительное место в облаке', 'description' => 'Расширьте хранилище для документов и вложений на любой объём.', 'price' => 'по объёму', 'icon' => 'additional-cloud'],
+        ] as $index => $option) {
+            $this->block([
+                'section_slug' => $section->slug,
+                'block_type' => 'option',
+                'title' => $option['title'],
+                'description' => $option['description'],
+                'price' => $option['price'],
+                'icon' => $this->icon($option['icon']),
+                'sort_order' => $index + 1,
+            ]);
+        }
+    }
+
     private function seedEpdPlatform(): void
     {
         $section = $this->section([
             'slug' => 'epd_platform',
             'name' => 'Платформа ЭПД',
             'anchor' => 'epd-platform',
-            'sort_order' => 7,
+            'sort_order' => 8,
             'title' => 'Платформа ЭПД',
             'subtitle' => 'Обмен электронными перевозочными документами между участниками грузоперевозок',
             'badge_icon' => $this->icon('epd-platform'),
@@ -399,7 +428,7 @@ class LandingContentSeeder extends Seeder
         $section = $this->section([
             'slug' => 'mobile',
             'name' => 'Мобильная версия',
-            'sort_order' => 8,
+            'sort_order' => 9,
             'badge_text' => 'Настройка интерфейса',
             'badge_icon' => $this->icon('sliders'),
             'title' => 'Удобная мобильная версия',
@@ -432,7 +461,7 @@ class LandingContentSeeder extends Seeder
         $section = $this->section([
             'slug' => 'quiz',
             'name' => 'Квиз',
-            'sort_order' => 10,
+            'sort_order' => 11,
             'kicker' => 'Квиз · 1 минута',
             'title' => 'Подберём тариф под вашу логистику',
             'description' => 'Ответьте на 4 коротких вопроса — пришлём подходящий тариф и расчёт за 15 минут в рабочее время.',
@@ -489,7 +518,7 @@ class LandingContentSeeder extends Seeder
         $section = $this->section([
             'slug' => 'faq',
             'name' => 'FAQ',
-            'sort_order' => 11,
+            'sort_order' => 12,
             'title' => 'Частые вопросы',
             'extra' => [
                 'toggle_icon' => $this->icon('chevron-down'),
@@ -518,7 +547,7 @@ class LandingContentSeeder extends Seeder
         $this->section([
             'slug' => 'final_cta',
             'name' => 'Финальный CTA',
-            'sort_order' => 12,
+            'sort_order' => 13,
             'title' => 'Подключите ЛОГИСТ этой неделе',
             'description' => 'Демо за 30 минут, настройка под ваши процессы, понятный счёт. Без долгих внедрений.',
             'button_primary_text' => 'Подобрать тариф',
@@ -533,7 +562,7 @@ class LandingContentSeeder extends Seeder
         $section = $this->section([
             'slug' => 'footer',
             'name' => 'Подвал',
-            'sort_order' => 13,
+            'sort_order' => 14,
             'description' => 'Лучший сервис для экспедиторов в России. Заявки, ЭДО и рейсы в одном кабинете.',
             'extra' => [
                 'logo_icon' => $this->icon('brand-logo'),
@@ -600,7 +629,7 @@ class LandingContentSeeder extends Seeder
         $section = $this->section([
             'slug' => 'driver_cabinet',
             'name' => 'Личный кабинет водителя',
-            'sort_order' => 9,
+            'sort_order' => 10,
             'badge_text' => 'Для водителя',
             'badge_icon' => $this->icon('user-driver'),
             'title' => 'Личный кабинет водителя',

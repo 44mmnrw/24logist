@@ -55,6 +55,7 @@ class BlocksRelationManager extends RelationManager
             'footer' => 'Колонки подвала',
             'header' => 'Ссылки меню',
             'pricing' => 'Тарифы',
+            'additional_options' => 'Дополнительные позиции',
             default => static::$title ?? 'Блоки секции',
         };
     }
@@ -185,6 +186,40 @@ class BlocksRelationManager extends RelationManager
                         ->addActionLabel('Добавить роль')
                         ->reorderable()
                         ->columnSpanFull(),
+                    Toggle::make('is_active')
+                        ->label('Активен')
+                        ->default(true),
+                    TextInput::make('sort_order')
+                        ->label('Порядок')
+                        ->numeric()
+                        ->default(0),
+                ]);
+        }
+
+        if ($this->isAdditionalOptionsSection()) {
+            return $schema
+                ->components([
+                    TextInput::make('title')
+                        ->label('Название')
+                        ->required()
+                        ->maxLength(255)
+                        ->columnSpanFull(),
+                    Textarea::make('description')
+                        ->label('Описание')
+                        ->rows(3)
+                        ->maxLength(2000)
+                        ->columnSpanFull(),
+                    TextInput::make('price')
+                        ->label('Цена / подпись справа')
+                        ->required()
+                        ->maxLength(255),
+                    Select::make('icon')
+                        ->label('Иконка')
+                        ->options(LandingIcons::OPTIONS)
+                        ->searchable()
+                        ->required()
+                        ->dehydrateStateUsing(fn (?string $state) => LandingIcons::normalize($state))
+                        ->formatStateUsing(fn (?string $state) => LandingIcons::resolve($state)),
                     Toggle::make('is_active')
                         ->label('Активен')
                         ->default(true),
@@ -354,6 +389,7 @@ class BlocksRelationManager extends RelationManager
         $isHeader = $this->isHeaderSection();
         $isFooter = $this->isFooterSection();
         $isPricing = $this->isPricingSection();
+        $isAdditionalOptions = $this->isAdditionalOptionsSection();
 
         $table = $isQuiz
             ? $table
@@ -495,7 +531,7 @@ class BlocksRelationManager extends RelationManager
                             : LandingBlockResource::table($table)))))));
 
         return $table
-            ->modifyQueryUsing(function ($query) use ($isMobile, $isPlatform, $isHeader, $isFooter, $isPricing): void {
+            ->modifyQueryUsing(function ($query) use ($isMobile, $isPlatform, $isHeader, $isFooter, $isPricing, $isAdditionalOptions): void {
                 if ($isMobile) {
                     $query->where('block_type', 'bullet');
                 }
@@ -515,6 +551,10 @@ class BlocksRelationManager extends RelationManager
                 if ($isPricing) {
                     $query->where('block_type', 'plan');
                 }
+
+                if ($isAdditionalOptions) {
+                    $query->where('block_type', 'option');
+                }
             })
             ->headerActions([
                 CreateAction::make()
@@ -526,9 +566,10 @@ class BlocksRelationManager extends RelationManager
                         $isHeader => 'Добавить ссылку',
                         $isFooter => 'Добавить колонку',
                         $isPricing => 'Добавить тариф',
+                        $isAdditionalOptions => 'Добавить позицию',
                         default => null,
                     })
-                    ->mutateFormDataUsing(function (array $data) use ($isQuiz, $isFaq, $isMobile, $isPlatform, $isHeader, $isFooter, $isPricing): array {
+                    ->mutateFormDataUsing(function (array $data) use ($isQuiz, $isFaq, $isMobile, $isPlatform, $isHeader, $isFooter, $isPricing, $isAdditionalOptions): array {
                         $data['section_slug'] = $this->getOwnerRecord()->slug;
 
                         if ($isQuiz) {
@@ -557,6 +598,10 @@ class BlocksRelationManager extends RelationManager
 
                         if ($isPricing) {
                             $data['block_type'] = 'plan';
+                        }
+
+                        if ($isAdditionalOptions) {
+                            $data['block_type'] = 'option';
                         }
 
                         return $data;
@@ -808,5 +853,10 @@ class BlocksRelationManager extends RelationManager
     protected function isPricingSection(): bool
     {
         return $this->getOwnerRecord()->slug === 'pricing';
+    }
+
+    protected function isAdditionalOptionsSection(): bool
+    {
+        return $this->getOwnerRecord()->slug === 'additional_options';
     }
 }
