@@ -34,15 +34,12 @@
                     'faq' => 'components.landing.faq',
                     'final_cta' => 'components.landing.final-cta',
                 ];
-                $alternatingSections = [
-                    'why', 'platform', 'features', 'pricing', 'epd_platform',
-                    'mobile', 'driver_cabinet', 'quiz', 'faq',
-                ];
+                $specialBackgroundSections = ['hero', 'final_cta'];
                 $alternatingIndex = 0;
             @endphp
             @foreach ($landing->sections() as $landingSection)
                 @if (isset($sectionViews[$landingSection->slug]))
-                    @if (in_array($landingSection->slug, $alternatingSections, true))
+                    @if (! in_array($landingSection->slug, $specialBackgroundSections, true))
                         <div class="landing-section-slot landing-section-slot--{{ $alternatingIndex % 2 === 0 ? 'white' : 'light' }}">
                             @include($sectionViews[$landingSection->slug])
                         </div>

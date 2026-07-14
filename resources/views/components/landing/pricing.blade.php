@@ -67,4 +67,33 @@
         @endif
     </div>
 </section>
+
+<section class="additional-options-section" aria-labelledby="additional-options-title">
+    <div class="landing-shell additional-options-section__layout">
+        <header class="additional-options-section__intro">
+            <span class="additional-options-section__badge">Подключаются отдельно</span>
+            <h2 id="additional-options-title">Дополнительные возможности</h2>
+            <p>Расширяйте систему по мере роста — подключайте только то, что нужно именно вам, и платите только за это.</p>
+        </header>
+
+        <div class="additional-options-card">
+            @foreach ([
+                ['icon' => 'additional-seat.svg', 'title' => 'Дополнительное рабочее место', 'description' => 'Каждое место сверх тарифного лимита оплачивается отдельно.', 'price' => '1 200 ₽/мес'],
+                ['icon' => 'additional-epd.svg', 'title' => 'Дополнительный пакет ЭПД', 'description' => 'Докупите пакет электронных перевозочных документов сверх включённого объёма.', 'price' => 'по пакетам'],
+                ['icon' => 'additional-cloud.svg', 'title' => 'Дополнительное место в облаке', 'description' => 'Расширьте хранилище для документов и вложений на любой объём.', 'price' => 'по объёму'],
+            ] as $option)
+                <article class="additional-option">
+                    <span class="additional-option__icon" aria-hidden="true">
+                        <img src="{{ asset('images/landing/'.$option['icon']) }}" alt="">
+                    </span>
+                    <div class="additional-option__copy">
+                        <h3>{{ $option['title'] }}</h3>
+                        <p>{{ $option['description'] }}</p>
+                    </div>
+                    <strong>{{ $option['price'] }}</strong>
+                </article>
+            @endforeach
+        </div>
+    </div>
+</section>
 @endif
