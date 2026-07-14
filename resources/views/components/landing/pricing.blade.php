@@ -19,7 +19,7 @@
             @endif
         </header>
 
-        <div class="pricing-grid">
+        <div @class(['pricing-grid', 'pricing-grid--three' => $plans->count() === 3])>
             @foreach ($plans as $plan)
                 <article @class(['pricing-card', 'pricing-card--hit' => $plan->is_highlighted])>
                     @if ($plan->tag)

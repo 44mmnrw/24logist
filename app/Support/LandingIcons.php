@@ -67,6 +67,7 @@ final class LandingIcons
         'truck' => 'Транспорт',
         'document-fast' => 'Быстрый документ',
         'document-signed' => 'Подписанный документ',
+        'epd-platform' => 'Платформа ЭПД',
         'documents' => 'Документы',
         'chart-bar' => 'Аналитика',
         'lifebuoy' => 'Поддержка',

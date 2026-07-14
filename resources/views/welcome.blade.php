@@ -20,17 +20,38 @@
     <div class="landing-page">
         <x-landing.header />
         <main>
-            <x-landing.hero />
-            {{-- <x-landing.partners /> --}}
-            <x-landing.why />
-            <x-landing.platform />
-            <x-landing.features />
-            <x-landing.pricing />
-            <x-landing.mobile />
-            <x-landing.driver-cabinet />
-            <x-landing.quiz />
-            <x-landing.faq />
-            <x-landing.final-cta />
+            @php
+                $sectionViews = [
+                    'hero' => 'components.landing.hero',
+                    'why' => 'components.landing.why',
+                    'platform' => 'components.landing.platform',
+                    'features' => 'components.landing.features',
+                    'pricing' => 'components.landing.pricing',
+                    'epd_platform' => 'components.landing.epd-platform',
+                    'mobile' => 'components.landing.mobile',
+                    'driver_cabinet' => 'components.landing.driver-cabinet',
+                    'quiz' => 'components.landing.quiz',
+                    'faq' => 'components.landing.faq',
+                    'final_cta' => 'components.landing.final-cta',
+                ];
+                $alternatingSections = [
+                    'why', 'platform', 'features', 'pricing', 'epd_platform',
+                    'mobile', 'driver_cabinet', 'quiz', 'faq',
+                ];
+                $alternatingIndex = 0;
+            @endphp
+            @foreach ($landing->sections() as $landingSection)
+                @if (isset($sectionViews[$landingSection->slug]))
+                    @if (in_array($landingSection->slug, $alternatingSections, true))
+                        <div class="landing-section-slot landing-section-slot--{{ $alternatingIndex % 2 === 0 ? 'white' : 'light' }}">
+                            @include($sectionViews[$landingSection->slug])
+                        </div>
+                        @php($alternatingIndex++)
+                    @else
+                        @include($sectionViews[$landingSection->slug])
+                    @endif
+                @endif
+            @endforeach
         </main>
         <x-landing.footer />
     </div>

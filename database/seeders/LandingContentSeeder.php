@@ -25,6 +25,7 @@ class LandingContentSeeder extends Seeder
         $this->seedPlatform();
         $this->seedFeatures();
         $this->seedPricing();
+        $this->seedEpdPlatform();
         $this->seedMobile();
         $this->seedDriverCabinet();
         $this->seedQuiz();
@@ -356,12 +357,49 @@ class LandingContentSeeder extends Seeder
         }
     }
 
+    private function seedEpdPlatform(): void
+    {
+        $section = $this->section([
+            'slug' => 'epd_platform',
+            'name' => 'Платформа ЭПД',
+            'anchor' => 'epd-platform',
+            'sort_order' => 7,
+            'title' => 'Платформа ЭПД',
+            'subtitle' => 'Обмен электронными перевозочными документами между участниками грузоперевозок',
+            'badge_icon' => $this->icon('epd-platform'),
+            'button_primary_text' => 'Подробнее о сервисе',
+        ]);
+
+        foreach ([
+            ['100', '1 000 ₽', '10 ₽ / документ'],
+            ['500', '3 000 ₽', '6 ₽ / документ'],
+            ['1 000', '5 000 ₽', '5 ₽ / документ'],
+            ['5 000', '20 000 ₽', '4 ₽ / документ'],
+            ['10 000', '35 000 ₽', '3,5 ₽ / документ'],
+            ['50 000', '150 000 ₽', '3 ₽ / документ'],
+            ['100 000', '250 000 ₽', '2,5 ₽ / документ'],
+        ] as $index => [$documents, $price, $rate]) {
+            $this->block([
+                'section_slug' => $section->slug,
+                'block_type' => 'package',
+                'title' => $documents,
+                'subtitle' => 'документов',
+                'price' => $price,
+                'description' => $rate,
+                'button_text' => 'Выбрать',
+                'link' => '#quiz',
+                'button_style' => 'ghost',
+                'sort_order' => $index + 1,
+            ]);
+        }
+    }
+
     private function seedMobile(): void
     {
         $section = $this->section([
             'slug' => 'mobile',
             'name' => 'Мобильная версия',
-            'sort_order' => 7,
+            'sort_order' => 8,
             'badge_text' => 'Настройка интерфейса',
             'badge_icon' => $this->icon('sliders'),
             'title' => 'Удобная мобильная версия',
@@ -394,7 +432,7 @@ class LandingContentSeeder extends Seeder
         $section = $this->section([
             'slug' => 'quiz',
             'name' => 'Квиз',
-            'sort_order' => 9,
+            'sort_order' => 10,
             'kicker' => 'Квиз · 1 минута',
             'title' => 'Подберём тариф под вашу логистику',
             'description' => 'Ответьте на 4 коротких вопроса — пришлём подходящий тариф и расчёт за 15 минут в рабочее время.',
@@ -451,7 +489,7 @@ class LandingContentSeeder extends Seeder
         $section = $this->section([
             'slug' => 'faq',
             'name' => 'FAQ',
-            'sort_order' => 10,
+            'sort_order' => 11,
             'title' => 'Частые вопросы',
             'extra' => [
                 'toggle_icon' => $this->icon('chevron-down'),
@@ -480,7 +518,7 @@ class LandingContentSeeder extends Seeder
         $this->section([
             'slug' => 'final_cta',
             'name' => 'Финальный CTA',
-            'sort_order' => 11,
+            'sort_order' => 12,
             'title' => 'Подключите ЛОГИСТ этой неделе',
             'description' => 'Демо за 30 минут, настройка под ваши процессы, понятный счёт. Без долгих внедрений.',
             'button_primary_text' => 'Подобрать тариф',
@@ -495,7 +533,7 @@ class LandingContentSeeder extends Seeder
         $section = $this->section([
             'slug' => 'footer',
             'name' => 'Подвал',
-            'sort_order' => 12,
+            'sort_order' => 13,
             'description' => 'Лучший сервис для экспедиторов в России. Заявки, ЭДО и рейсы в одном кабинете.',
             'extra' => [
                 'logo_icon' => $this->icon('brand-logo'),
@@ -562,7 +600,7 @@ class LandingContentSeeder extends Seeder
         $section = $this->section([
             'slug' => 'driver_cabinet',
             'name' => 'Личный кабинет водителя',
-            'sort_order' => 8,
+            'sort_order' => 9,
             'badge_text' => 'Для водителя',
             'badge_icon' => $this->icon('user-driver'),
             'title' => 'Личный кабинет водителя',
