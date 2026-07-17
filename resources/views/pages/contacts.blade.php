@@ -125,6 +125,7 @@
 
         <x-landing.footer />
     </div>
+    <x-site.telegram-popup />
     <x-analytics.yandex-metrika />
 </body>
 </html>

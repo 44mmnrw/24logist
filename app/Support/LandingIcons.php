@@ -55,6 +55,7 @@ final class LandingIcons
     public const OPTIONS = [
         'brand-logo' => 'Логотип',
         'brand-mark' => 'Марк логотипа',
+        'telegram' => 'Telegram',
         'badge-star' => 'Бейдж (звезда)',
         'check' => 'Галочка',
         'check-blue' => 'Галочка (синяя)',
@@ -174,6 +175,7 @@ final class LandingIcons
             'check-blue', 'document-fast', 'chart-bar', 'lifebuoy', 'shield-check', 'document-signed', 'truck', 'user-driver', 'calendar-alert', 'calculator', 'banknotes', 'rotes', 'folder-archive', 'bell', 'users-card' => '0 0 20 20',
             'additional-seat', 'additional-epd', 'additional-cloud' => '0 0 18 18',
             'manager-avatar' => '0 0 32 32',
+            'telegram' => '0 0 240.1 240.1',
             default => '0 0 24 24',
         };
     }

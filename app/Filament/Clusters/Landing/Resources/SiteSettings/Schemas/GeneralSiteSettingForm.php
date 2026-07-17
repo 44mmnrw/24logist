@@ -36,6 +36,10 @@ final class GeneralSiteSettingForm
                         ->label('Блог')
                         ->icon('heroicon-o-newspaper')
                         ->schema(self::blogTab()),
+                    Tab::make('telegram_popup')
+                        ->label('Telegram-окно')
+                        ->icon('heroicon-o-paper-airplane')
+                        ->schema(self::telegramPopupTab()),
                     Tab::make('organization')
                         ->label('Компания')
                         ->icon('heroicon-o-building-office-2')
@@ -276,6 +280,75 @@ final class GeneralSiteSettingForm
                 ])
                 ->columns(2)
                 ->collapsed()
+                ->columnSpanFull(),
+        ];
+    }
+
+    /**
+     * @return array<int, mixed>
+     */
+    private static function telegramPopupTab(): array
+    {
+        return [
+            Section::make('Окно подписки на Telegram-канал')
+                ->description('Показывается один раз за сеанс после загрузки главной страницы.')
+                ->schema([
+                    Toggle::make('telegram_popup_enabled')
+                        ->label('Окно включено')
+                        ->default(false)
+                        ->live(),
+                    TextInput::make('telegram_popup_channel_url')
+                        ->label('Ссылка на канал для десктопа')
+                        ->url()
+                        ->maxLength(2048)
+                        ->placeholder('https://telegram.me/logistru24')
+                        ->required(fn ($get): bool => (bool) $get('telegram_popup_enabled')),
+                    TextInput::make('telegram_popup_mobile_url')
+                        ->label('Ссылка для мобильных устройств')
+                        ->maxLength(2048)
+                        ->placeholder('tg://resolve?domain=logistru24')
+                        ->default('tg://resolve?domain=logistru24')
+                        ->rule('regex:/^tg:\/\/resolve\?domain=[A-Za-z0-9_]+$/')
+                        ->helperText('Открывает канал сразу в приложении Telegram. Формат: tg://resolve?domain=username')
+                        ->required(fn ($get): bool => (bool) $get('telegram_popup_enabled')),
+                    TextInput::make('telegram_popup_badge')
+                        ->label('Текст плашки')
+                        ->maxLength(100)
+                        ->default('Telegram-канал'),
+                    TextInput::make('telegram_popup_title')
+                        ->label('Заголовок')
+                        ->maxLength(255)
+                        ->default('Будьте в курсе обновлений'),
+                    Textarea::make('telegram_popup_description')
+                        ->label('Описание')
+                        ->rows(4)
+                        ->maxLength(1000)
+                        ->columnSpanFull(),
+                    TextInput::make('telegram_popup_button_text')
+                        ->label('Текст кнопки')
+                        ->maxLength(100)
+                        ->default('Подписаться на канал'),
+                    TextInput::make('telegram_popup_dismiss_text')
+                        ->label('Текст кнопки закрытия')
+                        ->maxLength(100)
+                        ->default('Не сейчас'),
+                    TextInput::make('telegram_popup_show_delay')
+                        ->label('Показать через, секунд')
+                        ->numeric()
+                        ->minValue(0)
+                        ->maxValue(86400)
+                        ->default(5)
+                        ->required(),
+                    TextInput::make('telegram_popup_auto_close_delay')
+                        ->label('Автоматически закрыть через, секунд')
+                        ->numeric()
+                        ->minValue(0)
+                        ->maxValue(86400)
+                        ->default(15)
+                        ->helperText('0 — не закрывать автоматически.')
+                        ->required(),
+                ])
+                ->columns(2)
                 ->columnSpanFull(),
         ];
     }
