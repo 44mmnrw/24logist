@@ -44,6 +44,15 @@ if [[ "${NPM_EXIT}" -ne 0 ]]; then
   exit "${NPM_EXIT}"
 fi
 
+echo "[REMOTE] sharp runtime check..."
+node -e "
+  const sharp = require('sharp');
+  if (!sharp.format.webp?.output?.file || !sharp.format.heif?.output?.file) {
+    throw new Error('sharp has no WebP or AVIF/HEIF output support');
+  }
+  console.log('[REMOTE] sharp', sharp.versions.sharp, 'libvips', sharp.versions.vips, 'WebP+AVIF OK');
+"
+
 echo "[REMOTE] vite build (max ${BUILD_TIMEOUT_MINUTES:-20}m)..."
 timeout --foreground -k 30s "${BUILD_TIMEOUT_MINUTES:-20}m" bash -c "
   export PATH=\"$PATH\"

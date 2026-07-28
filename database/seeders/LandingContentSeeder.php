@@ -97,6 +97,7 @@ class LandingContentSeeder extends Seeder
             'badge_text' => 'Лучший сервис для экспедиторов в России',
             'badge_icon' => $this->icon('badge-star'),
             'title' => 'ЛогистРу — заявки, рейсы и ЭДО в одном кабинете',
+            'seo_h1' => 'CRM для экспедиторов: заявки, ЭТрН и контроль рейсов',
             'button_primary_text' => 'Подобрать тариф',
             'button_secondary_text' => 'Посмотреть возможности',
             'extra' => [

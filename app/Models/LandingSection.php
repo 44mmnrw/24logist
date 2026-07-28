@@ -16,6 +16,7 @@ class LandingSection extends Model
         'anchor',
         'kicker',
         'title',
+        'seo_h1',
         'subtitle',
         'description',
         'badge_text',

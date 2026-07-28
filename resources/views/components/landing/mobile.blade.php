@@ -7,7 +7,7 @@
     @php
         $extra = $section?->extra ?? [];
         $bullets = $landing->blocks('mobile', 'bullet');
-        $mobileImage = \App\Support\LandingMedia::url($section?->mobile_image ?? $extra['mobile_image'] ?? null);
+        $mobileImage = $section?->mobile_image ?? $extra['mobile_image'] ?? null;
     @endphp
 
     <div class="landing-shell mobile-section__shell">
@@ -60,14 +60,14 @@
             <div class="mobile-phone">
                 <div class="mobile-phone__screen mobile-phone__screen--image">
                     @if ($mobileImage)
-                        <img
-                            src="{{ $mobileImage }}"
-                            alt="{{ $extra['mobile_image_alt'] ?? 'Мобильный интерфейс ЛогистРу' }}"
+                        <x-landing.responsive-image
+                            :path="$mobileImage"
+                            :alt="$extra['mobile_image_alt'] ?? 'Мобильный интерфейс ЛогистРу'"
                             width="276"
                             height="576"
                             loading="lazy"
-                            decoding="async"
-                        >
+                            sizes="276px"
+                        />
                     @endif
                 </div>
             </div>

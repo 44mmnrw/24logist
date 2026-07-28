@@ -7,7 +7,7 @@ use App\Models\LandingSection;
 final class LandingHeroCarousel
 {
     /**
-     * @return list<array{url: string, alt: string}>
+     * @return list<array{path: string, url: string, alt: string}>
      */
     public static function slides(?LandingSection $section): array
     {
@@ -24,15 +24,17 @@ final class LandingHeroCarousel
                 continue;
             }
 
-            $url = LandingMedia::url($item['image'] ?? null);
+            $path = LandingMedia::normalizePath($item['image'] ?? null);
+            $url = LandingMedia::url($path);
 
-            if ($url === null) {
+            if ($path === null || $url === null) {
                 continue;
             }
 
             $alt = trim((string) ($item['alt'] ?? ''));
 
             $slides[] = [
+                'path' => $path,
                 'url' => $url,
                 'alt' => $alt !== '' ? $alt : $defaultAlt,
             ];
@@ -50,6 +52,7 @@ final class LandingHeroCarousel
 
         return [
             [
+                'path' => $section->dashboard_image,
                 'url' => $legacyUrl,
                 'alt' => $defaultAlt,
             ],

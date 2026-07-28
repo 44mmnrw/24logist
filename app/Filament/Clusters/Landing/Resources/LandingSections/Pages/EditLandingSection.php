@@ -3,6 +3,7 @@
 namespace App\Filament\Clusters\Landing\Resources\LandingSections\Pages;
 
 use App\Filament\Clusters\Landing\Resources\LandingSections\LandingSectionResource;
+use App\Services\LandingImageOptimizer;
 use App\Services\LandingPageService;
 use App\Services\SitemapService;
 use App\Support\LandingFooterForm;
@@ -49,6 +50,7 @@ class EditLandingSection extends EditRecord
 
     protected function afterSave(): void
     {
+        app(LandingImageOptimizer::class)->optimizeSection($this->record);
         app(LandingPageService::class)->clearCache();
         app(SitemapService::class)->clearCache();
     }

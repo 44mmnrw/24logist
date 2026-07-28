@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru-RU">
 <head>
     <meta charset="utf-8">
     <title>OG Hero</title>

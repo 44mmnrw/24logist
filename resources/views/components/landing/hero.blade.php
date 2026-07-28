@@ -22,12 +22,20 @@
                 </div>
             @endif
 
+            @if ($section?->seo_h1)
+                <h1 class="landing-hero__seo-h1">{{ $section->seo_h1 }}</h1>
+            @endif
+
             @if ($section?->title)
-                <h1>{{ $section->title }}</h1>
+                @if ($section->seo_h1)
+                    <h2 class="landing-hero__title">{{ $section->title }}</h2>
+                @else
+                    <h1 class="landing-hero__title">{{ $section->title }}</h1>
+                @endif
             @endif
 
             @if ($section?->subtitle)
-                <h2 class="landing-hero__subtitle">{{ $section->subtitle }}</h2>
+                <p class="landing-hero__subtitle">{{ $section->subtitle }}</p>
             @endif
 
             <ul class="hero-list">
@@ -92,14 +100,16 @@
                             class="hero-carousel__slide{{ $index === 0 ? ' is-active' : '' }}"
                             data-hero-carousel-slide
                         >
-                            <img
-                                src="{{ $slide['url'] }}"
-                                alt="{{ $slide['alt'] }}"
+                            <x-landing.responsive-image
+                                :path="$slide['path']"
+                                :alt="$slide['alt']"
                                 width="640"
                                 height="480"
-                                loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
-                                decoding="async"
-                            >
+                                :loading="$index === 0 ? 'eager' : 'lazy'"
+                                :fetchpriority="$index === 0 ? 'high' : null"
+                                sizes="(max-width: 760px) calc(100vw - 32px), 50vw"
+                                picture-class="hero-carousel__picture"
+                            />
                         </div>
                     @endforeach
                 </div>

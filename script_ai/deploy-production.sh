@@ -71,6 +71,9 @@ mkdir -p storage/app/public/livewire-tmp
 chmod -R ug+rwx storage bootstrap/cache
 chmod 775 storage/app/public/livewire-tmp
 
+log "generate AVIF/WebP image variants"
+php artisan images:optimize --directory=landing
+
 log "clear caches"
 php artisan optimize:clear
 php artisan view:cache

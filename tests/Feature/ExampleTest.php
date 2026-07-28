@@ -23,6 +23,15 @@ class ExampleTest extends TestCase
     {
         $response = $this->get('/');
 
-        $response->assertStatus(200);
+        $response
+            ->assertStatus(200)
+            ->assertSee('<html lang="ru-RU">', false);
+    }
+
+    public function test_the_error_page_declares_russian_language(): void
+    {
+        $this->get('/missing-page')
+            ->assertNotFound()
+            ->assertSee('<html lang="ru-RU">', false);
     }
 }

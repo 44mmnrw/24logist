@@ -69,6 +69,12 @@ class LandingSectionResource extends Resource
                 TextInput::make('title')
                     ->label('Заголовок')
                     ->maxLength(255),
+                TextInput::make('seo_h1')
+                    ->label('SEO H1')
+                    ->helperText('Единственный H1 главной страницы. Визуальный заголовок hero редактируется в поле «Заголовок».')
+                    ->required(fn (?LandingSection $record): bool => $record?->slug === 'hero')
+                    ->maxLength(255)
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'hero'),
                 Textarea::make('subtitle')
                     ->label('Подзаголовок')
                     ->rows(2),
