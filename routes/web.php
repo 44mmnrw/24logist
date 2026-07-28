@@ -2,16 +2,22 @@
 
 use App\Http\Controllers\AppleTouchIconController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CsrfTokenController;
 use App\Http\Controllers\FaviconController;
-use App\Http\Controllers\ManifestController;
-use App\Http\Controllers\PwaIconController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LandingLeadController;
+use App\Http\Controllers\ManifestController;
+use App\Http\Controllers\OgHeroCardController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\PwaIconController;
 use App\Http\Controllers\SeoController;
+use App\Http\Middleware\CachePublicLandingPage;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-Route::get('/__og/hero-card', \App\Http\Controllers\OgHeroCardController::class)
+Route::get('/__og/hero-card', OgHeroCardController::class)
     ->name('og.hero.card');
 
 Route::get('/favicon.ico', FaviconController::class)->name('favicon');
@@ -27,7 +33,16 @@ Route::get('/robots.txt', [SeoController::class, 'robots'])->name('seo.robots');
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');
 Route::get('/llms.txt', [SeoController::class, 'llms'])->name('seo.llms');
 
-Route::get('/', LandingController::class);
+Route::get('/', LandingController::class)
+    ->withoutMiddleware([
+        StartSession::class,
+        ShareErrorsFromSession::class,
+        PreventRequestForgery::class,
+    ])
+    ->middleware(CachePublicLandingPage::class);
+
+Route::get('/csrf-token', CsrfTokenController::class)
+    ->name('csrf.token');
 
 Route::post('/leads/quiz', [LandingLeadController::class, 'storeQuiz'])
     ->middleware('throttle:12,1')

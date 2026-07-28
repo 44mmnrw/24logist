@@ -7,10 +7,12 @@
     <div
         class="telegram-popup"
         data-telegram-popup
-        data-show-delay="{{ max(0, (int) $settings->telegram_popup_show_delay) }}"
+        data-show-delay="{{ max(45, (int) $settings->telegram_popup_show_delay) }}"
+        data-scroll-percent="{{ min(90, max(25, (int) $settings->telegram_popup_scroll_percent)) }}"
         data-auto-close-delay="{{ max(0, (int) $settings->telegram_popup_auto_close_delay) }}"
-        role="dialog"
-        aria-modal="true"
+        data-cooldown-days="7"
+        role="region"
+        aria-live="polite"
         aria-labelledby="telegram-popup-title"
         aria-describedby="telegram-popup-description"
         aria-hidden="true"

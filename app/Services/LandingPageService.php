@@ -45,6 +45,7 @@ class LandingPageService
     {
         Cache::forget(self::CACHE_KEY);
         Cache::forget('landing.page.content');
+        app(PublicPageCache::class)->forgetLanding();
         $this->sections = null;
     }
 

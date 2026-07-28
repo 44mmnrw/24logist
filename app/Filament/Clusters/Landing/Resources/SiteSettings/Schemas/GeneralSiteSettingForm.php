@@ -85,7 +85,7 @@ final class GeneralSiteSettingForm
                         ->fetchFileInformation(false)
                         ->openable()
                         ->downloadable()
-                        ->getUploadedFileUsing(static::uploadPreview(...))
+                        ->getUploadedFileUsing(self::uploadPreview(...))
                         ->helperText('Иконка вкладки браузера. SVG, PNG, ICO или WebP до 1 МБ. Пусто — images/favicon.svg.')
                         ->columnSpanFull(),
                     FileUpload::make('apple_touch_icon_path')
@@ -103,7 +103,7 @@ final class GeneralSiteSettingForm
                         ->fetchFileInformation(false)
                         ->openable()
                         ->downloadable()
-                        ->getUploadedFileUsing(static::uploadPreview(...))
+                        ->getUploadedFileUsing(self::uploadPreview(...))
                         ->helperText('PNG или JPEG 180×180 px для «Добавить на экран» в iOS.')
                         ->columnSpanFull(),
                 ])
@@ -156,7 +156,7 @@ final class GeneralSiteSettingForm
                         ->fetchFileInformation(false)
                         ->openable()
                         ->downloadable()
-                        ->getUploadedFileUsing(static::uploadPreview(...))
+                        ->getUploadedFileUsing(self::uploadPreview(...))
                         ->helperText('1200×630 px. Главная и fallback для CMS.')
                         ->columnSpanFull(),
                 ])
@@ -235,7 +235,7 @@ final class GeneralSiteSettingForm
                         ->fetchFileInformation(false)
                         ->openable()
                         ->downloadable()
-                        ->getUploadedFileUsing(static::uploadPreview(...))
+                        ->getUploadedFileUsing(self::uploadPreview(...))
                         ->columnSpanFull(),
                     TextInput::make('org_street_address')
                         ->label('Улица, дом')
@@ -335,16 +335,25 @@ final class GeneralSiteSettingForm
                     TextInput::make('telegram_popup_show_delay')
                         ->label('Показать через, секунд')
                         ->numeric()
-                        ->minValue(0)
+                        ->minValue(45)
                         ->maxValue(86400)
-                        ->default(5)
+                        ->default(45)
+                        ->helperText('Не менее 45 секунд. Окно также может появиться раньше после достаточной прокрутки страницы.')
+                        ->required(),
+                    TextInput::make('telegram_popup_scroll_percent')
+                        ->label('Показать после прокрутки, %')
+                        ->numeric()
+                        ->minValue(25)
+                        ->maxValue(90)
+                        ->default(55)
+                        ->helperText('На мобильных устройствах используется минимум 65%.')
                         ->required(),
                     TextInput::make('telegram_popup_auto_close_delay')
                         ->label('Автоматически закрыть через, секунд')
                         ->numeric()
                         ->minValue(0)
                         ->maxValue(86400)
-                        ->default(15)
+                        ->default(0)
                         ->helperText('0 — не закрывать автоматически.')
                         ->required(),
                 ])
@@ -372,20 +381,20 @@ final class GeneralSiteSettingForm
                 ->columns(2)
                 ->columnSpanFull(),
             Section::make('AI-поиск и llms.txt')
-                ->description('Краткое описание для AI-ассистентов и файл /llms.txt.')
+                ->description('Краткое описание для метаданных и полное содержимое файла /llms.txt.')
                 ->schema([
                     Textarea::make('ai_site_summary')
                         ->label('Краткое описание для AI')
                         ->rows(4)
                         ->maxLength(1000)
                         ->placeholder(SiteSetting::defaultAiSiteSummary())
-                        ->helperText('Meta abstract и цитата в /llms.txt.')
+                        ->helperText('Meta abstract для AI-ассистентов.')
                         ->columnSpanFull(),
                     Textarea::make('llms_txt_extra')
-                        ->label('Дополнительный блок в llms.txt')
-                        ->rows(10)
+                        ->label('Полное содержимое llms.txt')
+                        ->rows(20)
                         ->placeholder(SiteSetting::defaultLlmsTxtExtra())
-                        ->helperText('Markdown: возможности, тарифы, инструкции.')
+                        ->helperText('Markdown. В /llms.txt публикуется только этот текст — без автоматически добавляемых разделов.')
                         ->columnSpanFull(),
                 ])
                 ->columnSpanFull(),

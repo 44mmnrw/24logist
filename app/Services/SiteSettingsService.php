@@ -60,6 +60,7 @@ class SiteSettingsService
     public function clearCache(): void
     {
         Cache::forget(self::CACHE_KEY);
+        app(PublicPageCache::class)->forgetLanding();
         Cache::forget('site.settings.v11');
         Cache::forget('site.settings.v10');
         Cache::forget('site.settings.v9');

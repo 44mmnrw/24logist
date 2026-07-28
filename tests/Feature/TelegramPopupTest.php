@@ -35,16 +35,21 @@ class TelegramPopupTest extends TestCase
             'telegram_popup_dismiss_text' => 'Закрыть',
             'telegram_popup_channel_url' => 'https://t.me/example_channel',
             'telegram_popup_mobile_url' => 'tg://resolve?domain=example_channel',
-            'telegram_popup_show_delay' => 7,
-            'telegram_popup_auto_close_delay' => 19,
+            'telegram_popup_show_delay' => 45,
+            'telegram_popup_scroll_percent' => 60,
+            'telegram_popup_auto_close_delay' => 0,
         ]);
         app(SiteSettingsService::class)->clearCache();
 
         $this->get('/')
             ->assertOk()
             ->assertSee('data-telegram-popup', false)
-            ->assertSee('data-show-delay="7"', false)
-            ->assertSee('data-auto-close-delay="19"', false)
+            ->assertSee('data-show-delay="45"', false)
+            ->assertSee('data-scroll-percent="60"', false)
+            ->assertSee('data-auto-close-delay="0"', false)
+            ->assertSee('data-cooldown-days="7"', false)
+            ->assertSee('role="region"', false)
+            ->assertDontSee('aria-modal=', false)
             ->assertSee('Тестовый заголовок')
             ->assertSee('Тестовое описание')
             ->assertSee('https://t.me/example_channel', false)
