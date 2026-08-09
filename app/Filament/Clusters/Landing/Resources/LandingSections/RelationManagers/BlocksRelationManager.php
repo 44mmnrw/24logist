@@ -171,8 +171,50 @@ class BlocksRelationManager extends RelationManager
                     TextInput::make('tag')
                         ->label('Тег карточки')
                         ->maxLength(255),
+                    Textarea::make('platform_note_text')
+                        ->label('Примечание в карточке')
+                        ->helperText('Для выделения части текста можно использовать тег <strong>. Оставьте пустым, чтобы скрыть примечание.')
+                        ->rows(2)
+                        ->maxLength(2000)
+                        ->columnSpanFull(),
+                    Select::make('platform_note_icon')
+                        ->label('Иконка примечания')
+                        ->options(LandingIcons::OPTIONS)
+                        ->searchable()
+                        ->dehydrateStateUsing(fn (?string $state) => LandingIcons::normalize($state))
+                        ->formatStateUsing(fn (?string $state) => LandingIcons::resolve($state)),
+                    Repeater::make('platform_list_items')
+                        ->label('Пункты списка')
+                        ->schema([
+                            TextInput::make('title')
+                                ->label('Текст пункта')
+                                ->required()
+                                ->maxLength(255),
+                            Select::make('icon')
+                                ->label('Иконка')
+                                ->options(LandingIcons::OPTIONS)
+                                ->searchable()
+                                ->dehydrateStateUsing(fn (?string $state) => LandingIcons::normalize($state))
+                                ->formatStateUsing(fn (?string $state) => LandingIcons::resolve($state)),
+                        ])
+                        ->defaultItems(0)
+                        ->addActionLabel('Добавить пункт')
+                        ->reorderable()
+                        ->columnSpanFull(),
+                    Repeater::make('platform_pills')
+                        ->label('Текстовые плашки')
+                        ->schema([
+                            TextInput::make('title')
+                                ->label('Текст плашки')
+                                ->required()
+                                ->maxLength(255),
+                        ])
+                        ->defaultItems(0)
+                        ->addActionLabel('Добавить плашку')
+                        ->reorderable()
+                        ->columnSpanFull(),
                     Repeater::make('platform_roles')
-                        ->label('Роли (platform-roles)')
+                        ->label('Роли')
                         ->schema([
                             TextInput::make('title')
                                 ->label('Роль')
@@ -182,7 +224,7 @@ class BlocksRelationManager extends RelationManager
                                 ->label('Описание роли')
                                 ->maxLength(255),
                         ])
-                        ->defaultItems(1)
+                        ->defaultItems(0)
                         ->addActionLabel('Добавить роль')
                         ->reorderable()
                         ->columnSpanFull(),
@@ -625,9 +667,6 @@ class BlocksRelationManager extends RelationManager
                         }
 
                         if ($isPlatform) {
-                            $roles = $data['platform_roles'] ?? [];
-                            unset($data['platform_roles']);
-
                             $card = LandingBlock::query()->create([
                                 'section_slug' => $this->getOwnerRecord()->slug,
                                 'block_type' => 'card',
@@ -640,7 +679,7 @@ class BlocksRelationManager extends RelationManager
                                 'is_active' => $data['is_active'] ?? true,
                             ]);
 
-                            LandingPlatform::syncRoles($card, $roles);
+                            LandingPlatform::syncContent($card, $data);
 
                             return $card;
                         }
@@ -703,7 +742,7 @@ class BlocksRelationManager extends RelationManager
                         }
 
                         if ($isPlatform && $record->block_type === 'card') {
-                            $data['platform_roles'] = LandingPlatform::rolesFormState($record);
+                            $data = array_merge($data, LandingPlatform::contentFormState($record));
                         }
 
                         if ($isFooter && $record->block_type === 'footer_column') {
@@ -737,7 +776,6 @@ class BlocksRelationManager extends RelationManager
                         }
 
                         if ($isPlatform && $record->block_type === 'card') {
-                            $roles = $data['platform_roles'] ?? [];
                             $record->update([
                                 'title' => $data['title'] ?? $record->title,
                                 'subtitle' => $data['subtitle'] ?? $record->subtitle,
@@ -748,7 +786,7 @@ class BlocksRelationManager extends RelationManager
                                 'is_active' => $data['is_active'] ?? $record->is_active,
                             ]);
 
-                            LandingPlatform::syncRoles($record, $roles);
+                            LandingPlatform::syncContent($record, $data);
 
                             return;
                         }
@@ -805,7 +843,9 @@ class BlocksRelationManager extends RelationManager
                         }
 
                         if ($record->block_type === 'card') {
-                            $record->children()->where('block_type', 'role')->delete();
+                            $record->children()
+                                ->whereIn('block_type', ['note', 'list_item', 'pill', 'role'])
+                                ->delete();
                         }
 
                         if ($record->block_type === 'footer_column') {
