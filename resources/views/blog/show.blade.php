@@ -58,7 +58,7 @@
 
                 <div class="landing-shell blog-post-layout">
                     <div class="blog-post-main">
-                        <div class="cms-page__body blog-post-body">
+                        <div class="cms-page__body blog-post-body blog-post-body--article">
                             {!! $post->renderBody() !!}
                         </div>
 

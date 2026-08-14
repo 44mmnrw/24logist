@@ -131,4 +131,23 @@ class BlogTest extends TestCase
 
         $this->get('/blog/hidden-post')->assertNotFound();
     }
+
+    public function test_blog_post_renders_article_format_blocks(): void
+    {
+        $post = BlogPost::query()->create([
+            'title' => 'Статейная верстка',
+            'slug' => 'article-layout',
+            'body' => '<p class="lead">Вводный абзац</p><h2>Раздел</h2><h3>Подраздел</h3><blockquote><p>Главное</p></blockquote><table><tbody><tr><td>45 дней</td><td>3 месяца</td></tr></tbody></table>',
+            'is_published' => true,
+            'published_at' => now()->subDay(),
+        ]);
+
+        $response = $this->get($post->getUrl());
+
+        $response->assertOk();
+        $response->assertSee('blog-post-body--article', false);
+        $response->assertSee('<h2>Раздел</h2>', false);
+        $response->assertSee('<blockquote>', false);
+        $response->assertSee('<table>', false);
+    }
 }

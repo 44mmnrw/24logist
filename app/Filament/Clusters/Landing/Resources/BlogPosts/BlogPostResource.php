@@ -16,6 +16,8 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\RichEditor\TextColor;
+use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
@@ -120,6 +122,32 @@ class BlogPostResource extends Resource
                     RichEditor::make('body')
                         ->label('Текст статьи')
                         ->required()
+                        ->helperText('Статейная верстка: «Лид» — вводный абзац, H2 — раздел с линией, H3 — синий подзаголовок, «Цитата» — акцентная врезка, выделение — предупреждение, таблица — блок с цифрами, скрепка — изображение.')
+                        ->toolbarButtons([
+                            ['undo', 'redo'],
+                            [
+                                ToolbarButtonGroup::make('Стиль', ['paragraph', 'lead', 'h2', 'h3'])
+                                    ->textualButtons(),
+                            ],
+                            ['bold', 'italic', 'underline', 'link', 'textColor', 'highlight'],
+                            ['bulletList', 'orderedList', 'blockquote'],
+                            ['table', 'attachFiles', 'horizontalRule'],
+                            ['alignStart', 'alignCenter', 'alignEnd'],
+                        ])
+                        ->textColors([
+                            'navy' => TextColor::make('Тёмно-синий', '#22384d', '#b9c9d8'),
+                            'blue' => TextColor::make('Синий', '#2878bd', '#7db7e8'),
+                            'teal' => TextColor::make('Бирюзовый', '#268b8d', '#65c7c9'),
+                            'red' => TextColor::make('Красный акцент', '#b23a3a', '#ef8d8d'),
+                            'muted' => TextColor::make('Серый', '#697786', '#aab5c0'),
+                        ])
+                        ->fileAttachments(true)
+                        ->fileAttachmentsDisk('public')
+                        ->fileAttachmentsDirectory('blog/body')
+                        ->fileAttachmentsVisibility('public')
+                        ->fileAttachmentsMaxSize(8192)
+                        ->resizableImages()
+                        ->extraAttributes(['class' => 'blog-article-editor'])
                         ->columnSpanFull(),
                 ])
                 ->columns(2)

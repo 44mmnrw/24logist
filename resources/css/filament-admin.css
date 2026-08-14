@@ -60,3 +60,78 @@
         padding-top: 0;
     }
 }
+
+/* Редактор блога: визуальная модель журнальной статьи. */
+.blog-article-editor .fi-fo-rich-editor-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.blog-article-editor .fi-fo-rich-editor-content {
+    min-height: 680px;
+    padding: 3rem clamp(1.5rem, 7vw, 5rem);
+    background: #fff;
+    color: #263746;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.05rem;
+    line-height: 1.48;
+}
+
+.blog-article-editor .fi-fo-rich-editor-content h2 {
+    margin-top: 2.25rem;
+    padding-bottom: 0.45rem;
+    border-bottom: 1px solid #c9d8df;
+    color: #22384d;
+    font-family: Arial, sans-serif;
+    font-size: 1.55rem;
+    line-height: 1.25;
+}
+
+.blog-article-editor .fi-fo-rich-editor-content h3 {
+    margin-top: 1.75rem;
+    color: #2878bd;
+    font-family: Arial, sans-serif;
+    font-size: 1.15rem;
+    line-height: 1.3;
+}
+
+.blog-article-editor .fi-fo-rich-editor-content .lead {
+    color: #697786;
+    font-size: 1.1rem;
+    font-style: italic;
+}
+
+.blog-article-editor .fi-fo-rich-editor-content blockquote {
+    margin-block: 1.25rem;
+    border-inline-start: 3px solid #268b8d;
+    background: #e8f2f4;
+    padding: 0.9rem 1rem;
+    color: #22384d;
+    font-style: normal;
+    font-weight: 600;
+}
+
+.blog-article-editor .fi-fo-rich-editor-content blockquote p:first-of-type::before,
+.blog-article-editor .fi-fo-rich-editor-content blockquote p:last-of-type::after {
+    content: none;
+}
+
+.blog-article-editor .fi-fo-rich-editor-content mark {
+    background: #fff1d6;
+    color: inherit;
+    box-decoration-break: clone;
+    padding: 0.08em 0.18em;
+}
+
+.blog-article-editor .fi-fo-rich-editor-content table {
+    border-top: 2px solid #268b8d;
+    border-collapse: collapse;
+}
+
+.blog-article-editor .fi-fo-rich-editor-content th,
+.blog-article-editor .fi-fo-rich-editor-content td {
+    border: 1px solid #d6e0e5;
+    background: #f5f7f8;
+    padding: 0.8rem;
+}
