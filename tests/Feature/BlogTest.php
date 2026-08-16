@@ -6,7 +6,9 @@ use App\Filament\Clusters\Landing\Resources\BlogTags\BlogTagResource;
 use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Models\BlogTag;
+use App\Services\BlogTagSocialImageGenerator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
@@ -267,5 +269,26 @@ class BlogTest extends TestCase
 
         $unusedTag->delete();
         $this->assertDatabaseMissing('blog_tags', ['id' => $unusedTag->id]);
+    }
+
+    public function test_social_image_is_generated_for_blog_tag_and_used_by_all_seo_formats(): void
+    {
+        Storage::fake('public');
+
+        $tag = BlogTag::query()->create([
+            'name' => 'Электронные транспортные накладные',
+            'slug' => 'elektronnye-transportnye-nakladnye',
+            'seo_h1' => 'Электронные транспортные накладные для перевозчиков',
+            'social_image_title' => 'ЭТрН для грузоперевозок',
+        ]);
+
+        $path = app(BlogTagSocialImageGenerator::class)->generate($tag);
+
+        Storage::disk('public')->assertExists($path);
+        $this->assertSame([1200, 630], array_slice(getimagesize(Storage::disk('public')->path($path)), 0, 2));
+        $this->assertSame('ЭТрН для грузоперевозок', $tag->socialImageTitle());
+        $this->assertSame($path, $tag->fresh()->og_image_path);
+        $this->assertSame($path, $tag->fresh()->twitter_image_path);
+        $this->assertSame($path, $tag->fresh()->schema_image_path);
     }
 }

@@ -21,6 +21,7 @@ class BlogTag extends Model
         'canonical_url',
         'og_title',
         'og_description',
+        'social_image_title',
         'og_image_path',
         'og_type',
         'twitter_title',
@@ -48,6 +49,11 @@ class BlogTag extends Model
         return filled($this->seo_h1)
             ? (string) $this->seo_h1
             : 'Статьи с тегом «'.$this->name.'»';
+    }
+
+    public function socialImageTitle(): string
+    {
+        return (string) ($this->social_image_title ?: $this->seo_h1 ?: $this->name);
     }
 
     public function usageCount(): int

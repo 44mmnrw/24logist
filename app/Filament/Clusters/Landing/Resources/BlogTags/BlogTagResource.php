@@ -139,6 +139,12 @@ class BlogTagResource extends Resource
                 ->columnSpanFull(),
             Section::make('Open Graph и соцсети')
                 ->schema([
+                    TextInput::make('social_image_title')
+                        ->label('Текст на изображении')
+                        ->maxLength(120)
+                        ->placeholder('Используется H1 или название тега')
+                        ->helperText('Заголовок для автоматически создаваемой обложки. После изменения нажмите «Сгенерировать изображение».')
+                        ->columnSpanFull(),
                     TextInput::make('og_title')->label('OG title')->maxLength(255),
                     Select::make('og_type')->label('OG type')->options(['website' => 'website', 'article' => 'article'])->default('website')->native(false),
                     Textarea::make('og_description')->label('OG description')->rows(2)->maxLength(500)->columnSpanFull(),
