@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\BlogPost;
+use App\Models\BlogTag;
 use App\Models\CmsPage;
 use App\Services\LandingPageService;
 use App\Services\SiteSettingsService;
@@ -85,6 +86,40 @@ final class StructuredData
             self::website(),
             self::article($post, $meta),
             self::breadcrumbListForBlogPost($post, $meta['url']),
+        ]));
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public static function forBlogTag(BlogTag $tag): array
+    {
+        $meta = OpenGraph::forBlogTag($tag);
+        $type = in_array($tag->schema_type, ['CollectionPage', 'WebPage'], true)
+            ? (string) $tag->schema_type
+            : 'CollectionPage';
+
+        $page = self::webPage(
+            name: self::pageTitle($tag->schema_headline ?: $meta['html_title']),
+            description: $tag->schema_description ?: $meta['description'],
+            url: $meta['url'],
+            type: $type,
+        );
+        $schemaImage = OpenGraph::absolutePublicUrl($tag->schema_image_path) ?? $meta['image'];
+
+        if ($page !== null && filled($schemaImage)) {
+            $page['primaryImageOfPage'] = [
+                '@type' => 'ImageObject',
+                'url' => $schemaImage,
+            ];
+            $page['image'] = $schemaImage;
+        }
+
+        return array_values(array_filter([
+            self::organization(),
+            self::website(),
+            $page,
+            self::breadcrumbListForBlogTag($tag, $meta['url']),
         ]));
     }
 
@@ -393,6 +428,37 @@ final class StructuredData
                     '@type' => 'ListItem',
                     'position' => 3,
                     'name' => $post->title,
+                    'item' => $url,
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private static function breadcrumbListForBlogTag(BlogTag $tag, string $url): ?array
+    {
+        return [
+            '@context' => self::CONTEXT,
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => [
+                [
+                    '@type' => 'ListItem',
+                    'position' => 1,
+                    'name' => 'Главная',
+                    'item' => self::siteUrl(),
+                ],
+                [
+                    '@type' => 'ListItem',
+                    'position' => 2,
+                    'name' => 'Блог',
+                    'item' => route('blog.index'),
+                ],
+                [
+                    '@type' => 'ListItem',
+                    'position' => 3,
+                    'name' => $tag->name,
                     'item' => $url,
                 ],
             ],

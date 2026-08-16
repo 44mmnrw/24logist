@@ -7,6 +7,7 @@ use App\Filament\Clusters\Landing\Resources\BlogPosts\Pages\EditBlogPost;
 use App\Filament\Clusters\Landing\Resources\BlogPosts\Pages\ListBlogPosts;
 use App\Models\BlogCategory;
 use App\Models\BlogPost;
+use App\Models\BlogTag;
 use App\Support\FilamentUploadPreview;
 use App\Support\OpenGraph;
 use BackedEnum;
@@ -52,7 +53,7 @@ class BlogPostResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 5;
 
     public static function form(Schema $schema): Schema
     {
@@ -168,6 +169,7 @@ class BlogPostResource extends Resource
                         ->native(false)
                         ->helperText('Список рубрик создается отдельно в разделе «Рубрики блога».'),
                     TagsInput::make('tags')
+                        ->suggestions(fn (): array => BlogTag::query()->orderBy('name')->pluck('name')->all())
                         ->label('Теги')
                         ->placeholder('Добавьте тег')
                         ->columnSpanFull(),

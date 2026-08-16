@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\BlogCategory;
 use App\Models\BlogPost;
+use App\Models\BlogTag;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -160,7 +161,8 @@ class BlogTest extends TestCase
             'is_published' => false,
         ]);
 
-        $tagUrl = route('blog.tag', ['tag' => 'Автоматизация']);
+        $tag = BlogTag::query()->where('name', 'Автоматизация')->firstOrFail();
+        $tagUrl = $tag->getUrl();
 
         $this->get($matchingPost->getUrl())
             ->assertOk()
@@ -177,6 +179,40 @@ class BlogTest extends TestCase
     public function test_empty_tag_redirects_to_blog_index(): void
     {
         $this->get('/tag')->assertRedirect(route('blog.index'));
+    }
+
+    public function test_legacy_tag_url_redirects_to_permanent_slug_and_seo_settings_are_rendered(): void
+    {
+        BlogPost::query()->create([
+            'title' => 'SEO для тега',
+            'slug' => 'tag-seo-post',
+            'body' => 'Текст',
+            'tags' => ['Автоматизация'],
+            'is_published' => true,
+            'published_at' => now()->subDay(),
+        ]);
+
+        $tag = BlogTag::query()->where('name', 'Автоматизация')->firstOrFail();
+        $tag->update([
+            'slug' => 'automation',
+            'meta_title' => 'Автоматизация логистики — статьи',
+            'meta_description' => 'Подборка материалов об автоматизации логистики.',
+            'meta_robots' => 'index, follow, max-image-preview:large',
+            'og_title' => 'Автоматизация логистики',
+            'schema_type' => 'CollectionPage',
+        ]);
+
+        $this->get('/tag?tag='.urlencode('Автоматизация'))
+            ->assertRedirect($tag->getUrl())
+            ->assertStatus(301);
+
+        $this->get($tag->getUrl())
+            ->assertOk()
+            ->assertSee('<title>Автоматизация логистики — статьи', false)
+            ->assertSee('name="description" content="Подборка материалов об автоматизации логистики."', false)
+            ->assertSee('rel="canonical" href="'.$tag->getUrl().'"', false)
+            ->assertSee('property="og:title" content="Автоматизация логистики"', false)
+            ->assertSee('"@type":"CollectionPage"', false);
     }
 
     public function test_blog_post_renders_article_format_blocks(): void

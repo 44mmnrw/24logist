@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\BlogPost;
+use App\Models\BlogTag;
 use App\Models\CmsPage;
 use App\Services\LandingPageService;
 use App\Services\SiteSettingsService;
@@ -134,19 +135,35 @@ final class OpenGraph
     /**
      * @return array<string, mixed>
      */
-    public static function forBlogTag(string $tag): array
+    public static function forBlogTag(BlogTag $tag): array
     {
-        $tag = trim($tag);
+        $settings = app(SiteSettingsService::class)->get();
+        $pageTitle = self::joinTitle($tag->meta_title ?: 'Статьи с тегом «'.$tag->name.'»');
+        $title = filled($tag->og_title) ? (string) $tag->og_title : $pageTitle;
 
-        return self::build(
-            title: self::joinTitle('Статьи с тегом «'.$tag.'»'),
-            description: 'Материалы блога 24Logist по теме «'.$tag.'».',
-            url: route('blog.tag', ['tag' => $tag]),
-            imagePath: app(SiteSettingsService::class)->get()->og_image_path ?: self::defaultHeroImagePath(),
-            type: 'website',
-            robots: self::ROBOTS_INDEX,
-            keywords: $tag,
+        $description = filled($tag->og_description)
+            ? (string) $tag->og_description
+            : ($tag->meta_description ?: $tag->description ?: 'Материалы блога 24Logist по теме «'.$tag->name.'».');
+
+        $imagePath = $tag->og_image_path ?: $settings->og_image_path;
+
+        $meta = self::build(
+            title: $title,
+            description: $description,
+            url: filled($tag->canonical_url) ? (string) $tag->canonical_url : $tag->getUrl(),
+            imagePath: $imagePath ?: self::defaultHeroImagePath(),
+            type: $tag->og_type ?: 'website',
+            robots: filled($tag->meta_robots) ? (string) $tag->meta_robots : self::ROBOTS_INDEX,
+            keywords: $tag->meta_keywords ?: $tag->name,
         );
+
+        $meta['twitter_card'] = $tag->twitter_card ?: 'summary_large_image';
+        $meta['html_title'] = $pageTitle;
+        $meta['twitter_title'] = $tag->twitter_title ?: $meta['title'];
+        $meta['twitter_description'] = $tag->twitter_description ?: $meta['description'];
+        $meta['twitter_image'] = self::absoluteImageUrl($tag->twitter_image_path ?: $imagePath) ?? $meta['image'];
+
+        return $meta;
     }
 
     /**

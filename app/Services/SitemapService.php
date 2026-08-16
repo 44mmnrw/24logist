@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\BlogPost;
+use App\Models\BlogTag;
 use App\Models\CmsPage;
 use App\Models\LandingSection;
 use Illuminate\Support\Carbon;
@@ -155,6 +156,28 @@ final class SitemapService
                 'changefreq' => 'monthly',
                 'priority' => $post->is_featured ? '0.8' : '0.6',
             ];
+        }
+
+        $publishedTagNames = $posts
+            ->flatMap(fn (BlogPost $post): array => (array) $post->tags)
+            ->filter(fn ($tag): bool => filled($tag))
+            ->unique()
+            ->values();
+
+        if ($publishedTagNames->isNotEmpty()) {
+            $tags = BlogTag::query()
+                ->whereIn('name', $publishedTagNames)
+                ->orderBy('name')
+                ->get();
+
+            foreach ($tags as $tag) {
+                $urls[] = [
+                    'loc' => $tag->getUrl(),
+                    'lastmod' => $this->formatLastmod($tag->updated_at),
+                    'changefreq' => 'weekly',
+                    'priority' => '0.5',
+                ];
+            }
         }
 
         return $urls;

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class BlogPost extends Model
@@ -144,6 +145,25 @@ class BlogPost extends Model
 
             if ($post->is_published && $post->published_at === null) {
                 $post->published_at = now();
+            }
+        });
+
+        static::saved(function (self $post): void {
+            if (! Schema::hasTable('blog_tags')) {
+                return;
+            }
+
+            foreach ((array) $post->tags as $value) {
+                $name = trim((string) $value);
+
+                if ($name === '') {
+                    continue;
+                }
+
+                BlogTag::query()->firstOrCreate(
+                    ['name' => $name],
+                    ['slug' => Str::slug($name) ?: 'tag-'.substr(md5($name), 0, 10)],
+                );
             }
         });
     }

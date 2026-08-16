@@ -84,7 +84,9 @@
                             <div class="blog-tags" aria-label="Теги статьи">
                                 @foreach ($post->tags as $tag)
                                     @if (filled($tag))
-                                        <a href="{{ route('blog.tag', ['tag' => trim((string) $tag)]) }}">{{ $tag }}</a>
+                                        @if ($tagLinks->has(trim((string) $tag)))
+                                            <a href="{{ $tagLinks->get(trim((string) $tag))->getUrl() }}">{{ $tag }}</a>
+                                        @endif
                                     @endif
                                 @endforeach
                             </div>

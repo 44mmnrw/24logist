@@ -7,8 +7,9 @@
     @php
         $og = \App\Support\OpenGraph::forBlogTag($tag);
     @endphp
-    <title>{{ $og['title'] }}</title>
+    <title>{{ $og['html_title'] }}</title>
     <x-seo.open-graph :blog-tag="$tag" />
+    <x-seo.structured-data :blog-tag="$tag" />
     <x-site.favicon />
     <x-fonts.preload />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -23,7 +24,10 @@
             <section class="blog-hero blog-tag-hero">
                 <div class="landing-shell blog-hero__shell">
                     <a class="blog-tag-hero__back" href="{{ route('blog.index') }}">← Все статьи</a>
-                    <h1>Статьи с тегом «{{ $tag }}»</h1>
+                    <h1>Статьи с тегом «{{ $tag->name }}»</h1>
+                    @if (filled($tag->description))
+                        <p>{{ $tag->description }}</p>
+                    @endif
                     <p class="blog-tag-count">
                         Найдено материалов: {{ $posts->total() }}
                     </p>

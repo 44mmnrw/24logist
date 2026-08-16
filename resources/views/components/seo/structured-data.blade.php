@@ -3,6 +3,7 @@
     'page' => null,
     'blogPost' => null,
     'blogIndex' => false,
+    'blogTag' => null,
     'notFound' => false,
 ])
 
@@ -10,6 +11,7 @@
     $graphs = match (true) {
         $notFound => [],
         $blogPost !== null => \App\Support\StructuredData::forBlogPost($blogPost),
+        $blogTag !== null => \App\Support\StructuredData::forBlogTag($blogTag),
         $blogIndex => \App\Support\StructuredData::forBlogIndex(),
         $page !== null => \App\Support\StructuredData::forPage($page),
         default => \App\Support\StructuredData::forLanding($landing),

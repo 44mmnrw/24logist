@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BlogPost;
+use App\Models\BlogTag;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -30,24 +31,30 @@ class BlogController extends Controller
         return view('blog.index', compact('featuredPost', 'posts'));
     }
 
-    public function tag(Request $request): View|RedirectResponse
+    public function legacyTag(Request $request): RedirectResponse
     {
-        $tag = trim((string) $request->query('tag'));
+        $name = trim((string) $request->query('tag'));
 
-        if ($tag === '') {
+        if ($name === '') {
             return redirect()->route('blog.index');
         }
 
-        abort_if(mb_strlen($tag) > 100, 404);
+        $tag = BlogTag::query()->where('name', $name)->firstOrFail();
+
+        return redirect()->route('blog.tag', $tag->slug, 301);
+    }
+
+    public function tag(BlogTag $blogTag): View
+    {
+        $tag = $blogTag;
 
         $posts = BlogPost::query()
             ->with('blogCategory')
             ->published()
-            ->whereJsonContains('tags', $tag)
+            ->whereJsonContains('tags', $tag->name)
             ->orderBy('sort_order')
             ->latest('published_at')
-            ->paginate(9)
-            ->withQueryString();
+            ->paginate(9);
 
         return view('blog.tag', compact('tag', 'posts'));
     }
@@ -88,6 +95,11 @@ class BlogController extends Controller
             $relatedPosts = $relatedPosts->concat($fallback);
         }
 
-        return view('blog.show', compact('post', 'relatedPosts'));
+        $tagLinks = BlogTag::query()
+            ->whereIn('name', array_values(array_filter((array) $post->tags, fn ($tag): bool => filled($tag))))
+            ->get()
+            ->keyBy('name');
+
+        return view('blog.show', compact('post', 'relatedPosts', 'tagLinks'));
     }
 }

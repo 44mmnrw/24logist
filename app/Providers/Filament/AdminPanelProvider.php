@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Auth\Login;
 use App\Filament\Clusters\Landing\Resources\BlogCategories\BlogCategoryResource;
 use App\Filament\Clusters\Landing\Resources\BlogPosts\BlogPostResource;
+use App\Filament\Clusters\Landing\Resources\BlogTags\BlogTagResource;
 use App\Filament\Clusters\Landing\Resources\CmsPages\CmsPageResource;
 use App\Filament\Clusters\Landing\Resources\LandingBlocks\LandingBlockResource;
 use App\Filament\Clusters\Landing\Resources\LandingLeads\LandingLeadResource;
@@ -51,6 +52,7 @@ class AdminPanelProvider extends PanelProvider
                 LandingSectionResource::class,
                 CmsPageResource::class,
                 BlogCategoryResource::class,
+                BlogTagResource::class,
                 BlogPostResource::class,
                 LandingLeadResource::class,
                 GeneralSiteSettingResource::class,
