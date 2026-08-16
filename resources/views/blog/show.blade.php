@@ -24,7 +24,13 @@
             <article>
                 <header class="blog-post-hero">
                     <div class="landing-shell blog-post-hero__shell">
-                        <a class="cms-page__back" href="{{ route('blog.index') }}">← Все статьи</a>
+                        <nav class="blog-breadcrumbs" aria-label="Хлебные крошки">
+                            <ol>
+                                <li><a href="{{ url('/') }}">Главная</a></li>
+                                <li><a href="{{ route('blog.index') }}">Блог</a></li>
+                                <li aria-current="page"><span>{{ $post->title }}</span></li>
+                            </ol>
+                        </nav>
                         <div class="blog-card__meta">
                             @if ($post->displayCategory())
                                 <span>{{ $post->displayCategory() }}</span>
@@ -48,16 +54,18 @@
                     </div>
                 </header>
 
-                @if ($post->coverImageUrl())
-                    <div class="landing-shell">
-                        <figure class="blog-post-cover">
-                            <img src="{{ $post->coverImageUrl() }}" alt="{{ $post->cover_image_alt ?: $post->title }}">
-                        </figure>
-                    </div>
-                @endif
-
-                <div class="landing-shell blog-post-layout">
+                <div @class([
+                    'landing-shell',
+                    'blog-post-layout',
+                    'blog-post-layout--without-cover' => ! $post->coverImageUrl(),
+                ])>
                     <div class="blog-post-main">
+                        @if ($post->coverImageUrl())
+                            <figure class="blog-post-cover">
+                                <img src="{{ $post->coverImageUrl() }}" alt="{{ $post->cover_image_alt ?: $post->title }}">
+                            </figure>
+                        @endif
+
                         <div class="cms-page__body blog-post-body blog-post-body--article">
                             {!! $post->renderBody() !!}
                         </div>
