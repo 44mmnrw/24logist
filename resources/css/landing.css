@@ -202,6 +202,84 @@ body {
 .landing-header__actions { display: flex; align-items: center; gap: 12px; }
 .landing-header__login { font-size: 16px; color: #45556c; }
 
+.landing-mobile-menu {
+    position: relative;
+    display: none;
+}
+
+.landing-mobile-menu__toggle {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #dbe3ef;
+    border-radius: 10px;
+    background: #fff;
+    color: #1f2a3d;
+    cursor: pointer;
+    list-style: none;
+}
+
+.landing-mobile-menu__toggle::-webkit-details-marker { display: none; }
+.landing-mobile-menu__toggle:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.25);
+    outline-offset: 2px;
+}
+
+.landing-mobile-menu__icon,
+.landing-mobile-menu__icon::before,
+.landing-mobile-menu__icon::after {
+    width: 20px;
+    height: 2px;
+    display: block;
+    border-radius: 999px;
+    background: currentColor;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.landing-mobile-menu__icon { position: relative; }
+.landing-mobile-menu__icon::before,
+.landing-mobile-menu__icon::after {
+    position: absolute;
+    left: 0;
+    content: '';
+}
+.landing-mobile-menu__icon::before { top: -6px; }
+.landing-mobile-menu__icon::after { top: 6px; }
+.landing-mobile-menu[open] .landing-mobile-menu__icon { background: transparent; }
+.landing-mobile-menu[open] .landing-mobile-menu__icon::before { top: 0; transform: rotate(45deg); }
+.landing-mobile-menu[open] .landing-mobile-menu__icon::after { top: 0; transform: rotate(-45deg); }
+
+.landing-mobile-menu__panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: min(300px, calc(100vw - 32px));
+    padding: 8px;
+    display: grid;
+    gap: 2px;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.16);
+}
+
+.landing-mobile-menu__panel a {
+    padding: 11px 12px;
+    border-radius: 8px;
+    color: #334155;
+    font-size: 15px;
+    line-height: 1.35;
+}
+
+.landing-mobile-menu__panel a:hover,
+.landing-mobile-menu__panel a:focus-visible {
+    background: #eff6ff;
+    color: #1d4ed8;
+    outline: none;
+}
+
 .landing-hero {
     padding-top: 48px;
     padding-bottom: 80px;
@@ -630,8 +708,11 @@ body {
     border: 2px solid #16a34a;
     box-shadow: 0 10px 7px rgba(0, 0, 0, 0.1), 0 4px 3px rgba(0, 0, 0, 0.1);
 }
-.pricing-hit {
+.pricing-card__badges {
     position: absolute; left: 16px; top: -11px;
+    display: flex; flex-wrap: wrap; gap: 6px;
+}
+.pricing-hit {
     background: #16a34a; color: #fff;
     border-radius: 8px; padding: 3px 9px; font-size: 12px; line-height: 16px;
 }
@@ -1197,6 +1278,7 @@ body {
 
 @media (max-width: 1260px) {
     .landing-nav { display: none; }
+    .landing-mobile-menu { display: block; }
     .why-grid { grid-template-columns: repeat(3, 1fr); }
     .pricing-grid { grid-template-columns: repeat(2, 1fr); }
 }
@@ -1225,6 +1307,9 @@ body {
 
 @media (max-width: 760px) {
     .landing-shell { padding-inline: 16px; }
+    .landing-header__shell { gap: 10px; }
+    .landing-header__actions { gap: 8px; }
+    .landing-header__actions .landing-header__login { display: none; }
     .section-head h2,
     .mobile-copy h2,
     .landing-hero .landing-hero__title,
@@ -1249,7 +1334,13 @@ body {
     .epd-section__head { align-items: flex-start; flex-direction: column; gap: 20px; }
     .epd-section__intro { align-items: flex-start; }
     .epd-section__details { width: 100%; }
-    .epd-packages { margin-top: 32px; grid-template-columns: repeat(7, 160px); }
+    .epd-packages {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-top: 32px;
+        overflow-x: visible;
+    }
+    .epd-package { min-width: 0; padding: 16px; }
+    .epd-package h3 { font-size: clamp(22px, 7vw, 28px); }
     .landing-section-slot > section.additional-options-section { padding-block: 56px; }
     .additional-options-section__intro h2 { font-size: 34px; }
     .additional-option {
@@ -1257,6 +1348,15 @@ body {
         padding: 18px 16px;
     }
     .additional-option strong { grid-column: 2; }
+}
+
+@media (max-width: 420px) {
+    .landing-header .brand-logo { height: 28px; }
+    .landing-header__actions .btn--sm { padding-inline: 12px; font-size: 13px; }
+}
+
+@media (max-width: 360px) {
+    .epd-packages { grid-template-columns: 1fr; }
 }
 
 .not-found-page__main {

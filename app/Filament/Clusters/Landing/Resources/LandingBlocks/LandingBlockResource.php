@@ -107,6 +107,9 @@ class LandingBlockResource extends Resource
                 TextInput::make('tag')
                     ->label('Тег')
                     ->maxLength(255),
+                TextInput::make('secondary_tag')
+                    ->label('Дополнительный тег')
+                    ->maxLength(255),
                 TextInput::make('link')
                     ->label('Ссылка')
                     ->maxLength(255),

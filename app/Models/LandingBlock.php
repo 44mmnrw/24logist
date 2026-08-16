@@ -19,6 +19,7 @@ class LandingBlock extends Model
         'icon',
         'price',
         'tag',
+        'secondary_tag',
         'link',
         'button_text',
         'button_style',

@@ -29,6 +29,20 @@
                     <a class="landing-header__login" href="{{ \App\Support\LandingLinks::resolve($button->link) }}">{{ $button->title }}</a>
                 @endif
             @endforeach
+
+            @if ($navLinks->isNotEmpty())
+                <details class="landing-mobile-menu">
+                    <summary class="landing-mobile-menu__toggle" aria-label="Открыть меню">
+                        <span class="landing-mobile-menu__icon" aria-hidden="true"></span>
+                    </summary>
+
+                    <nav class="landing-mobile-menu__panel" aria-label="Мобильная навигация">
+                        @foreach ($navLinks as $link)
+                            <a href="{{ \App\Support\LandingLinks::resolve($link->link) }}">{{ $link->title }}</a>
+                        @endforeach
+                    </nav>
+                </details>
+            @endif
         </div>
     </div>
 </header>

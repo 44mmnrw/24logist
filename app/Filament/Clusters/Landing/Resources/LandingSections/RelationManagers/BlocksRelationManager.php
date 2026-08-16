@@ -294,9 +294,13 @@ class BlocksRelationManager extends RelationManager
                         ->placeholder('В тариф включено 3 рабочих места')
                         ->columnSpanFull(),
                     TextInput::make('tag')
-                        ->label('Тег на карточке')
+                        ->label('Первый бейдж на карточке')
                         ->maxLength(255)
                         ->placeholder('Хит'),
+                    TextInput::make('secondary_tag')
+                        ->label('Второй бейдж на карточке')
+                        ->maxLength(255)
+                        ->placeholder('Например, Выгодно'),
                     TextInput::make('button_text')
                         ->label('Текст кнопки')
                         ->maxLength(255),
@@ -713,6 +717,7 @@ class BlocksRelationManager extends RelationManager
                                 'price' => $data['price'] ?? '',
                                 'description' => $data['description'] ?? null,
                                 'tag' => $data['tag'] ?? null,
+                                'secondary_tag' => $data['secondary_tag'] ?? null,
                                 'button_text' => $data['button_text'] ?? null,
                                 'link' => $data['link'] ?? null,
                                 'button_style' => $data['button_style'] ?? 'ghost',
@@ -812,6 +817,7 @@ class BlocksRelationManager extends RelationManager
                                 'price' => $data['price'] ?? $record->price,
                                 'description' => $data['description'] ?? $record->description,
                                 'tag' => $data['tag'] ?? $record->tag,
+                                'secondary_tag' => $data['secondary_tag'] ?? null,
                                 'button_text' => $data['button_text'] ?? $record->button_text,
                                 'link' => $data['link'] ?? $record->link,
                                 'button_style' => $data['button_style'] ?? $record->button_style,

@@ -22,8 +22,15 @@
         <div @class(['pricing-grid', 'pricing-grid--three' => $plans->count() === 3])>
             @foreach ($plans as $plan)
                 <article @class(['pricing-card', 'pricing-card--hit' => $plan->is_highlighted])>
-                    @if ($plan->tag)
-                        <span class="pricing-hit">{{ $plan->tag }}</span>
+                    @if ($plan->tag || $plan->secondary_tag)
+                        <div class="pricing-card__badges">
+                            @if ($plan->tag)
+                                <span class="pricing-hit">{{ $plan->tag }}</span>
+                            @endif
+                            @if ($plan->secondary_tag)
+                                <span class="pricing-hit">{{ $plan->secondary_tag }}</span>
+                            @endif
+                        </div>
                     @endif
                     <h3>{{ $plan->title }}</h3>
                     <p class="pricing-card__desc">{{ $plan->subtitle }}</p>
