@@ -20,7 +20,6 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\RichEditor\TextColor;
 use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -168,10 +167,15 @@ class BlogPostResource extends Resource
                         ->preload()
                         ->native(false)
                         ->helperText('Список рубрик создается отдельно в разделе «Рубрики блога».'),
-                    TagsInput::make('tags')
-                        ->suggestions(fn (): array => BlogTag::query()->orderBy('name')->pluck('name')->all())
+                    Select::make('tags')
+                        ->options(fn (): array => BlogTag::query()->orderBy('name')->pluck('name', 'name')->all())
+                        ->multiple()
+                        ->searchable()
+                        ->preload()
+                        ->native(false)
                         ->label('Теги')
-                        ->placeholder('Добавьте тег')
+                        ->placeholder('Выберите теги')
+                        ->helperText('В списке доступны только теги из раздела «Теги блога».')
                         ->columnSpanFull(),
                     TextInput::make('author_name')
                         ->label('Автор')

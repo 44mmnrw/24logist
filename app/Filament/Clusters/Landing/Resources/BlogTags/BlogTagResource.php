@@ -9,6 +9,7 @@ use App\Models\BlogTag;
 use App\Support\FilamentUploadPreview;
 use App\Support\OpenGraph;
 use BackedEnum;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -24,6 +25,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class BlogTagResource extends Resource
@@ -185,6 +187,11 @@ class BlogTagResource extends Resource
             ->columns([
                 TextColumn::make('name')->label('Тег')->searchable()->sortable(),
                 TextColumn::make('slug')->label('Slug')->badge()->copyable(),
+                TextColumn::make('usage_count')
+                    ->label('Статей')
+                    ->state(fn (BlogTag $record): int => $record->usageCount())
+                    ->badge()
+                    ->color(fn (int $state): string => $state > 0 ? 'success' : 'gray'),
                 TextColumn::make('url')
                     ->label('URL')
                     ->state(fn (BlogTag $record): string => '/tag/'.$record->slug)
@@ -193,7 +200,16 @@ class BlogTagResource extends Resource
                 TextColumn::make('updated_at')->label('Обновлён')->dateTime('d.m.Y H:i')->sortable(),
             ])
             ->defaultSort('name')
-            ->recordActions([EditAction::make()]);
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make()
+                    ->visible(fn (BlogTag $record): bool => ! $record->isUsed()),
+            ]);
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return $record instanceof BlogTag && ! $record->isUsed();
     }
 
     public static function getPages(): array

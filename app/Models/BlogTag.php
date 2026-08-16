@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Support\LandingMedia;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class BlogTag extends Model
 {
@@ -41,8 +42,26 @@ class BlogTag extends Model
         return route('blog.tag', $this->slug);
     }
 
+    public function usageCount(): int
+    {
+        return BlogPost::query()->whereJsonContains('tags', $this->name)->count();
+    }
+
+    public function isUsed(): bool
+    {
+        return BlogPost::query()->whereJsonContains('tags', $this->name)->exists();
+    }
+
     protected static function booted(): void
     {
+        static::deleting(function (self $tag): void {
+            if ($tag->isUsed()) {
+                throw ValidationException::withMessages([
+                    'tag' => 'Нельзя удалить тег, который используется в статьях.',
+                ]);
+            }
+        });
+
         static::saving(function (self $tag): void {
             if (! filled($tag->slug)) {
                 $tag->slug = $tag->name;

@@ -2,10 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Clusters\Landing\Resources\BlogTags\BlogTagResource;
 use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Models\BlogTag;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 class BlogTest extends TestCase
@@ -232,5 +234,36 @@ class BlogTest extends TestCase
         $response->assertSee('<h2>Раздел</h2>', false);
         $response->assertSee('<blockquote>', false);
         $response->assertSee('<table>', false);
+    }
+
+    public function test_only_unused_blog_tags_can_be_deleted(): void
+    {
+        BlogPost::query()->create([
+            'title' => 'Статья с тегом',
+            'slug' => 'post-with-protected-tag',
+            'body' => 'Текст',
+            'tags' => ['Используемый тег'],
+            'is_published' => true,
+        ]);
+
+        $usedTag = BlogTag::query()->where('name', 'Используемый тег')->firstOrFail();
+        $unusedTag = BlogTag::query()->create(['name' => 'Свободный тег', 'slug' => 'free-tag']);
+
+        $this->assertTrue($usedTag->isUsed());
+        $this->assertSame(1, $usedTag->usageCount());
+        $this->assertFalse(BlogTagResource::canDelete($usedTag));
+        $this->assertTrue(BlogTagResource::canDelete($unusedTag));
+
+        try {
+            $usedTag->delete();
+            $this->fail('Used tag deletion must be blocked.');
+        } catch (ValidationException $exception) {
+            $this->assertSame('Нельзя удалить тег, который используется в статьях.', $exception->errors()['tag'][0]);
+        }
+
+        $this->assertDatabaseHas('blog_tags', ['id' => $usedTag->id]);
+
+        $unusedTag->delete();
+        $this->assertDatabaseMissing('blog_tags', ['id' => $unusedTag->id]);
     }
 }
