@@ -13,7 +13,10 @@ use Throwable;
 
 class YandexWordstatCollector
 {
-    public function __construct(private readonly Factory $http) {}
+    public function __construct(
+        private readonly Factory $http,
+        private readonly KeywordRelevanceFilter $relevanceFilter,
+    ) {}
 
     public function collect(): SeoResearchRun
     {
@@ -101,6 +104,11 @@ class YandexWordstatCollector
                 }
 
                 $phrase = trim((string) preg_replace('/\s+/u', ' ', (string) $item['phrase']));
+
+                if (! $this->relevanceFilter->matches($cluster, $phrase)) {
+                    continue;
+                }
+
                 $count = max(0, (int) ($item['count'] ?? 0));
                 $identity = SeoKeyword::identityHash($phrase, $run->region_id, $run->device);
                 $keyword = SeoKeyword::query()->firstOrNew(['identity_hash' => $identity]);

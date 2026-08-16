@@ -8,6 +8,7 @@ use App\Models\SeoKeywordSnapshot;
 use App\Models\SeoMonitoringSetting;
 use App\Models\SeoResearchRun;
 use App\Models\User;
+use App\Services\Seo\KeywordRelevanceFilter;
 use App\Services\Seo\WordstatCsvImporter;
 use App\Services\Seo\YandexPositionChecker;
 use App\Services\Seo\YandexWordstatCollector;
@@ -48,7 +49,7 @@ class SeoMonitoringTest extends TestCase
             'phrase' => 'транспортный эдо',
             'is_active' => false,
         ]);
-        $this->assertSame(2, SeoKeywordSnapshot::query()->count());
+        $this->assertSame(2, SeoKeywordSnapshot::query()->where('seo_research_run_id', $run->id)->count());
 
         @unlink($path);
     }
@@ -124,6 +125,49 @@ XML;
         ]);
         $this->assertDatabaseHas('seo_keywords', ['phrase' => 'транспортный эдо', 'is_active' => false]);
         $this->assertSame(2, SeoKeywordSnapshot::query()->where('seo_research_run_id', $run->id)->count());
+    }
+
+    public function test_sorm_cluster_keeps_only_queries_related_to_freight_forwarders(): void
+    {
+        SeoMonitoringSetting::instance()->update(['yandex_api_key' => 'test-key', 'wordstat_limit' => 25]);
+        $cluster = SeoKeywordCluster::query()->where('slug', 'sorm')->firstOrFail();
+        $cluster->update(['seed_phrase' => 'сорм для экспедиторов']);
+
+        Http::fake([
+            'searchapi.api.cloud.yandex.net/v2/wordstat/topRequests' => Http::response([
+                'results' => [
+                    ['phrase' => 'сорм для экспедиторов цена', 'count' => 18],
+                    ['phrase' => 'сорм для операторов связи', 'count' => 5000],
+                ],
+                'associations' => [
+                    ['phrase' => 'пэк отслеживание груза', 'count' => 12000],
+                    ['phrase' => 'сорм тэд стоимость', 'count' => 8],
+                ],
+            ]),
+        ]);
+
+        $run = app(YandexWordstatCollector::class)->collect();
+
+        $this->assertDatabaseHas('seo_keywords', ['phrase' => 'сорм для экспедиторов цена']);
+        $this->assertDatabaseHas('seo_keywords', ['phrase' => 'сорм тэд стоимость']);
+        $this->assertDatabaseMissing('seo_keywords', ['phrase' => 'сорм для операторов связи']);
+        $this->assertDatabaseMissing('seo_keywords', ['phrase' => 'пэк отслеживание груза']);
+        $this->assertSame(2, SeoKeywordSnapshot::query()->where('seo_research_run_id', $run->id)->count());
+    }
+
+    public function test_semantic_core_rejects_generic_queries(): void
+    {
+        $filter = app(KeywordRelevanceFilter::class);
+        $etrn = SeoKeywordCluster::query()->create(['name' => 'ЭТрН', 'slug' => 'etrn']);
+        $software = SeoKeywordCluster::query()->create(['name' => 'Программа для экспедитора', 'slug' => 'programma-dlia-ekspeditora']);
+        $logistics = SeoKeywordCluster::query()->create(['name' => 'Логистика', 'slug' => 'logistika', 'is_active' => false]);
+
+        $this->assertTrue($filter->matches($etrn, 'электронные транспортные накладные для перевозчика'));
+        $this->assertFalse($filter->matches($etrn, 'накладная'));
+        $this->assertTrue($filter->matches($software, 'программа учета для экспедитора'));
+        $this->assertFalse($filter->matches($software, 'экспедитор это'));
+        $this->assertFalse($filter->matches($logistics, 'перевозка'));
+        $this->assertFalse($logistics->is_active);
     }
 
     public function test_admin_can_open_all_seo_monitoring_tables(): void

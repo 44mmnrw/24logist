@@ -89,7 +89,7 @@ class SeoKeywordResource extends Resource
             ->defaultSort('latest_wordstat_count', 'desc')
             ->filters([
                 SelectFilter::make('seo_keyword_cluster_id')->label('Кластер')->relationship('cluster', 'name')->searchable()->preload(),
-                SelectFilter::make('is_active')->label('Отслеживание')->options(['1' => 'Активные', '0' => 'Отключённые']),
+                SelectFilter::make('is_active')->label('Отслеживание')->options(['1' => 'Активные', '0' => 'Отключённые'])->default('1'),
                 SelectFilter::make('device')->label('Устройство')->options([
                     'DEVICE_ALL' => 'Все устройства',
                     'DEVICE_DESKTOP' => 'Компьютеры',

@@ -14,6 +14,8 @@ use Throwable;
 
 class WordstatCsvImporter
 {
+    public function __construct(private readonly KeywordRelevanceFilter $relevanceFilter) {}
+
     public function import(string $path): SeoResearchRun
     {
         if (! is_file($path) || ! is_readable($path)) {
@@ -99,6 +101,11 @@ class WordstatCsvImporter
         $normalized = SeoKeyword::normalizePhrase($phrase);
         $seed = SeoKeyword::normalizePhrase(explode(' | ', $row['seeds'] ?? '')[0] ?? '');
         $cluster = $this->resolveCluster($seed);
+
+        if (! $cluster || ! $this->relevanceFilter->matches($cluster, $phrase)) {
+            return;
+        }
+
         $recordedAt = filled($row['collected_at'] ?? null)
             ? Carbon::parse($row['collected_at'])
             : now();

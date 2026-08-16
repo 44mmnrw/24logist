@@ -13,6 +13,14 @@ class BlogTagSocialImageGenerator
 
     private const HEIGHT = 630;
 
+    private const LAYOUT_VERSION = '2';
+
+    private const LOGO_WIDTH = 170;
+
+    private const LOGO_X = 82;
+
+    private const LOGO_Y = 108;
+
     public function generate(BlogTag $tag): string
     {
         $this->assertGdIsAvailable();
@@ -23,13 +31,21 @@ class BlogTagSocialImageGenerator
             $this->placeLogo($canvas);
             $this->placeTitle($canvas, $tag->socialImageTitle());
 
-            $path = 'blog/tags/generated/'.$tag->slug.'.webp';
+            $imageHash = substr(hash('sha256', self::LAYOUT_VERSION.'|'.$tag->socialImageTitle()), 0, 12);
+            $path = 'blog/tags/generated/'.$tag->slug.'-'.$imageHash.'.webp';
             $disk = Storage::disk('public');
             $disk->makeDirectory(dirname($path));
 
             if (! imagewebp($canvas, $disk->path($path), 90)) {
                 throw new RuntimeException('Не удалось сохранить изображение тега.');
             }
+
+            collect([$tag->og_image_path, $tag->twitter_image_path, $tag->schema_image_path])
+                ->filter(fn (?string $oldPath): bool => filled($oldPath)
+                    && $oldPath !== $path
+                    && str_starts_with($oldPath, 'blog/tags/generated/'))
+                ->unique()
+                ->each(fn (string $oldPath) => $disk->delete($oldPath));
 
             $tag->forceFill([
                 'og_image_path' => $path,
@@ -105,7 +121,22 @@ class BlogTagSocialImageGenerator
 
         imagealphablending($canvas, true);
         imagesavealpha($canvas, true);
-        imagecopy($canvas, $logo, 72, 54, 0, 0, imagesx($logo), imagesy($logo));
+        $logoWidth = imagesx($logo);
+        $logoHeight = imagesy($logo);
+        $renderedHeight = (int) round($logoHeight * (self::LOGO_WIDTH / $logoWidth));
+
+        imagecopyresampled(
+            $canvas,
+            $logo,
+            self::LOGO_X,
+            self::LOGO_Y,
+            0,
+            0,
+            self::LOGO_WIDTH,
+            $renderedHeight,
+            $logoWidth,
+            $logoHeight,
+        );
         imagedestroy($logo);
     }
 

@@ -22,24 +22,21 @@ class SeoMonitoringSeeder extends Seeder
                     'seed_phrase' => $seed,
                     'target_url' => filled($cluster['target'] ?? null) ? url($cluster['target']) : null,
                     'search_intent' => $cluster['intent'] ?? null,
+                    'is_active' => array_key_exists($cluster['slug'], (array) config('seo-monitoring.keyword_filters')),
                 ],
             );
         }
 
-        $path = database_path('data/seo-wordstat-2026-08-16.csv');
+        foreach (glob(database_path('data/seo-wordstat-*.csv')) ?: [] as $path) {
+            $hash = hash_file('sha256', $path);
+            $alreadyImported = SeoResearchRun::query()
+                ->where('type', 'wordstat')
+                ->get(['metadata'])
+                ->contains(fn (SeoResearchRun $run): bool => ($run->metadata['sha256'] ?? null) === $hash);
 
-        if (! is_file($path)) {
-            return;
-        }
-
-        $hash = hash_file('sha256', $path);
-        $alreadyImported = SeoResearchRun::query()
-            ->where('type', 'wordstat')
-            ->get(['metadata'])
-            ->contains(fn (SeoResearchRun $run): bool => ($run->metadata['sha256'] ?? null) === $hash);
-
-        if (! $alreadyImported) {
-            app(WordstatCsvImporter::class)->import($path);
+            if (! $alreadyImported) {
+                app(WordstatCsvImporter::class)->import($path);
+            }
         }
     }
 }
