@@ -24,7 +24,7 @@
             <section class="blog-hero blog-tag-hero">
                 <div class="landing-shell blog-hero__shell">
                     <a class="blog-tag-hero__back" href="{{ route('blog.index') }}">← Все статьи</a>
-                    <h1>Статьи с тегом «{{ $tag->name }}»</h1>
+                    <h1>{{ $tag->displayH1() }}</h1>
                     @if (filled($tag->description))
                         <p>{{ $tag->description }}</p>
                     @endif

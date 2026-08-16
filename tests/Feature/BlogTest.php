@@ -197,6 +197,7 @@ class BlogTest extends TestCase
         $tag = BlogTag::query()->where('name', 'Автоматизация')->firstOrFail();
         $tag->update([
             'slug' => 'automation',
+            'seo_h1' => 'Автоматизация транспортной логистики',
             'meta_title' => 'Автоматизация логистики — статьи',
             'meta_description' => 'Подборка материалов об автоматизации логистики.',
             'meta_robots' => 'index, follow, max-image-preview:large',
@@ -210,6 +211,7 @@ class BlogTest extends TestCase
 
         $this->get($tag->getUrl())
             ->assertOk()
+            ->assertSee('<h1>Автоматизация транспортной логистики</h1>', false)
             ->assertSee('<title>Автоматизация логистики — статьи', false)
             ->assertSee('name="description" content="Подборка материалов об автоматизации логистики."', false)
             ->assertSee('rel="canonical" href="'.$tag->getUrl().'"', false)

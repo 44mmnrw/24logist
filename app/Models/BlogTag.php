@@ -13,6 +13,7 @@ class BlogTag extends Model
         'name',
         'slug',
         'description',
+        'seo_h1',
         'meta_title',
         'meta_description',
         'meta_keywords',
@@ -40,6 +41,13 @@ class BlogTag extends Model
     public function getUrl(): string
     {
         return route('blog.tag', $this->slug);
+    }
+
+    public function displayH1(): string
+    {
+        return filled($this->seo_h1)
+            ? (string) $this->seo_h1
+            : 'Статьи с тегом «'.$this->name.'»';
     }
 
     public function usageCount(): int

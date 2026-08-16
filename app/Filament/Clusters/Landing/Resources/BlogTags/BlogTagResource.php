@@ -104,6 +104,12 @@ class BlogTagResource extends Resource
         return [
             Section::make('Meta-теги')
                 ->schema([
+                    TextInput::make('seo_h1')
+                        ->label('H1 страницы')
+                        ->maxLength(255)
+                        ->placeholder('Статьи с тегом «Название»')
+                        ->helperText('Главный видимый заголовок страницы тега. Если поле пустое, используется название тега.')
+                        ->columnSpanFull(),
                     TextInput::make('meta_title')->label('Meta title')->maxLength(70),
                     Select::make('meta_robots')
                         ->label('Robots')
