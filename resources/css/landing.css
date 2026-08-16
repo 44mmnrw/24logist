@@ -709,13 +709,14 @@ body {
     box-shadow: 0 10px 7px rgba(0, 0, 0, 0.1), 0 4px 3px rgba(0, 0, 0, 0.1);
 }
 .pricing-card__badges {
-    position: absolute; left: 16px; top: -11px;
+    position: absolute; left: 16px; right: 16px; top: -11px;
     display: flex; flex-wrap: wrap; gap: 6px;
 }
 .pricing-hit {
     background: #16a34a; color: #fff;
     border-radius: 8px; padding: 3px 9px; font-size: 12px; line-height: 16px;
 }
+.pricing-hit--secondary { margin-left: auto; }
 .pricing-card h3 { font-size: 30px; line-height: 1; color: #0a0a0a; }
 .pricing-card__desc { margin-top: 0; padding-top: 6px; color: #45556c; font-size: 14px; line-height: 21px; min-height: 21px; }
 .pricing-card__price { margin-top: 0; padding-top: 8px; font-size: 36px; line-height: 1; color: #0a0a0a; font-weight: 700; }
@@ -2304,9 +2305,19 @@ body {
     }
 
     .blog-post-body--article table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
+        display: table;
+        width: 100%;
+        max-width: 100%;
+        table-layout: fixed;
+        white-space: normal;
+    }
+
+    .blog-post-body--article th,
+    .blog-post-body--article td {
+        padding: 10px 8px;
+        overflow-wrap: anywhere;
+        word-break: normal;
+        hyphens: auto;
     }
 }
 

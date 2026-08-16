@@ -37,6 +37,7 @@ class LandingPricingBadgesTest extends TestCase
 
         $this->assertStringContainsString('pricing-card__badges', $html);
         $this->assertStringContainsString('>Хит</span>', $html);
+        $this->assertStringContainsString('pricing-hit pricing-hit--secondary', $html);
         $this->assertStringContainsString('>Выгодно</span>', $html);
     }
 }

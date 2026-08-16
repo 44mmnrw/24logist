@@ -28,7 +28,7 @@
                                 <span class="pricing-hit">{{ $plan->tag }}</span>
                             @endif
                             @if ($plan->secondary_tag)
-                                <span class="pricing-hit">{{ $plan->secondary_tag }}</span>
+                                <span class="pricing-hit pricing-hit--secondary">{{ $plan->secondary_tag }}</span>
                             @endif
                         </div>
                     @endif
