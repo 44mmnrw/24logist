@@ -1759,6 +1759,37 @@ body {
     overflow-x: auto;
 }
 
+@media (max-width: 760px) {
+    .cms-page {
+        padding-top: 32px;
+        padding-bottom: 56px;
+    }
+
+    .cms-page__article {
+        min-width: 0;
+    }
+
+    .cms-page__article h1 {
+        font-size: 32px;
+        overflow-wrap: anywhere;
+    }
+
+    .cms-page__body {
+        min-width: 0;
+        margin-top: 24px;
+        font-size: 15px;
+    }
+
+    .cms-page__body table {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        overscroll-behavior-inline: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
 .blog-page {
     background: #f8fafc;
 }

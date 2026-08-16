@@ -4,6 +4,7 @@ namespace App\Filament\Clusters\Landing\Resources\SiteSettings\Pages;
 
 use App\Filament\Clusters\Landing\Resources\SiteSettings\GeneralSiteSettingResource;
 use App\Models\SiteSetting;
+use App\Services\LlmsTxtService;
 use App\Services\SiteMailService;
 use App\Services\SiteSettingsService;
 use App\Support\AppleTouchIcon;
@@ -33,6 +34,23 @@ class EditGeneralSiteSetting extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('refreshLlmsTxt')
+                ->label('Обновить llms.txt')
+                ->icon('heroicon-o-arrow-path')
+                ->color('gray')
+                ->requiresConfirmation()
+                ->modalHeading('Обновить llms.txt?')
+                ->modalDescription('Текущее содержимое поля llms.txt будет заменено списком опубликованных страниц, статей и используемых тегов.')
+                ->action(function (LlmsTxtService $llms): void {
+                    $result = $llms->refreshFromPublishedContent();
+                    $this->data['llms_txt_extra'] = $result['content'];
+
+                    Notification::make()
+                        ->title('llms.txt обновлён')
+                        ->body("Добавлено: страниц — {$result['pages']}, статей — {$result['posts']}, тегов — {$result['tags']}.")
+                        ->success()
+                        ->send();
+                }),
             Action::make('sendTestMail')
                 ->label('Тестовое письмо')
                 ->icon('heroicon-o-paper-airplane')

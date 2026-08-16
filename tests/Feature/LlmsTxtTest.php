@@ -2,7 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\BlogPost;
+use App\Models\BlogTag;
+use App\Models\CmsPage;
 use App\Models\SiteSetting;
+use App\Services\LlmsTxtService;
 use App\Services\SiteSettingsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -48,5 +52,64 @@ MD;
         $this->get(route('seo.llms'))
             ->assertOk()
             ->assertContent('');
+    }
+
+    public function test_it_refreshes_llms_txt_from_published_pages_articles_and_used_tags(): void
+    {
+        SiteSetting::instance()->update([
+            'org_brand_name' => 'ЛогистРу',
+            'ai_site_summary' => 'CRM для транспортных экспедиторов.',
+            'blog_description' => 'Материалы о цифровой логистике.',
+        ]);
+        app(SiteSettingsService::class)->clearCache();
+
+        $page = CmsPage::query()->create([
+            'slug' => 'documentation',
+            'title' => 'Документация',
+            'meta_description' => 'Инструкции по работе с системой.',
+            'is_published' => true,
+        ]);
+        CmsPage::query()->create([
+            'slug' => 'draft-page',
+            'title' => 'Черновик страницы',
+            'is_published' => false,
+        ]);
+
+        $tag = BlogTag::query()->create([
+            'name' => 'ЭТрН',
+            'slug' => 'etrn',
+            'seo_h1' => 'Электронные транспортные накладные',
+            'meta_description' => 'Материалы об ЭТрН для экспедиторов.',
+        ]);
+        BlogTag::query()->create(['name' => 'Неиспользуемый тег', 'slug' => 'unused']);
+
+        $post = BlogPost::query()->create([
+            'slug' => 'etrn-for-forwarders',
+            'title' => 'ЭТрН для экспедиторов',
+            'excerpt' => 'Практическое руководство по ЭТрН.',
+            'tags' => ['ЭТрН'],
+            'is_published' => true,
+            'published_at' => now(),
+        ]);
+        BlogPost::query()->create([
+            'slug' => 'draft-post',
+            'title' => 'Черновик статьи',
+            'tags' => ['Неиспользуемый тег'],
+            'is_published' => false,
+        ]);
+
+        $result = app(LlmsTxtService::class)->refreshFromPublishedContent();
+
+        $this->assertSame(1, $result['pages']);
+        $this->assertSame(1, $result['posts']);
+        $this->assertSame(1, $result['tags']);
+        $this->assertStringContainsString('[Документация]('.route('pages.show', $page->slug).')', $result['content']);
+        $this->assertStringContainsString('[ЭТрН для экспедиторов]('.$post->getUrl().')', $result['content']);
+        $this->assertStringContainsString('('.$tag->getUrl().')', $result['content']);
+        $this->assertStringNotContainsString('Черновик страницы', $result['content']);
+        $this->assertStringNotContainsString('Черновик статьи', $result['content']);
+        $this->assertStringNotContainsString('Неиспользуемый тег', $result['content']);
+        $this->assertSame($result['content'], SiteSetting::instance()->fresh()->llms_txt_extra);
+        $this->assertSame($result['content'], app(LlmsTxtService::class)->generate());
     }
 }
