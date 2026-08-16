@@ -5,8 +5,8 @@ namespace App\Filament\Clusters\Landing\Resources\CmsPages;
 use App\Filament\Clusters\Landing\Resources\CmsPages\Pages\CreateCmsPage;
 use App\Filament\Clusters\Landing\Resources\CmsPages\Pages\EditCmsPage;
 use App\Filament\Clusters\Landing\Resources\CmsPages\Pages\ListCmsPages;
-use App\Support\FilamentUploadPreview;
 use App\Models\CmsPage;
+use App\Support\FilamentUploadPreview;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -284,10 +284,13 @@ class CmsPageResource extends Resource
                 TextColumn::make('title')
                     ->label('Заголовок')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->limit(52)
+                    ->wrap(),
                 TextColumn::make('slug')
                     ->label('Slug')
                     ->badge()
+                    ->limit(38)
                     ->copyable()
                     ->copyMessage('Slug скопирован'),
                 TextColumn::make('url')
@@ -296,7 +299,7 @@ class CmsPageResource extends Resource
                     ->copyable()
                     ->copyableState(fn (CmsPage $record): string => $record->getUrl())
                     ->copyMessage('Ссылка скопирована')
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('is_published')
                     ->label('Опубликована')
                     ->boolean(),
@@ -306,11 +309,12 @@ class CmsPageResource extends Resource
                 TextColumn::make('updated_at')
                     ->label('Обновлена')
                     ->dateTime('d.m.Y H:i')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('sort_order')
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->iconButton(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

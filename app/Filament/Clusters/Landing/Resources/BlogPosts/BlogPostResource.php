@@ -445,12 +445,8 @@ class BlogPostResource extends Resource
                     ->label('Заголовок')
                     ->searchable()
                     ->sortable()
-                    ->limit(48),
-                TextColumn::make('slug')
-                    ->label('Slug')
-                    ->badge()
-                    ->copyable()
-                    ->copyMessage('Slug скопирован'),
+                    ->limit(44)
+                    ->wrap(),
                 TextColumn::make('category_label')
                     ->label('Рубрика')
                     ->state(fn (BlogPost $record): string => $record->displayCategory() ?: '—')
@@ -464,15 +460,8 @@ class BlogPostResource extends Resource
                     ->toggleable(),
                 TextColumn::make('published_at')
                     ->label('Дата')
-                    ->dateTime('d.m.Y H:i')
+                    ->date('d.m.Y')
                     ->sortable(),
-                TextColumn::make('url')
-                    ->label('URL')
-                    ->state(fn (BlogPost $record): string => '/blog/'.$record->slug)
-                    ->copyable()
-                    ->copyableState(fn (BlogPost $record): string => $record->getUrl())
-                    ->copyMessage('Ссылка скопирована')
-                    ->toggleable(),
                 TextColumn::make('updated_at')
                     ->label('Обновлена')
                     ->dateTime('d.m.Y H:i')
@@ -495,7 +484,7 @@ class BlogPostResource extends Resource
                         ->pluck('name', 'id')),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->iconButton(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
