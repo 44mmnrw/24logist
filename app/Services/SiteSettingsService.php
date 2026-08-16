@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Cache;
 
 class SiteSettingsService
 {
-    private const CACHE_KEY = 'site.settings.v12';
+    private const CACHE_KEY = 'site.settings.v13';
 
     public function get(): SiteSetting
     {
@@ -57,9 +57,25 @@ class SiteSettingsService
         ];
     }
 
+    public function googleAnalyticsMeasurementId(): ?string
+    {
+        $settings = $this->get();
+
+        if (! $settings->google_analytics_enabled) {
+            return null;
+        }
+
+        $measurementId = strtoupper(trim((string) $settings->google_analytics_measurement_id));
+
+        return preg_match('/^G-[A-Z0-9]+$/', $measurementId) === 1
+            ? $measurementId
+            : null;
+    }
+
     public function clearCache(): void
     {
         Cache::forget(self::CACHE_KEY);
+        Cache::forget('site.settings.v12');
         app(PublicPageCache::class)->forgetLanding();
         Cache::forget('site.settings.v11');
         Cache::forget('site.settings.v10');

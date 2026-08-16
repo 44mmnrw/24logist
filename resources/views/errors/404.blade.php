@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru-RU">
 <head>
+    <x-analytics.google-analytics />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <x-csrf-meta />
@@ -87,6 +88,7 @@
 
         <x-landing.footer />
     </div>
+    <x-site.cookie-consent />
     <x-analytics.yandex-metrika />
 </body>
 </html>

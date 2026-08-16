@@ -11,7 +11,7 @@ class EditSiteSetting extends EditRecord
 {
     protected static string $resource = SiteSettingResource::class;
 
-    protected static ?string $title = 'Яндекс Метрика';
+    protected static ?string $title = 'Аналитика';
 
     protected static ?string $navigationLabel = 'Аналитика';
 

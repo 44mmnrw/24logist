@@ -69,6 +69,8 @@ class SiteSetting extends Model
         'yandex_metrika_clickmap',
         'yandex_metrika_track_links',
         'yandex_metrika_accurate_track_bounce',
+        'google_analytics_enabled',
+        'google_analytics_measurement_id',
     ];
 
     protected function casts(): array
@@ -88,6 +90,7 @@ class SiteSetting extends Model
             'yandex_metrika_clickmap' => 'boolean',
             'yandex_metrika_track_links' => 'boolean',
             'yandex_metrika_accurate_track_bounce' => 'boolean',
+            'google_analytics_enabled' => 'boolean',
         ];
     }
 
@@ -222,6 +225,7 @@ TEXT;
                 'yandex_metrika_clickmap' => true,
                 'yandex_metrika_track_links' => true,
                 'yandex_metrika_accurate_track_bounce' => true,
+                'google_analytics_enabled' => false,
             ],
         );
     }
