@@ -50,8 +50,14 @@ final class LlmsTxtService
             ? collect()
             : BlogTag::query()->whereIn('name', $usedTagNames)->orderBy('name')->get();
 
-        $brand = trim((string) $settings->org_brand_name) ?: (string) config('app.name');
-        $summary = $this->plainText($settings->ai_site_summary, 500);
+        $brand = trim((string) $settings->org_brand_name);
+
+        if ($brand === '' || mb_strtolower($brand) === 'laravel') {
+            $brand = 'ЛогистРу';
+        }
+        $summary = $this->normalizeSiteSummary(
+            $this->plainText($settings->ai_site_summary, 500),
+        );
         $lines = ['# '.$this->markdownLabel($brand)];
 
         if ($summary !== '') {
@@ -133,5 +139,14 @@ final class LlmsTxtService
         $text = Str::squish(html_entity_decode(strip_tags((string) $value), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
 
         return $text === '' ? '' : Str::limit($text, $limit);
+    }
+
+    private function normalizeSiteSummary(string $summary): string
+    {
+        return (string) preg_replace(
+            '/тарифы от 1\s*600\s*₽\/мес\.?/iu',
+            'тарифы от 2 900 ₽/мес.',
+            $summary,
+        );
     }
 }

@@ -112,4 +112,28 @@ MD;
         $this->assertSame($result['content'], SiteSetting::instance()->fresh()->llms_txt_extra);
         $this->assertSame($result['content'], app(LlmsTxtService::class)->generate());
     }
+
+    public function test_refresh_never_uses_laravel_as_the_site_name(): void
+    {
+        SiteSetting::instance()->update(['org_brand_name' => 'Laravel']);
+        app(SiteSettingsService::class)->clearCache();
+
+        $result = app(LlmsTxtService::class)->refreshFromPublishedContent();
+
+        $this->assertStringStartsWith("# ЛогистРу\n", $result['content']);
+        $this->assertStringNotContainsString('# Laravel', $result['content']);
+    }
+
+    public function test_refresh_replaces_the_outdated_minimum_tariff_in_the_summary(): void
+    {
+        SiteSetting::instance()->update([
+            'ai_site_summary' => 'CRM для экспедиторов. Данные хранятся на серверах в РФ; тарифы от 1 600 ₽/мес.',
+        ]);
+        app(SiteSettingsService::class)->clearCache();
+
+        $result = app(LlmsTxtService::class)->refreshFromPublishedContent();
+
+        $this->assertStringContainsString('тарифы от 2 900 ₽/мес.', $result['content']);
+        $this->assertStringNotContainsString('тарифы от 1 600 ₽/мес.', $result['content']);
+    }
 }

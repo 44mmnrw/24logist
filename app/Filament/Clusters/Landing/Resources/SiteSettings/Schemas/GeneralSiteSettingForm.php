@@ -3,13 +3,17 @@
 namespace App\Filament\Clusters\Landing\Resources\SiteSettings\Schemas;
 
 use App\Models\SiteSetting;
+use App\Services\LlmsTxtService;
 use App\Support\FilamentUploadPreview;
+use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -395,6 +399,27 @@ final class GeneralSiteSettingForm
                         ->rows(20)
                         ->placeholder(SiteSetting::defaultLlmsTxtExtra())
                         ->helperText('Markdown. В /llms.txt публикуется только этот текст — без автоматически добавляемых разделов.')
+                        ->columnSpanFull(),
+                    Actions::make([
+                        Action::make('refreshLlmsTxt')
+                            ->label('Обновить llms.txt')
+                            ->icon('heroicon-o-arrow-path')
+                            ->color('gray')
+                            ->requiresConfirmation()
+                            ->modalHeading('Обновить llms.txt?')
+                            ->modalDescription('Текущее содержимое поля llms.txt будет заменено списком опубликованных страниц, статей и используемых тегов.')
+                            ->action(function (LlmsTxtService $llms, $set): void {
+                                $result = $llms->refreshFromPublishedContent();
+                                $set('llms_txt_extra', $result['content']);
+
+                                Notification::make()
+                                    ->title('llms.txt обновлён')
+                                    ->body("Добавлено: страниц — {$result['pages']}, статей — {$result['posts']}, тегов — {$result['tags']}.")
+                                    ->success()
+                                    ->send();
+                            }),
+                    ])
+                        ->alignEnd()
                         ->columnSpanFull(),
                 ])
                 ->columnSpanFull(),
