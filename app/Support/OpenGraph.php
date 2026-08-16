@@ -134,6 +134,24 @@ final class OpenGraph
     /**
      * @return array<string, mixed>
      */
+    public static function forBlogTag(string $tag): array
+    {
+        $tag = trim($tag);
+
+        return self::build(
+            title: self::joinTitle('Статьи с тегом «'.$tag.'»'),
+            description: 'Материалы блога 24Logist по теме «'.$tag.'».',
+            url: route('blog.tag', ['tag' => $tag]),
+            imagePath: app(SiteSettingsService::class)->get()->og_image_path ?: self::defaultHeroImagePath(),
+            type: 'website',
+            robots: self::ROBOTS_INDEX,
+            keywords: $tag,
+        );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
     public static function forBlogPost(BlogPost $post): array
     {
         $settings = app(SiteSettingsService::class)->get();

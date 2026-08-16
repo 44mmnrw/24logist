@@ -2154,7 +2154,7 @@ body {
     margin-top: 18px;
 }
 
-.blog-tags span {
+.blog-tags a {
     display: inline-flex;
     align-items: center;
     min-height: 28px;
@@ -2165,6 +2165,45 @@ body {
     padding: 4px 11px;
     font-size: 13px;
     line-height: 1.3;
+    text-decoration: none;
+    transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .blog-tags a:hover {
+        border-color: #1d4ed8;
+        background: #1d4ed8;
+        color: #fff;
+    }
+}
+
+.blog-tags a:focus-visible {
+    outline: 3px solid rgba(29, 78, 216, 0.25);
+    outline-offset: 2px;
+}
+
+.blog-tag-hero {
+    padding-block: 48px 42px;
+}
+
+.blog-tag-hero__back {
+    display: inline-flex;
+    align-items: center;
+    color: #1d4ed8;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.blog-tag-hero h1 {
+    overflow-wrap: anywhere;
+}
+
+.blog-tag-count {
+    margin-top: 14px;
+    color: #62748e;
+    font-size: 15px;
+    line-height: 1.5;
 }
 
 .blog-post-aside {
@@ -2272,6 +2311,23 @@ body {
     .blog-hero p,
     .blog-post-hero p {
         font-size: 16px;
+    }
+
+    .blog-tag-hero {
+        padding-block: 32px 28px;
+    }
+
+    .blog-listing {
+        padding-block: 32px 56px;
+    }
+
+    .blog-tags {
+        gap: 10px 8px;
+    }
+
+    .blog-tags a {
+        min-height: 36px;
+        padding-inline: 14px;
     }
 
     .blog-featured h2 {

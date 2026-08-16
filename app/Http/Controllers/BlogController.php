@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\BlogPost;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class BlogController extends Controller
@@ -26,6 +28,28 @@ class BlogController extends Controller
             ->paginate(9);
 
         return view('blog.index', compact('featuredPost', 'posts'));
+    }
+
+    public function tag(Request $request): View|RedirectResponse
+    {
+        $tag = trim((string) $request->query('tag'));
+
+        if ($tag === '') {
+            return redirect()->route('blog.index');
+        }
+
+        abort_if(mb_strlen($tag) > 100, 404);
+
+        $posts = BlogPost::query()
+            ->with('blogCategory')
+            ->published()
+            ->whereJsonContains('tags', $tag)
+            ->orderBy('sort_order')
+            ->latest('published_at')
+            ->paginate(9)
+            ->withQueryString();
+
+        return view('blog.tag', compact('tag', 'posts'));
     }
 
     public function show(string $slug): View

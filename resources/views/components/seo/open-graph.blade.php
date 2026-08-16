@@ -3,12 +3,14 @@
     'page' => null,
     'blogPost' => null,
     'blogIndex' => false,
+    'blogTag' => null,
     'notFound' => false,
 ])
 
 @php
     $meta = match (true) {
         $blogPost !== null => \App\Support\OpenGraph::forBlogPost($blogPost),
+        $blogTag !== null => \App\Support\OpenGraph::forBlogTag($blogTag),
         $blogIndex => \App\Support\OpenGraph::forBlogIndex(),
         $page !== null => \App\Support\OpenGraph::forPage($page),
         $notFound => \App\Support\OpenGraph::forNotFound(),

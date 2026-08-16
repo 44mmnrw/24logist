@@ -132,6 +132,53 @@ class BlogTest extends TestCase
         $this->get('/blog/hidden-post')->assertNotFound();
     }
 
+    public function test_blog_tags_are_clickable_and_tag_page_filters_published_posts(): void
+    {
+        $matchingPost = BlogPost::query()->create([
+            'title' => 'Автоматизация доставки',
+            'slug' => 'delivery-automation',
+            'body' => 'Текст статьи',
+            'tags' => ['Автоматизация', 'Доставка'],
+            'is_published' => true,
+            'published_at' => now()->subDay(),
+        ]);
+
+        BlogPost::query()->create([
+            'title' => 'Управление складом',
+            'slug' => 'warehouse-management',
+            'body' => 'Другой текст',
+            'tags' => ['Склад'],
+            'is_published' => true,
+            'published_at' => now()->subDay(),
+        ]);
+
+        BlogPost::query()->create([
+            'title' => 'Скрытая автоматизация',
+            'slug' => 'hidden-automation',
+            'body' => 'Черновик',
+            'tags' => ['Автоматизация'],
+            'is_published' => false,
+        ]);
+
+        $tagUrl = route('blog.tag', ['tag' => 'Автоматизация']);
+
+        $this->get($matchingPost->getUrl())
+            ->assertOk()
+            ->assertSee('href="'.e($tagUrl).'"', false);
+
+        $this->get($tagUrl)
+            ->assertOk()
+            ->assertSee('Статьи с тегом «Автоматизация»')
+            ->assertSee('Автоматизация доставки')
+            ->assertDontSee('Управление складом')
+            ->assertDontSee('Скрытая автоматизация');
+    }
+
+    public function test_empty_tag_redirects_to_blog_index(): void
+    {
+        $this->get('/tag')->assertRedirect(route('blog.index'));
+    }
+
     public function test_blog_post_renders_article_format_blocks(): void
     {
         $post = BlogPost::query()->create([

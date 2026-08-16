@@ -55,6 +55,9 @@ Route::post('/leads/contact', [LandingLeadController::class, 'storeContact'])
 Route::get('/blog', [BlogController::class, 'index'])
     ->name('blog.index');
 
+Route::get('/tag', [BlogController::class, 'tag'])
+    ->name('blog.tag');
+
 Route::get('/blog/{slug}', [BlogController::class, 'show'])
     ->name('blog.show')
     ->where('slug', '[a-z0-9\-]+');
