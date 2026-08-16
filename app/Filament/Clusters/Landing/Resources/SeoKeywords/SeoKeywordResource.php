@@ -66,10 +66,26 @@ class SeoKeywordResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('phrase')->label('Запрос')->searchable()->sortable()->limit(70)->wrap(),
+                TextColumn::make('phrase')
+                    ->label('Запрос')
+                    ->searchable()
+                    ->sortable()
+                    ->limit(60)
+                    ->lineClamp(2)
+                    ->width('42%')
+                    ->tooltip(fn (SeoKeyword $record): string => $record->phrase),
                 TextColumn::make('cluster.name')->label('Кластер')->badge()->searchable()->sortable(),
-                TextColumn::make('source_type')->label('Тип Wordstat')->badge()->toggleable(),
-                TextColumn::make('latest_wordstat_count')->label('Wordstat')->numeric()->sortable(),
+                TextColumn::make('source_type')
+                    ->label('Тип Wordstat')
+                    ->badge()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('latest_wordstat_count')
+                    ->label('Wordstat')
+                    ->numeric()
+                    ->sortable()
+                    ->tooltip(fn (SeoKeyword $record): ?string => $record->wordstat_updated_at
+                        ? 'Обновлён: '.$record->wordstat_updated_at->format('d.m.Y H:i')
+                        : null),
                 TextColumn::make('latest_position')
                     ->label('Позиция')
                     ->placeholder('> 100')
@@ -80,11 +96,26 @@ class SeoKeywordResource extends Resource
                         $state <= 30 => 'warning',
                         default => 'danger',
                     })
+                    ->tooltip(fn (SeoKeyword $record): ?string => $record->position_checked_at
+                        ? 'Проверена: '.$record->position_checked_at->format('d.m.Y H:i')
+                        : null)
                     ->sortable(),
-                TextColumn::make('latest_result_url')->label('URL в выдаче')->limit(38)->copyable()->toggleable(),
-                TextColumn::make('wordstat_updated_at')->label('Wordstat обновлён')->dateTime('d.m.Y H:i')->sortable()->toggleable(),
-                TextColumn::make('position_checked_at')->label('Позиция проверена')->dateTime('d.m.Y H:i')->sortable(),
-                IconColumn::make('is_active')->label('Активен')->boolean(),
+                TextColumn::make('latest_result_url')
+                    ->label('URL в выдаче')
+                    ->limit(38)
+                    ->copyable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('wordstat_updated_at')
+                    ->label('Wordstat обновлён')
+                    ->dateTime('d.m.Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('position_checked_at')
+                    ->label('Позиция проверена')
+                    ->dateTime('d.m.Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                IconColumn::make('is_active')->label('Активен')->boolean()->alignCenter(),
             ])
             ->defaultSort('latest_wordstat_count', 'desc')
             ->filters([
@@ -102,7 +133,7 @@ class SeoKeywordResource extends Resource
                     'result,association' => 'Результат и ассоциация',
                 ]),
             ])
-            ->recordActions([EditAction::make()]);
+            ->recordActions([EditAction::make()->iconButton()]);
     }
 
     public static function getPages(): array
