@@ -1,5 +1,7 @@
 <?php
 
+use App\Console\Commands\CheckSeoPositions;
+use App\Console\Commands\ImportWordstatCsv;
 use App\Http\Middleware\EnforceCanonicalUrl;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -11,6 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withCommands([
+        ImportWordstatCsv::class,
+        CheckSeoPositions::class,
+    ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
         $middleware->web(prepend: [

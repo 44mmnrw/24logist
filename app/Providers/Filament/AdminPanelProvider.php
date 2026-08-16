@@ -12,6 +12,10 @@ use App\Filament\Clusters\Landing\Resources\LandingLeads\LandingLeadResource;
 use App\Filament\Clusters\Landing\Resources\LandingSections\LandingSectionResource;
 use App\Filament\Clusters\Landing\Resources\SiteSettings\GeneralSiteSettingResource;
 use App\Filament\Clusters\Landing\Resources\SiteSettings\SiteSettingResource;
+use App\Filament\Clusters\Landing\Resources\SeoKeywordClusters\SeoKeywordClusterResource;
+use App\Filament\Clusters\Landing\Resources\SeoKeywords\SeoKeywordResource;
+use App\Filament\Clusters\Landing\Resources\SeoKeywordSnapshots\SeoKeywordSnapshotResource;
+use App\Filament\Clusters\Landing\Resources\SeoResearchRuns\SeoResearchRunResource;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -57,6 +61,10 @@ class AdminPanelProvider extends PanelProvider
                 LandingLeadResource::class,
                 GeneralSiteSettingResource::class,
                 SiteSettingResource::class,
+                SeoKeywordClusterResource::class,
+                SeoKeywordResource::class,
+                SeoKeywordSnapshotResource::class,
+                SeoResearchRunResource::class,
                 LandingBlockResource::class,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
