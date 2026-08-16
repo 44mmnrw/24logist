@@ -2,6 +2,7 @@
 
 namespace App\Services\Seo;
 
+use App\Models\SeoMonitoringSetting;
 use Illuminate\Http\Client\Factory;
 use RuntimeException;
 
@@ -12,7 +13,8 @@ class YandexPositionChecker
     /** @return array{position: ?int, url: ?string, results: int} */
     public function check(string $phrase, string $regionId = '225', string $device = 'DEVICE_ALL'): array
     {
-        $apiKey = trim((string) config('seo-monitoring.yandex_api_key'));
+        $settings = SeoMonitoringSetting::instance();
+        $apiKey = trim((string) ($settings->yandex_api_key ?: config('seo-monitoring.yandex_api_key')));
 
         if ($apiKey === '') {
             throw new RuntimeException('YANDEX_SEARCH_API_KEY is not configured.');
@@ -28,7 +30,7 @@ class YandexPositionChecker
             ],
             'groupSpec' => [
                 'groupMode' => 'GROUP_MODE_FLAT',
-                'groupsOnPage' => (string) min(100, max(1, (int) config('seo-monitoring.position_depth', 100))),
+                'groupsOnPage' => (string) min(100, max(1, $settings->position_depth)),
                 'docsInGroup' => '1',
             ],
             'maxPassages' => '1',
@@ -38,8 +40,10 @@ class YandexPositionChecker
             'userAgent' => $this->userAgent($device),
         ];
 
-        if (filled(config('seo-monitoring.yandex_folder_id'))) {
-            $payload['folderId'] = (string) config('seo-monitoring.yandex_folder_id');
+        $folderId = trim((string) ($settings->yandex_folder_id ?: config('seo-monitoring.yandex_folder_id')));
+
+        if ($folderId !== '') {
+            $payload['folderId'] = $folderId;
         }
 
         $response = $this->http
@@ -68,7 +72,7 @@ class YandexPositionChecker
         }
 
         $documents = $xml->xpath('//group/doc') ?: [];
-        $targetHost = mb_strtolower(trim((string) config('seo-monitoring.target_host', '24logist.ru')));
+        $targetHost = mb_strtolower(trim($settings->target_host));
 
         foreach ($documents as $index => $document) {
             $url = trim((string) ($document->url ?? ''));

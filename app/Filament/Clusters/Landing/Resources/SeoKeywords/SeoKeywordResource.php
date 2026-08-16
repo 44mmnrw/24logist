@@ -5,6 +5,7 @@ namespace App\Filament\Clusters\Landing\Resources\SeoKeywords;
 use App\Filament\Clusters\Landing\Resources\SeoKeywords\Pages\CreateSeoKeyword;
 use App\Filament\Clusters\Landing\Resources\SeoKeywords\Pages\EditSeoKeyword;
 use App\Filament\Clusters\Landing\Resources\SeoKeywords\Pages\ListSeoKeywords;
+use App\Filament\Clusters\Seo\SeoCluster;
 use App\Models\SeoKeyword;
 use BackedEnum;
 use Filament\Actions\EditAction;
@@ -23,15 +24,17 @@ class SeoKeywordResource extends Resource
 {
     protected static ?string $model = SeoKeyword::class;
 
+    protected static ?string $cluster = SeoCluster::class;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMagnifyingGlass;
 
-    protected static ?string $navigationLabel = 'SEO: запросы';
+    protected static ?string $navigationLabel = 'Запросы';
 
     protected static ?string $modelLabel = 'поисковый запрос';
 
     protected static ?string $pluralModelLabel = 'Поисковые запросы';
 
-    protected static ?int $navigationSort = 21;
+    protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema
     {

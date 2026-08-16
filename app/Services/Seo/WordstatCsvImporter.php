@@ -150,6 +150,7 @@ class WordstatCsvImporter
             ['slug' => $slug],
             [
                 'name' => $name,
+                'seed_phrase' => $seed,
                 'target_url' => $target,
                 'search_intent' => $settings['intent'] ?? null,
             ],

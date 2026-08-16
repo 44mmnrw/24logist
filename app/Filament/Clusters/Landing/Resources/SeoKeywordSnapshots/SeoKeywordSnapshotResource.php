@@ -3,6 +3,7 @@
 namespace App\Filament\Clusters\Landing\Resources\SeoKeywordSnapshots;
 
 use App\Filament\Clusters\Landing\Resources\SeoKeywordSnapshots\Pages\ListSeoKeywordSnapshots;
+use App\Filament\Clusters\Seo\SeoCluster;
 use App\Models\SeoKeywordSnapshot;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -15,15 +16,17 @@ class SeoKeywordSnapshotResource extends Resource
 {
     protected static ?string $model = SeoKeywordSnapshot::class;
 
+    protected static ?string $cluster = SeoCluster::class;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBar;
 
-    protected static ?string $navigationLabel = 'SEO: история метрик';
+    protected static ?string $navigationLabel = 'История метрик';
 
     protected static ?string $modelLabel = 'срез метрик';
 
     protected static ?string $pluralModelLabel = 'История SEO-метрик';
 
-    protected static ?int $navigationSort = 22;
+    protected static ?int $navigationSort = 3;
 
     public static function table(Table $table): Table
     {

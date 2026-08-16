@@ -4,6 +4,7 @@ namespace App\Filament\Clusters\Landing\Resources\SeoResearchRuns\Pages;
 
 use App\Filament\Clusters\Landing\Resources\SeoResearchRuns\SeoResearchRunResource;
 use App\Services\Seo\WordstatCsvImporter;
+use App\Services\Seo\YandexWordstatCollector;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
@@ -17,6 +18,21 @@ class ListSeoResearchRuns extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('refreshWordstat')
+                ->label('Обновить Wordstat')
+                ->icon('heroicon-o-arrow-path')
+                ->color('success')
+                ->requiresConfirmation()
+                ->modalDescription('Wordstat будет обновлён для всех активных кластеров, у которых заполнена Seed-фраза.')
+                ->action(function (YandexWordstatCollector $collector): void {
+                    $run = $collector->collect();
+
+                    Notification::make()
+                        ->title($run->status === 'completed' ? 'Wordstat обновлён' : 'Wordstat обновлён с ошибками')
+                        ->body("Обработано кластеров: {$run->processed_items} из {$run->total_items}. Запуск #{$run->getKey()}.")
+                        ->color($run->status === 'completed' ? 'success' : 'warning')
+                        ->send();
+                }),
             Action::make('importWordstat')
                 ->label('Импорт Wordstat CSV')
                 ->icon('heroicon-o-arrow-up-tray')

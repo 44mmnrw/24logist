@@ -3,6 +3,7 @@
 namespace App\Filament\Clusters\Landing\Resources\SeoResearchRuns;
 
 use App\Filament\Clusters\Landing\Resources\SeoResearchRuns\Pages\ListSeoResearchRuns;
+use App\Filament\Clusters\Seo\SeoCluster;
 use App\Models\SeoResearchRun;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -15,15 +16,17 @@ class SeoResearchRunResource extends Resource
 {
     protected static ?string $model = SeoResearchRun::class;
 
+    protected static ?string $cluster = SeoCluster::class;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
 
-    protected static ?string $navigationLabel = 'SEO: обновления';
+    protected static ?string $navigationLabel = 'Обновления';
 
     protected static ?string $modelLabel = 'запуск обновления';
 
     protected static ?string $pluralModelLabel = 'История обновлений SEO';
 
-    protected static ?int $navigationSort = 23;
+    protected static ?int $navigationSort = 4;
 
     public static function table(Table $table): Table
     {

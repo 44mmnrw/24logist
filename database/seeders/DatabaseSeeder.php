@@ -17,5 +17,6 @@ class DatabaseSeeder extends Seeder
         $this->call(AdminUserSeeder::class);
         $this->call(LandingContentSeeder::class);
         $this->call(CmsPagesSeeder::class);
+        $this->call(SeoMonitoringSeeder::class);
     }
 }

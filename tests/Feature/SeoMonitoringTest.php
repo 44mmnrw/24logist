@@ -5,10 +5,12 @@ namespace Tests\Feature;
 use App\Models\SeoKeyword;
 use App\Models\SeoKeywordCluster;
 use App\Models\SeoKeywordSnapshot;
+use App\Models\SeoMonitoringSetting;
 use App\Models\SeoResearchRun;
 use App\Models\User;
 use App\Services\Seo\WordstatCsvImporter;
 use App\Services\Seo\YandexPositionChecker;
+use App\Services\Seo\YandexWordstatCollector;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -96,15 +98,44 @@ XML;
         $this->assertSame(1, SeoResearchRun::query()->where('type', 'positions')->count());
     }
 
+    public function test_wordstat_can_be_updated_directly_from_api(): void
+    {
+        SeoMonitoringSetting::instance()->update(['yandex_api_key' => 'test-key', 'wordstat_limit' => 25]);
+        SeoKeywordCluster::query()->create([
+            'name' => 'ЭПД',
+            'slug' => 'epd',
+            'seed_phrase' => 'электронные перевозочные документы',
+            'target_url' => 'https://24logist.ru/tag/epd',
+        ]);
+        Http::fake([
+            'searchapi.api.cloud.yandex.net/v2/wordstat/topRequests' => Http::response([
+                'results' => [['phrase' => 'электронные перевозочные документы', 'count' => 21451]],
+                'associations' => [['phrase' => 'транспортный эдо', 'count' => 24659]],
+            ]),
+        ]);
+
+        $run = app(YandexWordstatCollector::class)->collect();
+
+        $this->assertSame('completed', $run->status);
+        $this->assertDatabaseHas('seo_keywords', [
+            'phrase' => 'электронные перевозочные документы',
+            'latest_wordstat_count' => 21451,
+            'is_active' => true,
+        ]);
+        $this->assertDatabaseHas('seo_keywords', ['phrase' => 'транспортный эдо', 'is_active' => false]);
+        $this->assertSame(2, SeoKeywordSnapshot::query()->where('seo_research_run_id', $run->id)->count());
+    }
+
     public function test_admin_can_open_all_seo_monitoring_tables(): void
     {
         $this->actingAs(User::factory()->create());
 
         foreach ([
-            '/admin/seo-keyword-clusters',
-            '/admin/seo-keywords',
-            '/admin/seo-keyword-snapshots',
-            '/admin/seo-research-runs',
+            '/admin/seo/seo-keyword-clusters',
+            '/admin/seo/seo-keywords',
+            '/admin/seo/seo-keyword-snapshots',
+            '/admin/seo/seo-research-runs',
+            '/admin/seo/settings',
         ] as $url) {
             $this->get($url)->assertOk();
         }

@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 
 class SeoKeywordCluster extends Model
 {
-    protected $fillable = ['name', 'slug', 'description', 'target_url', 'search_intent', 'is_active', 'sort_order'];
+    protected $fillable = ['name', 'slug', 'seed_phrase', 'description', 'target_url', 'search_intent', 'is_active', 'sort_order'];
 
     protected function casts(): array
     {

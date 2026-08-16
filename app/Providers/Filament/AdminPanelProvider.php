@@ -10,12 +10,13 @@ use App\Filament\Clusters\Landing\Resources\CmsPages\CmsPageResource;
 use App\Filament\Clusters\Landing\Resources\LandingBlocks\LandingBlockResource;
 use App\Filament\Clusters\Landing\Resources\LandingLeads\LandingLeadResource;
 use App\Filament\Clusters\Landing\Resources\LandingSections\LandingSectionResource;
-use App\Filament\Clusters\Landing\Resources\SiteSettings\GeneralSiteSettingResource;
-use App\Filament\Clusters\Landing\Resources\SiteSettings\SiteSettingResource;
 use App\Filament\Clusters\Landing\Resources\SeoKeywordClusters\SeoKeywordClusterResource;
 use App\Filament\Clusters\Landing\Resources\SeoKeywords\SeoKeywordResource;
 use App\Filament\Clusters\Landing\Resources\SeoKeywordSnapshots\SeoKeywordSnapshotResource;
+use App\Filament\Clusters\Landing\Resources\SeoMonitoringSettings\SeoMonitoringSettingResource;
 use App\Filament\Clusters\Landing\Resources\SeoResearchRuns\SeoResearchRunResource;
+use App\Filament\Clusters\Landing\Resources\SiteSettings\GeneralSiteSettingResource;
+use App\Filament\Clusters\Landing\Resources\SiteSettings\SiteSettingResource;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -65,8 +66,10 @@ class AdminPanelProvider extends PanelProvider
                 SeoKeywordResource::class,
                 SeoKeywordSnapshotResource::class,
                 SeoResearchRunResource::class,
+                SeoMonitoringSettingResource::class,
                 LandingBlockResource::class,
             ])
+            ->discoverClusters(in: app_path('Filament/Clusters/Seo'), for: 'App\Filament\Clusters\Seo')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')

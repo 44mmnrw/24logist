@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\SeoKeyword;
 use App\Models\SeoKeywordSnapshot;
+use App\Models\SeoMonitoringSetting;
 use App\Models\SeoResearchRun;
 use App\Services\Seo\YandexPositionChecker;
 use Illuminate\Console\Command;
@@ -17,6 +18,7 @@ class CheckSeoPositions extends Command
 
     public function handle(YandexPositionChecker $checker): int
     {
+        $settings = SeoMonitoringSetting::instance();
         $limit = min(500, max(1, (int) $this->option('limit')));
         $keywords = SeoKeyword::query()
             ->where('is_active', true)
@@ -36,11 +38,11 @@ class CheckSeoPositions extends Command
             'type' => 'positions',
             'source' => 'yandex_search',
             'status' => 'running',
-            'region_id' => (string) config('seo-monitoring.default_region_id', '225'),
-            'device' => (string) config('seo-monitoring.default_device', 'DEVICE_ALL'),
+            'region_id' => $settings->default_region_id,
+            'device' => $settings->default_device,
             'total_items' => $keywords->count(),
             'started_at' => now(),
-            'metadata' => ['depth' => (int) config('seo-monitoring.position_depth', 100)],
+            'metadata' => ['depth' => $settings->position_depth],
         ]);
         $errors = [];
 
@@ -65,7 +67,7 @@ class CheckSeoPositions extends Command
                     'raw' => ['results' => $result['results']],
                 ]);
 
-                $this->line($keyword->phrase.': '.($result['position'] ?? '> '.config('seo-monitoring.position_depth', 100)));
+                $this->line($keyword->phrase.': '.($result['position'] ?? '> '.$settings->position_depth));
             } catch (Throwable $exception) {
                 $errors[$keyword->getKey()] = $exception->getMessage();
                 $this->error($keyword->phrase.': '.$exception->getMessage());

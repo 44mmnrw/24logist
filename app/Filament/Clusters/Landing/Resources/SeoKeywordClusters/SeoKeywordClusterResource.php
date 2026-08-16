@@ -5,6 +5,7 @@ namespace App\Filament\Clusters\Landing\Resources\SeoKeywordClusters;
 use App\Filament\Clusters\Landing\Resources\SeoKeywordClusters\Pages\CreateSeoKeywordCluster;
 use App\Filament\Clusters\Landing\Resources\SeoKeywordClusters\Pages\EditSeoKeywordCluster;
 use App\Filament\Clusters\Landing\Resources\SeoKeywordClusters\Pages\ListSeoKeywordClusters;
+use App\Filament\Clusters\Seo\SeoCluster;
 use App\Models\SeoKeywordCluster;
 use BackedEnum;
 use Filament\Actions\EditAction;
@@ -26,15 +27,17 @@ class SeoKeywordClusterResource extends Resource
 {
     protected static ?string $model = SeoKeywordCluster::class;
 
+    protected static ?string $cluster = SeoCluster::class;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?string $navigationLabel = 'SEO: кластеры';
+    protected static ?string $navigationLabel = 'Кластеры';
 
     protected static ?string $modelLabel = 'SEO-кластер';
 
     protected static ?string $pluralModelLabel = 'SEO-кластеры';
 
-    protected static ?int $navigationSort = 20;
+    protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema
     {
@@ -49,6 +52,7 @@ class SeoKeywordClusterResource extends Resource
                     }
                 }),
             TextInput::make('slug')->label('Slug')->required()->unique(ignoreRecord: true),
+            TextInput::make('seed_phrase')->label('Seed-фраза Wordstat')->maxLength(500)->helperText('По этой фразе кластер обновляется через API.'),
             Select::make('search_intent')
                 ->label('Интент')
                 ->options([

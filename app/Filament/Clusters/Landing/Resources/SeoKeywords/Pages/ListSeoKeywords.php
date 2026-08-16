@@ -3,6 +3,7 @@
 namespace App\Filament\Clusters\Landing\Resources\SeoKeywords\Pages;
 
 use App\Filament\Clusters\Landing\Resources\SeoKeywords\SeoKeywordResource;
+use App\Models\SeoMonitoringSetting;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Select;
@@ -24,8 +25,8 @@ class ListSeoKeywords extends ListRecords
                 ->schema([
                     Select::make('limit')
                         ->label('Количество запросов')
-                        ->options([1 => '1', 5 => '5', 10 => '10'])
-                        ->default(5)
+                        ->options([1 => '1', 5 => '5', 10 => '10', 25 => '25', 50 => '50'])
+                        ->default(fn (): int => SeoMonitoringSetting::instance()->position_batch_limit)
                         ->required()
                         ->helperText('Проверяются запросы, которые обновлялись раньше остальных. Каждый запрос расходует квоту Search API.'),
                 ])
