@@ -1880,6 +1880,9 @@ body {
 .blog-post-cover {
     margin: 0;
     width: 100%;
+    min-width: 0;
+    grid-column: 1;
+    justify-self: stretch;
     border-radius: 18px;
     overflow: hidden;
     background: #f8fafc;
@@ -1895,6 +1898,7 @@ body {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 280px;
     column-gap: 1rem;
+    row-gap: 48px;
     align-items: start;
     padding-top: 0;
     padding-bottom: 80px;
@@ -1905,11 +1909,10 @@ body {
 }
 
 .blog-post-main {
+    width: 100%;
     min-width: 0;
-}
-
-.blog-post-cover + .blog-post-body {
-    margin-top: 48px;
+    grid-column: 1;
+    justify-self: stretch;
 }
 
 .blog-post-body {
@@ -2067,6 +2070,8 @@ body {
     position: sticky;
     top: 88px;
     width: min(100%, 280px);
+    grid-column: 2;
+    grid-row: 1 / span 2;
     justify-self: end;
 }
 
@@ -2129,15 +2134,26 @@ body {
     .blog-post-aside {
         position: static;
         width: 100%;
+        grid-column: 1;
+        grid-row: auto;
         justify-self: stretch;
     }
 
-    .blog-post-cover + .blog-post-body {
-        margin-top: 1rem;
+    .blog-post-layout {
+        row-gap: 1rem;
     }
 }
 
 @media (max-width: 760px) {
+    .blog-post-hero {
+        padding-top: 32px;
+        padding-bottom: 32px;
+    }
+
+    .blog-post-layout {
+        padding-bottom: 32px;
+    }
+
     .blog-post-cover {
         height: auto;
     }

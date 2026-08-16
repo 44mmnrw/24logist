@@ -59,13 +59,23 @@
                     'blog-post-layout',
                     'blog-post-layout--without-cover' => ! $post->coverImageUrl(),
                 ])>
-                    <div class="blog-post-main">
-                        @if ($post->coverImageUrl())
-                            <figure class="blog-post-cover">
-                                <img src="{{ $post->coverImageUrl() }}" alt="{{ $post->cover_image_alt ?: $post->title }}">
-                            </figure>
-                        @endif
+                    @if ($post->coverImageUrl())
+                        <figure class="blog-post-cover">
+                            <img src="{{ $post->coverImageUrl() }}" alt="{{ $post->cover_image_alt ?: $post->title }}">
+                        </figure>
+                    @endif
 
+                    <aside class="blog-post-aside">
+                        <div class="blog-post-aside__box">
+                            <span>Материал</span>
+                            <strong>{{ $post->displayCategory() ?: 'Блог' }}</strong>
+                            @if ($post->publishedDate())
+                                <p>Опубликовано {{ $post->publishedDate()->format('d.m.Y') }}</p>
+                            @endif
+                        </div>
+                    </aside>
+
+                    <div class="blog-post-main">
                         <div class="cms-page__body blog-post-body blog-post-body--article">
                             {!! $post->renderBody() !!}
                         </div>
@@ -80,16 +90,6 @@
                             </div>
                         @endif
                     </div>
-
-                    <aside class="blog-post-aside">
-                        <div class="blog-post-aside__box">
-                            <span>Материал</span>
-                            <strong>{{ $post->displayCategory() ?: 'Блог' }}</strong>
-                            @if ($post->publishedDate())
-                                <p>Опубликовано {{ $post->publishedDate()->format('d.m.Y') }}</p>
-                            @endif
-                        </div>
-                    </aside>
                 </div>
             </article>
 
