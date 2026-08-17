@@ -126,7 +126,7 @@ class BlogPostResource extends Resource
                         ->toolbarButtons([
                             ['undo', 'redo'],
                             [
-                                ToolbarButtonGroup::make('Стиль', ['paragraph', 'lead', 'h2', 'h3'])
+                                ToolbarButtonGroup::make('Стиль', ['paragraph', 'lead', 'h2', 'h3', 'h4', 'h5', 'h6'])
                                     ->textualButtons(),
                             ],
                             ['bold', 'italic', 'underline', 'link', 'textColor', 'highlight'],

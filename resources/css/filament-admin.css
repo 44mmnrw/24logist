@@ -78,6 +78,7 @@
     line-height: 1.48;
 }
 
+.blog-article-editor .fi-fo-rich-editor-content h1,
 .blog-article-editor .fi-fo-rich-editor-content h2 {
     margin-top: 2.25rem;
     padding-bottom: 0.45rem;
@@ -95,6 +96,19 @@
     font-size: 1.15rem;
     line-height: 1.3;
 }
+
+.blog-article-editor .fi-fo-rich-editor-content h4,
+.blog-article-editor .fi-fo-rich-editor-content h5,
+.blog-article-editor .fi-fo-rich-editor-content h6 {
+    margin-top: 1.35rem;
+    color: #22384d;
+    font-family: Arial, sans-serif;
+    line-height: 1.35;
+}
+
+.blog-article-editor .fi-fo-rich-editor-content h4 { font-size: 1.05rem; }
+.blog-article-editor .fi-fo-rich-editor-content h5 { font-size: 0.98rem; }
+.blog-article-editor .fi-fo-rich-editor-content h6 { font-size: 0.92rem; }
 
 .blog-article-editor .fi-fo-rich-editor-content .lead {
     color: #697786;
