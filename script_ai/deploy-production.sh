@@ -69,9 +69,6 @@ php artisan migrate --force
 log "seed functional section data"
 php artisan db:seed --class=FunctionalSectionSeeder --force --no-interaction
 
-log "seed landing route defaults"
-php artisan db:seed --class=LandingRouteSeeder --force --no-interaction
-
 php artisan storage:link --force 2>/dev/null || true
 mkdir -p storage/app/public/livewire-tmp
 chmod -R ug+rwx storage bootstrap/cache

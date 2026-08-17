@@ -38,7 +38,7 @@
                 <p class="landing-hero__subtitle">{{ $section->subtitle }}</p>
             @endif
 
-            <ul class="hero-list hero-list--progress">
+            <ul class="hero-list">
                 @foreach ($bullets as $bullet)
                     <li>
                         @if ($bullet->icon)

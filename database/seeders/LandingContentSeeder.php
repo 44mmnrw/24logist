@@ -121,7 +121,7 @@ class LandingContentSeeder extends Seeder
                 'section_slug' => $section->slug,
                 'block_type' => 'bullet',
                 'title' => $title,
-                'icon' => $this->icon('doc-check-circle'),
+                'icon' => $this->icon('check-blue'),
                 'sort_order' => $index + 1,
             ]);
         }

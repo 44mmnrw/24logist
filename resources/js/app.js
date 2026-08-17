@@ -4,4 +4,3 @@ import './landing-contact-form.js';
 import './landing-hero-carousel.js';
 import './telegram-popup.js';
 import './landing-mobile-menu.js';
-import './landing-route.js';

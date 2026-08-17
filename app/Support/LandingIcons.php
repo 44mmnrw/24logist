@@ -60,7 +60,6 @@ final class LandingIcons
         'check' => 'Галочка',
         'check-blue' => 'Галочка (синяя)',
         'check-circle' => 'Галочка в круге',
-        'doc-check-circle' => 'Точка маршрута доставки',
         'arrow-right' => 'Стрелка вправо',
         'chevron-down' => 'Шеврон вниз',
         'info-circle' => 'Информация',
@@ -174,7 +173,6 @@ final class LandingIcons
     {
         return match ($name) {
             'check-blue', 'document-fast', 'chart-bar', 'lifebuoy', 'shield-check', 'document-signed', 'truck', 'user-driver', 'calendar-alert', 'calculator', 'banknotes', 'rotes', 'folder-archive', 'bell', 'users-card' => '0 0 20 20',
-            'doc-check-circle' => '0 0 16 16',
             'additional-seat', 'additional-epd', 'additional-cloud' => '0 0 18 18',
             'manager-avatar' => '0 0 32 32',
             'telegram' => '0 0 240.1 240.1',

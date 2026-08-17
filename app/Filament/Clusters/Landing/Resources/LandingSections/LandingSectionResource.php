@@ -84,16 +84,6 @@ class LandingSectionResource extends Resource
                         default => 'Описание',
                     })
                     ->rows(4),
-                Toggle::make('route_enabled')
-                    ->label('Точка сквозного маршрута')
-                    ->helperText('Показывает эту секцию как этап маршрута на лендинге.')
-                    ->default(false)
-                    ->visible(fn (?LandingSection $record): bool => ! in_array($record?->slug, ['header', 'footer'], true)),
-                TextInput::make('route_label')
-                    ->label('Короткая подпись маршрута')
-                    ->helperText('Отображается рядом с активной точкой. Без автоматического fallback.')
-                    ->maxLength(80)
-                    ->visible(fn (?LandingSection $record): bool => ! in_array($record?->slug, ['header', 'footer'], true)),
                 Textarea::make('functional_quote')
                     ->label('Текст цитаты')
                     ->rows(3)

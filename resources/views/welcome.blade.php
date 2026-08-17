@@ -20,16 +20,7 @@
 
     <div class="landing-page">
         <x-landing.header />
-        <main class="landing-route" data-landing-route>
-            <div class="landing-route__overlay" data-landing-route-overlay aria-hidden="true">
-                <svg class="landing-route__svg" data-landing-route-svg preserveAspectRatio="none">
-                    <path class="landing-route__path landing-route__path--road-edge" data-landing-route-path />
-                    <path class="landing-route__path landing-route__path--road-surface" data-landing-route-path />
-                    <path class="landing-route__path landing-route__path--road-marking" data-landing-route-path />
-                    <path class="landing-route__path landing-route__path--progress" data-landing-route-path data-landing-route-progress />
-                </svg>
-            </div>
-            <div class="landing-route__markers" data-landing-route-markers aria-hidden="true"></div>
+        <main>
             @php
                 $sectionViews = [
                     'hero' => 'components.landing.hero',
@@ -50,25 +41,14 @@
             @endphp
             @foreach ($landing->sections() as $landingSection)
                 @if (isset($sectionViews[$landingSection->slug]))
-                    @php
-                        $isRouteStop = $landingSection->route_enabled && filled($landingSection->route_label);
-                    @endphp
-                    <div
-                        class="landing-route__section"
-                        @if ($isRouteStop)
-                            data-route-stop
-                            data-route-label="{{ $landingSection->route_label }}"
-                        @endif
-                    >
-                        @if (! in_array($landingSection->slug, $specialBackgroundSections, true))
-                            <div class="landing-section-slot landing-section-slot--{{ $alternatingIndex % 2 === 0 ? 'white' : 'light' }}">
-                                @include($sectionViews[$landingSection->slug])
-                            </div>
-                            @php($alternatingIndex++)
-                        @else
+                    @if (! in_array($landingSection->slug, $specialBackgroundSections, true))
+                        <div class="landing-section-slot landing-section-slot--{{ $alternatingIndex % 2 === 0 ? 'white' : 'light' }}">
                             @include($sectionViews[$landingSection->slug])
-                        @endif
-                    </div>
+                        </div>
+                        @php($alternatingIndex++)
+                    @else
+                        @include($sectionViews[$landingSection->slug])
+                    @endif
                 @endif
             @endforeach
         </main>
