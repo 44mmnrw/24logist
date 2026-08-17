@@ -28,6 +28,8 @@ class LandingSection extends Model
         'dashboard_image',
         'mobile_image',
         'extra',
+        'route_enabled',
+        'route_label',
         'is_active',
         'sort_order',
     ];
@@ -36,6 +38,7 @@ class LandingSection extends Model
     {
         return [
             'extra' => 'array',
+            'route_enabled' => 'boolean',
             'is_active' => 'boolean',
         ];
     }
