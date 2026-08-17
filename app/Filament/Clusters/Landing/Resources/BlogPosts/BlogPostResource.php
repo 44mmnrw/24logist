@@ -10,6 +10,7 @@ use App\Models\BlogPost;
 use App\Models\BlogTag;
 use App\Support\FilamentUploadPreview;
 use App\Support\OpenGraph;
+use App\Support\RichContent\FontSizeRichContentPlugin;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -122,17 +123,39 @@ class BlogPostResource extends Resource
                     RichEditor::make('body')
                         ->label('Текст статьи')
                         ->required()
-                        ->helperText('Статейная верстка: «Лид» — вводный абзац, H2 — раздел с линией, H3 — синий подзаголовок, «Цитата» — акцентная врезка, выделение — предупреждение, таблица — блок с цифрами, скрепка — изображение.')
+                        ->plugins([FontSizeRichContentPlugin::make()])
+                        ->helperText('Доступен полный набор форматирования. Заголовок статьи уже выводится как H1, поэтому внутри текста обычно используйте H2–H6.')
                         ->toolbarButtons([
                             ['undo', 'redo'],
                             [
-                                ToolbarButtonGroup::make('Стиль', ['paragraph', 'lead', 'h2', 'h3', 'h4', 'h5', 'h6'])
+                                ToolbarButtonGroup::make('Стиль', ['paragraph', 'lead', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'small'])
                                     ->textualButtons(),
                             ],
-                            ['bold', 'italic', 'underline', 'link', 'textColor', 'highlight'],
-                            ['bulletList', 'orderedList', 'blockquote'],
-                            ['table', 'attachFiles', 'horizontalRule'],
-                            ['alignStart', 'alignCenter', 'alignEnd'],
+                            [
+                                ToolbarButtonGroup::make('Размер', ['fontSizeDefault', 'fontSize12', 'fontSize14', 'fontSize16', 'fontSize18', 'fontSize20', 'fontSize24', 'fontSize28', 'fontSize32'])
+                                    ->textualButtons(),
+                            ],
+                            ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript'],
+                            ['link', 'textColor', 'highlight', 'code', 'clearFormatting'],
+                            ['bulletList', 'orderedList', 'blockquote', 'codeBlock', 'details'],
+                            [
+                                ToolbarButtonGroup::make('Таблица', [
+                                    'table',
+                                    'tableAddColumnBefore',
+                                    'tableAddColumnAfter',
+                                    'tableDeleteColumn',
+                                    'tableAddRowBefore',
+                                    'tableAddRowAfter',
+                                    'tableDeleteRow',
+                                    'tableMergeCells',
+                                    'tableSplitCell',
+                                    'tableToggleHeaderRow',
+                                    'tableToggleHeaderCell',
+                                    'tableDelete',
+                                ])->textualButtons(),
+                            ],
+                            ['grid', 'gridDelete', 'attachFiles', 'horizontalRule'],
+                            ['alignStart', 'alignCenter', 'alignEnd', 'alignJustify'],
                         ])
                         ->textColors([
                             'navy' => TextColor::make('Тёмно-синий', '#22384d', '#b9c9d8'),

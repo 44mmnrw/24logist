@@ -38,4 +38,48 @@ class BlogEditorTest extends TestCase
             $post->fresh()->body,
         );
     }
+
+    public function test_admin_can_save_deeply_nested_rich_editor_table_content(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $post = BlogPost::query()->create([
+            'title' => 'Статья с таблицей',
+            'slug' => 'article-with-table',
+            'body' => '<p>Первый блок</p><p>Второй блок</p><table><tbody><tr><td><p>Исходный текст</p></td></tr></tbody></table>',
+            'is_published' => false,
+        ]);
+
+        Livewire::test(EditBlogPost::class, ['record' => $post->getRouteKey()])
+            ->set('data.body.content.2.content.0.content.0.content.0.content.0.text', 'Изменённый текст')
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertStringContainsString('Изменённый текст', $post->fresh()->body);
+    }
+
+    public function test_admin_can_save_and_render_a_custom_font_size(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $post = BlogPost::query()->create([
+            'title' => 'Статья с размером шрифта',
+            'slug' => 'article-with-font-size',
+            'body' => '<p>Исходный текст</p>',
+            'is_published' => false,
+        ]);
+
+        $body = '<p><span class="font-size" data-font-size="24">Крупный текст</span></p>';
+
+        Livewire::test(EditBlogPost::class, ['record' => $post->getRouteKey()])
+            ->fillForm(['body' => $body])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $savedBody = $post->fresh()->body;
+
+        $this->assertStringContainsString('font-size-24', $savedBody);
+        $this->assertStringContainsString('data-font-size="24"', $savedBody);
+        $this->assertStringContainsString('font-size-24', $post->fresh()->renderBody());
+    }
 }

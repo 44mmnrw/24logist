@@ -275,7 +275,8 @@ return [
 
     'payload' => [
         'max_size' => 5 * 1024 * 1024,   // 5MB — Filament admin forms with repeaters can exceed 1MB
-        'max_nesting_depth' => 10,   // Maximum depth of dot-notation property paths
+        // Rich editor tables are represented as doc -> table -> row -> cell -> paragraph -> text.
+        'max_nesting_depth' => (int) env('LIVEWIRE_MAX_NESTING_DEPTH', 20),
         'max_calls' => 50,           // Maximum method calls per request
         'max_components' => 200,     // Maximum components per batch request
     ],

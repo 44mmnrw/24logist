@@ -7,6 +7,8 @@ use App\Observers\LandingLeadObserver;
 use App\Services\LandingPageService;
 use App\Support\CanonicalUrl;
 use Filament\Facades\Filament;
+use Filament\Support\Assets\Js;
+use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -27,6 +29,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        FilamentAsset::register([
+            Js::make('rich-content-plugins/font-size', resource_path('js/filament/rich-content-plugins/font-size.js'))
+                ->loadedOnRequest(),
+        ]);
+
         // Production: canonical URLs from APP_URL (24logist.ru без www).
         // Local: match browser host (Laragon / *.test).
         if (! $this->app->runningInConsole()) {

@@ -22,6 +22,7 @@ class LandingContentSeeder extends Seeder
         $this->seedHeader();
         $this->seedHero();
         $this->seedWhy();
+        $this->seedFunctional();
         $this->seedPlatform();
         $this->seedFeatures();
         $this->seedPricing();
@@ -164,6 +165,46 @@ class LandingContentSeeder extends Seeder
                 'block_type' => 'stat',
                 'title' => $stat['title'],
                 'subtitle' => $stat['subtitle'],
+                'sort_order' => $index + 1,
+            ]);
+        }
+    }
+
+    /**
+     * Replaces the legacy advantages content with the current Figma functional section.
+     */
+    private function seedFunctional(): void
+    {
+        $section = LandingSection::query()->where('slug', 'why')->firstOrFail();
+
+        $section->update([
+            'name' => 'Функционал',
+            'title' => 'Функционал',
+            'subtitle' => 'Всё, что нужно экспедитору для работы с заявкой — от оформления и документооборота до аналитики прибыли и проверки контрагентов.',
+            'extra' => [
+                'quote' => 'Наша главная ценность в том, что мы упрощаем процесс работы с заявкой от Заказчика, делаем его простым и удобным',
+                'quote_initials' => 'СА',
+                'quote_author' => 'Станислав Аристов',
+                'quote_handle' => '@sss_air',
+            ],
+        ]);
+
+        LandingBlock::query()->where('section_slug', 'why')->delete();
+
+        foreach ([
+            ['title' => 'Заявка', 'description' => 'Первый договор-заявка оформляется за считанные минуты. На его основе автоматически заполняются доверенность, транспортная накладная и ЭТрН. Документы отправляются перевозчику через ЭДО или почту.', 'tag' => '3–5 минут на заявку'],
+            ['title' => 'Документооборот и банковские выписки', 'description' => 'После доставки заявка попадает в документооборот. Пользователь указывает плановые даты оплат, а сервис напоминает о сроках. Загруженные выписки показывают все платежи в личном кабинете.', 'tag' => 'Контроль оплат'],
+            ['title' => 'Зарплата и дополнительные расходы', 'description' => 'Администратор видит расходы на оклады и налоги, а менеджер — только свои показатели. Система автоматически считывает платежи и распределяет их по статьям доходов и расходов.', 'tag' => 'Учёт по ролям'],
+            ['title' => 'ЭПД', 'description' => 'Обмен электронными перевозочными документами происходит в несколько кликов. Из входящих поручений экспедитору формируются заказ-заявки и ЭТрН.', 'tag' => 'Обмен в 1 клик'],
+            ['title' => 'Прибыль', 'description' => 'Гибкая настройка аналитики и финансов, учёт дополнительных расходов, расчёт прибыли и маржинальности каждой заявки.', 'tag' => 'Маржа по заявке'],
+            ['title' => 'Безопасность', 'description' => 'Рейтинг перевозчика в АТИ и проверка контрагентов доступны прямо в личном кабинете, без подключения дополнительных сервисов.', 'tag' => 'Проверка контрагентов'],
+        ] as $index => $card) {
+            $this->block([
+                'section_slug' => $section->slug,
+                'block_type' => 'card',
+                'title' => $card['title'],
+                'description' => $card['description'],
+                'tag' => $card['tag'],
                 'sort_order' => $index + 1,
             ]);
         }

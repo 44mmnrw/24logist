@@ -84,6 +84,26 @@ class LandingSectionResource extends Resource
                         default => 'Описание',
                     })
                     ->rows(4),
+                Textarea::make('extra.quote')
+                    ->label('Текст цитаты')
+                    ->rows(3)
+                    ->columnSpanFull()
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'why'),
+                TextInput::make('extra.quote_initials')
+                    ->label('Инициалы в аватаре')
+                    ->maxLength(4)
+                    ->placeholder('СА')
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'why'),
+                TextInput::make('extra.quote_author')
+                    ->label('Автор цитаты')
+                    ->maxLength(255)
+                    ->placeholder('Станислав Аристов')
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'why'),
+                TextInput::make('extra.quote_handle')
+                    ->label('Подпись или ник')
+                    ->maxLength(255)
+                    ->placeholder('@sss_air')
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'why'),
                 TextInput::make('badge_text')
                     ->label('Текст бейджа')
                     ->maxLength(255),
@@ -299,7 +319,7 @@ class LandingSectionResource extends Resource
                     ->keyLabel('Ключ')
                     ->valueLabel('Значение')
                     ->reorderable()
-                    ->visible(fn (?LandingSection $record): bool => ! in_array($record?->slug, ['hero', 'mobile', 'driver_cabinet', 'quiz', 'footer', 'faq', 'platform', 'header', 'pricing'], true)),
+                    ->visible(fn (?LandingSection $record): bool => ! in_array($record?->slug, ['hero', 'mobile', 'driver_cabinet', 'quiz', 'footer', 'faq', 'platform', 'header', 'pricing', 'why'], true)),
                 Toggle::make('is_active')
                     ->label('Активна')
                     ->default(true),
