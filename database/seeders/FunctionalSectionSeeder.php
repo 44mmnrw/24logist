@@ -17,13 +17,11 @@ class FunctionalSectionSeeder extends Seeder
                 'name' => 'Функционал',
                 'title' => 'Функционал',
                 'subtitle' => 'Всё, что нужно экспедитору для работы с заявкой — от оформления и документооборота до аналитики прибыли и проверки контрагентов.',
+                'extra' => $this->quoteDefaults(),
                 'is_active' => true,
                 'sort_order' => 3,
             ],
         );
-
-        $section->extra = array_replace($this->quoteDefaults(), $section->extra ?? []);
-        $section->save();
 
         foreach ($this->cards() as $index => $data) {
             $card = LandingBlock::query()->firstOrNew([

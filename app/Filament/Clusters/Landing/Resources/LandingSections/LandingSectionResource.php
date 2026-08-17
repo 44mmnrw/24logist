@@ -84,22 +84,22 @@ class LandingSectionResource extends Resource
                         default => 'Описание',
                     })
                     ->rows(4),
-                Textarea::make('extra.quote')
+                Textarea::make('functional_quote')
                     ->label('Текст цитаты')
                     ->rows(3)
                     ->columnSpanFull()
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'why'),
-                TextInput::make('extra.quote_initials')
+                TextInput::make('functional_quote_initials')
                     ->label('Инициалы в аватаре')
                     ->maxLength(4)
                     ->placeholder('СА')
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'why'),
-                TextInput::make('extra.quote_author')
+                TextInput::make('functional_quote_author')
                     ->label('Автор цитаты')
                     ->maxLength(255)
                     ->placeholder('Станислав Аристов')
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'why'),
-                TextInput::make('extra.quote_handle')
+                TextInput::make('functional_quote_handle')
                     ->label('Подпись или ник')
                     ->maxLength(255)
                     ->placeholder('@sss_air')

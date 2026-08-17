@@ -7,6 +7,7 @@ use App\Services\LandingImageOptimizer;
 use App\Services\LandingPageService;
 use App\Services\SitemapService;
 use App\Support\LandingFooterForm;
+use App\Support\LandingFunctionalForm;
 use App\Support\LandingHeroCarouselForm;
 use App\Support\LandingMobileForm;
 use App\Support\LandingPricingForm;
@@ -24,11 +25,13 @@ class EditLandingSection extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        return LandingQuizForm::hydrate(
-            LandingPricingForm::hydrate(
-                LandingFooterForm::hydrate(
-                    LandingMobileForm::hydrate(
-                        LandingHeroCarouselForm::hydrate($data),
+        return LandingFunctionalForm::hydrate(
+            LandingQuizForm::hydrate(
+                LandingPricingForm::hydrate(
+                    LandingFooterForm::hydrate(
+                        LandingMobileForm::hydrate(
+                            LandingHeroCarouselForm::hydrate($data),
+                        ),
                     ),
                 ),
             ),
@@ -37,11 +40,13 @@ class EditLandingSection extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        return LandingQuizForm::dehydrate(
-            LandingPricingForm::dehydrate(
-                LandingFooterForm::dehydrate(
-                    LandingMobileForm::dehydrate(
-                        LandingHeroCarouselForm::dehydrate($data),
+        return LandingFunctionalForm::dehydrate(
+            LandingQuizForm::dehydrate(
+                LandingPricingForm::dehydrate(
+                    LandingFooterForm::dehydrate(
+                        LandingMobileForm::dehydrate(
+                            LandingHeroCarouselForm::dehydrate($data),
+                        ),
                     ),
                 ),
             ),
