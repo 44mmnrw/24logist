@@ -70,9 +70,11 @@ final class OpenGraph
         $settings = app(SiteSettingsService::class)->get();
         $extra = is_array($page->extra) ? $page->extra : [];
 
+        $htmlTitle = self::joinTitle($page->displayTitle());
+
         $title = filled($extra['og_title'] ?? null)
             ? (string) $extra['og_title']
-            : self::joinTitle($page->displayTitle());
+            : $htmlTitle;
 
         $description = filled($extra['og_description'] ?? null)
             ? (string) $extra['og_description']
@@ -96,7 +98,7 @@ final class OpenGraph
             ? (string) $extra['og_type']
             : 'website';
 
-        return self::build(
+        $meta = self::build(
             title: $title,
             description: $description,
             url: $url,
@@ -105,6 +107,10 @@ final class OpenGraph
             robots: $robots,
             keywords: $extra['meta_keywords'] ?? $settings->seo_keywords,
         );
+
+        $meta['html_title'] = $htmlTitle;
+
+        return $meta;
     }
 
     /**

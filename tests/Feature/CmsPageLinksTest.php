@@ -16,6 +16,8 @@ class CmsPageLinksTest extends TestCase
     {
         parent::setUp();
 
+        $this->withoutVite();
+
         config(['app.url' => 'https://24logist.ru']);
         URL::forceRootUrl('https://24logist.ru');
         URL::forceScheme('https');
@@ -63,5 +65,30 @@ class CmsPageLinksTest extends TestCase
         $this->assertSame('/blog', LandingLinks::resolve('/blog'));
         $this->assertSame('mailto:info@24logist.ru', LandingLinks::resolve('mailto:info@24logist.ru'));
         $this->assertSame('https://example.com', LandingLinks::resolve('https://example.com'));
+    }
+
+    public function test_meta_title_and_open_graph_title_are_rendered_independently(): void
+    {
+        CmsPage::query()->create([
+            'title' => 'Эксплуатационная документация',
+            'slug' => 'ekspluatacionnaia-dokumentaciia-po-logistru',
+            'meta_title' => 'Эксплуатационная документация программы для экспедиторов ЛогистРу',
+            'body' => '{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Документация"}]}]}',
+            'extra' => [
+                'og_title' => 'Эксплуатационная документация ПО ЛогистРу',
+            ],
+            'is_published' => true,
+        ]);
+
+        $this->get('/pages/ekspluatacionnaia-dokumentaciia-po-logistru')
+            ->assertOk()
+            ->assertSee(
+                '<title>Эксплуатационная документация программы для экспедиторов ЛогистРу</title>',
+                false,
+            )
+            ->assertSee(
+                'property="og:title" content="Эксплуатационная документация ПО ЛогистРу"',
+                false,
+            );
     }
 }

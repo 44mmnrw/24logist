@@ -8,7 +8,7 @@
     @php
         $og = \App\Support\OpenGraph::forPage($page);
     @endphp
-    <title>{{ $og['title'] }}</title>
+    <title>{{ $og['html_title'] }}</title>
     <x-seo.open-graph :page="$page" />
     <x-seo.structured-data :page="$page" />
     <x-site.favicon />
