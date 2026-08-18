@@ -366,6 +366,41 @@ body {
     height: 20px;
     transition: color 0.22s ease;
 }
+.hero-list--progress {
+    gap: 0;
+}
+.hero-list--progress li {
+    position: relative;
+    min-height: 38px;
+    align-items: flex-start;
+}
+.hero-list--progress li:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    top: 20px;
+    bottom: 0;
+    left: 7px;
+    width: 2px;
+    border-radius: 999px;
+    background: #bbf7d0;
+}
+.hero-list--progress .hero-list__icon {
+    z-index: 1;
+    width: 16px;
+    height: 16px;
+    margin-top: 5px;
+    color: #16a34a;
+    background: #fff;
+}
+.hero-list--progress .hero-list__icon::before {
+    display: none;
+}
+.hero-list--progress .hero-list__icon .landing-icon,
+.hero-list--progress img {
+    width: 16px;
+    height: 16px;
+}
 @media (hover: hover) and (pointer: fine) {
     .hero-list li:hover .hero-list__icon::before {
         transform: scale(1);
@@ -374,6 +409,10 @@ body {
 
     .hero-list li:hover .hero-list__icon {
         color: #fff;
+    }
+
+    .hero-list--progress li:hover .hero-list__icon {
+        color: #16a34a;
     }
 }
 @media (prefers-reduced-motion: reduce) {
