@@ -1625,11 +1625,18 @@ body {
     }
     .epd-package { min-width: 0; padding: 16px; }
     .epd-package h3 { font-size: clamp(22px, 7vw, 28px); }
-    .growth-section { padding-block: 56px; }
+    .growth-section { padding-block: 56px; overflow: hidden; }
+    .growth-section__shell { gap: 28px; }
     .growth-section__copy h2 { font-size: 34px; }
     .growth-card { padding: 12px; }
     .growth-card__header { gap: 8px; }
-    .growth-customer { grid-template-columns: minmax(150px, 1fr) minmax(100px, 1.25fr) minmax(60px, auto); gap: 8px; }
+    .growth-tabs { min-width: 0; }
+    .growth-tabs button { min-width: 0; }
+    .growth-customer {
+        grid-template-columns: minmax(0, 1.35fr) minmax(56px, 1fr) auto;
+        gap: 8px;
+    }
+    .growth-customer__name { min-width: 0; overflow-wrap: anywhere; }
     .landing-section-slot > section.additional-options-section { padding-block: 56px; }
     .additional-options-section__intro h2 { font-size: 34px; }
     .additional-option {
@@ -1643,14 +1650,33 @@ body {
     .landing-header .brand-logo { height: 28px; }
     .landing-header__actions .btn--sm { padding-inline: 12px; font-size: 13px; }
     .growth-card__header--customers { align-items: stretch; flex-direction: column; }
-    .growth-tabs { width: 100%; max-width: 100%; justify-content: space-between; overflow: hidden; }
-    .growth-tabs button { padding-inline: 5px; font-size: 8px; }
-    .growth-customer { grid-template-columns: minmax(135px, .9fr) minmax(70px, 1fr) minmax(60px, auto); }
+    .growth-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        width: 100%;
+        max-width: 100%;
+    }
+    .growth-tabs button {
+        width: 100%;
+        padding: 5px 3px;
+        font-size: 9px;
+        line-height: 12px;
+        white-space: normal;
+    }
+    .growth-customer { grid-template-columns: minmax(0, 1.25fr) minmax(48px, .8fr) auto; }
     .growth-customer__name { font-size: 10px; line-height: 13px; }
-    .growth-card--margins { min-height: 316px; }
-    .growth-donut { top: 104px; width: 126px; height: 126px; }
+    .growth-card--margins { display: grid; min-height: 0; }
+    .growth-donut {
+        position: relative;
+        top: auto;
+        left: auto;
+        width: 126px;
+        height: 126px;
+        margin: 16px auto 0;
+        transform: none;
+    }
     .growth-donut::before { inset: 21px; }
-    .growth-legend { padding-top: 136px; }
+    .growth-legend { padding-top: 16px; }
 }
 
 @media (max-width: 360px) {
