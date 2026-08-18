@@ -28,6 +28,7 @@ class LandingContentSeeder extends Seeder
         $this->seedPricing();
         $this->seedAdditionalOptions();
         $this->seedEpdPlatform();
+        $this->seedGrowth();
         $this->seedMobile();
         $this->seedDriverCabinet();
         $this->seedQuiz();
@@ -470,7 +471,7 @@ class LandingContentSeeder extends Seeder
         $section = $this->section([
             'slug' => 'mobile',
             'name' => 'Мобильная версия',
-            'sort_order' => 9,
+            'sort_order' => 10,
             'badge_text' => 'Настройка интерфейса',
             'badge_icon' => $this->icon('sliders'),
             'title' => 'Удобная мобильная версия',
@@ -498,12 +499,36 @@ class LandingContentSeeder extends Seeder
         }
     }
 
+    private function seedGrowth(): void
+    {
+        $this->section([
+            'slug' => 'growth',
+            'name' => 'Рост и эффективность',
+            'sort_order' => 9,
+            'title' => 'Повышайте эффективность и растите вместе с нами',
+            'extra' => [
+                'lead_prefix' => 'Работа в нашей системе освободит от',
+                'lead_highlight' => '30 до 60% времени',
+                'lead_suffix' => ', которое вы раньше тратили на составление, редактирование и учёт транспортных документов в таблицах или сторонних сервисах.',
+                'paragraph_two' => 'Это время вы сможете направить на поиск новых клиентов и работу с действующими заказчиками.',
+                'paragraph_three' => 'Занимайтесь новыми проектами, не отвлекаясь от текущих задач, имея круглосуточный доступ к личному кабинету с любого из ваших устройств.',
+                'customer_names' => [
+                    ['name' => 'ООО "ГК «ЛОГОС»"'],
+                    ['name' => 'АО "УКЗ"'],
+                    ['name' => 'ООО "БУГУЛЬМИНСКИЙ СЕЛЬСКОХОЗЯЙСТВЕННЫЙ РЫНОК"'],
+                    ['name' => 'ООО "МЕТАЛЛИНВЕСТСПБ"'],
+                    ['name' => 'ООО "КЛИМАТ-КОМПЛЕКС"'],
+                ],
+            ],
+        ]);
+    }
+
     private function seedQuiz(): void
     {
         $section = $this->section([
             'slug' => 'quiz',
             'name' => 'Квиз',
-            'sort_order' => 11,
+            'sort_order' => 12,
             'kicker' => 'Квиз · 1 минута',
             'title' => 'Подберём тариф под вашу логистику',
             'description' => 'Ответьте на 4 коротких вопроса — пришлём подходящий тариф и расчёт за 15 минут в рабочее время.',
@@ -560,7 +585,7 @@ class LandingContentSeeder extends Seeder
         $section = $this->section([
             'slug' => 'faq',
             'name' => 'FAQ',
-            'sort_order' => 12,
+            'sort_order' => 13,
             'title' => 'Частые вопросы',
             'extra' => [
                 'toggle_icon' => $this->icon('chevron-down'),
@@ -589,7 +614,7 @@ class LandingContentSeeder extends Seeder
         $this->section([
             'slug' => 'final_cta',
             'name' => 'Финальный CTA',
-            'sort_order' => 13,
+            'sort_order' => 14,
             'title' => 'Подключите ЛОГИСТ этой неделе',
             'description' => 'Демо за 30 минут, настройка под ваши процессы, понятный счёт. Без долгих внедрений.',
             'button_primary_text' => 'Подобрать тариф',
@@ -604,7 +629,7 @@ class LandingContentSeeder extends Seeder
         $section = $this->section([
             'slug' => 'footer',
             'name' => 'Подвал',
-            'sort_order' => 14,
+            'sort_order' => 15,
             'description' => 'Лучший сервис для экспедиторов в России. Заявки, ЭДО и рейсы в одном кабинете.',
             'extra' => [
                 'logo_icon' => $this->icon('brand-logo'),
@@ -671,7 +696,7 @@ class LandingContentSeeder extends Seeder
         $section = $this->section([
             'slug' => 'driver_cabinet',
             'name' => 'Личный кабинет водителя',
-            'sort_order' => 10,
+            'sort_order' => 11,
             'badge_text' => 'Для водителя',
             'badge_icon' => $this->icon('user-driver'),
             'title' => 'Личный кабинет водителя',

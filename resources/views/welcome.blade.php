@@ -30,6 +30,7 @@
                     'pricing' => 'components.landing.pricing',
                     'additional_options' => 'components.landing.additional-options',
                     'epd_platform' => 'components.landing.epd-platform',
+                    'growth' => 'components.landing.growth',
                     'mobile' => 'components.landing.mobile',
                     'driver_cabinet' => 'components.landing.driver-cabinet',
                     'quiz' => 'components.landing.quiz',

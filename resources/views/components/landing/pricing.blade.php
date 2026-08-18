@@ -39,9 +39,18 @@
                     <ul>
                         @foreach ($plan->children->where('block_type', 'feature') as $feature)
                             <li>
-                                @if ($feature->icon)
-                                    <x-landing.icon :name="$feature->icon" />
-                                @endif
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 16 16"
+                                    width="20"
+                                    height="20"
+                                    fill="none"
+                                    aria-hidden="true"
+                                    class="pricing-card__check"
+                                    style="display:block;width:20px;height:20px;flex:0 0 20px;color:#16a34a"
+                                >
+                                    <use href="#icon-doc-check-circle" xlink:href="#icon-doc-check-circle" />
+                                </svg>
                                 {{ $feature->title }}
                             </li>
                         @endforeach

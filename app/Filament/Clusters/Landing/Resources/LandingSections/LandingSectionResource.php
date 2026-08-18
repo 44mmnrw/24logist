@@ -84,6 +84,42 @@ class LandingSectionResource extends Resource
                         default => 'Описание',
                     })
                     ->rows(4),
+                TextInput::make('extra.lead_prefix')
+                    ->label('Первый абзац — текст до выделения')
+                    ->maxLength(255)
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
+                TextInput::make('extra.lead_highlight')
+                    ->label('Первый абзац — выделенный текст')
+                    ->maxLength(255)
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
+                Textarea::make('extra.lead_suffix')
+                    ->label('Первый абзац — текст после выделения')
+                    ->rows(3)
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
+                Textarea::make('extra.paragraph_two')
+                    ->label('Второй абзац')
+                    ->rows(3)
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
+                Textarea::make('extra.paragraph_three')
+                    ->label('Третий абзац')
+                    ->rows(3)
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
+                Repeater::make('extra.customer_names')
+                    ->label('Названия компаний в отчёте')
+                    ->schema([
+                        TextInput::make('name')
+                            ->label('Компания')
+                            ->required()
+                            ->maxLength(255),
+                    ])
+                    ->minItems(5)
+                    ->maxItems(5)
+                    ->reorderable(false)
+                    ->addable(false)
+                    ->deletable(false)
+                    ->itemLabel(fn (array $state): string => $state['name'] ?? 'Компания')
+                    ->columnSpanFull()
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
                 Textarea::make('functional_quote')
                     ->label('Текст цитаты')
                     ->rows(3)
@@ -319,7 +355,7 @@ class LandingSectionResource extends Resource
                     ->keyLabel('Ключ')
                     ->valueLabel('Значение')
                     ->reorderable()
-                    ->visible(fn (?LandingSection $record): bool => ! in_array($record?->slug, ['hero', 'mobile', 'driver_cabinet', 'quiz', 'footer', 'faq', 'platform', 'header', 'pricing', 'why'], true)),
+                    ->visible(fn (?LandingSection $record): bool => ! in_array($record?->slug, ['hero', 'mobile', 'driver_cabinet', 'quiz', 'footer', 'faq', 'platform', 'header', 'pricing', 'why', 'growth'], true)),
                 Toggle::make('is_active')
                     ->label('Активна')
                     ->default(true),

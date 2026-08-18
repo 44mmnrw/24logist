@@ -1083,6 +1083,142 @@ body {
 .epd-package__rate { padding-top: 2px; color: #90a1b9; font-size: 12px; line-height: 18px; }
 .epd-package .btn { min-height: 40px; padding-inline: 8px; color: #1d4ed8; border-color: #1d4ed8; }
 
+.growth-section {
+    padding-block: 80px;
+    background: #f8fafc;
+}
+.growth-section__shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 64px;
+    align-items: center;
+}
+.growth-section__copy h2 {
+    max-width: 584px;
+    color: #1f2a3d;
+    font-size: 40px;
+    line-height: 1.25;
+    font-weight: 700;
+}
+.growth-section__text {
+    display: grid;
+    gap: 16px;
+    max-width: 584px;
+    padding-top: 20px;
+}
+.growth-section__text p {
+    color: #45556c;
+    font-size: 17px;
+    line-height: 1.7;
+}
+.growth-section__text strong { color: #1f2a3d; font-weight: 700; }
+.growth-dashboard { display: grid; gap: 16px; min-width: 0; }
+.growth-card {
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 8px 18px rgba(15, 23, 43, .08);
+}
+.growth-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+.growth-card__header h3 { color: #1f2a3d; font-size: 16px; line-height: 24px; font-weight: 700; }
+.growth-card__header p { padding-top: 2px; color: #90a1b9; font-size: 13px; line-height: 19px; }
+.growth-switch,
+.growth-tabs {
+    display: inline-flex;
+    flex-shrink: 0;
+    padding: 3px;
+    border: 1px solid #dbe3ee;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+.growth-switch button {
+    min-width: 34px;
+    padding: 3px 10px;
+    border: 0;
+    border-radius: 6px;
+    color: #45556c;
+    background: transparent;
+    font: inherit;
+    font-size: 12px;
+    line-height: 18px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+}
+.growth-switch .is-active,
+.growth-tabs .is-active {
+    color: #1f2a3d;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(15, 23, 43, .16);
+}
+.growth-card--margins { position: relative; min-height: 242px; }
+.growth-donut {
+    position: absolute;
+    top: 74px;
+    left: 50%;
+    width: 142px;
+    height: 142px;
+    border-radius: 50%;
+    background: conic-gradient(#c32108 0 16.9%, #ffff35 16.9% 33.8%, #21eb00 33.8% 89.7%, #94a3b8 89.7% 100%);
+    transform: translateX(-50%);
+}
+.growth-donut::before { content: ""; position: absolute; inset: 23px; border-radius: 50%; background: #fff; }
+.growth-donut__center { position: absolute; inset: 0; z-index: 1; display: grid; place-content: center; text-align: center; }
+.growth-donut__center strong { color: #1f2a3d; font-size: 20px; line-height: 20px; font-weight: 800; }
+.growth-donut__center span { padding-top: 3px; color: #90a1b9; font-size: 11px; line-height: 16px; }
+.growth-legend { position: relative; z-index: 2; display: grid; gap: 4px; width: 100%; padding-top: 96px; }
+.growth-legend__row {
+    display: grid;
+    grid-template-columns: 9px minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: center;
+    min-width: 0;
+    color: #60708a;
+    font-size: 12px;
+    line-height: 18px;
+}
+.growth-legend__row strong { color: #111827; font-size: 13px; font-weight: 700; }
+.growth-dot { width: 9px; height: 9px; border-radius: 50%; }
+.growth-dot--blue { background: #2563eb; }
+.growth-dot--green { background: #16a34a; }
+.growth-dot--orange { background: #f59e0b; }
+.growth-dot--gray { background: #94a3b8; }
+.growth-card__header--customers { align-items: center; }
+.growth-tabs button {
+    padding: 4px 9px;
+    border: 0;
+    border-radius: 6px;
+    color: #61718a;
+    background: transparent;
+    font: inherit;
+    font-size: 10px;
+    line-height: 16px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.growth-customer-list { display: grid; gap: 12px; padding-top: 24px; }
+.growth-customer {
+    display: grid;
+    grid-template-columns: minmax(190px, 1fr) minmax(140px, 1.55fr) minmax(64px, auto);
+    gap: 12px;
+    align-items: center;
+    min-width: 0;
+}
+.growth-customer__name { color: #24344e; font-size: 12px; line-height: 15px; }
+.growth-customer__track { display: block; height: 12px; overflow: hidden; border-radius: 999px; background: #f8fafc; }
+.growth-customer__track span { display: block; height: 100%; border-radius: inherit; background: #19a857; transition: width .3s ease; }
+.growth-customer > strong { color: #1f2a3d; font-size: 14px; line-height: 21px; font-weight: 800; text-align: right; }
+.growth-dashboard.is-updating .growth-customer-list { opacity: .55; }
+.growth-customer-list { transition: opacity .15s ease; }
+
 .mobile-section__shell {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1443,6 +1579,8 @@ body {
     .deadline-banner { grid-template-columns: 1fr; }
     .mobile-pill { display: none; }
     .additional-options-section__layout { grid-template-columns: 1fr; gap: 40px; }
+    .growth-section__shell { grid-template-columns: 1fr; gap: 40px; }
+    .growth-dashboard { width: 100%; max-width: 584px; }
 }
 
 @media (max-width: 760px) {
@@ -1484,6 +1622,11 @@ body {
     }
     .epd-package { min-width: 0; padding: 16px; }
     .epd-package h3 { font-size: clamp(22px, 7vw, 28px); }
+    .growth-section { padding-block: 56px; }
+    .growth-section__copy h2 { font-size: 34px; }
+    .growth-card { padding: 12px; }
+    .growth-card__header { gap: 8px; }
+    .growth-customer { grid-template-columns: minmax(150px, 1fr) minmax(100px, 1.25fr) minmax(60px, auto); gap: 8px; }
     .landing-section-slot > section.additional-options-section { padding-block: 56px; }
     .additional-options-section__intro h2 { font-size: 34px; }
     .additional-option {
@@ -1496,6 +1639,15 @@ body {
 @media (max-width: 420px) {
     .landing-header .brand-logo { height: 28px; }
     .landing-header__actions .btn--sm { padding-inline: 12px; font-size: 13px; }
+    .growth-card__header--customers { align-items: stretch; flex-direction: column; }
+    .growth-tabs { width: 100%; max-width: 100%; justify-content: space-between; overflow: hidden; }
+    .growth-tabs button { padding-inline: 5px; font-size: 8px; }
+    .growth-customer { grid-template-columns: minmax(135px, .9fr) minmax(70px, 1fr) minmax(60px, auto); }
+    .growth-customer__name { font-size: 10px; line-height: 13px; }
+    .growth-card--margins { min-height: 316px; }
+    .growth-donut { top: 104px; width: 126px; height: 126px; }
+    .growth-donut::before { inset: 21px; }
+    .growth-legend { padding-top: 136px; }
 }
 
 @media (max-width: 360px) {
