@@ -1630,8 +1630,20 @@ body {
     .growth-section__copy h2 { font-size: 34px; }
     .growth-card { padding: 12px; }
     .growth-card__header { gap: 8px; }
-    .growth-tabs { min-width: 0; }
-    .growth-tabs button { min-width: 0; }
+    .growth-card__header--customers { align-items: stretch; flex-direction: column; }
+    .growth-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+    .growth-tabs button {
+        width: 100%;
+        min-width: 0;
+        padding-inline: 5px;
+        white-space: normal;
+    }
     .growth-customer {
         grid-template-columns: minmax(0, 1.35fr) minmax(56px, 1fr) auto;
         gap: 8px;
@@ -1649,19 +1661,10 @@ body {
 @media (max-width: 420px) {
     .landing-header .brand-logo { height: 28px; }
     .landing-header__actions .btn--sm { padding-inline: 12px; font-size: 13px; }
-    .growth-card__header--customers { align-items: stretch; flex-direction: column; }
-    .growth-tabs {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        width: 100%;
-        max-width: 100%;
-    }
     .growth-tabs button {
-        width: 100%;
         padding: 5px 3px;
         font-size: 9px;
         line-height: 12px;
-        white-space: normal;
     }
     .growth-customer { grid-template-columns: minmax(0, 1.25fr) minmax(48px, .8fr) auto; }
     .growth-customer__name { font-size: 10px; line-height: 13px; }
