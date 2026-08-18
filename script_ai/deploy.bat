@@ -275,6 +275,15 @@ if errorlevel 1 (
 echo [OK] Migrations applied.
 
 echo.
+echo [4.1] Seed growth section data...
+call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_APP% && php artisan db:seed --class=GrowthSectionSeeder --force --no-interaction"
+if errorlevel 1 (
+	echo [ERROR] GrowthSectionSeeder failed on server.
+	exit /b 1
+)
+echo [OK] Growth section data seeded.
+
+echo.
 echo [4.9] Ensure Node.js on server ^($HOME/opt/node^)...
 call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "test -x $HOME/opt/node/bin/node || (test -f %SERVER_APP%/script_ai/install-node-server.sh && sed -i 's/\r$//' %SERVER_APP%/script_ai/install-node-server.sh && bash %SERVER_APP%/script_ai/install-node-server.sh) || (echo [ERROR] Node missing. Install: bash script_ai/install-node-server.sh && exit 1)"
 if errorlevel 1 exit /b 1

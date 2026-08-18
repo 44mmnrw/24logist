@@ -1,6 +1,7 @@
 @php
     $section = $landing->section('growth');
     $extra = $section?->extra ?? [];
+    $descriptionParagraphs = preg_split('/\R{2,}/u', trim((string) ($section?->description ?? '')), -1, PREG_SPLIT_NO_EMPTY) ?: [];
     $segmentClasses = ['growth-dot--blue', 'growth-dot--green', 'growth-dot--orange', 'growth-dot--gray'];
     $marginSegments = collect($extra['margin_segments'] ?? [])
         ->values()
@@ -36,16 +37,9 @@
             @endif
 
             <div class="growth-section__text">
-                <p>
-                    {{ $extra['lead_prefix'] ?? '' }}
-                    <strong>{{ $extra['lead_highlight'] ?? '' }}</strong>{{ $extra['lead_suffix'] ?? '' }}
-                </p>
-                @if (! empty($extra['paragraph_two']))
-                    <p>{{ $extra['paragraph_two'] }}</p>
-                @endif
-                @if (! empty($extra['paragraph_three']))
-                    <p>{{ $extra['paragraph_three'] }}</p>
-                @endif
+                @foreach ($descriptionParagraphs as $paragraph)
+                    <p>{{ $paragraph }}</p>
+                @endforeach
             </div>
         </div>
 

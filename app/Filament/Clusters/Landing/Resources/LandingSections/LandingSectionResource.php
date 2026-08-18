@@ -81,62 +81,44 @@ class LandingSectionResource extends Resource
                 Textarea::make('description')
                     ->label(fn (?LandingSection $record): string => match ($record?->slug) {
                         'footer' => 'Текст под логотипом',
+                        'growth' => 'Описание',
                         default => 'Описание',
                     })
-                    ->rows(4),
-                TextInput::make('extra.lead_prefix')
-                    ->label('Первый абзац — текст до выделения')
-                    ->maxLength(255)
-                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
-                TextInput::make('extra.lead_highlight')
-                    ->label('Первый абзац — выделенный текст')
-                    ->maxLength(255)
-                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
-                Textarea::make('extra.lead_suffix')
-                    ->label('Первый абзац — текст после выделения')
-                    ->rows(3)
-                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
-                Textarea::make('extra.paragraph_two')
-                    ->label('Второй абзац')
-                    ->rows(3)
-                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
-                Textarea::make('extra.paragraph_three')
-                    ->label('Третий абзац')
-                    ->rows(3)
-                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
-                TextInput::make('extra.chart_title')
+                    ->rows(fn (?LandingSection $record): int => $record?->slug === 'growth' ? 10 : 4)
+                    ->columnSpanFull(),
+                TextInput::make('growth_chart_title')
                     ->label('Диаграмма — заголовок')
                     ->maxLength(255)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
-                TextInput::make('extra.chart_subtitle')
+                TextInput::make('growth_chart_subtitle')
                     ->label('Диаграмма — подзаголовок')
                     ->maxLength(255)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
-                TextInput::make('extra.unit_percent_label')
+                TextInput::make('growth_unit_percent_label')
                     ->label('Переключатель — проценты')
                     ->maxLength(32)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
-                TextInput::make('extra.unit_count_label')
+                TextInput::make('growth_unit_count_label')
                     ->label('Переключатель — количество')
                     ->maxLength(32)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
-                TextInput::make('extra.total_percent_value')
+                TextInput::make('growth_total_percent_value')
                     ->label('Центр диаграммы — значение в процентах')
                     ->maxLength(32)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
-                TextInput::make('extra.total_percent_label')
+                TextInput::make('growth_total_percent_label')
                     ->label('Центр диаграммы — подпись процентов')
                     ->maxLength(64)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
-                TextInput::make('extra.total_count_value')
+                TextInput::make('growth_total_count_value')
                     ->label('Центр диаграммы — количество')
                     ->maxLength(32)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
-                TextInput::make('extra.total_count_label')
+                TextInput::make('growth_total_count_label')
                     ->label('Центр диаграммы — подпись количества')
                     ->maxLength(64)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
-                Repeater::make('extra.margin_segments')
+                Repeater::make('growth_margin_segments')
                     ->label('Диапазоны маржинальности')
                     ->schema([
                         TextInput::make('label')
@@ -161,23 +143,23 @@ class LandingSectionResource extends Resource
                     ->itemLabel(fn (array $state): string => $state['label'] ?? 'Диапазон')
                     ->columnSpanFull()
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
-                TextInput::make('extra.customers_title')
+                TextInput::make('growth_customers_title')
                     ->label('Рейтинг — заголовок')
                     ->maxLength(255)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
-                TextInput::make('extra.tab_count_label')
+                TextInput::make('growth_tab_count_label')
                     ->label('Вкладка — количество заявок')
                     ->maxLength(255)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
-                TextInput::make('extra.tab_revenue_label')
+                TextInput::make('growth_tab_revenue_label')
                     ->label('Вкладка — выручка')
                     ->maxLength(255)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
-                TextInput::make('extra.tab_margin_label')
+                TextInput::make('growth_tab_margin_label')
                     ->label('Вкладка — маржинальность')
                     ->maxLength(255)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
-                Repeater::make('extra.customer_metrics')
+                Repeater::make('growth_customer_metrics')
                     ->label('Компании и показатели рейтинга')
                     ->schema([
                         TextInput::make('name')->label('Компания')->required()->maxLength(255)->columnSpanFull(),
@@ -197,19 +179,19 @@ class LandingSectionResource extends Resource
                     ->itemLabel(fn (array $state): string => $state['name'] ?? 'Компания')
                     ->columnSpanFull()
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
-                TextInput::make('extra.dashboard_aria_label')
+                TextInput::make('growth_dashboard_aria_label')
                     ->label('Доступность — название блока отчётов')
                     ->maxLength(255)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
-                TextInput::make('extra.unit_aria_label')
+                TextInput::make('growth_unit_aria_label')
                     ->label('Доступность — переключатель единиц')
                     ->maxLength(255)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
-                TextInput::make('extra.chart_aria_label')
+                TextInput::make('growth_chart_aria_label')
                     ->label('Доступность — диаграмма')
                     ->maxLength(255)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
-                TextInput::make('extra.tabs_aria_label')
+                TextInput::make('growth_tabs_aria_label')
                     ->label('Доступность — вкладки рейтинга')
                     ->maxLength(255)
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'growth'),
