@@ -2,9 +2,11 @@
 
 namespace App\Filament\Clusters\Landing\Resources\BlogTags;
 
+use App\Filament\Clusters\Landing\Resources\BlogPosts\BlogPostResource;
 use App\Filament\Clusters\Landing\Resources\BlogTags\Pages\CreateBlogTag;
 use App\Filament\Clusters\Landing\Resources\BlogTags\Pages\EditBlogTag;
 use App\Filament\Clusters\Landing\Resources\BlogTags\Pages\ListBlogTags;
+use App\Models\BlogPost;
 use App\Models\BlogTag;
 use App\Support\FilamentUploadPreview;
 use App\Support\OpenGraph;
@@ -12,6 +14,7 @@ use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -26,6 +29,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
 class BlogTagResource extends Resource
@@ -57,6 +61,12 @@ class BlogTagResource extends Resource
                         ->label('SEO')
                         ->icon('heroicon-o-magnifying-glass')
                         ->schema(self::seoTab()),
+                    Tab::make('articles')
+                        ->label(fn (?BlogTag $record): string => $record === null
+                            ? 'Статьи'
+                            : 'Статьи ('.$record->usageCount().')')
+                        ->icon('heroicon-o-newspaper')
+                        ->schema(self::articlesTab()),
                 ])
                 ->persistTabInQueryString()
                 ->columnSpanFull(),
@@ -171,6 +181,59 @@ class BlogTagResource extends Resource
                 ->columns(2)
                 ->columnSpanFull(),
         ];
+    }
+
+    /** @return array<int, mixed> */
+    private static function articlesTab(): array
+    {
+        return [
+            Section::make('Статьи с этим тегом')
+                ->description('Список формируется автоматически по тегам, указанным в статьях блога.')
+                ->schema([
+                    Placeholder::make('related_articles')
+                        ->hiddenLabel()
+                        ->content(fn (?BlogTag $record): HtmlString => self::relatedArticlesHtml($record))
+                        ->columnSpanFull(),
+                ])
+                ->columnSpanFull(),
+        ];
+    }
+
+    private static function relatedArticlesHtml(?BlogTag $record): HtmlString
+    {
+        if ($record === null) {
+            return new HtmlString('<p class="text-sm text-gray-500">Сначала сохраните тег.</p>');
+        }
+
+        $posts = BlogPost::query()
+            ->whereJsonContains('tags', $record->name)
+            ->orderByDesc('published_at')
+            ->orderByDesc('created_at')
+            ->get(['id', 'slug', 'title', 'is_published', 'published_at']);
+
+        if ($posts->isEmpty()) {
+            return new HtmlString('<p class="text-sm text-gray-500">Этот тег пока не используется ни в одной статье.</p>');
+        }
+
+        $items = $posts->map(function (BlogPost $post): string {
+            $title = e($post->title);
+            $editUrl = e(BlogPostResource::getUrl('edit', ['record' => $post]));
+            $status = $post->is_published ? 'Опубликована' : 'Черновик';
+            $statusClass = $post->is_published
+                ? 'bg-success-50 text-success-700 dark:bg-success-400/10 dark:text-success-400'
+                : 'bg-gray-100 text-gray-600 dark:bg-white/5 dark:text-gray-400';
+            $viewLink = $post->is_published
+                ? '<a class="text-sm text-primary-600 hover:underline dark:text-primary-400" href="'.e($post->getUrl()).'" target="_blank" rel="noopener noreferrer">Открыть</a>'
+                : '';
+
+            return '<li class="flex flex-col gap-2 rounded-xl border border-gray-200 p-4 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between">'
+                .'<div class="min-w-0"><a class="font-medium text-gray-950 hover:text-primary-600 hover:underline dark:text-white dark:hover:text-primary-400" href="'.$editUrl.'">'.$title.'</a>'
+                .'<div class="mt-1"><span class="inline-flex rounded-md px-2 py-0.5 text-xs font-medium '.$statusClass.'">'.$status.'</span></div></div>'
+                .'<div class="flex shrink-0 items-center gap-3"><a class="text-sm text-primary-600 hover:underline dark:text-primary-400" href="'.$editUrl.'">Редактировать</a>'.$viewLink.'</div>'
+                .'</li>';
+        })->implode('');
+
+        return new HtmlString('<ul class="space-y-3">'.$items.'</ul>');
     }
 
     private static function imageUpload(string $name, string $label, string $directory): FileUpload
