@@ -39,7 +39,11 @@ class GrowthSectionSeeder extends Seeder
             ])->filter()->implode(PHP_EOL.PHP_EOL) ?: $this->defaultDescription();
         }
 
-        $extra = array_replace($this->defaults(), $extra);
+        foreach ($this->defaults() as $key => $defaultValue) {
+            if (! array_key_exists($key, $extra) || blank($extra[$key])) {
+                $extra[$key] = $defaultValue;
+            }
+        }
         unset(
             $extra['paragraph_one'],
             $extra['paragraph_two'],

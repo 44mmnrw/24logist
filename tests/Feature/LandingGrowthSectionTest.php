@@ -86,6 +86,23 @@ class LandingGrowthSectionTest extends TestCase
         $this->assertSame('Топ заказчиков', $section->extra['customers_title']);
     }
 
+    public function test_deploy_seeder_fills_empty_customer_report_fields(): void
+    {
+        $section = LandingSection::query()->where('slug', 'growth')->firstOrFail();
+        $extra = $section->extra;
+        $extra['customers_title'] = '';
+        $extra['customer_metrics'] = [];
+        $section->extra = $extra;
+        $section->save();
+
+        $this->seed(GrowthSectionSeeder::class);
+
+        $section->refresh();
+        $this->assertSame('Топ заказчиков', $section->extra['customers_title']);
+        $this->assertCount(5, $section->extra['customer_metrics']);
+        $this->assertSame('ООО "ГК «ЛОГОС»"', $section->extra['customer_metrics'][0]['name']);
+    }
+
     public function test_admin_form_is_hydrated_from_and_saved_to_extra_json(): void
     {
         $section = LandingSection::query()->where('slug', 'growth')->firstOrFail();
