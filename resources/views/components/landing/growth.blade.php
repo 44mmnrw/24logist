@@ -2,15 +2,22 @@
     $section = $landing->section('growth');
     $extra = $section?->extra ?? [];
     $descriptionParagraphs = preg_split('/\R{2,}/u', trim((string) ($section?->description ?? '')), -1, PREG_SPLIT_NO_EMPTY) ?: [];
-    $segmentClasses = ['growth-dot--blue', 'growth-dot--green', 'growth-dot--orange', 'growth-dot--gray'];
     $marginSegments = collect($extra['margin_segments'] ?? [])
         ->values()
         ->map(fn (array $segment, int $index): array => [
             'label' => (string) ($segment['label'] ?? ''),
             'value' => (string) ($segment['percent_value'] ?? ''),
             'count' => (string) ($segment['count_value'] ?? ''),
-            'class' => $segmentClasses[$index] ?? 'growth-dot--gray',
+            'percent' => max(0, (float) str_replace(',', '.', rtrim((string) ($segment['percent_value'] ?? '0'), "% \t\n\r\0\x0B"))),
+            'color' => preg_match('/^#[0-9a-f]{6}$/i', (string) ($segment['color'] ?? '')) ? (string) $segment['color'] : '#94a3b8',
         ]);
+    $gradientPosition = 0.0;
+    $gradientStops = $marginSegments->map(function (array $segment) use (&$gradientPosition): string {
+        $start = $gradientPosition;
+        $gradientPosition = min(100, $gradientPosition + $segment['percent']);
+
+        return sprintf('%s %.2f%% %.2f%%', $segment['color'], $start, $gradientPosition);
+    })->implode(', ');
     $customerMetrics = collect($extra['customer_metrics'] ?? [])->values();
     $customerViews = collect(['count', 'revenue', 'margin'])
         ->mapWithKeys(fn (string $view): array => [
@@ -56,7 +63,7 @@
                     </div>
                 </header>
 
-                <div class="growth-donut" role="img" aria-label="{{ $extra['chart_aria_label'] ?? '' }}">
+                <div class="growth-donut" role="img" aria-label="{{ $extra['chart_aria_label'] ?? '' }}" style="background: conic-gradient({{ $gradientStops }})">
                     <div class="growth-donut__center">
                         <strong data-growth-total data-percent-value="{{ $extra['total_percent_value'] ?? '' }}" data-count-value="{{ $extra['total_count_value'] ?? '' }}">{{ $extra['total_percent_value'] ?? '' }}</strong>
                         <span data-growth-total-label data-percent-label="{{ $extra['total_percent_label'] ?? '' }}" data-count-label="{{ $extra['total_count_label'] ?? '' }}">{{ $extra['total_percent_label'] ?? '' }}</span>
@@ -66,7 +73,7 @@
                 <div class="growth-legend">
                     @foreach ($marginSegments as $segment)
                         <div class="growth-legend__row">
-                            <span class="growth-dot {{ $segment['class'] }}" aria-hidden="true"></span>
+                            <span class="growth-dot" style="background: {{ $segment['color'] }}" aria-hidden="true"></span>
                             <span>{{ $segment['label'] }}</span>
                             <strong data-growth-percent="{{ $segment['value'] }}" data-growth-count="{{ $segment['count'] }}">{{ $segment['value'] }}</strong>
                         </div>

@@ -13,6 +13,7 @@ use App\Support\LandingMedia;
 use App\Support\LandingSectionAnchor;
 use BackedEnum;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Repeater;
@@ -133,8 +134,11 @@ class LandingSectionResource extends Resource
                             ->label('Количество')
                             ->required()
                             ->maxLength(32),
+                        ColorPicker::make('color')
+                            ->label('Цвет сектора')
+                            ->required(),
                     ])
-                    ->columns(3)
+                    ->columns(4)
                     ->minItems(4)
                     ->maxItems(4)
                     ->reorderable(false)

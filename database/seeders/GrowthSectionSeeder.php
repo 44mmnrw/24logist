@@ -39,11 +39,26 @@ class GrowthSectionSeeder extends Seeder
             ])->filter()->implode(PHP_EOL.PHP_EOL) ?: $this->defaultDescription();
         }
 
-        foreach ($this->defaults() as $key => $defaultValue) {
+        $defaults = $this->defaults();
+
+        foreach ($defaults as $key => $defaultValue) {
             if (! array_key_exists($key, $extra) || blank($extra[$key])) {
                 $extra[$key] = $defaultValue;
             }
         }
+
+        $extra['margin_segments'] = collect($extra['margin_segments'])
+            ->values()
+            ->map(function ($segment, int $index) use ($defaults): array {
+                $segment = is_array($segment) ? $segment : [];
+
+                if (blank($segment['color'] ?? null)) {
+                    $segment['color'] = $defaults['margin_segments'][$index]['color'] ?? '#94a3b8';
+                }
+
+                return $segment;
+            })
+            ->all();
         unset(
             $extra['paragraph_one'],
             $extra['paragraph_two'],
@@ -71,10 +86,10 @@ class GrowthSectionSeeder extends Seeder
             'total_count_value' => '59',
             'total_count_label' => 'Заявок',
             'margin_segments' => [
-                ['label' => 'от 5% до 9%', 'percent_value' => '16.9%', 'count_value' => '10'],
-                ['label' => 'от 10% до 15%', 'percent_value' => '16.9%', 'count_value' => '10'],
-                ['label' => 'от 16%', 'percent_value' => '55.9%', 'count_value' => '33'],
-                ['label' => 'Вне диапазонов', 'percent_value' => '10.2%', 'count_value' => '6'],
+                ['label' => 'от 5% до 9%', 'percent_value' => '16.9%', 'count_value' => '10', 'color' => '#c32108'],
+                ['label' => 'от 10% до 15%', 'percent_value' => '16.9%', 'count_value' => '10', 'color' => '#ffff35'],
+                ['label' => 'от 16%', 'percent_value' => '55.9%', 'count_value' => '33', 'color' => '#21eb00'],
+                ['label' => 'Вне диапазонов', 'percent_value' => '10.2%', 'count_value' => '6', 'color' => '#94a3b8'],
             ],
             'customers_title' => 'Топ заказчиков',
             'tab_count_label' => 'По количеству заявок',

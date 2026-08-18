@@ -45,6 +45,7 @@ class LandingGrowthSectionTest extends TestCase
         $extra['chart_title'] = 'Редактируемый заголовок диаграммы';
         $extra['tab_count_label'] = 'Редактируемая вкладка';
         $extra['margin_segments'][0]['label'] = 'Редактируемый диапазон';
+        $extra['margin_segments'][0]['color'] = '#123456';
         $extra['customer_metrics'][0]['name'] = 'Редактируемая компания';
         $extra['customer_metrics'][0]['count_value'] = '77';
         $section->extra = $extra;
@@ -57,6 +58,7 @@ class LandingGrowthSectionTest extends TestCase
         $this->assertStringContainsString('Редактируемый заголовок диаграммы', $html);
         $this->assertStringContainsString('Редактируемая вкладка', $html);
         $this->assertStringContainsString('Редактируемый диапазон', $html);
+        $this->assertStringContainsString('#123456', $html);
         $this->assertStringContainsString('Редактируемая компания', $html);
         $this->assertStringContainsString('<strong>77</strong>', $html);
     }
@@ -72,6 +74,7 @@ class LandingGrowthSectionTest extends TestCase
         $this->assertArrayNotHasKey('paragraph_one', $section->extra);
         $this->assertSame('Сегменты маржинальности заявок', $section->extra['chart_title']);
         $this->assertCount(5, $section->extra['customer_metrics']);
+        $this->assertSame('#c32108', $section->extra['margin_segments'][0]['color']);
 
         $extra = $section->extra;
         $extra['chart_title'] = 'Текст из админки';
