@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\LandingSection;
 use App\Services\LandingPageService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -26,5 +27,28 @@ class LandingGrowthSectionTest extends TestCase
         $this->assertStringContainsString('data-growth-customer-data', $html);
         $this->assertStringContainsString('ООО &quot;ГК «ЛОГОС»&quot;', $html);
         $this->assertSame(5, substr_count($html, 'class="growth-customer"'));
+    }
+
+    public function test_all_visible_dashboard_content_is_loaded_from_the_database(): void
+    {
+        $section = LandingSection::query()->where('slug', 'growth')->firstOrFail();
+        $extra = $section->extra;
+        $extra['chart_title'] = 'Редактируемый заголовок диаграммы';
+        $extra['tab_count_label'] = 'Редактируемая вкладка';
+        $extra['margin_segments'][0]['label'] = 'Редактируемый диапазон';
+        $extra['customer_metrics'][0]['name'] = 'Редактируемая компания';
+        $extra['customer_metrics'][0]['count_value'] = '77';
+        $section->extra = $extra;
+        $section->save();
+
+        $html = view('components.landing.growth', [
+            'landing' => app(LandingPageService::class),
+        ])->render();
+
+        $this->assertStringContainsString('Редактируемый заголовок диаграммы', $html);
+        $this->assertStringContainsString('Редактируемая вкладка', $html);
+        $this->assertStringContainsString('Редактируемый диапазон', $html);
+        $this->assertStringContainsString('Редактируемая компания', $html);
+        $this->assertStringContainsString('<strong>77</strong>', $html);
     }
 }

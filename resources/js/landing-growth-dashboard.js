@@ -24,8 +24,8 @@ const initializeGrowthDashboard = (dashboard) => {
                 value.textContent = showCounts ? value.dataset.growthCount : value.dataset.growthPercent;
             });
 
-            total.textContent = showCounts ? '59' : '100%';
-            totalLabel.textContent = showCounts ? 'Заявок' : 'Доля';
+            total.textContent = showCounts ? total.dataset.countValue : total.dataset.percentValue;
+            totalLabel.textContent = showCounts ? totalLabel.dataset.countLabel : totalLabel.dataset.percentLabel;
         });
     });
 
@@ -97,4 +97,3 @@ const initializeGrowthDashboard = (dashboard) => {
 };
 
 document.querySelectorAll('[data-growth-dashboard]').forEach(initializeGrowthDashboard);
-
