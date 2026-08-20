@@ -67,8 +67,8 @@
                                     @endif
                                 </div>
                                 <h2><a href="{{ $featuredPost->getUrl() }}">{{ $featuredPost->title }}</a></h2>
-                                @if ($featuredPost->displayExcerpt())
-                                    <p>{{ $featuredPost->displayExcerpt() }}</p>
+                                @if ($featuredExcerpt = $featuredPost->previewExcerpt(150))
+                                    <p>{{ $featuredExcerpt }}</p>
                                 @endif
                                 <a class="btn btn--primary" href="{{ $featuredPost->getUrl() }}">
                                     Читать статью
@@ -102,8 +102,8 @@
                                             @endif
                                         </div>
                                         <h2><a href="{{ $post->getUrl() }}">{{ $post->title }}</a></h2>
-                                        @if ($post->displayExcerpt())
-                                            <p>{{ $post->displayExcerpt() }}</p>
+                                        @if ($previewExcerpt = $post->previewExcerpt(160))
+                                            <p>{{ $previewExcerpt }}</p>
                                         @endif
                                     </div>
                                 </article>

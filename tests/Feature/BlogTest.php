@@ -48,6 +48,16 @@ class BlogTest extends TestCase
         $response->assertDontSee('Черновик');
     }
 
+    public function test_blog_preview_excerpt_is_shortened_without_changing_full_excerpt(): void
+    {
+        $excerpt = str_repeat('Длинный анонс статьи для карточки. ', 20);
+        $post = new BlogPost(['excerpt' => $excerpt]);
+
+        $this->assertSame(trim($excerpt), $post->displayExcerpt());
+        $this->assertLessThanOrEqual(220, mb_strlen((string) $post->previewExcerpt()));
+        $this->assertStringEndsWith('…', (string) $post->previewExcerpt());
+    }
+
     public function test_blog_index_shows_fixed_category_name(): void
     {
         $category = BlogCategory::query()->create([

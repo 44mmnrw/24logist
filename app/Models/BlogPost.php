@@ -107,6 +107,25 @@ class BlogPost extends Model
         return $body !== '' ? Str::limit($body, 220) : null;
     }
 
+    public function previewExcerpt(int $limit = 220): ?string
+    {
+        $excerpt = $this->displayExcerpt();
+
+        if ($excerpt === null) {
+            return null;
+        }
+
+        $limit = max(1, $limit);
+
+        if (mb_strlen($excerpt) <= $limit) {
+            return $excerpt;
+        }
+
+        return $limit === 1
+            ? '…'
+            : rtrim(mb_substr($excerpt, 0, $limit - 1)).'…';
+    }
+
     public function displayCategory(): ?string
     {
         $name = trim((string) ($this->blogCategory?->name ?? ''));

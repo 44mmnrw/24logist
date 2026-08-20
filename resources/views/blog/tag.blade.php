@@ -61,8 +61,8 @@
                                             @endif
                                         </div>
                                         <h2><a href="{{ $post->getUrl() }}">{{ $post->title }}</a></h2>
-                                        @if ($post->displayExcerpt())
-                                            <p>{{ $post->displayExcerpt() }}</p>
+                                        @if ($previewExcerpt = $post->previewExcerpt(160))
+                                            <p>{{ $previewExcerpt }}</p>
                                         @endif
                                     </div>
                                 </article>
