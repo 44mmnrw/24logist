@@ -108,7 +108,7 @@ class BlogPostResource extends Resource
                         ->required()
                         ->maxLength(255)
                         ->unique(ignoreRecord: true)
-                        ->helperText('Статья откроется по адресу /blog/slug. Используйте латиницу, цифры и дефисы.'),
+                        ->helperText('Статья откроется по адресу /blog/slug. При изменении старый адрес автоматически получит 301-редирект.'),
                     Textarea::make('subtitle')
                         ->label('Подзаголовок')
                         ->rows(2)
@@ -286,8 +286,8 @@ class BlogPostResource extends Resource
                         ->helperText('Необязательно. Если оставить поле пустым, сайт создаст изображение 1200×675 px с размытым фоном без растягивания оригинала.')
                         ->columnSpanFull(),
                     Toggle::make('show_card_logo')
-                        ->label('Показывать логотип ЛогистРу поверх миниатюры')
-                        ->helperText('Отключите, если логотип уже встроен в само изображение.')
+                        ->label('Показывать логотип ЛогистРу на изображениях статьи')
+                        ->helperText('Логотип автоматически появится на карточке и обложке внутри статьи. Отключите, если он уже встроен в изображение.')
                         ->default(true)
                         ->inline(false)
                         ->columnSpanFull(),

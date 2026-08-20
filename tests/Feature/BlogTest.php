@@ -157,6 +157,23 @@ class BlogTest extends TestCase
         $response->assertSee('/blog/seo-post');
     }
 
+    public function test_blog_post_cover_shows_logo_when_enabled(): void
+    {
+        $post = BlogPost::query()->create([
+            'title' => 'Branded article cover',
+            'slug' => 'branded-article-cover',
+            'body' => 'Article body',
+            'cover_image_path' => 'blog/covers/cover.jpg',
+            'show_card_logo' => true,
+            'is_published' => true,
+            'published_at' => now()->subDay(),
+        ]);
+
+        $this->get($post->getUrl())
+            ->assertOk()
+            ->assertSee('blog-post-cover--branded', false);
+    }
+
     public function test_blog_post_page_outputs_extended_seo_metadata(): void
     {
         $post = BlogPost::query()->create([
@@ -199,6 +216,70 @@ class BlogTest extends TestCase
         ]);
 
         $this->get('/blog/hidden-post')->assertNotFound();
+    }
+
+    public function test_changing_article_slug_creates_direct_permanent_redirects(): void
+    {
+        $post = BlogPost::query()->create([
+            'title' => 'Slug redirect test',
+            'slug' => 'first-article-url',
+            'body' => 'Article body',
+            'is_published' => true,
+            'published_at' => now()->subDay(),
+        ]);
+
+        $post->update(['slug' => 'second-article-url']);
+        $post->update(['slug' => 'current-article-url']);
+
+        $currentUrl = route('blog.show', 'current-article-url');
+
+        $this->get('/blog/first-article-url')
+            ->assertStatus(301)
+            ->assertRedirect($currentUrl);
+
+        $this->get('/blog/second-article-url')
+            ->assertStatus(301)
+            ->assertRedirect($currentUrl);
+
+        $this->get('/blog/current-article-url')->assertOk();
+        $this->assertDatabaseHas('blog_post_redirects', [
+            'blog_post_id' => $post->id,
+            'slug' => 'first-article-url',
+        ]);
+    }
+
+    public function test_article_cannot_use_another_articles_redirect_slug(): void
+    {
+        $firstPost = BlogPost::query()->create([
+            'title' => 'First article',
+            'slug' => 'reserved-old-url',
+            'body' => 'Article body',
+        ]);
+        $firstPost->update(['slug' => 'first-current-url']);
+
+        $secondPost = BlogPost::query()->create([
+            'title' => 'Second article',
+            'slug' => 'second-current-url',
+            'body' => 'Article body',
+        ]);
+
+        $this->expectException(ValidationException::class);
+
+        $secondPost->update(['slug' => 'reserved-old-url']);
+    }
+
+    public function test_old_slug_of_unpublished_article_returns_404(): void
+    {
+        $post = BlogPost::query()->create([
+            'title' => 'Unpublished redirect',
+            'slug' => 'unpublished-old-url',
+            'body' => 'Article body',
+            'is_published' => false,
+        ]);
+
+        $post->update(['slug' => 'unpublished-current-url']);
+
+        $this->get('/blog/unpublished-old-url')->assertNotFound();
     }
 
     public function test_blog_tags_are_clickable_and_tag_page_filters_published_posts(): void

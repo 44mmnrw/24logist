@@ -8,9 +8,11 @@ use Filament\Forms\Components\RichEditor\RichContentRenderer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class BlogPost extends Model
 {
@@ -76,6 +78,14 @@ class BlogPost extends Model
     public function blogCategory(): BelongsTo
     {
         return $this->belongsTo(BlogCategory::class);
+    }
+
+    /**
+     * @return HasMany<BlogPostRedirect, BlogPost>
+     */
+    public function redirects(): HasMany
+    {
+        return $this->hasMany(BlogPostRedirect::class);
     }
 
     public function scopePublished(Builder $query): Builder
@@ -178,6 +188,11 @@ class BlogPost extends Model
         return $this->hasPreparedCardImage() && $this->show_card_logo;
     }
 
+    public function shouldShowArticleLogo(): bool
+    {
+        return filled($this->cover_image_path) && $this->show_card_logo;
+    }
+
     public function publishedDate(): ?Carbon
     {
         return $this->published_at ?: $this->created_at;
@@ -187,6 +202,20 @@ class BlogPost extends Model
     {
         static::saving(function (self $post): void {
             $post->slug = Str::slug($post->slug);
+
+            if ($post->isDirty('slug') && Schema::hasTable('blog_post_redirects')) {
+                $redirectConflict = BlogPostRedirect::query()
+                    ->where('slug', $post->slug)
+                    ->when($post->exists, fn (Builder $query) => $query->where('blog_post_id', '!=', $post->getKey()))
+                    ->exists();
+
+                if ($redirectConflict) {
+                    throw ValidationException::withMessages([
+                        'slug' => 'Этот URL уже сохранён как старый адрес другой статьи.',
+                    ]);
+                }
+            }
+
             $post->cover_image_path = LandingMedia::normalizePath($post->cover_image_path);
             $post->card_image_path = LandingMedia::normalizePath($post->card_image_path);
             $post->og_image_path = LandingMedia::normalizePath($post->og_image_path);
@@ -215,6 +244,28 @@ class BlogPost extends Model
                     ['slug' => Str::slug($name) ?: 'tag-'.substr(md5($name), 0, 10)],
                 );
             }
+        });
+
+        static::updated(function (self $post): void {
+            if (! $post->wasChanged('slug') || ! Schema::hasTable('blog_post_redirects')) {
+                return;
+            }
+
+            $oldSlug = Str::slug((string) $post->getOriginal('slug'));
+
+            BlogPostRedirect::query()
+                ->where('blog_post_id', $post->getKey())
+                ->where('slug', $post->slug)
+                ->delete();
+
+            if ($oldSlug === '' || $oldSlug === $post->slug) {
+                return;
+            }
+
+            BlogPostRedirect::query()->updateOrCreate(
+                ['slug' => $oldSlug],
+                ['blog_post_id' => $post->getKey()],
+            );
         });
     }
 }

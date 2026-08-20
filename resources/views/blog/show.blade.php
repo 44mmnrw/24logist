@@ -61,7 +61,10 @@
                     'blog-post-layout--without-cover' => ! $post->coverImageUrl(),
                 ])>
                     @if ($post->coverImageUrl())
-                        <figure class="blog-post-cover">
+                        <figure @class([
+                            'blog-post-cover',
+                            'blog-post-cover--branded' => $post->shouldShowArticleLogo(),
+                        ])>
                             <img src="{{ $post->coverImageUrl() }}" alt="{{ $post->cover_image_alt ?: $post->title }}">
                         </figure>
                     @endif

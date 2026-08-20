@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BlogPost;
+use App\Models\BlogPostRedirect;
 use App\Models\BlogTag;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -56,13 +57,23 @@ class BlogController extends Controller
         return view('blog.tag', compact('tag', 'posts'));
     }
 
-    public function show(string $slug): View
+    public function show(string $slug): View|RedirectResponse
     {
         $post = BlogPost::query()
             ->with('blogCategory')
             ->published()
             ->where('slug', $slug)
-            ->firstOrFail();
+            ->first();
+
+        if (! $post) {
+            $redirect = BlogPostRedirect::query()
+                ->where('slug', $slug)
+                ->whereHas('blogPost', fn ($query) => $query->published())
+                ->with('blogPost')
+                ->firstOrFail();
+
+            return redirect()->to($redirect->blogPost->getUrl(), 301);
+        }
 
         $relatedPosts = BlogPost::query()
             ->with('blogCategory')
