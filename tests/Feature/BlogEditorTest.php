@@ -6,6 +6,7 @@ use App\Filament\Clusters\Landing\Resources\BlogPosts\Pages\EditBlogPost;
 use App\Models\BlogPost;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -83,25 +84,18 @@ class BlogEditorTest extends TestCase
         $this->assertStringContainsString('font-size-24', $post->fresh()->renderBody());
     }
 
-    public function test_admin_can_save_and_render_a_heading_anchor(): void
+    public function test_article_body_image_is_rendered_from_public_storage(): void
     {
-        $this->actingAs(User::factory()->create());
+        Storage::fake('public');
+        Storage::disk('public')->put('blog/body/article-image.jpg', 'image');
 
-        $post = BlogPost::query()->create([
-            'title' => 'Статья с якорем',
-            'slug' => 'article-with-anchor',
-            'body' => '<h2>Условия доставки</h2>',
-            'is_published' => false,
+        $post = new BlogPost([
+            'body' => '<p><img data-id="blog/body/article-image.jpg" alt="Изображение статьи"></p>',
         ]);
 
-        Livewire::test(EditBlogPost::class, ['record' => $post->getRouteKey()])
-            ->fillForm(['body' => '<h2 id="delivery-terms">Условия доставки</h2>'])
-            ->call('save')
-            ->assertHasNoFormErrors();
+        $renderedBody = $post->renderBody();
 
-        $savedPost = $post->fresh();
-
-        $this->assertStringContainsString('id="delivery-terms"', $savedPost->body);
-        $this->assertStringContainsString('id="delivery-terms"', $savedPost->renderBody());
+        $this->assertStringContainsString('src="/storage/blog/body/article-image.jpg"', $renderedBody);
+        $this->assertStringContainsString('alt="Изображение статьи"', $renderedBody);
     }
 }

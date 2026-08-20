@@ -11,7 +11,6 @@ use App\Models\BlogTag;
 use App\Support\FilamentUploadPreview;
 use App\Support\OpenGraph;
 use App\Support\RichContent\FontSizeRichContentPlugin;
-use App\Support\RichContent\HeadingAnchorRichContentPlugin;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -124,10 +123,7 @@ class BlogPostResource extends Resource
                     RichEditor::make('body')
                         ->label('Текст статьи')
                         ->required()
-                        ->plugins([
-                            FontSizeRichContentPlugin::make(),
-                            HeadingAnchorRichContentPlugin::make(),
-                        ])
+                        ->plugins([FontSizeRichContentPlugin::make()])
                         ->helperText('Доступен полный набор форматирования. Заголовок статьи уже выводится как H1, поэтому внутри текста обычно используйте H2–H6.')
                         ->toolbarButtons([
                             ['undo', 'redo'],
@@ -140,7 +136,7 @@ class BlogPostResource extends Resource
                                     ->textualButtons(),
                             ],
                             ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript'],
-                            ['link', 'headingAnchor', 'textColor', 'highlight', 'code', 'clearFormatting'],
+                            ['link', 'textColor', 'highlight', 'code', 'clearFormatting'],
                             ['bulletList', 'orderedList', 'blockquote', 'codeBlock', 'details'],
                             [
                                 ToolbarButtonGroup::make('Таблица', [

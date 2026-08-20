@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Support\RichContent\HeadingAnchorRichContentPlugin;
 use Filament\Forms\Components\RichEditor\RichContentRenderer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -59,9 +58,7 @@ class CmsPage extends Model
 
     public function renderBody(): string
     {
-        return RichContentRenderer::make($this->body ?? '')
-            ->plugins([HeadingAnchorRichContentPlugin::make()])
-            ->toHtml();
+        return RichContentRenderer::make($this->body ?? '')->toHtml();
     }
 
     public function displayTitle(): string
