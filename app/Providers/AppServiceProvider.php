@@ -32,6 +32,8 @@ class AppServiceProvider extends ServiceProvider
         FilamentAsset::register([
             Js::make('rich-content-plugins/font-size', resource_path('js/filament/rich-content-plugins/font-size.js'))
                 ->loadedOnRequest(),
+            Js::make('rich-content-plugins/heading-anchor', resource_path('js/filament/rich-content-plugins/heading-anchor.js'))
+                ->loadedOnRequest(),
         ]);
 
         // Production: canonical URLs from APP_URL (24logist.ru без www).

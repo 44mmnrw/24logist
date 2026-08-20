@@ -7,6 +7,7 @@ use App\Filament\Clusters\Landing\Resources\CmsPages\Pages\EditCmsPage;
 use App\Filament\Clusters\Landing\Resources\CmsPages\Pages\ListCmsPages;
 use App\Models\CmsPage;
 use App\Support\FilamentUploadPreview;
+use App\Support\RichContent\HeadingAnchorRichContentPlugin;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -130,6 +131,7 @@ class CmsPageResource extends Resource
                     ->columnSpanFull(),
                 RichEditor::make('body')
                     ->label('Содержимое')
+                    ->plugins([HeadingAnchorRichContentPlugin::make()])
                     ->columnSpanFull(),
                 Repeater::make('extra.managers')
                     ->label('Карточки менеджеров (для contacts)')

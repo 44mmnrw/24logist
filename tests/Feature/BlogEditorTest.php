@@ -82,4 +82,26 @@ class BlogEditorTest extends TestCase
         $this->assertStringContainsString('data-font-size="24"', $savedBody);
         $this->assertStringContainsString('font-size-24', $post->fresh()->renderBody());
     }
+
+    public function test_admin_can_save_and_render_a_heading_anchor(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $post = BlogPost::query()->create([
+            'title' => 'Статья с якорем',
+            'slug' => 'article-with-anchor',
+            'body' => '<h2>Условия доставки</h2>',
+            'is_published' => false,
+        ]);
+
+        Livewire::test(EditBlogPost::class, ['record' => $post->getRouteKey()])
+            ->fillForm(['body' => '<h2 id="delivery-terms">Условия доставки</h2>'])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $savedPost = $post->fresh();
+
+        $this->assertStringContainsString('id="delivery-terms"', $savedPost->body);
+        $this->assertStringContainsString('id="delivery-terms"', $savedPost->renderBody());
+    }
 }
