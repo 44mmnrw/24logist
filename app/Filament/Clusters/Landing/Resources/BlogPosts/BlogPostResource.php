@@ -260,7 +260,7 @@ class BlogPostResource extends Resource
                 ])
                 ->columnSpanFull(),
             Section::make('Миниатюра карточки')
-                ->description('Отдельное изображение для списков статей. Редактор фиксирует формат 16:9, логотип накладывается сайтом поверх изображения.')
+                ->description('При сохранении статьи миниатюра 16:9 автоматически создаётся из обложки. При необходимости здесь можно загрузить отдельный вариант.')
                 ->schema([
                     FileUpload::make('card_image_path')
                         ->label('Изображение карточки 16:9')
@@ -283,7 +283,7 @@ class BlogPostResource extends Resource
                         ->openable()
                         ->downloadable()
                         ->getUploadedFileUsing(static::uploadPreview(...))
-                        ->helperText('Итоговый размер 1200×675 px. Для старых изображений с другим соотношением сторон используйте генератор с размытым фоном.')
+                        ->helperText('Необязательно. Если оставить поле пустым, сайт создаст изображение 1200×675 px с размытым фоном без растягивания оригинала.')
                         ->columnSpanFull(),
                     Toggle::make('show_card_logo')
                         ->label('Показывать логотип ЛогистРу поверх миниатюры')

@@ -2,10 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Clusters\Landing\Resources\BlogPosts\Pages\CreateBlogPost;
 use App\Filament\Clusters\Landing\Resources\BlogPosts\Pages\EditBlogPost;
 use App\Models\BlogPost;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -13,6 +15,38 @@ use Tests\TestCase;
 class BlogEditorTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_uploading_cover_automatically_creates_branded_card_image(): void
+    {
+        if (! function_exists('imagecreatetruecolor') || ! function_exists('imagewebp')) {
+            $this->markTestSkipped('GD with WebP support is required.');
+        }
+
+        Storage::fake('public');
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(CreateBlogPost::class)
+            ->fillForm([
+                'title' => 'Automatic card image',
+                'slug' => 'automatic-card-image',
+                'body' => 'Article body',
+                'cover_image_path' => UploadedFile::fake()->image('cover.jpg', 900, 600),
+                'show_card_logo' => true,
+                'is_published' => false,
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $post = BlogPost::query()->where('slug', 'automatic-card-image')->firstOrFail();
+
+        $this->assertStringStartsWith('blog/cards/generated/', (string) $post->card_image_path);
+        $this->assertTrue($post->show_card_logo);
+        Storage::disk('public')->assertExists($post->card_image_path);
+        $this->assertSame(
+            [1200, 675],
+            array_slice(getimagesize(Storage::disk('public')->path($post->card_image_path)), 0, 2),
+        );
+    }
 
     public function test_admin_can_change_article_heading_and_save(): void
     {

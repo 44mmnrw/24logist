@@ -3,6 +3,7 @@
 namespace App\Filament\Clusters\Landing\Resources\BlogPosts\Pages;
 
 use App\Filament\Clusters\Landing\Resources\BlogPosts\BlogPostResource;
+use App\Services\BlogCardImageGenerator;
 use App\Services\SitemapService;
 use App\Support\FilamentMediaUpload;
 use Filament\Resources\Pages\CreateRecord;
@@ -24,6 +25,13 @@ class CreateBlogPost extends CreateRecord
 
     protected function afterCreate(): void
     {
+        if (filled($this->record->cover_image_path) && blank($this->record->card_image_path)) {
+            app(BlogCardImageGenerator::class)->generate(
+                $this->record,
+                (bool) $this->record->show_card_logo,
+            );
+        }
+
         app(SitemapService::class)->clearCache();
     }
 }
