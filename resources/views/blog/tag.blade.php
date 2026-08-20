@@ -41,9 +41,15 @@
                         <div class="blog-grid">
                             @foreach ($posts as $post)
                                 <article class="blog-card">
-                                    <a class="blog-card__media" href="{{ $post->getUrl() }}" aria-label="{{ $post->title }}">
-                                        @if ($post->coverImageUrl())
-                                            <img src="{{ $post->coverImageUrl() }}" alt="{{ $post->cover_image_alt ?: $post->title }}" loading="lazy">
+                                    <a @class([
+                                        'blog-card__media',
+                                        'blog-card__media--branded' => $post->shouldShowCardLogo(),
+                                    ]) href="{{ $post->getUrl() }}" aria-label="{{ $post->title }}">
+                                        @if ($post->cardImageUrl())
+                                            <img @class([
+                                                'blog-card__image',
+                                                'blog-card__image--prepared' => $post->hasPreparedCardImage(),
+                                            ]) src="{{ $post->cardImageUrl() }}" alt="{{ $post->cover_image_alt ?: $post->title }}" loading="lazy">
                                         @else
                                             <div class="blog-card__image-placeholder">24L</div>
                                         @endif

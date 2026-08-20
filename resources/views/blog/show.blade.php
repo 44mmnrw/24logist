@@ -105,9 +105,15 @@
                         <div class="blog-grid blog-grid--related">
                             @foreach ($relatedPosts as $relatedPost)
                                 <article class="blog-card">
-                                    <a class="blog-card__media" href="{{ $relatedPost->getUrl() }}" aria-label="{{ $relatedPost->title }}">
-                                        @if ($relatedPost->coverImageUrl())
-                                            <img src="{{ $relatedPost->coverImageUrl() }}" alt="{{ $relatedPost->cover_image_alt ?: $relatedPost->title }}" loading="lazy">
+                                    <a @class([
+                                        'blog-card__media',
+                                        'blog-card__media--branded' => $relatedPost->shouldShowCardLogo(),
+                                    ]) href="{{ $relatedPost->getUrl() }}" aria-label="{{ $relatedPost->title }}">
+                                        @if ($relatedPost->cardImageUrl())
+                                            <img @class([
+                                                'blog-card__image',
+                                                'blog-card__image--prepared' => $relatedPost->hasPreparedCardImage(),
+                                            ]) src="{{ $relatedPost->cardImageUrl() }}" alt="{{ $relatedPost->cover_image_alt ?: $relatedPost->title }}" loading="lazy">
                                         @else
                                             <div class="blog-card__image-placeholder">24L</div>
                                         @endif

@@ -1,6 +1,7 @@
 <?php
 
 use App\Console\Commands\CheckSeoPositions;
+use App\Console\Commands\GenerateBlogCardImages;
 use App\Console\Commands\GenerateBlogTagImages;
 use App\Console\Commands\ImportWordstatCsv;
 use App\Http\Middleware\EnforceCanonicalUrl;
@@ -17,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withCommands([
         ImportWordstatCsv::class,
         CheckSeoPositions::class,
+        GenerateBlogCardImages::class,
         GenerateBlogTagImages::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {

@@ -235,7 +235,7 @@ class BlogPostResource extends Resource
     {
         return [
             Section::make('Обложка статьи')
-                ->description('Используется на странице статьи и в карточках блога.')
+                ->description('Используется на странице статьи и как резервное изображение, если отдельная миниатюра не задана.')
                 ->schema([
                     FileUpload::make('cover_image_path')
                         ->label('Изображение обложки')
@@ -256,6 +256,40 @@ class BlogPostResource extends Resource
                     TextInput::make('cover_image_alt')
                         ->label('Alt-текст обложки')
                         ->maxLength(255)
+                        ->columnSpanFull(),
+                ])
+                ->columnSpanFull(),
+            Section::make('Миниатюра карточки')
+                ->description('Отдельное изображение для списков статей. Редактор фиксирует формат 16:9, логотип накладывается сайтом поверх изображения.')
+                ->schema([
+                    FileUpload::make('card_image_path')
+                        ->label('Изображение карточки 16:9')
+                        ->disk('public')
+                        ->directory('blog/cards')
+                        ->visibility('public')
+                        ->image()
+                        ->imageEditor()
+                        ->imageEditorAspectRatioOptions(['16:9'])
+                        ->imageAspectRatio('16:9')
+                        ->automaticallyCropImagesToAspectRatio()
+                        ->automaticallyResizeImagesMode('cover')
+                        ->automaticallyResizeImagesToWidth('1200')
+                        ->automaticallyResizeImagesToHeight('675')
+                        ->imagePreviewHeight('220')
+                        ->maxFiles(1)
+                        ->maxSize(8192)
+                        ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
+                        ->fetchFileInformation(false)
+                        ->openable()
+                        ->downloadable()
+                        ->getUploadedFileUsing(static::uploadPreview(...))
+                        ->helperText('Итоговый размер 1200×675 px. Для старых изображений с другим соотношением сторон используйте генератор с размытым фоном.')
+                        ->columnSpanFull(),
+                    Toggle::make('show_card_logo')
+                        ->label('Показывать логотип ЛогистРу поверх миниатюры')
+                        ->helperText('Отключите, если логотип уже встроен в само изображение.')
+                        ->default(true)
+                        ->inline(false)
                         ->columnSpanFull(),
                 ])
                 ->columnSpanFull(),

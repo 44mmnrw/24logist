@@ -92,6 +92,26 @@ class BlogTest extends TestCase
             ->assertSeeInOrder(['Новая статья', 'Средняя статья', 'Старая статья']);
     }
 
+    public function test_blog_card_uses_prepared_image_and_optional_logo_overlay(): void
+    {
+        BlogPost::query()->create([
+            'title' => 'Card image test',
+            'slug' => 'prepared-card',
+            'body' => 'Article body',
+            'cover_image_path' => 'blog/covers/original.jpg',
+            'card_image_path' => 'blog/cards/prepared.webp',
+            'show_card_logo' => true,
+            'is_published' => true,
+            'published_at' => now()->subDay(),
+        ]);
+
+        $this->get('/blog')
+            ->assertOk()
+            ->assertSee('/storage/blog/cards/prepared.webp', false)
+            ->assertSee('blog-card__media--branded', false)
+            ->assertDontSee('/storage/blog/covers/original.jpg', false);
+    }
+
     public function test_blog_index_shows_fixed_category_name(): void
     {
         $category = BlogCategory::query()->create([

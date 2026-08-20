@@ -21,6 +21,8 @@ class BlogPost extends Model
         'excerpt',
         'body',
         'cover_image_path',
+        'card_image_path',
+        'show_card_logo',
         'cover_image_alt',
         'author_name',
         'author_type',
@@ -58,6 +60,7 @@ class BlogPost extends Model
             'tags' => 'array',
             'is_published' => 'boolean',
             'is_featured' => 'boolean',
+            'show_card_logo' => 'boolean',
             'published_at' => 'datetime',
         ];
     }
@@ -160,6 +163,21 @@ class BlogPost extends Model
         return LandingMedia::url($this->cover_image_path);
     }
 
+    public function cardImageUrl(): ?string
+    {
+        return LandingMedia::url($this->card_image_path ?: $this->cover_image_path);
+    }
+
+    public function hasPreparedCardImage(): bool
+    {
+        return filled($this->card_image_path);
+    }
+
+    public function shouldShowCardLogo(): bool
+    {
+        return $this->hasPreparedCardImage() && $this->show_card_logo;
+    }
+
     public function publishedDate(): ?Carbon
     {
         return $this->published_at ?: $this->created_at;
@@ -170,6 +188,7 @@ class BlogPost extends Model
         static::saving(function (self $post): void {
             $post->slug = Str::slug($post->slug);
             $post->cover_image_path = LandingMedia::normalizePath($post->cover_image_path);
+            $post->card_image_path = LandingMedia::normalizePath($post->card_image_path);
             $post->og_image_path = LandingMedia::normalizePath($post->og_image_path);
             $post->twitter_image_path = LandingMedia::normalizePath($post->twitter_image_path);
             $post->schema_image_path = LandingMedia::normalizePath($post->schema_image_path);
