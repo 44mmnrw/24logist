@@ -101,6 +101,7 @@ class BlogTest extends TestCase
             'cover_image_path' => 'blog/covers/original.jpg',
             'card_image_path' => 'blog/cards/prepared.webp',
             'show_card_logo' => true,
+            'card_logo_position' => 'top-right',
             'is_published' => true,
             'published_at' => now()->subDay(),
         ]);
@@ -109,6 +110,7 @@ class BlogTest extends TestCase
             ->assertOk()
             ->assertSee('/storage/blog/cards/prepared.webp', false)
             ->assertSee('blog-card__media--branded', false)
+            ->assertSee('blog-logo--top-right', false)
             ->assertDontSee('/storage/blog/covers/original.jpg', false);
     }
 
@@ -165,13 +167,15 @@ class BlogTest extends TestCase
             'body' => 'Article body',
             'cover_image_path' => 'blog/covers/cover.jpg',
             'show_card_logo' => true,
+            'card_logo_position' => 'bottom-right',
             'is_published' => true,
             'published_at' => now()->subDay(),
         ]);
 
         $this->get($post->getUrl())
             ->assertOk()
-            ->assertSee('blog-post-cover--branded', false);
+            ->assertSee('blog-post-cover--branded', false)
+            ->assertSee('blog-logo--bottom-right', false);
     }
 
     public function test_blog_post_page_outputs_extended_seo_metadata(): void

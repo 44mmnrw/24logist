@@ -44,6 +44,7 @@
                                     <a @class([
                                         'blog-card__media',
                                         'blog-card__media--branded' => $post->shouldShowCardLogo(),
+                                        $post->logoPositionClass() => $post->shouldShowCardLogo(),
                                     ]) href="{{ $post->getUrl() }}" aria-label="{{ $post->title }}">
                                         @if ($post->cardImageUrl())
                                             <img @class([

@@ -291,6 +291,14 @@ class BlogPostResource extends Resource
                         ->default(true)
                         ->inline(false)
                         ->columnSpanFull(),
+                    Select::make('card_logo_position')
+                        ->label('Расположение логотипа')
+                        ->options(BlogPost::LOGO_POSITIONS)
+                        ->default('top-left')
+                        ->required()
+                        ->native(false)
+                        ->selectablePlaceholder(false)
+                        ->columnSpanFull(),
                 ])
                 ->columnSpanFull(),
         ];

@@ -50,6 +50,7 @@
                             <a @class([
                                 'blog-featured__media',
                                 'blog-card__media--branded' => $featuredPost->shouldShowCardLogo(),
+                                $featuredPost->logoPositionClass() => $featuredPost->shouldShowCardLogo(),
                             ]) href="{{ $featuredPost->getUrl() }}" aria-label="{{ $featuredPost->title }}">
                                 @if ($featuredPost->cardImageUrl())
                                     <img class="blog-featured__image" src="{{ $featuredPost->cardImageUrl() }}" alt="{{ $featuredPost->cover_image_alt ?: $featuredPost->title }}" loading="eager">
@@ -88,6 +89,7 @@
                                     <a @class([
                                         'blog-card__media',
                                         'blog-card__media--branded' => $post->shouldShowCardLogo(),
+                                        $post->logoPositionClass() => $post->shouldShowCardLogo(),
                                     ]) href="{{ $post->getUrl() }}" aria-label="{{ $post->title }}">
                                         @if ($post->cardImageUrl())
                                             <img @class([

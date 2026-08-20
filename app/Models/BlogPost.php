@@ -16,6 +16,13 @@ use Illuminate\Validation\ValidationException;
 
 class BlogPost extends Model
 {
+    public const LOGO_POSITIONS = [
+        'top-left' => 'Сверху слева',
+        'top-right' => 'Сверху справа',
+        'bottom-left' => 'Снизу слева',
+        'bottom-right' => 'Снизу справа',
+    ];
+
     protected $fillable = [
         'slug',
         'title',
@@ -25,6 +32,7 @@ class BlogPost extends Model
         'cover_image_path',
         'card_image_path',
         'show_card_logo',
+        'card_logo_position',
         'cover_image_alt',
         'author_name',
         'author_type',
@@ -193,6 +201,20 @@ class BlogPost extends Model
         return filled($this->cover_image_path) && $this->show_card_logo;
     }
 
+    public function logoPosition(): string
+    {
+        $position = (string) $this->card_logo_position;
+
+        return array_key_exists($position, self::LOGO_POSITIONS)
+            ? $position
+            : 'top-left';
+    }
+
+    public function logoPositionClass(): string
+    {
+        return 'blog-logo--'.$this->logoPosition();
+    }
+
     public function publishedDate(): ?Carbon
     {
         return $this->published_at ?: $this->created_at;
@@ -202,6 +224,7 @@ class BlogPost extends Model
     {
         static::saving(function (self $post): void {
             $post->slug = Str::slug($post->slug);
+            $post->card_logo_position = $post->logoPosition();
 
             if ($post->isDirty('slug') && Schema::hasTable('blog_post_redirects')) {
                 $redirectConflict = BlogPostRedirect::query()

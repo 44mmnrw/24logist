@@ -64,6 +64,7 @@
                         <figure @class([
                             'blog-post-cover',
                             'blog-post-cover--branded' => $post->shouldShowArticleLogo(),
+                            $post->logoPositionClass() => $post->shouldShowArticleLogo(),
                         ])>
                             <img src="{{ $post->coverImageUrl() }}" alt="{{ $post->cover_image_alt ?: $post->title }}">
                         </figure>
@@ -111,6 +112,7 @@
                                     <a @class([
                                         'blog-card__media',
                                         'blog-card__media--branded' => $relatedPost->shouldShowCardLogo(),
+                                        $relatedPost->logoPositionClass() => $relatedPost->shouldShowCardLogo(),
                                     ]) href="{{ $relatedPost->getUrl() }}" aria-label="{{ $relatedPost->title }}">
                                         @if ($relatedPost->cardImageUrl())
                                             <img @class([
