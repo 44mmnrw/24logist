@@ -58,6 +58,40 @@ class BlogTest extends TestCase
         $this->assertStringEndsWith('…', (string) $post->previewExcerpt());
     }
 
+    public function test_blog_index_orders_posts_by_publication_date_not_manual_sort_order(): void
+    {
+        BlogPost::query()->create([
+            'title' => 'Старая статья',
+            'slug' => 'old-post',
+            'body' => 'Текст',
+            'is_published' => true,
+            'published_at' => now()->subDays(3),
+            'sort_order' => 0,
+        ]);
+
+        BlogPost::query()->create([
+            'title' => 'Новая статья',
+            'slug' => 'new-post',
+            'body' => 'Текст',
+            'is_published' => true,
+            'published_at' => now()->subDay(),
+            'sort_order' => 999,
+        ]);
+
+        BlogPost::query()->create([
+            'title' => 'Средняя статья',
+            'slug' => 'middle-post',
+            'body' => 'Текст',
+            'is_published' => true,
+            'published_at' => now()->subDays(2),
+            'sort_order' => -999,
+        ]);
+
+        $this->get('/blog')
+            ->assertOk()
+            ->assertSeeInOrder(['Новая статья', 'Средняя статья', 'Старая статья']);
+    }
+
     public function test_blog_index_shows_fixed_category_name(): void
     {
         $category = BlogCategory::query()->create([

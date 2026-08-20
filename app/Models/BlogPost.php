@@ -84,6 +84,13 @@ class BlogPost extends Model
                 ->orWhere('published_at', '<=', now()));
     }
 
+    public function scopeNewestFirst(Builder $query): Builder
+    {
+        return $query
+            ->orderByDesc('published_at')
+            ->orderByDesc('id');
+    }
+
     public function getUrl(): string
     {
         return route('blog.show', $this->slug);

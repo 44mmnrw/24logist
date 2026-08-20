@@ -16,16 +16,14 @@ class BlogController extends Controller
             ->with('blogCategory')
             ->published()
             ->where('is_featured', true)
-            ->orderBy('sort_order')
-            ->latest('published_at')
+            ->newestFirst()
             ->first();
 
         $posts = BlogPost::query()
             ->with('blogCategory')
             ->published()
             ->when($featuredPost, fn ($query) => $query->whereKeyNot($featuredPost->getKey()))
-            ->orderBy('sort_order')
-            ->latest('published_at')
+            ->newestFirst()
             ->paginate(9);
 
         return view('blog.index', compact('featuredPost', 'posts'));
@@ -52,8 +50,7 @@ class BlogController extends Controller
             ->with('blogCategory')
             ->published()
             ->whereJsonContains('tags', $tag->name)
-            ->orderBy('sort_order')
-            ->latest('published_at')
+            ->newestFirst()
             ->paginate(9);
 
         return view('blog.tag', compact('tag', 'posts'));
@@ -76,8 +73,7 @@ class BlogController extends Controller
                 fn ($query) => $query->where('blog_category_id', $post->blog_category_id),
                 fn ($query) => $query->when($post->category, fn ($query) => $query->where('category', $post->category)),
             )
-            ->orderBy('sort_order')
-            ->latest('published_at')
+            ->newestFirst()
             ->limit(3)
             ->get();
 
@@ -87,8 +83,7 @@ class BlogController extends Controller
                 ->published()
                 ->whereKeyNot($post->getKey())
                 ->whereNotIn('id', $relatedPosts->pluck('id'))
-                ->orderBy('sort_order')
-                ->latest('published_at')
+                ->newestFirst()
                 ->limit(3 - $relatedPosts->count())
                 ->get();
 
