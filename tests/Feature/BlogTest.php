@@ -137,6 +137,135 @@ class BlogTest extends TestCase
         $response->assertSee('Обновления');
     }
 
+    public function test_blog_index_shows_clear_links_only_for_active_categories_with_published_posts(): void
+    {
+        $visibleCategory = BlogCategory::query()->create([
+            'name' => 'Useful guides',
+            'slug' => 'useful-guides',
+            'is_active' => true,
+            'sort_order' => 10,
+        ]);
+        $draftOnlyCategory = BlogCategory::query()->create([
+            'name' => 'Draft only',
+            'slug' => 'draft-only',
+            'is_active' => true,
+        ]);
+        $inactiveCategory = BlogCategory::query()->create([
+            'name' => 'Inactive category',
+            'slug' => 'inactive-category',
+            'is_active' => false,
+        ]);
+
+        foreach (['first-guide', 'second-guide'] as $slug) {
+            BlogPost::query()->create([
+                'title' => $slug,
+                'slug' => $slug,
+                'body' => 'Article body',
+                'blog_category_id' => $visibleCategory->id,
+                'is_published' => true,
+                'published_at' => now()->subDay(),
+            ]);
+        }
+
+        BlogPost::query()->create([
+            'title' => 'Draft article',
+            'slug' => 'draft-category-article',
+            'body' => 'Article body',
+            'blog_category_id' => $draftOnlyCategory->id,
+            'is_published' => false,
+        ]);
+        BlogPost::query()->create([
+            'title' => 'Inactive category article',
+            'slug' => 'inactive-category-article',
+            'body' => 'Article body',
+            'blog_category_id' => $inactiveCategory->id,
+            'is_published' => true,
+            'published_at' => now()->subDay(),
+        ]);
+
+        $this->get('/blog')
+            ->assertOk()
+            ->assertSee('Навигация по блогу')
+            ->assertSee('href="'.e($visibleCategory->getUrl()).'"', false)
+            ->assertSee('Useful guides')
+            ->assertSee('2 материала')
+            ->assertDontSee('Draft only')
+            ->assertDontSee('href="'.e($inactiveCategory->getUrl()).'"', false);
+    }
+
+    public function test_blog_category_is_clickable_and_category_page_filters_published_posts(): void
+    {
+        $category = BlogCategory::query()->create([
+            'name' => 'Automation',
+            'slug' => 'automation',
+            'is_active' => true,
+        ]);
+        $categoryUrl = $category->getUrl();
+
+        $publishedPost = BlogPost::query()->create([
+            'title' => 'Published category post',
+            'slug' => 'published-category-post',
+            'body' => 'Article body',
+            'blog_category_id' => $category->id,
+            'is_published' => true,
+            'published_at' => now()->subDay(),
+        ]);
+
+        BlogPost::query()->create([
+            'title' => 'Hidden category post',
+            'slug' => 'hidden-category-post',
+            'body' => 'Article body',
+            'blog_category_id' => $category->id,
+            'is_published' => false,
+        ]);
+
+        $this->get($publishedPost->getUrl())
+            ->assertOk()
+            ->assertSee('href="'.e($categoryUrl).'"', false);
+
+        $this->get($categoryUrl)
+            ->assertOk()
+            ->assertSee('Published category post')
+            ->assertDontSee('Hidden category post');
+    }
+
+    public function test_blog_category_renders_full_seo_settings_and_inactive_category_is_hidden(): void
+    {
+        $category = BlogCategory::query()->create([
+            'name' => 'Digital logistics',
+            'slug' => 'digital-logistics',
+            'description' => 'Category description',
+            'seo_h1' => 'Digital logistics articles',
+            'meta_title' => 'Category SEO title',
+            'meta_description' => 'Category SEO description',
+            'meta_keywords' => 'logistics, automation',
+            'meta_robots' => 'index, follow',
+            'og_title' => 'Category OG title',
+            'og_description' => 'Category OG description',
+            'twitter_title' => 'Category Twitter title',
+            'twitter_description' => 'Category Twitter description',
+            'schema_type' => 'CollectionPage',
+            'schema_headline' => 'Category schema headline',
+            'schema_description' => 'Category schema description',
+            'is_active' => true,
+        ]);
+
+        $this->get($category->getUrl())
+            ->assertOk()
+            ->assertSee('<h1>Digital logistics articles</h1>', false)
+            ->assertSee('<title>Category SEO title', false)
+            ->assertSee('name="description" content="Category OG description"', false)
+            ->assertSee('name="keywords" content="logistics, automation"', false)
+            ->assertSee('property="og:title" content="Category OG title"', false)
+            ->assertSee('name="twitter:title" content="Category Twitter title"', false)
+            ->assertSee('"@type":"CollectionPage"', false)
+            ->assertSee('Category schema headline');
+
+        $category->update(['is_active' => false]);
+
+        $this->get($category->getUrl())->assertNotFound();
+    }
+
     public function test_blog_post_page_has_article_seo(): void
     {
         $post = BlogPost::query()->create([

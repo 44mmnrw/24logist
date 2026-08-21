@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Models\BlogTag;
 use App\Models\CmsPage;
@@ -120,6 +121,40 @@ final class StructuredData
             self::website(),
             $page,
             self::breadcrumbListForBlogTag($tag, $meta['url']),
+        ]));
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public static function forBlogCategory(BlogCategory $category): array
+    {
+        $meta = OpenGraph::forBlogCategory($category);
+        $type = in_array($category->schema_type, ['CollectionPage', 'WebPage'], true)
+            ? (string) $category->schema_type
+            : 'CollectionPage';
+
+        $page = self::webPage(
+            name: self::pageTitle($category->schema_headline ?: $meta['html_title']),
+            description: $category->schema_description ?: $meta['description'],
+            url: $meta['url'],
+            type: $type,
+        );
+        $schemaImage = OpenGraph::absolutePublicUrl($category->schema_image_path) ?? $meta['image'];
+
+        if ($page !== null && filled($schemaImage)) {
+            $page['primaryImageOfPage'] = [
+                '@type' => 'ImageObject',
+                'url' => $schemaImage,
+            ];
+            $page['image'] = $schemaImage;
+        }
+
+        return array_values(array_filter([
+            self::organization(),
+            self::website(),
+            $page,
+            self::breadcrumbListForBlogCategory($category, $meta['url']),
         ]));
     }
 
@@ -459,6 +494,37 @@ final class StructuredData
                     '@type' => 'ListItem',
                     'position' => 3,
                     'name' => $tag->name,
+                    'item' => $url,
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private static function breadcrumbListForBlogCategory(BlogCategory $category, string $url): ?array
+    {
+        return [
+            '@context' => self::CONTEXT,
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => [
+                [
+                    '@type' => 'ListItem',
+                    'position' => 1,
+                    'name' => 'Главная',
+                    'item' => self::siteUrl(),
+                ],
+                [
+                    '@type' => 'ListItem',
+                    'position' => 2,
+                    'name' => 'Блог',
+                    'item' => route('blog.index'),
+                ],
+                [
+                    '@type' => 'ListItem',
+                    'position' => 3,
+                    'name' => $category->name,
                     'item' => $url,
                 ],
             ],

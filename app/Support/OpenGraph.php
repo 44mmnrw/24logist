@@ -2,11 +2,13 @@
 
 namespace App\Support;
 
+use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Models\BlogTag;
 use App\Models\CmsPage;
 use App\Services\LandingPageService;
 use App\Services\SiteSettingsService;
+use Illuminate\Support\Facades\Storage;
 
 final class OpenGraph
 {
@@ -168,6 +170,38 @@ final class OpenGraph
         $meta['twitter_title'] = $tag->twitter_title ?: $meta['title'];
         $meta['twitter_description'] = $tag->twitter_description ?: $meta['description'];
         $meta['twitter_image'] = self::absoluteImageUrl($tag->twitter_image_path ?: $imagePath) ?? $meta['image'];
+
+        return $meta;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function forBlogCategory(BlogCategory $category): array
+    {
+        $settings = app(SiteSettingsService::class)->get();
+        $pageTitle = self::joinTitle($category->meta_title ?: 'Статьи рубрики «'.$category->name.'»');
+        $title = filled($category->og_title) ? (string) $category->og_title : $pageTitle;
+        $description = filled($category->og_description)
+            ? (string) $category->og_description
+            : ($category->meta_description ?: $category->description ?: 'Материалы блога 24Logist в рубрике «'.$category->name.'».');
+        $imagePath = $category->og_image_path ?: $settings->og_image_path;
+
+        $meta = self::build(
+            title: $title,
+            description: $description,
+            url: filled($category->canonical_url) ? (string) $category->canonical_url : $category->getUrl(),
+            imagePath: $imagePath ?: self::defaultHeroImagePath(),
+            type: $category->og_type ?: 'website',
+            robots: filled($category->meta_robots) ? (string) $category->meta_robots : self::ROBOTS_INDEX,
+            keywords: $category->meta_keywords ?: $category->name,
+        );
+
+        $meta['twitter_card'] = $category->twitter_card ?: 'summary_large_image';
+        $meta['html_title'] = $pageTitle;
+        $meta['twitter_title'] = $category->twitter_title ?: $meta['title'];
+        $meta['twitter_description'] = $category->twitter_description ?: $meta['description'];
+        $meta['twitter_image'] = self::absoluteImageUrl($category->twitter_image_path ?: $imagePath) ?? $meta['image'];
 
         return $meta;
     }
@@ -406,8 +440,8 @@ final class OpenGraph
             return is_file($file) ? $file : null;
         }
 
-        if (\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
-            return \Illuminate\Support\Facades\Storage::disk('public')->path($path);
+        if (Storage::disk('public')->exists($path)) {
+            return Storage::disk('public')->path($path);
         }
 
         return null;

@@ -4,6 +4,7 @@
     'blogPost' => null,
     'blogIndex' => false,
     'blogTag' => null,
+    'blogCategory' => null,
     'notFound' => false,
 ])
 
@@ -11,6 +12,7 @@
     $meta = match (true) {
         $blogPost !== null => \App\Support\OpenGraph::forBlogPost($blogPost),
         $blogTag !== null => \App\Support\OpenGraph::forBlogTag($blogTag),
+        $blogCategory !== null => \App\Support\OpenGraph::forBlogCategory($blogCategory),
         $blogIndex => \App\Support\OpenGraph::forBlogIndex(),
         $page !== null => \App\Support\OpenGraph::forPage($page),
         $notFound => \App\Support\OpenGraph::forNotFound(),

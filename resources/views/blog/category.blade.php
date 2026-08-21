@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <x-csrf-meta />
     @php
-        $og = \App\Support\OpenGraph::forBlogTag($tag);
+        $og = \App\Support\OpenGraph::forBlogCategory($category);
     @endphp
     <title>{{ $og['html_title'] }}</title>
-    <x-seo.open-graph :blog-tag="$tag" />
-    <x-seo.structured-data :blog-tag="$tag" />
+    <x-seo.open-graph :blog-category="$category" />
+    <x-seo.structured-data :blog-category="$category" />
     <x-site.favicon />
     <x-fonts.preload />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -25,13 +25,11 @@
             <section class="blog-hero blog-tag-hero">
                 <div class="landing-shell blog-hero__shell">
                     <a class="blog-tag-hero__back" href="{{ route('blog.index') }}">← Все статьи</a>
-                    <h1>{{ $tag->displayH1() }}</h1>
-                    @if (filled($tag->description))
-                        <p>{{ $tag->description }}</p>
+                    <h1>{{ $category->displayH1() }}</h1>
+                    @if (filled($category->description))
+                        <p>{{ $category->description }}</p>
                     @endif
-                    <p class="blog-tag-count">
-                        Найдено материалов: {{ $posts->total() }}
-                    </p>
+                    <p class="blog-tag-count">Найдено материалов: {{ $posts->total() }}</p>
                 </div>
             </section>
 
@@ -57,13 +55,7 @@
                                     </a>
                                     <div class="blog-card__body">
                                         <div class="blog-card__meta">
-                                            @if ($post->displayCategory())
-                                                @if ($post->categoryUrl())
-                                                    <a class="blog-card__category" href="{{ $post->categoryUrl() }}">{{ $post->displayCategory() }}</a>
-                                                @else
-                                                    <span>{{ $post->displayCategory() }}</span>
-                                                @endif
-                                            @endif
+                                            <a class="blog-card__category" href="{{ $category->getUrl() }}">{{ $category->name }}</a>
                                             @if ($post->publishedDate())
                                                 <time datetime="{{ $post->publishedDate()->toDateString() }}">{{ $post->publishedDate()->format('d.m.Y') }}</time>
                                             @endif
@@ -81,14 +73,12 @@
                         </div>
 
                         @if ($posts->hasPages())
-                            <div class="blog-pagination">
-                                {{ $posts->links() }}
-                            </div>
+                            <div class="blog-pagination">{{ $posts->links() }}</div>
                         @endif
                     @else
                         <div class="blog-empty">
-                            <h2>Статей с таким тегом пока нет</h2>
-                            <p>Посмотрите другие материалы в блоге или выберите другой тег.</p>
+                            <h2>В этой рубрике пока нет статей</h2>
+                            <p>Посмотрите другие материалы блога или вернитесь позже.</p>
                         </div>
                     @endif
                 </div>

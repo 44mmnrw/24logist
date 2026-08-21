@@ -62,6 +62,10 @@ Route::get('/tag/{blogTag:slug}', [BlogController::class, 'tag'])
     ->where('blogTag', '[a-z0-9\-]+')
     ->name('blog.tag');
 
+Route::get('/blog/category/{blogCategory:slug}', [BlogController::class, 'category'])
+    ->where('blogCategory', '[a-z0-9\-]+')
+    ->name('blog.category');
+
 Route::get('/blog/{slug}', [BlogController::class, 'show'])
     ->name('blog.show')
     ->where('slug', '[a-z0-9\-]+');

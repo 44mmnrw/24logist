@@ -29,12 +29,19 @@
                             <ol>
                                 <li><a href="{{ url('/') }}">Главная</a></li>
                                 <li><a href="{{ route('blog.index') }}">Блог</a></li>
+                                @if ($post->categoryUrl())
+                                    <li><a href="{{ $post->categoryUrl() }}">{{ $post->displayCategory() }}</a></li>
+                                @endif
                                 <li aria-current="page"><span>{{ $post->title }}</span></li>
                             </ol>
                         </nav>
                         <div class="blog-card__meta">
                             @if ($post->displayCategory())
-                                <span>{{ $post->displayCategory() }}</span>
+                                @if ($post->categoryUrl())
+                                    <a class="blog-card__category" href="{{ $post->categoryUrl() }}">{{ $post->displayCategory() }}</a>
+                                @else
+                                    <span>{{ $post->displayCategory() }}</span>
+                                @endif
                             @endif
                             @if ($post->publishedDate())
                                 <time datetime="{{ $post->publishedDate()->toDateString() }}">{{ $post->publishedDate()->format('d.m.Y') }}</time>
@@ -73,7 +80,13 @@
                     <aside class="blog-post-aside">
                         <div class="blog-post-aside__box">
                             <span>Материал</span>
-                            <strong>{{ $post->displayCategory() ?: 'Блог' }}</strong>
+                            <strong>
+                                @if ($post->categoryUrl())
+                                    <a href="{{ $post->categoryUrl() }}">{{ $post->displayCategory() }}</a>
+                                @else
+                                    {{ $post->displayCategory() ?: 'Блог' }}
+                                @endif
+                            </strong>
                             @if ($post->publishedDate())
                                 <p>Опубликовано {{ $post->publishedDate()->format('d.m.Y') }}</p>
                             @endif
@@ -126,7 +139,11 @@
                                     <div class="blog-card__body">
                                         <div class="blog-card__meta">
                                             @if ($relatedPost->displayCategory())
-                                                <span>{{ $relatedPost->displayCategory() }}</span>
+                                                @if ($relatedPost->categoryUrl())
+                                                    <a class="blog-card__category" href="{{ $relatedPost->categoryUrl() }}">{{ $relatedPost->displayCategory() }}</a>
+                                                @else
+                                                    <span>{{ $relatedPost->displayCategory() }}</span>
+                                                @endif
                                             @endif
                                             @if ($relatedPost->publishedDate())
                                                 <time datetime="{{ $relatedPost->publishedDate()->toDateString() }}">{{ $relatedPost->publishedDate()->format('d.m.Y') }}</time>

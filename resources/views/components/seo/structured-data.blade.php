@@ -4,6 +4,7 @@
     'blogPost' => null,
     'blogIndex' => false,
     'blogTag' => null,
+    'blogCategory' => null,
     'notFound' => false,
 ])
 
@@ -12,6 +13,7 @@
         $notFound => [],
         $blogPost !== null => \App\Support\StructuredData::forBlogPost($blogPost),
         $blogTag !== null => \App\Support\StructuredData::forBlogTag($blogTag),
+        $blogCategory !== null => \App\Support\StructuredData::forBlogCategory($blogCategory),
         $blogIndex => \App\Support\StructuredData::forBlogIndex(),
         $page !== null => \App\Support\StructuredData::forPage($page),
         default => \App\Support\StructuredData::forLanding($landing),

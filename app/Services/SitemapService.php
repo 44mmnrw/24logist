@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Models\BlogTag;
 use App\Models\CmsPage;
@@ -156,6 +157,30 @@ final class SitemapService
                 'changefreq' => 'monthly',
                 'priority' => $post->is_featured ? '0.8' : '0.6',
             ];
+        }
+
+        $publishedCategoryIds = $posts
+            ->pluck('blog_category_id')
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($publishedCategoryIds->isNotEmpty()) {
+            $categories = BlogCategory::query()
+                ->where('is_active', true)
+                ->whereKey($publishedCategoryIds)
+                ->orderBy('sort_order')
+                ->orderBy('name')
+                ->get();
+
+            foreach ($categories as $category) {
+                $urls[] = [
+                    'loc' => $category->getUrl(),
+                    'lastmod' => $this->formatLastmod($category->updated_at),
+                    'changefreq' => 'weekly',
+                    'priority' => '0.6',
+                ];
+            }
         }
 
         $publishedTagNames = $posts

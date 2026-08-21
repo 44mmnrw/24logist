@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Models\BlogPostRedirect;
 use App\Models\BlogTag;
@@ -27,7 +28,17 @@ class BlogController extends Controller
             ->newestFirst()
             ->paginate(9);
 
-        return view('blog.index', compact('featuredPost', 'posts'));
+        $categories = BlogCategory::query()
+            ->where('is_active', true)
+            ->whereHas('posts', fn ($query) => $query->published())
+            ->withCount([
+                'posts as published_posts_count' => fn ($query) => $query->published(),
+            ])
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+
+        return view('blog.index', compact('featuredPost', 'posts', 'categories'));
     }
 
     public function legacyTag(Request $request): RedirectResponse
@@ -55,6 +66,21 @@ class BlogController extends Controller
             ->paginate(9);
 
         return view('blog.tag', compact('tag', 'posts'));
+    }
+
+    public function category(BlogCategory $blogCategory): View
+    {
+        abort_unless($blogCategory->is_active, 404);
+
+        $category = $blogCategory;
+        $posts = BlogPost::query()
+            ->with('blogCategory')
+            ->published()
+            ->whereBelongsTo($category, 'blogCategory')
+            ->newestFirst()
+            ->paginate(9);
+
+        return view('blog.category', compact('category', 'posts'));
     }
 
     public function show(string $slug): View|RedirectResponse

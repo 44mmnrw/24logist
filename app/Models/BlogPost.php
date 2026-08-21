@@ -167,6 +167,13 @@ class BlogPost extends Model
         return $legacyCategory !== '' ? $legacyCategory : null;
     }
 
+    public function categoryUrl(): ?string
+    {
+        return $this->blogCategory?->is_active
+            ? $this->blogCategory->getUrl()
+            : null;
+    }
+
     public function renderBody(): string
     {
         return RichContentRenderer::make($this->body ?? '')
