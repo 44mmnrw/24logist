@@ -225,6 +225,9 @@ class BlogTest extends TestCase
 
         $this->get($categoryUrl)
             ->assertOk()
+            ->assertSee('aria-label="Рубрики блога"', false)
+            ->assertSee('Все статьи')
+            ->assertSee('blog-category-link blog-category-link--active', false)
             ->assertSee('Published category post')
             ->assertDontSee('Hidden category post');
     }

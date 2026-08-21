@@ -43,24 +43,7 @@
                 </div>
             </section>
 
-            @if ($categories->isNotEmpty())
-                <nav class="blog-categories" aria-label="Рубрики блога">
-                    <div class="landing-shell">
-                        <ul class="blog-categories__list">
-                            <li>
-                                <a class="blog-category-link blog-category-link--active" href="{{ route('blog.index') }}" aria-current="page">
-                                    Все статьи
-                                </a>
-                            </li>
-                            @foreach ($categories as $category)
-                                <li>
-                                    <a class="blog-category-link" href="{{ $category->getUrl() }}">{{ $category->name }}</a>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </nav>
-            @endif
+            @include('blog._categories', ['categories' => $categories])
 
             <section class="blog-listing">
                 <div class="landing-shell">

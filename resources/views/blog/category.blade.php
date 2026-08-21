@@ -33,6 +33,11 @@
                 </div>
             </section>
 
+            @include('blog._categories', [
+                'categories' => $categories,
+                'activeCategory' => $category,
+            ])
+
             <section class="blog-listing">
                 <div class="landing-shell">
                     @if ($posts->count())

@@ -6,6 +6,7 @@ use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Models\BlogPostRedirect;
 use App\Models\BlogTag;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -28,12 +29,7 @@ class BlogController extends Controller
             ->newestFirst()
             ->paginate(9);
 
-        $categories = BlogCategory::query()
-            ->where('is_active', true)
-            ->whereHas('posts', fn ($query) => $query->published())
-            ->orderBy('sort_order')
-            ->orderBy('name')
-            ->get();
+        $categories = $this->navigationCategories();
 
         return view('blog.index', compact('featuredPost', 'posts', 'categories'));
     }
@@ -77,7 +73,9 @@ class BlogController extends Controller
             ->newestFirst()
             ->paginate(9);
 
-        return view('blog.category', compact('category', 'posts'));
+        $categories = $this->navigationCategories();
+
+        return view('blog.category', compact('category', 'posts', 'categories'));
     }
 
     public function show(string $slug): View|RedirectResponse
@@ -130,5 +128,16 @@ class BlogController extends Controller
             ->keyBy('name');
 
         return view('blog.show', compact('post', 'relatedPosts', 'tagLinks'));
+    }
+
+    /** @return Collection<int, BlogCategory> */
+    private function navigationCategories(): Collection
+    {
+        return BlogCategory::query()
+            ->where('is_active', true)
+            ->whereHas('posts', fn ($query) => $query->published())
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
     }
 }
