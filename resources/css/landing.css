@@ -2762,6 +2762,12 @@ body {
     padding-block: 48px 42px;
 }
 
+.blog-tag-hero h1,
+.blog-tag-hero p {
+    width: 100%;
+    max-width: none;
+}
+
 .blog-tag-hero__back {
     display: inline-flex;
     align-items: center;
@@ -2900,9 +2906,9 @@ body {
         font-size: 16px;
     }
 
-    .blog-tag-hero {
-        padding-block: 32px 28px;
-    }
+.blog-tag-hero {
+    padding-block: 32px 28px;
+}
 
     .blog-listing {
         padding-block: 32px 56px;
