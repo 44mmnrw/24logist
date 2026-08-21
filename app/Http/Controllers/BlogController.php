@@ -31,9 +31,6 @@ class BlogController extends Controller
         $categories = BlogCategory::query()
             ->where('is_active', true)
             ->whereHas('posts', fn ($query) => $query->published())
-            ->withCount([
-                'posts as published_posts_count' => fn ($query) => $query->published(),
-            ])
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get();

@@ -185,10 +185,10 @@ class BlogTest extends TestCase
 
         $this->get('/blog')
             ->assertOk()
-            ->assertSee('Навигация по блогу')
+            ->assertSee('aria-label="Рубрики блога"', false)
+            ->assertSee('Все статьи')
             ->assertSee('href="'.e($visibleCategory->getUrl()).'"', false)
             ->assertSee('Useful guides')
-            ->assertSee('2 материала')
             ->assertDontSee('Draft only')
             ->assertDontSee('href="'.e($inactiveCategory->getUrl()).'"', false);
     }

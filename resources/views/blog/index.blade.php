@@ -44,25 +44,17 @@
             </section>
 
             @if ($categories->isNotEmpty())
-                <nav class="blog-categories" aria-labelledby="blog-categories-title">
+                <nav class="blog-categories" aria-label="Рубрики блога">
                     <div class="landing-shell">
-                        <div class="blog-categories__head">
-                            <div>
-                                <div class="section-kicker">Навигация по блогу</div>
-                                <h2 id="blog-categories-title">Рубрики</h2>
-                            </div>
-                            <a class="blog-categories__all" href="{{ route('blog.index') }}">Все статьи</a>
-                        </div>
                         <ul class="blog-categories__list">
+                            <li>
+                                <a class="blog-category-link blog-category-link--active" href="{{ route('blog.index') }}" aria-current="page">
+                                    Все статьи
+                                </a>
+                            </li>
                             @foreach ($categories as $category)
                                 <li>
-                                    <a class="blog-category-link" href="{{ $category->getUrl() }}">
-                                        <span class="blog-category-link__content">
-                                            <strong>{{ $category->name }}</strong>
-                                            <span>{{ trans_choice(':count материал|:count материала|:count материалов', $category->published_posts_count, ['count' => $category->published_posts_count]) }}</span>
-                                        </span>
-                                        <span class="blog-category-link__arrow" aria-hidden="true">→</span>
-                                    </a>
+                                    <a class="blog-category-link" href="{{ $category->getUrl() }}">{{ $category->name }}</a>
                                 </li>
                             @endforeach
                         </ul>
