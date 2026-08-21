@@ -2777,11 +2777,11 @@ body {
     overflow-wrap: anywhere;
 }
 
-.blog-tag-count {
-    margin-top: 14px;
+.blog-hero .blog-tag-count {
+    margin-top: 8px;
     color: #62748e;
-    font-size: 15px;
-    line-height: 1.5;
+    font-size: 13px;
+    line-height: 1.35;
 }
 
 .blog-post-aside {
