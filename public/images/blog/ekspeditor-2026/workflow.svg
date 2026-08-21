@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1040" viewBox="0 0 1600 1040" role="img" aria-labelledby="title desc">
+  <title id="title">Схема работы экспедиторской компании с 1 сентября 2026 года</title>
+  <desc id="desc">Последовательность от поручения клиента до закрытия перевозки с ответвлениями для экспедиторской и складской расписок</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eef6ff"/>
+      <stop offset="1" stop-color="#f8fbff"/>
+    </linearGradient>
+    <linearGradient id="primary" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#12326d"/>
+      <stop offset="1" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#12326d" flood-opacity=".12"/>
+    </filter>
+    <marker id="arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto">
+      <path d="M0 0l10 5-10 5z" fill="#6b82a8"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto">
+      <path d="M0 0l10 5-10 5z" fill="#16a366"/>
+    </marker>
+    <style>
+      .eyebrow{font:700 22px Arial,sans-serif;letter-spacing:2px;fill:#1d4ed8}
+      .heading{font:700 46px Arial,sans-serif;fill:#10244a}
+      .sub{font:400 23px Arial,sans-serif;fill:#526987}
+      .card{fill:#fff;stroke:#d8e4f4;stroke-width:2;filter:url(#shadow)}
+      .step{font:700 20px Arial,sans-serif;fill:#fff}
+      .name{font:700 25px Arial,sans-serif;fill:#10244a}
+      .copy{font:400 20px Arial,sans-serif;fill:#526987}
+      .badge{font:700 18px Arial,sans-serif;fill:#167044}
+      .arrow{fill:none;stroke:#6b82a8;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#arrow-gray)}
+      .branch{fill:none;stroke:#16a366;stroke-width:3.2;stroke-dasharray:9 9;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#arrow-green)}
+      .note{font:700 22px Arial,sans-serif;fill:#12326d}
+    </style>
+  </defs>
+
+  <rect width="1600" height="1040" rx="36" fill="url(#bg)"/>
+  <circle cx="1470" cy="70" r="190" fill="#dceaff" opacity=".65"/>
+  <circle cx="110" cy="980" r="220" fill="#e2f8ee" opacity=".7"/>
+
+  <text x="100" y="88" class="eyebrow">ОДИН РЕЙС · ДВА ЦИФРОВЫХ КОНТУРА</text>
+  <text x="100" y="147" class="heading">Как работает экспедитор после 01.09.2026</text>
+  <text x="100" y="191" class="sub">Экспедиторские документы подтверждают услугу экспедиции, ЭТрН — перевозку груза.</text>
+
+  <path d="M390 335H515" class="arrow"/>
+  <path d="M805 335H930" class="arrow"/>
+  <path d="M1220 335H1345" class="arrow"/>
+  <path d="M1490 435V690" class="arrow"/>
+  <path d="M1220 785H1120" class="arrow"/>
+
+  <g transform="translate(100 245)">
+    <rect width="290" height="190" rx="26" class="card"/>
+    <circle cx="42" cy="42" r="25" fill="url(#primary)"/>
+    <text x="42" y="49" text-anchor="middle" class="step">1</text>
+    <text x="82" y="49" class="name">Поручение</text>
+    <text x="28" y="92" class="copy"><tspan x="28">Клиент формирует файл 1:</tspan><tspan x="28" dy="29">груз, маршрут, услуги</tspan><tspan x="28" dy="29">и условия исполнения.</tspan></text>
+  </g>
+
+  <g transform="translate(515 245)">
+    <rect width="290" height="190" rx="26" class="card"/>
+    <circle cx="42" cy="42" r="25" fill="url(#primary)"/>
+    <text x="42" y="49" text-anchor="middle" class="step">2</text>
+    <text x="82" y="49" class="name">Акцепт</text>
+    <text x="28" y="92" class="copy"><tspan x="28">Экспедитор проверяет</tspan><tspan x="28" dy="29">данные и формирует</tspan><tspan x="28" dy="29">ответный файл 2.</tspan></text>
+  </g>
+
+  <g transform="translate(930 245)">
+    <rect width="290" height="190" rx="26" class="card"/>
+    <circle cx="42" cy="42" r="25" fill="url(#primary)"/>
+    <text x="42" y="49" text-anchor="middle" class="step">3</text>
+    <text x="82" y="49" class="name">Организация</text>
+    <text x="28" y="92" class="copy"><tspan x="28">Экспедитор привлекает</tspan><tspan x="28" dy="29">перевозчика и проверяет</tspan><tspan x="28" dy="29">готовность участников.</tspan></text>
+  </g>
+
+  <g transform="translate(1345 245)">
+    <rect width="190" height="190" rx="26" class="card"/>
+    <circle cx="42" cy="42" r="25" fill="url(#primary)"/>
+    <text x="42" y="49" text-anchor="middle" class="step">4</text>
+    <text x="80" y="49" class="name">ЭТрН</text>
+    <text x="24" y="92" class="copy"><tspan x="24">Т1 → Т2:</tspan><tspan x="24" dy="29">груз передан</tspan><tspan x="24" dy="29">перевозчику.</tspan></text>
+  </g>
+
+  <g transform="translate(1220 690)">
+    <rect width="315" height="190" rx="26" class="card"/>
+    <circle cx="42" cy="42" r="25" fill="url(#primary)"/>
+    <text x="42" y="49" text-anchor="middle" class="step">5</text>
+    <text x="82" y="49" class="name">Доставка</text>
+    <text x="28" y="92" class="copy"><tspan x="28">Получатель оформляет Т3,</tspan><tspan x="28" dy="29">перевозчик — Т4.</tspan><tspan x="28" dy="29">Расхождения фиксируются.</tspan></text>
+  </g>
+
+  <g transform="translate(805 690)">
+    <rect width="315" height="190" rx="26" class="card"/>
+    <circle cx="42" cy="42" r="25" fill="url(#primary)"/>
+    <text x="42" y="49" text-anchor="middle" class="step">6</text>
+    <text x="82" y="49" class="name">Закрытие</text>
+    <text x="28" y="92" class="copy"><tspan x="28">Статусы и документы</tspan><tspan x="28" dy="29">сверяются с заявкой,</tspan><tspan x="28" dy="29">рейс уходит в архив.</tspan></text>
+  </g>
+
+  <path d="M660 435V505H460V555" class="branch"/>
+  <path d="M660 505H860V555" class="branch"/>
+
+  <g transform="translate(270 555)">
+    <rect width="380" height="110" rx="24" fill="#effbf5" stroke="#98ddbb" stroke-width="2"/>
+    <text x="28" y="42" class="badge">ЕСЛИ ГРУЗ ПРИНЯТ ДЛЯ ПЕРЕВОЗКИ</text>
+    <text x="28" y="78" class="name">Экспедиторская расписка</text>
+  </g>
+
+  <g transform="translate(700 555)">
+    <rect width="380" height="110" rx="24" fill="#effbf5" stroke="#98ddbb" stroke-width="2"/>
+    <text x="28" y="42" class="badge">ЕСЛИ ГРУЗ ПРИНЯТ НА ХРАНЕНИЕ</text>
+    <text x="28" y="78" class="name">Складская расписка</text>
+  </g>
+
+  <rect x="100" y="902" width="1400" height="80" rx="20" fill="#fff" stroke="#d8e4f4" stroke-width="2"/>
+  <circle cx="145" cy="942" r="20" fill="#16a366"/>
+  <path d="M136 942l7 7 13-16" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="185" y="950" class="note">Все XML-файлы подписываются и передаются через оператора ИС ЭПД в ГИС ЭПД.</text>
+</svg>

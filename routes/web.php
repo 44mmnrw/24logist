@@ -66,6 +66,11 @@ Route::get('/blog/category/{blogCategory:slug}', [BlogController::class, 'catego
     ->where('blogCategory', '[a-z0-9\-]+')
     ->name('blog.category');
 
+Route::get('/blog/preview/{blogPost:slug}', [BlogController::class, 'preview'])
+    ->middleware(['signed', 'throttle:60,1'])
+    ->where('blogPost', '[a-z0-9\-]+')
+    ->name('blog.preview');
+
 Route::get('/blog/{slug}', [BlogController::class, 'show'])
     ->name('blog.show')
     ->where('slug', '[a-z0-9\-]+');

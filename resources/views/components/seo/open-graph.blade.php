@@ -6,6 +6,7 @@
     'blogTag' => null,
     'blogCategory' => null,
     'notFound' => false,
+    'robots' => null,
 ])
 
 @php
@@ -19,6 +20,10 @@
         default => \App\Support\OpenGraph::forLanding($landing),
     };
 @endphp
+
+@if ($robots !== null)
+    @php($meta['robots'] = $robots)
+@endif
 
 <link rel="canonical" href="{{ $meta['url'] }}">
 <link rel="alternate" type="text/plain" href="{{ url('/llms.txt') }}" title="LLMs.txt">

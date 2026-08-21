@@ -2473,6 +2473,26 @@ body {
     background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 }
 
+.blog-preview-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+    border: 1px solid #f4c152;
+    border-radius: 12px;
+    background: #fffbeb;
+    padding: 12px 16px;
+    color: #713f12;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.blog-preview-banner strong {
+    flex: none;
+    color: #92400e;
+}
+
 .blog-breadcrumbs {
     margin-bottom: 22px;
     color: #62748e;

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -115,6 +116,15 @@ class BlogPost extends Model
     public function getUrl(): string
     {
         return route('blog.show', $this->slug);
+    }
+
+    public function previewUrl(): string
+    {
+        return URL::temporarySignedRoute(
+            'blog.preview',
+            now()->addDays(7),
+            ['blogPost' => $this],
+        );
     }
 
     public function displayTitle(): string

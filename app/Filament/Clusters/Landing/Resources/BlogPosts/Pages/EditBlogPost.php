@@ -6,6 +6,7 @@ use App\Filament\Clusters\Landing\Resources\BlogPosts\BlogPostResource;
 use App\Services\BlogCardImageGenerator;
 use App\Services\SitemapService;
 use App\Support\FilamentMediaUpload;
+use Filament\Actions\Action;
 use Filament\Resources\Pages\EditRecord;
 
 class EditBlogPost extends EditRecord
@@ -13,6 +14,19 @@ class EditBlogPost extends EditRecord
     protected static string $resource = BlogPostResource::class;
 
     private bool $shouldGenerateCardImage = false;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('preview')
+                ->label('Закрытый предпросмотр')
+                ->icon('heroicon-o-eye')
+                ->color('gray')
+                ->url(fn (): string => $this->record->previewUrl())
+                ->openUrlInNewTab()
+                ->tooltip('Подписанная ссылка действует 7 дней'),
+        ];
+    }
 
     protected function mutateFormDataBeforeFill(array $data): array
     {

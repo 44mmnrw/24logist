@@ -9,6 +9,7 @@ use App\Models\BlogTag;
 use App\Services\BlogTagSocialImageGenerator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
@@ -352,6 +353,60 @@ class BlogTest extends TestCase
         ]);
 
         $this->get('/blog/hidden-post')->assertNotFound();
+    }
+
+    public function test_unpublished_blog_post_is_available_through_signed_preview_link(): void
+    {
+        $post = BlogPost::query()->create([
+            'title' => 'Закрытый черновик',
+            'slug' => 'private-draft-preview',
+            'body' => '<p>Содержимое закрытого черновика</p>',
+            'is_published' => false,
+        ]);
+
+        $this->get($post->getUrl())->assertNotFound();
+
+        $this->get($post->previewUrl())
+            ->assertOk()
+            ->assertSee('Закрытый предпросмотр')
+            ->assertSee('Содержимое закрытого черновика')
+            ->assertSee('name="robots" content="noindex, nofollow, noarchive"', false)
+            ->assertDontSee('application/ld+json', false);
+    }
+
+    public function test_draft_preview_rejects_tampered_and_expired_links(): void
+    {
+        $post = BlogPost::query()->create([
+            'title' => 'Подписанный черновик',
+            'slug' => 'signed-draft',
+            'body' => 'Текст',
+            'is_published' => false,
+        ]);
+
+        $tamperedUrl = $post->previewUrl().'&tampered=1';
+
+        $this->get($tamperedUrl)->assertForbidden();
+
+        $expiredUrl = URL::temporarySignedRoute(
+            'blog.preview',
+            now()->subMinute(),
+            ['blogPost' => $post],
+        );
+
+        $this->get($expiredUrl)->assertForbidden();
+    }
+
+    public function test_preview_link_redirects_to_public_url_after_publication(): void
+    {
+        $post = BlogPost::query()->create([
+            'title' => 'Опубликованная статья',
+            'slug' => 'published-preview',
+            'body' => 'Текст',
+            'is_published' => true,
+            'published_at' => now()->subMinute(),
+        ]);
+
+        $this->get($post->previewUrl())->assertRedirect($post->getUrl());
     }
 
     public function test_changing_article_slug_creates_direct_permanent_redirects(): void

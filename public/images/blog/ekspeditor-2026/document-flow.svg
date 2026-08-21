@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1100" viewBox="0 0 1600 1100" role="img" aria-labelledby="title desc">
+  <title id="title">Компактная схема электронного обмена документами экспедитора</title>
+  <desc id="desc">Экспедитор в центре. Слева обмен поручением с заказчиком и односторонняя передача расписки. Справа обмен заказом-заявкой с перевозчиком и оформление титулов электронной транспортной накладной.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f7faff"/><stop offset="1" stop-color="#eef6ff"/></linearGradient>
+    <linearGradient id="hub" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#153b83"/><stop offset="1" stop-color="#2563eb"/></linearGradient>
+    <filter id="shadow" x="-25%" y="-30%" width="150%" height="170%"><feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#10244a" flood-opacity=".13"/></filter>
+    <marker id="blue-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0 0l10 5-10 5z" fill="#2563eb"/></marker>
+    <marker id="green-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0 0l10 5-10 5z" fill="#149667"/></marker>
+    <marker id="violet-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0 0l10 5-10 5z" fill="#7656d6"/></marker>
+    <marker id="orange-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0 0l10 5-10 5z" fill="#e67817"/></marker>
+    <style>
+      .eyebrow{font:700 19px Arial,sans-serif;letter-spacing:2px;fill:#2563eb}.heading{font:700 42px Arial,sans-serif;fill:#10244a}.subtitle{font:400 21px Arial,sans-serif;fill:#59708e}
+      .person{fill:#12326d;stroke:#12326d;stroke-width:2;filter:url(#shadow)}.person-title{font:700 24px Arial,sans-serif;fill:#fff}.person-sub{font:400 16px Arial,sans-serif;fill:#dce8ff}
+      .hub-title{font:700 31px Arial,sans-serif;fill:#fff}.hub-sub{font:400 17px Arial,sans-serif;fill:#dce8ff}
+      .doc{fill:#edf4ff;stroke:#5c83c5;stroke-width:3;filter:url(#shadow)}.doc-green{fill:#ecfaf4;stroke:#39a878;stroke-width:3;filter:url(#shadow)}.doc-violet{fill:#f3efff;stroke:#8a6bdb;stroke-width:3;filter:url(#shadow)}
+      .doc-kicker{font:700 14px Arial,sans-serif;letter-spacing:1px;fill:#4b6d9f}.doc-title{font:700 20px Arial,sans-serif;fill:#10244a}.doc-note{font:400 14px Arial,sans-serif;fill:#536b89}.doc-note-tight{font:700 13px Arial,sans-serif;fill:#5f42bd}.doc-role{font:700 14px Arial,sans-serif;fill:#315d9f}
+      .line{fill:none;stroke:#2563eb;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#blue-arrow)}.line-green{fill:none;stroke:#149667;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#green-arrow)}.line-violet{fill:none;stroke:#7656d6;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#violet-arrow)}
+      .line-info{fill:none;stroke:#e67817;stroke-width:3.2;stroke-dasharray:9 9;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#orange-arrow)}
+      .tag{fill:#e8f0ff;stroke:#b9cef4}.tag-green{fill:#e7f8f0;stroke:#9cd8bd}.tag-violet{fill:#eee9ff;stroke:#c9bcf0}.tag-orange{fill:#fff2e5;stroke:#f0b77f}.tag-text{font:700 15px Arial,sans-serif;fill:#174aa6}.tag-text-green{font:700 15px Arial,sans-serif;fill:#11724b}.tag-text-violet{font:700 15px Arial,sans-serif;fill:#5f42bd}.tag-text-orange{font:700 15px Arial,sans-serif;fill:#a94f08}
+      .legend{font:400 15px Arial,sans-serif;fill:#536a87}.legend-strong{font:700 15px Arial,sans-serif;fill:#10244a}
+    </style>
+  </defs>
+
+  <rect width="1600" height="1100" rx="34" fill="url(#bg)"/>
+  <circle cx="1510" cy="100" r="210" fill="#dceaff" opacity=".7"/><circle cx="90" cy="1030" r="190" fill="#e2f7ee" opacity=".75"/>
+  <text x="70" y="65" class="eyebrow">ЭЛЕКТРОННЫЙ ОБМЕН · ОДИН РЕЙС</text>
+  <text x="70" y="119" class="heading">Экспедитор — в центре документооборота</text>
+  <text x="70" y="156" class="subtitle">Сплошные стрелки — движение титулов, пунктирная — возврат информации экспедитору</text>
+
+  <rect x="655" y="415" width="290" height="140" rx="28" fill="url(#hub)" filter="url(#shadow)"/>
+  <text x="800" y="474" text-anchor="middle" class="hub-title">Экспедитор</text>
+  <text x="800" y="507" text-anchor="middle" class="hub-sub">принимает поручение</text><text x="800" y="531" text-anchor="middle" class="hub-sub">и организует перевозку</text>
+
+  <rect x="55" y="420" width="220" height="130" rx="24" class="person"/>
+  <text x="165" y="477" text-anchor="middle" class="person-title">Заказчик</text><text x="165" y="508" text-anchor="middle" class="person-sub">клиент экспедитора</text>
+  <rect x="340" y="355" width="250" height="210" rx="12" class="doc"/>
+  <text x="465" y="392" text-anchor="middle" class="doc-kicker">ДВА ТИТУЛА</text><text x="465" y="430" text-anchor="middle" class="doc-title">Поручение</text><text x="465" y="458" text-anchor="middle" class="doc-title">экспедитору</text>
+  <path d="M380 483h170" stroke="#b9cdea" stroke-width="2"/><text x="465" y="514" text-anchor="middle" class="doc-role">Т1 · подписывает заказчик</text><text x="465" y="537" text-anchor="middle" class="doc-role">Т2 · подписывает экспедитор</text>
+  <path d="M275 445H340" class="line"/><path d="M590 445H655" class="line"/>
+  <rect x="288" y="407" width="44" height="29" rx="14" class="tag"/><text x="310" y="427" text-anchor="middle" class="tag-text">Т1</text>
+  <path d="M655 525H590" class="line"/><path d="M340 525H275" class="line"/>
+  <rect x="603" y="534" width="44" height="29" rx="14" class="tag"/><text x="625" y="554" text-anchor="middle" class="tag-text">Т2</text>
+
+  <rect x="1010" y="355" width="250" height="210" rx="12" class="doc"/>
+  <text x="1135" y="392" text-anchor="middle" class="doc-kicker">ДВА ТИТУЛА</text><text x="1135" y="430" text-anchor="middle" class="doc-title">Заказ-заявка</text><text x="1135" y="458" text-anchor="middle" class="doc-title">на перевозку</text>
+  <path d="M1050 483h170" stroke="#b9cdea" stroke-width="2"/><text x="1135" y="514" text-anchor="middle" class="doc-role">Т1 · подписывает экспедитор</text><text x="1135" y="537" text-anchor="middle" class="doc-role">Т2 · подписывает перевозчик</text>
+  <rect x="1325" y="420" width="220" height="130" rx="24" class="person"/>
+  <text x="1435" y="477" text-anchor="middle" class="person-title">Перевозчик</text><text x="1435" y="508" text-anchor="middle" class="person-sub">исполнитель перевозки</text>
+  <path d="M945 445H1010" class="line"/><path d="M1260 445H1325" class="line"/>
+  <rect x="960" y="407" width="44" height="29" rx="14" class="tag"/><text x="982" y="427" text-anchor="middle" class="tag-text">Т1</text>
+  <path d="M1325 525H1260" class="line"/><path d="M1010 525H945" class="line"/>
+  <rect x="1270" y="534" width="44" height="29" rx="14" class="tag"/><text x="1292" y="554" text-anchor="middle" class="tag-text">Т2</text>
+
+  <rect x="310" y="725" width="310" height="205" rx="12" class="doc-green"/>
+  <text x="465" y="763" text-anchor="middle" class="doc-kicker">ОДИН ТИТУЛ</text><text x="465" y="801" text-anchor="middle" class="doc-title">Экспедиторская</text><text x="465" y="829" text-anchor="middle" class="doc-title">или складская расписка</text>
+  <text x="465" y="862" text-anchor="middle" class="doc-note">подписывает экспедитор</text><text x="465" y="886" text-anchor="middle" class="doc-note">направляется заказчику</text><text x="465" y="910" text-anchor="middle" class="doc-note">при приёме груза или на хранение</text>
+  <path d="M700 555C700 650 650 680 620 755" class="line-green"/>
+  <rect x="590" y="650" width="44" height="29" rx="14" class="tag-green"/><text x="612" y="670" text-anchor="middle" class="tag-text-green">Т1</text>
+  <path d="M310 818C230 818 165 720 165 550" class="line-green"/>
+
+  <rect x="1010" y="650" width="250" height="310" rx="12" class="doc-violet"/>
+  <text x="1135" y="688" text-anchor="middle" class="doc-kicker">ОТДЕЛЬНЫЙ КОНТУР</text><text x="1135" y="730" text-anchor="middle" class="doc-title">ЭТрН</text>
+  <text x="1135" y="765" text-anchor="middle" class="doc-note-tight">Т1 · экспедитор —</text><text x="1135" y="785" text-anchor="middle" class="doc-note-tight">грузоотправитель</text><text x="1135" y="815" text-anchor="middle" class="doc-note">Т2 · перевозчик</text><text x="1135" y="842" text-anchor="middle" class="doc-note">Т3 · грузополучатель</text><text x="1135" y="869" text-anchor="middle" class="doc-note">Т4 · перевозчик</text><text x="1135" y="920" text-anchor="middle" class="doc-note">каждый подписывает свой титул</text>
+  <rect x="1325" y="630" width="220" height="90" rx="24" class="person"/>
+  <text x="1435" y="670" text-anchor="middle" class="person-title">Перевозчик</text><text x="1435" y="700" text-anchor="middle" class="person-sub">принимает груз · Т2</text>
+  <rect x="1325" y="755" width="220" height="90" rx="24" class="person"/>
+  <text x="1435" y="795" text-anchor="middle" class="person-title">Грузополучатель</text><text x="1435" y="825" text-anchor="middle" class="person-sub">принимает доставку · Т3</text>
+  <rect x="1325" y="880" width="220" height="90" rx="24" class="person"/>
+  <text x="1435" y="920" text-anchor="middle" class="person-title">Перевозчик</text><text x="1435" y="950" text-anchor="middle" class="person-sub">подтверждает выдачу · Т4</text>
+  <path d="M900 555C900 650 965 672 1010 750" class="line-violet"/>
+  <path d="M1325 675H1260" class="line-violet"/>
+  <rect x="1270" y="630" width="44" height="29" rx="14" class="tag-violet"/><text x="1292" y="650" text-anchor="middle" class="tag-text-violet">Т2</text>
+  <path d="M1325 800H1260" class="line-violet"/>
+  <rect x="1270" y="805" width="44" height="29" rx="14" class="tag-violet"/><text x="1292" y="825" text-anchor="middle" class="tag-text-violet">Т3</text>
+  <path d="M1325 925H1260" class="line-violet"/>
+  <rect x="1270" y="930" width="44" height="29" rx="14" class="tag-violet"/><text x="1292" y="950" text-anchor="middle" class="tag-text-violet">Т4</text>
+  <path d="M1010 895C925 875 820 690 800 555" class="line-info"/>
+  <rect x="770" y="760" width="220" height="31" rx="15" class="tag-orange"/><text x="880" y="781" text-anchor="middle" class="tag-text-orange">вся информация по ЭТрН</text>
+
+  <rect x="265" y="1000" width="1070" height="60" rx="18" fill="#fff" stroke="#d5e1f0" stroke-width="2"/>
+  <circle cx="305" cy="1030" r="17" fill="#2563eb"/><path d="M297 1030l6 6 11-14" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="335" y="1036" class="legend"><tspan class="legend-strong">Важно:</tspan> расписка не заменяет ЭТрН, а поручение экспедитору не заменяет заказ-заявку на перевозку.</text>
+</svg>

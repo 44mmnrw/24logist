@@ -96,6 +96,22 @@ class BlogController extends Controller
             return redirect()->to($redirect->blogPost->getUrl(), 301);
         }
 
+        return $this->renderPost($post);
+    }
+
+    public function preview(BlogPost $blogPost): View|RedirectResponse
+    {
+        if ($blogPost->is_published && ($blogPost->published_at === null || $blogPost->published_at->isPast())) {
+            return redirect()->to($blogPost->getUrl());
+        }
+
+        $blogPost->load('blogCategory');
+
+        return $this->renderPost($blogPost, true);
+    }
+
+    private function renderPost(BlogPost $post, bool $isPreview = false): View
+    {
         $relatedPosts = BlogPost::query()
             ->with('blogCategory')
             ->published()
@@ -127,7 +143,7 @@ class BlogController extends Controller
             ->get()
             ->keyBy('name');
 
-        return view('blog.show', compact('post', 'relatedPosts', 'tagLinks'));
+        return view('blog.show', compact('post', 'relatedPosts', 'tagLinks', 'isPreview'));
     }
 
     /** @return Collection<int, BlogCategory> */

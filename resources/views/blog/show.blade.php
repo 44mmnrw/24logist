@@ -7,10 +7,13 @@
     <x-csrf-meta />
     @php
         $og = \App\Support\OpenGraph::forBlogPost($post);
+        $isPreview = $isPreview ?? false;
     @endphp
     <title>{{ $og['title'] }}</title>
-    <x-seo.open-graph :blog-post="$post" />
-    <x-seo.structured-data :blog-post="$post" />
+    <x-seo.open-graph :blog-post="$post" :robots="$isPreview ? 'noindex, nofollow, noarchive' : null" />
+    @unless ($isPreview)
+        <x-seo.structured-data :blog-post="$post" />
+    @endunless
     <x-site.favicon />
     <x-fonts.preload />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -25,6 +28,12 @@
             <article>
                 <header class="blog-post-hero">
                     <div class="landing-shell blog-post-hero__shell">
+                        @if ($isPreview)
+                            <div class="blog-preview-banner" role="status">
+                                <strong>Закрытый предпросмотр</strong>
+                                <span>Статья ещё не опубликована и доступна только по подписанной ссылке.</span>
+                            </div>
+                        @endif
                         <nav class="blog-breadcrumbs" aria-label="Хлебные крошки">
                             <ol>
                                 <li><a href="{{ url('/') }}">Главная</a></li>
