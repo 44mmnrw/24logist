@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="hero" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0D2147"/><stop offset=".72" stop-color="#123B79"/><stop offset="1" stop-color="#0D67F3"/></linearGradient>
+    <linearGradient id="frame" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#DCE9FF"/><stop offset="1" stop-color="#D9F8E6"/></linearGradient>
+    <linearGradient id="value" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0D2147"/><stop offset="1" stop-color="#0D67F3"/></linearGradient>
+    <pattern id="dots" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="2" fill="#0D67F3" opacity=".08"/></pattern>
+    <clipPath id="screenClip"><rect x="870" y="157" width="941" height="560" rx="22"/></clipPath>
+  </defs>
+
+  <rect width="1920" height="1080" fill="#F7FAFF"/>
+  <rect width="470" height="500" fill="url(#dots)"/><rect x="1510" y="660" width="410" height="420" fill="url(#dots)"/>
+  <path d="M0 300C190 180 340 205 500 112S710 48 820 0" fill="none" stroke="#0D67F3" stroke-width="4" opacity=".12"/>
+  <path d="M1920 205C1740 180 1715 72 1590 54S1400 86 1325 0" fill="none" stroke="#19BD49" stroke-width="5" opacity=".13"/>
+  <path d="M0 980C230 855 335 1012 520 1080" fill="none" stroke="#0D67F3" stroke-width="4" opacity=".15"/>
+  <path d="M1920 840C1760 858 1748 990 1655 1080" fill="none" stroke="#0D67F3" stroke-width="4" opacity=".13"/>
+  <g fill="#19BD49" opacity=".5"><circle cx="308" cy="204" r="10"/><circle cx="1725" cy="108" r="9"/><circle cx="1735" cy="925" r="11"/></g>
+
+  <!-- Header -->
+  <rect x="60" y="42" width="326" height="76" rx="18" fill="#FFFFFF" stroke="#DFE8F5" stroke-width="2"/>
+  <g transform="translate(82 52)"><circle cx="37" cy="28" r="26" fill="none" stroke="#0D67F3" stroke-width="4"/><path d="M8 33H30V15H47L58 27V39H52" fill="none" stroke="#0D67F3" stroke-width="4" stroke-linejoin="round"/><circle cx="24" cy="41" r="6" fill="#0D67F3"/><circle cx="47" cy="41" r="6" fill="#0D67F3"/><path d="M51 9C58 1 68 2 72 9C75 17 67 27 61 34C56 27 48 17 51 9Z" fill="#19BD49"/><text x="88" y="40" font-family="Arial" font-size="37" font-weight="700" fill="#0D2147">Логист<tspan fill="#0D67F3">Ру</tspan></text></g>
+  <rect x="1482" y="51" width="368" height="58" rx="29" fill="#E8F0FF"/><text x="1666" y="89" text-anchor="middle" font-family="Arial" font-size="23" font-weight="700" fill="#0D67F3">CRM ДЛЯ ЭКСПЕДИТОРОВ</text>
+
+  <!-- Left hero -->
+  <rect x="60" y="138" width="760" height="252" rx="32" fill="url(#hero)"/>
+  <circle cx="778" cy="110" r="126" fill="none" stroke="#19BD49" stroke-width="30" opacity=".31"/>
+  <text x="102" y="220" font-family="Arial" font-size="58" font-weight="700" fill="#FFFFFF"><tspan x="102">Заявки, рейсы и ЭДО</tspan><tspan x="102" dy="64">в одном кабинете</tspan></text>
+  <text x="102" y="340" font-family="Arial" font-size="22" fill="#DCE9FF"><tspan x="102">Полный цикл работы экспедитора — от первой заявки</tspan><tspan x="102" dy="32">до документов, контроля рейса, оплат и прибыли.</tspan></text>
+
+  <!-- Compact solutions -->
+  <text x="66" y="431" font-family="Arial" font-size="27" font-weight="700" fill="#0D2147">Основные решения</text>
+  <g font-family="Arial" font-size="20" font-weight="700" fill="#0D2147">
+    <g><rect x="60" y="450" width="368" height="58" rx="17" fill="#FFFFFF" stroke="#DCE7F8" stroke-width="2"/><circle cx="94" cy="479" r="17" fill="#E3F8EB"/><path d="M86 479L92 485L103 469" fill="none" stroke="#12A744" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text x="122" y="486">Создавайте заявки</text></g>
+    <g><rect x="446" y="450" width="374" height="58" rx="17" fill="#FFFFFF" stroke="#DCE7F8" stroke-width="2"/><circle cx="480" cy="479" r="17" fill="#E3F8EB"/><path d="M472 479L478 485L489 469" fill="none" stroke="#12A744" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text x="508" y="486">Контролируйте оплаты</text></g>
+    <g><rect x="60" y="520" width="368" height="58" rx="17" fill="#FFFFFF" stroke="#DCE7F8" stroke-width="2"/><circle cx="94" cy="549" r="17" fill="#E3F8EB"/><path d="M86 549L92 555L103 539" fill="none" stroke="#12A744" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text x="122" y="556">Следите за доставкой</text></g>
+    <g><rect x="446" y="520" width="374" height="58" rx="17" fill="#FFFFFF" stroke="#DCE7F8" stroke-width="2"/><circle cx="480" cy="549" r="17" fill="#E3F8EB"/><path d="M472 549L478 555L489 539" fill="none" stroke="#12A744" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text x="508" y="546"><tspan x="508">Документы</tspan><tspan x="508" dy="22">согласно ФЗ</tspan></text></g>
+  </g>
+
+  <!-- Two scenarios -->
+  <text x="66" y="622" font-family="Arial" font-size="27" font-weight="700" fill="#0D2147">Два сценария работы с заявкой</text>
+  <g font-family="Arial" fill="#0D2147">
+    <g><rect x="60" y="641" width="760" height="143" rx="22" fill="#FFFFFF" stroke="#DCE7F8" stroke-width="2"/><rect x="80" y="658" width="39" height="39" rx="12" fill="#0D67F3"/><text x="100" y="686" text-anchor="middle" font-size="21" font-weight="700" fill="#FFFFFF">1</text><text x="135" y="685" font-size="24" font-weight="700">Заявка от Заказчика</text>
+      <g font-size="15" font-weight="700" text-anchor="middle"><g fill="#F0F5FF"><rect x="80" y="713" width="155" height="52" rx="12"/><rect x="263" y="713" width="155" height="52" rx="12"/><rect x="446" y="713" width="165" height="52" rx="12"/><rect x="639" y="713" width="161" height="52" rx="12"/></g><g fill="#17345F"><text x="158" y="745">Получили заявку</text><text x="341" y="745">Создали рейс</text><text x="528" y="738"><tspan x="528">Передали</tspan><tspan x="528" dy="17">перевозчику</tspan></text><text x="720" y="745">Контроль и оплата</text></g></g>
+      <g stroke="#7395C8" stroke-width="3"><path d="M240 739H256M251 734L257 739L251 744" fill="none"/><path d="M423 739H439M434 734L440 739L434 744" fill="none"/><path d="M616 739H632M627 734L633 739L627 744" fill="none"/></g>
+    </g>
+    <g><rect x="60" y="800" width="760" height="143" rx="22" fill="#FFFFFF" stroke="#DCE7F8" stroke-width="2"/><rect x="80" y="817" width="39" height="39" rx="12" fill="#17AC4C"/><text x="100" y="845" text-anchor="middle" font-size="21" font-weight="700" fill="#FFFFFF">2</text><text x="135" y="844" font-size="24" font-weight="700">Поручение и ЭПД</text>
+      <g font-size="15" font-weight="700" text-anchor="middle"><g fill="#EDF9F1"><rect x="80" y="872" width="155" height="52" rx="12"/><rect x="263" y="872" width="155" height="52" rx="12"/><rect x="446" y="872" width="165" height="52" rx="12"/><rect x="639" y="872" width="161" height="52" rx="12"/></g><g fill="#17345F"><text x="158" y="891"><tspan x="158">Входящее</tspan><tspan x="158" dy="17">поручение</tspan></text><text x="341" y="904">Заказ-заявка</text><text x="528" y="891"><tspan x="528">ЭТрН в несколько</tspan><tspan x="528" dy="17">кликов</tspan></text><text x="720" y="904">Архив и аналитика</text></g></g>
+      <g stroke="#7395C8" stroke-width="3"><path d="M240 898H256M251 893L257 898L251 903" fill="none"/><path d="M423 898H439M434 893L440 898L434 903" fill="none"/><path d="M616 898H632M627 893L633 898L627 903" fill="none"/></g>
+    </g>
+  </g>
+
+  <!-- Interface right -->
+  <rect x="846" y="133" width="995" height="608" rx="32" fill="url(#frame)"/>
+  <image x="870" y="157" width="941" height="560" preserveAspectRatio="xMidYMin slice" clip-path="url(#screenClip)" xlink:href="SCREENSHOT_DATA_URI"/>
+
+  <!-- Bottom right: value and fast start -->
+  <rect x="846" y="775" width="480" height="215" rx="28" fill="url(#value)"/>
+  <text x="880" y="824" font-family="Arial" font-size="18" font-weight="700" letter-spacing="1.1" fill="#FFFFFF" opacity=".82">НАША ГЛАВНАЯ ЦЕННОСТЬ</text>
+  <text x="880" y="876" font-family="Arial" font-size="27" font-weight="700" fill="#FFFFFF"><tspan x="880">Упрощаем работу с заявкой</tspan><tspan x="880" dy="36">от Заказчика — делаем её</tspan><tspan x="880" dy="36">простой, понятной и удобной.</tspan></text>
+
+  <rect x="1346" y="775" width="495" height="215" rx="28" fill="#FFFFFF" stroke="#DCE7F8" stroke-width="2"/>
+  <text x="1375" y="818" font-family="Arial" font-size="18" font-weight="700" letter-spacing="1" fill="#526481">БЫСТРЫЙ СТАРТ</text>
+  <g font-family="Arial" text-anchor="middle"><g fill="#F4F7FB"><rect x="1375" y="836" width="135" height="69" rx="15"/><rect x="1520" y="836" width="135" height="69" rx="15"/><rect x="1665" y="836" width="147" height="69" rx="15"/></g><g fill="#0D67F3" font-size="25" font-weight="700"><text x="1442" y="868">40 мин</text><text x="1587" y="868">1 час</text><text x="1738" y="868">5 мин</text></g><g fill="#526481" font-size="12" font-weight="700"><text x="1442" y="891">презентация</text><text x="1587" y="891">внедрение</text><text x="1738" y="891">первая заявка</text></g></g>
+  <rect x="1375" y="920" width="252" height="51" rx="25" fill="#18BA52"/>
+  <text x="1501" y="953" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700" fill="#FFFFFF">30–60% экономии</text>
+  <rect x="1639" y="920" width="173" height="51" rx="25" fill="#FFFFFF" stroke="#18BA52" stroke-width="4"/>
+  <text x="1725" y="953" text-anchor="middle" font-family="Arial" font-size="20" font-weight="700" fill="#0D67F3">24logist.ru</text>
+
+  <text x="60" y="1024" font-family="Arial" font-size="20" font-weight="700" fill="#0D2147">Создайте кабинет и работайте правильно!</text>
+</svg>

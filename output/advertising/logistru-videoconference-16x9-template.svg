@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="hero" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0D2147"/><stop offset=".72" stop-color="#123B79"/><stop offset="1" stop-color="#0D67F3"/>
+    </linearGradient>
+    <linearGradient id="frame" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#DCE9FF"/><stop offset="1" stop-color="#D9F8E6"/>
+    </linearGradient>
+    <linearGradient id="value" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0D2147"/><stop offset="1" stop-color="#0D67F3"/>
+    </linearGradient>
+    <pattern id="dots" width="30" height="30" patternUnits="userSpaceOnUse">
+      <circle cx="4" cy="4" r="2" fill="#0D67F3" opacity=".08"/>
+    </pattern>
+    <clipPath id="screenClip"><rect x="942" y="176" width="875" height="554" rx="22"/></clipPath>
+  </defs>
+
+  <rect width="1920" height="1080" fill="#F7FAFF"/>
+  <rect width="480" height="520" fill="url(#dots)"/>
+  <rect x="1500" y="650" width="420" height="430" fill="url(#dots)"/>
+  <path d="M0 300C190 180 340 205 500 112S710 48 820 0" fill="none" stroke="#0D67F3" stroke-width="4" opacity=".12"/>
+  <path d="M1920 205C1740 180 1715 72 1590 54S1400 86 1325 0" fill="none" stroke="#19BD49" stroke-width="5" opacity=".13"/>
+  <path d="M0 980C230 855 335 1012 520 1080" fill="none" stroke="#0D67F3" stroke-width="4" opacity=".15"/>
+  <path d="M1920 840C1760 858 1748 990 1655 1080" fill="none" stroke="#0D67F3" stroke-width="4" opacity=".13"/>
+  <g fill="#19BD49" opacity=".52"><circle cx="308" cy="204" r="10"/><circle cx="1725" cy="108" r="9"/><circle cx="1735" cy="925" r="11"/></g>
+
+  <!-- Header -->
+  <rect x="70" y="48" width="326" height="76" rx="18" fill="#FFFFFF" stroke="#DFE8F5" stroke-width="2"/>
+  <g transform="translate(92 58)">
+    <circle cx="37" cy="28" r="26" fill="none" stroke="#0D67F3" stroke-width="4"/>
+    <path d="M8 33H30V15H47L58 27V39H52" fill="none" stroke="#0D67F3" stroke-width="4" stroke-linejoin="round"/>
+    <circle cx="24" cy="41" r="6" fill="#0D67F3"/><circle cx="47" cy="41" r="6" fill="#0D67F3"/>
+    <path d="M51 9C58 1 68 2 72 9C75 17 67 27 61 34C56 27 48 17 51 9Z" fill="#19BD49"/>
+    <text x="88" y="40" font-family="Arial" font-size="37" font-weight="700" fill="#0D2147">Логист<tspan fill="#0D67F3">Ру</tspan></text>
+  </g>
+  <rect x="1482" y="55" width="368" height="58" rx="29" fill="#E8F0FF"/>
+  <text x="1666" y="93" text-anchor="middle" font-family="Arial" font-size="23" font-weight="700" fill="#0D67F3">CRM ДЛЯ ЭКСПЕДИТОРОВ</text>
+
+  <!-- Left message -->
+  <rect x="70" y="154" width="812" height="328" rx="34" fill="url(#hero)"/>
+  <circle cx="826" cy="124" r="142" fill="none" stroke="#19BD49" stroke-width="34" opacity=".32"/>
+  <text x="116" y="244" font-family="Arial" font-size="65" font-weight="700" fill="#FFFFFF">
+    <tspan x="116">Заявки, рейсы и ЭДО</tspan><tspan x="116" dy="72">в одном кабинете</tspan>
+  </text>
+  <text x="116" y="390" font-family="Arial" font-size="25" fill="#DCE9FF">
+    <tspan x="116">Полный цикл работы экспедитора — от первой заявки</tspan>
+    <tspan x="116" dy="36">до документов, контроля рейса, оплат и прибыли.</tspan>
+  </text>
+
+  <!-- Solutions -->
+  <text x="76" y="536" font-family="Arial" font-size="30" font-weight="700" fill="#0D2147">Основные решения</text>
+  <g font-family="Arial" font-size="23" font-weight="700" fill="#0D2147">
+    <g><rect x="70" y="558" width="394" height="74" rx="20" fill="#FFFFFF" stroke="#DCE7F8" stroke-width="2"/><circle cx="110" cy="595" r="20" fill="#E3F8EB"/><path d="M100 595L108 603L121 583" fill="none" stroke="#12A744" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><text x="145" y="603">Создавайте заявки</text></g>
+    <g><rect x="486" y="558" width="396" height="74" rx="20" fill="#FFFFFF" stroke="#DCE7F8" stroke-width="2"/><circle cx="526" cy="595" r="20" fill="#E3F8EB"/><path d="M516 595L524 603L537 583" fill="none" stroke="#12A744" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><text x="561" y="603">Контролируйте оплаты</text></g>
+    <g><rect x="70" y="650" width="394" height="74" rx="20" fill="#FFFFFF" stroke="#DCE7F8" stroke-width="2"/><circle cx="110" cy="687" r="20" fill="#E3F8EB"/><path d="M100 687L108 695L121 675" fill="none" stroke="#12A744" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><text x="145" y="695">Следите за доставкой</text></g>
+    <g><rect x="486" y="650" width="396" height="74" rx="20" fill="#FFFFFF" stroke="#DCE7F8" stroke-width="2"/><circle cx="526" cy="687" r="20" fill="#E3F8EB"/><path d="M516 687L524 695L537 675" fill="none" stroke="#12A744" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><text x="561" y="679"><tspan x="561">Формируйте документы</tspan><tspan x="561" dy="27">согласно ФЗ</tspan></text></g>
+  </g>
+
+  <!-- Interface -->
+  <rect x="918" y="152" width="923" height="602" rx="34" fill="url(#frame)"/>
+  <image x="942" y="176" width="875" height="554" preserveAspectRatio="xMidYMin slice" clip-path="url(#screenClip)" xlink:href="SCREENSHOT_DATA_URI"/>
+
+  <!-- Bottom value -->
+  <rect x="70" y="790" width="568" height="218" rx="30" fill="url(#value)"/>
+  <text x="104" y="840" font-family="Arial" font-size="19" font-weight="700" letter-spacing="1.2" fill="#FFFFFF" opacity=".82">НАША ГЛАВНАЯ ЦЕННОСТЬ</text>
+  <text x="104" y="895" font-family="Arial" font-size="29" font-weight="700" fill="#FFFFFF"><tspan x="104">Упрощаем работу с заявкой</tspan><tspan x="104" dy="39">от Заказчика — делаем её</tspan><tspan x="104" dy="39">простой, понятной и удобной.</tspan></text>
+
+  <rect x="660" y="790" width="732" height="218" rx="30" fill="#FFFFFF" stroke="#DCE7F8" stroke-width="2"/>
+  <text x="694" y="840" font-family="Arial" font-size="19" font-weight="700" letter-spacing="1.1" fill="#526481">БЫСТРЫЙ СТАРТ</text>
+  <g font-family="Arial" text-anchor="middle">
+    <g fill="#F4F7FB"><rect x="694" y="862" width="205" height="86" rx="18"/><rect x="912" y="862" width="205" height="86" rx="18"/><rect x="1130" y="862" width="228" height="86" rx="18"/></g>
+    <g fill="#0D67F3" font-size="30" font-weight="700"><text x="796" y="902">40 мин</text><text x="1014" y="902">1 час</text><text x="1244" y="902">5 мин</text></g>
+    <g fill="#526481" font-size="15" font-weight="700"><text x="796" y="930">презентация</text><text x="1014" y="930">внедрение</text><text x="1244" y="930">первая заявка</text></g>
+  </g>
+  <rect x="694" y="961" width="664" height="32" rx="16" fill="#E8F8ED"/>
+  <text x="1026" y="983" text-anchor="middle" font-family="Arial" font-size="17" font-weight="700" fill="#107F37">30–60% экономии времени на документах</text>
+
+  <rect x="1414" y="790" width="427" height="218" rx="30" fill="#18BA52"/>
+  <text x="1452" y="850" font-family="Arial" font-size="24" font-weight="700" fill="#FFFFFF"><tspan x="1452">Создайте кабинет.</tspan><tspan x="1452" dy="34">Работайте правильно!</tspan></text>
+  <rect x="1452" y="924" width="351" height="56" rx="28" fill="#FFFFFF"/>
+  <text x="1627" y="962" text-anchor="middle" font-family="Arial" font-size="28" font-weight="700" fill="#0D67F3">24logist.ru</text>
+
+</svg>

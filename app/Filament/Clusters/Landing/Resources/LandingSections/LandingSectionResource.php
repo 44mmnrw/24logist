@@ -62,31 +62,64 @@ class LandingSectionResource extends Resource
                     ->prefix('/#')
                     ->maxLength(64)
                     ->placeholder('why')
-                    ->helperText('Ссылка на секцию с главной: /#why. Укажите только якорь без # — why, pricing, quiz.')
+                    ->columnSpanFull()
                     ->visible(fn (?LandingSection $record): bool => LandingSectionAnchor::supports($record)),
                 TextInput::make('kicker')
                     ->label('Надзаголовок')
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug !== 'hero'),
                 TextInput::make('title')
                     ->label('Заголовок')
                     ->maxLength(255),
-                TextInput::make('seo_h1')
-                    ->label('SEO H1')
-                    ->helperText('Единственный H1 главной страницы. Визуальный заголовок hero редактируется в поле «Заголовок».')
-                    ->required(fn (?LandingSection $record): bool => $record?->slug === 'hero')
-                    ->maxLength(255)
+                TextInput::make('extra.title_font_size')
+                    ->label('Размер заголовка')
+                    ->numeric()
+                    ->minValue(12)
+                    ->maxValue(96)
+                    ->default(56)
+                    ->suffix('px')
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'hero'),
                 Textarea::make('subtitle')
-                    ->label('Подзаголовок')
-                    ->rows(2),
+                    ->label(fn (?LandingSection $record): string => $record?->slug === 'hero'
+                        ? 'Подзаголовок 1'
+                        : 'Подзаголовок')
+                    ->rows(fn (?LandingSection $record): int => $record?->slug === 'hero' ? 1 : 2),
+                TextInput::make('extra.subtitle_1_font_size')
+                    ->label('Размер подзаголовка 1')
+                    ->numeric()
+                    ->minValue(12)
+                    ->maxValue(96)
+                    ->default(40)
+                    ->suffix('px')
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'hero'),
                 Textarea::make('description')
                     ->label(fn (?LandingSection $record): string => match ($record?->slug) {
                         'footer' => 'Текст под логотипом',
                         'growth' => 'Описание',
+                        'hero' => 'Подзаголовок 2',
                         default => 'Описание',
                     })
-                    ->rows(fn (?LandingSection $record): int => $record?->slug === 'growth' ? 10 : 4)
-                    ->columnSpanFull(),
+                    ->rows(fn (?LandingSection $record): int => match ($record?->slug) {
+                        'growth' => 10,
+                        'hero' => 1,
+                        default => 4,
+                    })
+                    ->columnSpan(fn (?LandingSection $record): int|string => $record?->slug === 'hero' ? 1 : 'full'),
+                TextInput::make('extra.subtitle_2_font_size')
+                    ->label('Размер подзаголовка 2')
+                    ->numeric()
+                    ->minValue(12)
+                    ->maxValue(96)
+                    ->default(28)
+                    ->suffix('px')
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'hero'),
+                TextInput::make('seo_h1')
+                    ->label('SEO H1 (скрытый)')
+                    ->helperText('Единственный H1 главной страницы; посетители его не видят.')
+                    ->required(fn (?LandingSection $record): bool => $record?->slug === 'hero')
+                    ->maxLength(255)
+                    ->columnSpanFull()
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'hero'),
                 TextInput::make('growth_chart_title')
                     ->label('Диаграмма — заголовок')
                     ->maxLength(255)

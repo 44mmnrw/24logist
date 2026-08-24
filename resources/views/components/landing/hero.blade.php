@@ -9,9 +9,18 @@
         $bullets = $landing->blocks('hero', 'bullet');
         $carouselSlides = \App\Support\LandingHeroCarousel::slides($section);
         $carouselDelayMs = \App\Support\LandingHeroCarousel::delayMs($section);
+        $fontSize = static fn (mixed $value, int $default): int => is_numeric($value)
+            ? max(12, min(96, (int) $value))
+            : $default;
+        $titleFontSize = $fontSize($extra['title_font_size'] ?? null, 56);
+        $subtitle1FontSize = $fontSize($extra['subtitle_1_font_size'] ?? null, 40);
+        $subtitle2FontSize = $fontSize($extra['subtitle_2_font_size'] ?? null, 28);
     @endphp
 
-    <div class="landing-shell landing-hero__shell">
+    <div
+        class="landing-shell landing-hero__shell"
+        style="--hero-title-font-size: {{ $titleFontSize }}px; --hero-subtitle-1-font-size: {{ $subtitle1FontSize }}px; --hero-subtitle-2-font-size: {{ $subtitle2FontSize }}px;"
+    >
         <div class="landing-hero__content">
             @if ($section?->badge_text)
                 <div class="landing-badge">
@@ -36,6 +45,10 @@
 
             @if ($section?->subtitle)
                 <p class="landing-hero__subtitle">{{ $section->subtitle }}</p>
+            @endif
+
+            @if ($section?->description)
+                <p class="landing-hero__subtitle-2">{{ $section->description }}</p>
             @endif
 
             <ul class="hero-list hero-list--progress">

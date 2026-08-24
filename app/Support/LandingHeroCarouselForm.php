@@ -49,6 +49,10 @@ final class LandingHeroCarouselForm
             $extra['carousel_delay_ms'] = 5000;
         }
 
+        foreach (self::fontSizeDefaults() as $key => $default) {
+            $extra[$key] = self::normalizeFontSize($extra[$key] ?? null, $default);
+        }
+
         $data['extra'] = $extra;
 
         return $data;
@@ -66,6 +70,10 @@ final class LandingHeroCarouselForm
 
         $extra = is_array($data['extra'] ?? null) ? $data['extra'] : [];
         $slides = [];
+
+        foreach (self::fontSizeDefaults() as $key => $default) {
+            $extra[$key] = self::normalizeFontSize($extra[$key] ?? null, $default);
+        }
 
         foreach ($data['hero_carousel_slides'] ?? [] as $slide) {
             if (! is_array($slide)) {
@@ -89,6 +97,27 @@ final class LandingHeroCarouselForm
         $data['extra'] = $extra;
 
         return $data;
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    private static function fontSizeDefaults(): array
+    {
+        return [
+            'title_font_size' => 56,
+            'subtitle_1_font_size' => 40,
+            'subtitle_2_font_size' => 28,
+        ];
+    }
+
+    private static function normalizeFontSize(mixed $value, int $default): int
+    {
+        if (! is_numeric($value)) {
+            return $default;
+        }
+
+        return max(12, min(96, (int) $value));
     }
 
     public static function persistImage(mixed $state): ?string

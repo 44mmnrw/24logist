@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=2480, initial-scale=1">
+  <title>ЛогистРу — рекламный лист A4</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 2480px; height: 3508px; overflow: hidden; }
+    body {
+      font-family: Arial, "Segoe UI", sans-serif;
+      color: #0d2147;
+      background: #f7faff;
+    }
+    .page {
+      width: 2480px;
+      height: 3508px;
+      padding: 104px 132px 96px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    .vector-bg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; }
+    .logo-wrap {
+      width: 355px;
+      height: 86px;
+      display: flex;
+      align-items: center;
+      background: #fff;
+      border-radius: 20px;
+      padding: 12px 18px;
+      box-shadow: 0 10px 28px rgba(13, 33, 71, .09);
+    }
+    .logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
+    .eyebrow {
+      padding: 16px 26px;
+      border-radius: 999px;
+      background: #e8f0ff;
+      color: #0d67f3;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: .02em;
+    }
+    .hero {
+      background: linear-gradient(135deg, #0d2147 0%, #123b79 58%, #0d67f3 100%);
+      border-radius: 42px;
+      padding: 54px 62px 48px;
+      color: #fff;
+      box-shadow: 0 24px 70px rgba(13, 33, 71, .19);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 520px;
+      height: 520px;
+      right: -150px;
+      top: -245px;
+      border: 64px solid rgba(25, 189, 73, .34);
+      border-radius: 50%;
+    }
+    h1 { margin: 0; font-size: 82px; line-height: 1.05; letter-spacing: -.035em; max-width: 1850px; }
+    .hero p { margin: 24px 0 0; font-size: 33px; line-height: 1.42; max-width: 1840px; color: #dce9ff; }
+    .section-title { display: flex; align-items: center; gap: 18px; margin-bottom: 22px; }
+    .section-title .num {
+      width: 54px; height: 54px; border-radius: 17px; display: grid; place-items: center;
+      color: #fff; background: #0d67f3; font-size: 28px; font-weight: 900;
+      box-shadow: 0 8px 18px rgba(13, 103, 243, .22);
+    }
+    .section-title h2 { margin: 0; font-size: 42px; line-height: 1.1; letter-spacing: -.02em; }
+    .solutions { padding: 24px 8px 2px; }
+    .solution-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .solution {
+      min-height: 112px;
+      border-radius: 26px;
+      background: rgba(255,255,255,.92);
+      border: 2px solid #dce7f8;
+      padding: 25px 30px;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      box-shadow: 0 10px 28px rgba(13, 33, 71, .07);
+      font-size: 31px;
+      line-height: 1.18;
+      font-weight: 800;
+    }
+    .check {
+      flex: 0 0 auto; width: 52px; height: 52px; border-radius: 16px;
+      display: grid; place-items: center; background: #e3f8eb; color: #12a744;
+      font-size: 32px; font-weight: 900;
+    }
+    .request-section { display: grid; grid-template-columns: 700px 1fr; gap: 34px; align-items: stretch; }
+    .request-copy {
+      background: #fff;
+      border-radius: 34px;
+      padding: 40px 42px;
+      border: 2px solid #dce7f8;
+      box-shadow: 0 14px 36px rgba(13, 33, 71, .09);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .request-copy .pill { align-self: flex-start; color: #0d67f3; background: #eaf1ff; font-size: 25px; font-weight: 800; padding: 12px 18px; border-radius: 999px; }
+    .request-copy h3 { margin: 25px 0 18px; font-size: 50px; line-height: 1.06; letter-spacing: -.025em; }
+    .request-copy p { margin: 0; color: #526481; font-size: 29px; line-height: 1.42; }
+    .request-copy strong { color: #13a848; }
+    .screen {
+      min-height: 700px;
+      border-radius: 34px;
+      padding: 18px;
+      background: linear-gradient(135deg, #dce9ff, #d9f8e6);
+      box-shadow: 0 16px 44px rgba(13, 33, 71, .12);
+      overflow: hidden;
+      position: relative;
+    }
+    .screen img {
+      width: 100%; height: 100%; border-radius: 22px;
+      object-fit: cover; object-position: 50% 6%; display: block;
+      box-shadow: 0 8px 22px rgba(13, 33, 71, .15);
+    }
+    .screen-label {
+      position: absolute; left: 42px; bottom: 40px;
+      border-radius: 16px; padding: 14px 20px; background: rgba(13,33,71,.92);
+      color: #fff; font-size: 24px; font-weight: 800;
+    }
+    .scenario-wrap { padding: 6px 0 0; }
+    .scenarios { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+    .scenario {
+      border-radius: 30px;
+      background: rgba(255,255,255,.94);
+      border: 2px solid #dce7f8;
+      padding: 30px 32px;
+      box-shadow: 0 12px 30px rgba(13, 33, 71, .07);
+    }
+    .scenario-head { display: flex; align-items: center; gap: 16px; margin-bottom: 23px; }
+    .scenario-badge { width: 54px; height: 54px; border-radius: 18px; display: grid; place-items: center; color: #fff; background: #0d67f3; font-size: 28px; font-weight: 900; }
+    .scenario:nth-child(2) .scenario-badge { background: #17ac4c; }
+    .scenario h3 { margin: 0; font-size: 34px; line-height: 1.1; }
+    .flow { display: flex; align-items: stretch; gap: 9px; }
+    .step { flex: 1; min-height: 92px; padding: 15px 12px; border-radius: 16px; background: #f0f5ff; color: #17345f; display: grid; place-items: center; text-align: center; font-size: 21px; line-height: 1.2; font-weight: 750; }
+    .scenario:nth-child(2) .step { background: #edf9f1; }
+    .arrow { align-self: center; color: #7395c8; font-size: 28px; font-weight: 900; }
+    .value {
+      display: grid;
+      grid-template-columns: 1.06fr 1.54fr;
+      gap: 26px;
+    }
+    .our-value {
+      border-radius: 34px;
+      padding: 40px 42px;
+      color: #fff;
+      background: linear-gradient(140deg, #0d2147, #0d67f3);
+      box-shadow: 0 18px 45px rgba(13, 33, 71, .16);
+    }
+    .our-value .label, .client-value .label { font-size: 25px; font-weight: 900; text-transform: uppercase; letter-spacing: .06em; opacity: .78; }
+    .our-value blockquote { margin: 22px 0 0; font-size: 34px; line-height: 1.33; font-weight: 800; letter-spacing: -.012em; }
+    .client-value {
+      border-radius: 34px;
+      padding: 38px 40px;
+      background: #fff;
+      border: 2px solid #dce7f8;
+      box-shadow: 0 14px 36px rgba(13, 33, 71, .09);
+    }
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 22px; }
+    .metric { border-radius: 22px; padding: 19px 14px; background: #f4f7fb; text-align: center; }
+    .metric strong { display: block; color: #0d67f3; font-size: 37px; line-height: 1; margin-bottom: 10px; }
+    .metric span { display: block; color: #526481; font-size: 19px; line-height: 1.18; font-weight: 700; }
+    .savings { margin-top: 17px; display: flex; align-items: center; justify-content: center; gap: 14px; border-radius: 18px; padding: 15px 20px; background: #e8f8ed; color: #107f37; font-size: 25px; font-weight: 800; }
+    .cta {
+      margin-top: auto;
+      min-height: 180px;
+      border-radius: 34px;
+      padding: 34px 44px;
+      background: linear-gradient(90deg, #18b34f, #17c85a);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 30px;
+      box-shadow: 0 18px 48px rgba(18, 167, 68, .25);
+    }
+    .cta h2 { margin: 0; font-size: 47px; line-height: 1.08; letter-spacing: -.02em; }
+    .cta p { margin: 12px 0 0; font-size: 26px; color: #eafff0; }
+    .url { flex: 0 0 auto; border-radius: 999px; background: #fff; color: #0d67f3; padding: 24px 38px; font-size: 32px; font-weight: 900; box-shadow: 0 9px 22px rgba(13,33,71,.15); }
+    .foot { position: absolute; bottom: 30px; right: 142px; color: #7d8da8; font-size: 18px; }
+    @media print {
+      @page { size: 656.167mm 928.158mm; margin: 0; }
+      html, body { width: 2480px; height: 3508px; }
+      .page { zoom: 1; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <svg class="vector-bg" viewBox="0 0 2480 3508" aria-hidden="true">
+      <defs>
+        <pattern id="grid" width="34" height="34" patternUnits="userSpaceOnUse">
+          <circle cx="3" cy="3" r="2.2" fill="#0d67f3" opacity=".075"/>
+        </pattern>
+        <linearGradient id="routeFade" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#0d67f3" stop-opacity=".08"/>
+          <stop offset=".55" stop-color="#0d67f3" stop-opacity=".26"/>
+          <stop offset="1" stop-color="#19bd49" stop-opacity=".22"/>
+        </linearGradient>
+      </defs>
+      <rect width="2480" height="3508" fill="#f7faff"/>
+      <path d="M0 540 C260 320 360 240 590 170 S1010 130 1110 0" fill="none" stroke="#0d67f3" stroke-width="5" opacity=".12"/>
+      <path d="M2480 430 C2300 360 2240 210 2110 175 S1870 230 1730 0" fill="none" stroke="url(#routeFade)" stroke-width="6"/>
+      <path d="M0 2920 C260 2780 300 3020 520 3140 S870 3300 1120 3508" fill="none" stroke="url(#routeFade)" stroke-width="6"/>
+      <path d="M2480 2440 C2260 2520 2240 2740 2150 2880 S1980 3180 1870 3508" fill="none" stroke="#0d67f3" stroke-width="5" opacity=".14"/>
+      <rect x="0" y="0" width="540" height="720" fill="url(#grid)" opacity=".55"/>
+      <rect x="1960" y="2640" width="520" height="868" fill="url(#grid)" opacity=".48"/>
+      <g fill="#19bd49" opacity=".48">
+        <circle cx="315" cy="355" r="13"/><circle cx="2245" cy="295" r="10"/>
+        <circle cx="338" cy="3060" r="11"/><circle cx="2165" cy="2865" r="13"/>
+      </g>
+    </svg>
+    <div class="topbar">
+      <div class="logo-wrap"><img src="../../public/images/logo.svg" alt="ЛогистРу"></div>
+      <div class="eyebrow">CRM ДЛЯ ЭКСПЕДИТОРОВ</div>
+    </div>
+
+    <section class="hero">
+      <h1>Заявки, рейсы и ЭДО<br>в одном кабинете</h1>
+      <p>ЛогистРу упрощает полный цикл работы экспедитора: от первой заявки Заказчика до перевозочных документов, контроля рейса, оплат и прибыли.</p>
+    </section>
+
+    <section class="solutions">
+      <div class="section-title"><span class="num">1</span><h2>Основные решения</h2></div>
+      <div class="solution-grid">
+        <div class="solution"><span class="check">✓</span>Создавайте заявки</div>
+        <div class="solution"><span class="check">✓</span>Контролируйте оплаты</div>
+        <div class="solution"><span class="check">✓</span>Следите за статусом доставки</div>
+        <div class="solution"><span class="check">✓</span>Формируйте перевозочные документы согласно ФЗ</div>
+      </div>
+    </section>
+
+    <section class="request-section">
+      <div class="request-copy">
+        <span class="pill">ЗАЯВКА</span>
+        <h3>Всё по рейсу —<br>в одной карточке</h3>
+        <p>Маршрут, статусы, участники, ставки, документы и прибыль. Первая договор-заявка оформляется за <strong>5 минут</strong>.</p>
+      </div>
+      <div class="screen">
+        <img src="../../public/storage/landing/hero/MacBook%20Pro-1783268187056_edited.png" alt="Карточка заявки в ЛогистРу">
+        <div class="screen-label">Реальный интерфейс ЛогистРу</div>
+      </div>
+    </section>
+
+    <section class="scenario-wrap">
+      <div class="section-title"><span class="num">2</span><h2>Два сценария работы с заявкой</h2></div>
+      <div class="scenarios">
+        <article class="scenario">
+          <div class="scenario-head"><span class="scenario-badge">1</span><h3>Заявка от Заказчика</h3></div>
+          <div class="flow">
+            <div class="step">Получили заявку</div><div class="arrow">→</div>
+            <div class="step">Создали рейс</div><div class="arrow">→</div>
+            <div class="step">Передали перевозчику</div><div class="arrow">→</div>
+            <div class="step">Контроль и оплата</div>
+          </div>
+        </article>
+        <article class="scenario">
+          <div class="scenario-head"><span class="scenario-badge">2</span><h3>Поручение и ЭПД</h3></div>
+          <div class="flow">
+            <div class="step">Входящее поручение</div><div class="arrow">→</div>
+            <div class="step">Заказ-заявка</div><div class="arrow">→</div>
+            <div class="step">ЭТрН в несколько кликов</div><div class="arrow">→</div>
+            <div class="step">Архив и аналитика</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="value">
+      <div class="our-value">
+        <div class="label">Наша главная ценность</div>
+        <blockquote>Упрощаем процесс работы с заявкой от Заказчика — делаем его простым, понятным и удобным.</blockquote>
+      </div>
+      <div class="client-value">
+        <div class="label">Ценность для клиента</div>
+        <div class="metrics">
+          <div class="metric"><strong>40 мин</strong><span>презентация системы</span></div>
+          <div class="metric"><strong>1 час</strong><span>внедрение</span></div>
+          <div class="metric"><strong>5 мин</strong><span>первая заявка</span></div>
+          <div class="metric"><strong>1 ч 45 мин</strong><span>до начала работы</span></div>
+        </div>
+        <div class="savings">↓ 30–60% времени на работу с документами</div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <div>
+        <h2>Создайте кабинет и работайте правильно!</h2>
+        <p>Начните с короткой презентации — и уже сегодня оформите первую заявку.</p>
+      </div>
+      <div class="url">24logist.ru</div>
+    </section>
+
+    <div class="foot">Формат A4 · 210 × 297 мм</div>
+  </main>
+</body>
+</html>
