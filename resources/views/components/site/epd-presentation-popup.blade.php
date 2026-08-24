@@ -16,7 +16,7 @@
     aria-hidden="true"
     hidden
 >
-    <button class="epd-popup__backdrop" type="button" data-epd-popup-close aria-label="Закрыть окно"></button>
+    <div class="epd-popup__backdrop" aria-hidden="true"></div>
 
     <div class="epd-popup__card" role="document">
         <button class="epd-popup__close" type="button" data-epd-popup-close aria-label="Закрыть">×</button>
