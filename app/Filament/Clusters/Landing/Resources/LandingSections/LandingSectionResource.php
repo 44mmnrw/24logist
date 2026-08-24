@@ -71,7 +71,7 @@ class LandingSectionResource extends Resource
                 TextInput::make('title')
                     ->label('Заголовок')
                     ->maxLength(255),
-                TextInput::make('extra.title_font_size')
+                TextInput::make('hero_title_font_size')
                     ->label('Размер заголовка')
                     ->numeric()
                     ->minValue(12)
@@ -84,7 +84,7 @@ class LandingSectionResource extends Resource
                         ? 'Подзаголовок 1'
                         : 'Подзаголовок')
                     ->rows(fn (?LandingSection $record): int => $record?->slug === 'hero' ? 1 : 2),
-                TextInput::make('extra.subtitle_1_font_size')
+                TextInput::make('hero_subtitle_1_font_size')
                     ->label('Размер подзаголовка 1')
                     ->numeric()
                     ->minValue(12)
@@ -105,7 +105,7 @@ class LandingSectionResource extends Resource
                         default => 4,
                     })
                     ->columnSpan(fn (?LandingSection $record): int|string => $record?->slug === 'hero' ? 1 : 'full'),
-                TextInput::make('extra.subtitle_2_font_size')
+                TextInput::make('hero_subtitle_2_font_size')
                     ->label('Размер подзаголовка 2')
                     ->numeric()
                     ->minValue(12)

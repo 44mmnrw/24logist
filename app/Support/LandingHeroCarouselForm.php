@@ -49,8 +49,9 @@ final class LandingHeroCarouselForm
             $extra['carousel_delay_ms'] = 5000;
         }
 
-        foreach (self::fontSizeDefaults() as $key => $default) {
+        foreach (self::fontSizeFields() as $field => [$key, $default]) {
             $extra[$key] = self::normalizeFontSize($extra[$key] ?? null, $default);
+            $data[$field] = $extra[$key];
         }
 
         $data['extra'] = $extra;
@@ -71,8 +72,12 @@ final class LandingHeroCarouselForm
         $extra = is_array($data['extra'] ?? null) ? $data['extra'] : [];
         $slides = [];
 
-        foreach (self::fontSizeDefaults() as $key => $default) {
-            $extra[$key] = self::normalizeFontSize($extra[$key] ?? null, $default);
+        foreach (self::fontSizeFields() as $field => [$key, $default]) {
+            $extra[$key] = self::normalizeFontSize(
+                $data[$field] ?? $extra[$key] ?? null,
+                $default,
+            );
+            unset($data[$field]);
         }
 
         foreach ($data['hero_carousel_slides'] ?? [] as $slide) {
@@ -100,14 +105,14 @@ final class LandingHeroCarouselForm
     }
 
     /**
-     * @return array<string, int>
+     * @return array<string, array{string, int}>
      */
-    private static function fontSizeDefaults(): array
+    private static function fontSizeFields(): array
     {
         return [
-            'title_font_size' => 56,
-            'subtitle_1_font_size' => 40,
-            'subtitle_2_font_size' => 28,
+            'hero_title_font_size' => ['title_font_size', 56],
+            'hero_subtitle_1_font_size' => ['subtitle_1_font_size', 40],
+            'hero_subtitle_2_font_size' => ['subtitle_2_font_size', 28],
         ];
     }
 

@@ -17,6 +17,9 @@ class LandingHeroCarouselFormTest extends TestCase
         $this->assertSame(56, $data['extra']['title_font_size']);
         $this->assertSame(40, $data['extra']['subtitle_1_font_size']);
         $this->assertSame(28, $data['extra']['subtitle_2_font_size']);
+        $this->assertSame(56, $data['hero_title_font_size']);
+        $this->assertSame(40, $data['hero_subtitle_1_font_size']);
+        $this->assertSame(28, $data['hero_subtitle_2_font_size']);
     }
 
     public function test_it_limits_hero_font_sizes_saved_from_the_admin_form(): void
