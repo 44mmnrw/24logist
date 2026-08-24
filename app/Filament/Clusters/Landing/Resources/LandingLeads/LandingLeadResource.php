@@ -52,7 +52,7 @@ class LandingLeadResource extends Resource
                 TextEntry::make('status')
                     ->label('Статус')
                     ->formatStateUsing(fn (LandingLead $record): string => $record->statusLabel()),
-                TextEntry::make('name')->label('Имя'),
+                TextEntry::make('name')->label('Имя / контакт'),
                 TextEntry::make('phone')->label('Телефон'),
                 TextEntry::make('email')->label('Email')->placeholder('—'),
                 TextEntry::make('message')
@@ -65,13 +65,13 @@ class LandingLeadResource extends Resource
                     ->placeholder('—')
                     ->visible(fn (LandingLead $record): bool => $record->type === LandingLead::TYPE_QUIZ),
                 RepeatableEntry::make('quiz_answers')
-                    ->label('Ответы квиза')
+                    ->label('Данные заявки')
                     ->schema([
                         TextEntry::make('question')->label('Вопрос'),
                         TextEntry::make('answer')->label('Ответ'),
                     ])
                     ->columnSpanFull()
-                    ->visible(fn (LandingLead $record): bool => $record->type === LandingLead::TYPE_QUIZ),
+                    ->visible(fn (LandingLead $record): bool => filled($record->quiz_answers)),
                 TextEntry::make('source_url')->label('Страница')->placeholder('—')->columnSpanFull(),
                 TextEntry::make('ip')->label('IP')->placeholder('—'),
                 TextEntry::make('created_at')->label('Создана')->dateTime('d.m.Y H:i'),
@@ -91,7 +91,7 @@ class LandingLeadResource extends Resource
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => LandingLead::TYPE_LABELS[$state] ?? $state),
                 TextColumn::make('name')
-                    ->label('Имя')
+                    ->label('Имя / контакт')
                     ->searchable(),
                 TextColumn::make('phone')
                     ->label('Телефон')

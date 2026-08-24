@@ -44,6 +44,10 @@ final class GeneralSiteSettingForm
                         ->label('Telegram-окно')
                         ->icon('heroicon-o-paper-airplane')
                         ->schema(self::telegramPopupTab()),
+                    Tab::make('epd_popup')
+                        ->label('Баннер ЭПД')
+                        ->icon('heroicon-o-document-text')
+                        ->schema(self::epdPopupTab()),
                     Tab::make('organization')
                         ->label('Компания')
                         ->icon('heroicon-o-building-office-2')
@@ -362,6 +366,24 @@ final class GeneralSiteSettingForm
                         ->required(),
                 ])
                 ->columns(2)
+                ->columnSpanFull(),
+        ];
+    }
+
+    /**
+     * @return array<int, mixed>
+     */
+    private static function epdPopupTab(): array
+    {
+        return [
+            Section::make('Анонс презентации модуля ЭПД')
+                ->description('Управляет всплывающим баннером 27.08 с формой заявки на презентацию.')
+                ->schema([
+                    Toggle::make('epd_popup_enabled')
+                        ->label('Баннер включён')
+                        ->helperText('После сохранения баннер будет добавлен или удалён со всех публичных страниц сайта.')
+                        ->default(true),
+                ])
                 ->columnSpanFull(),
         ];
     }

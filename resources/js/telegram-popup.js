@@ -65,6 +65,13 @@ if (popup) {
         }, 200);
     };
 
+    document.addEventListener('epd-popup:open', () => {
+        isSuppressed = true;
+        writeStorage(window.sessionStorage, suppressedSessionKey, '1');
+        cleanupTriggers();
+        close();
+    });
+
     const show = () => {
         if (
             isSuppressed

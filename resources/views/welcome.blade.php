@@ -55,6 +55,7 @@
         </main>
         <x-landing.footer />
     </div>
+    <x-site.epd-presentation-popup />
     <x-site.telegram-popup />
     <x-site.cookie-consent />
     <x-analytics.yandex-metrika />

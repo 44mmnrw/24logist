@@ -10,6 +10,8 @@ class LandingLead extends Model
 
     public const TYPE_CONTACT = 'contact';
 
+    public const TYPE_EPD_PRESENTATION = 'epd_presentation';
+
     public const STATUS_NEW = 'new';
 
     public const STATUS_PROCESSED = 'processed';
@@ -18,6 +20,7 @@ class LandingLead extends Model
     public const TYPE_LABELS = [
         self::TYPE_QUIZ => 'Квиз (просчёт тарифа)',
         self::TYPE_CONTACT => 'Форма контактов',
+        self::TYPE_EPD_PRESENTATION => 'Презентация модуля ЭПД',
     ];
 
     /** @var array<string, string> */

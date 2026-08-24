@@ -54,6 +54,21 @@ final class LandingLeadNotificationService
         $subject = LandingLeadMailTemplate::render($subjectTemplate, $lead, $site, ['{admin_url}' => $adminUrl]);
         $body = LandingLeadMailTemplate::render($bodyTemplate, $lead, $site, ['{admin_url}' => $adminUrl]);
 
+        if ($lead->type === LandingLead::TYPE_EPD_PRESENTATION && filled($lead->quiz_answers)) {
+            $details = collect($lead->quiz_answers)
+                ->filter(fn (mixed $row): bool => is_array($row))
+                ->map(fn (array $row): string => sprintf(
+                    '%s: %s',
+                    trim((string) ($row['question'] ?? 'Поле')),
+                    trim((string) ($row['answer'] ?? '—')),
+                ))
+                ->implode("\n");
+
+            if ($details !== '') {
+                $body = rtrim($body)."\n\nДанные заявки:\n".$details;
+            }
+        }
+
         try {
             $this->mail->apply();
 

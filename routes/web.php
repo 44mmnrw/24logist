@@ -52,6 +52,10 @@ Route::post('/leads/contact', [LandingLeadController::class, 'storeContact'])
     ->middleware('throttle:12,1')
     ->name('leads.contact.store');
 
+Route::post('/leads/epd-presentation', [LandingLeadController::class, 'storeEpdPresentation'])
+    ->middleware('throttle:12,1')
+    ->name('leads.epd-presentation.store');
+
 Route::get('/blog', [BlogController::class, 'index'])
     ->name('blog.index');
 
