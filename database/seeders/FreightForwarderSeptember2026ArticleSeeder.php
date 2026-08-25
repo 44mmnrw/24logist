@@ -248,7 +248,7 @@ class FreightForwarderSeptember2026ArticleSeeder extends Seeder
 <li><a href="https://www.consultant.ru/document/cons_doc_LAW_9027/bf3951e6ba650293a571c5ac9176cf6b7af35874/" target="_blank">Статья 801 ГК РФ: договор транспортной экспедиции</a>.</li>
 <li><a href="https://www.consultant.ru/document/cons_doc_LAW_301030/b52d852a5971a1f62acb81af7fe681c662d09256/" target="_blank">Пункты 25–26 Постановления Пленума Верховного Суда РФ от 26.06.2018 № 26</a>.</li>
 </ol>
-<p>Подробнее о последовательности Т1–Т4 читайте в нашем <a href="/blog/prakticeskoe-rukovodstvo">практическом руководстве по ЭТрН</a>.</p>
+<p>Подробнее о последовательности Т1–Т4 читайте в нашем <a href="/blog/ehtrn-s-1-sentyabrya-2026-goda-prakticheskoe-rukovodstvo-dlya-uchastnikov-gruzoperevozok">практическом руководстве по ЭТрН</a>.</p>
 <p>Наш открытый Telegram-канал: <a href="https://t.me/logistru24" target="_blank">t.me/logistru24</a></p>
 <p><a href="https://logistsystem.ru/register" target="_blank">Создать личный кабинет для работы с ЭПД</a></p>
 <p style="text-align: center;"><strong>Подготовлено для пользователей ЛогистРу</strong></p>
