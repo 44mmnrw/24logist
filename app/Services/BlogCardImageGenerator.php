@@ -18,7 +18,7 @@ class BlogCardImageGenerator
 
     private const BACKGROUND_HEIGHT = 90;
 
-    private const LAYOUT_VERSION = '2';
+    private const LAYOUT_VERSION = '3';
 
     private const LOGO_WIDTH = 360;
 
@@ -135,7 +135,7 @@ class BlogCardImageGenerator
 
     private function placeLogo(GdImage $canvas, string $position): void
     {
-        $logoPath = resource_path('images/blog-tag-logo.png');
+        $logoPath = public_path('images/logo/logo_platform.png');
         $logo = @imagecreatefrompng($logoPath);
 
         if (! $logo) {
