@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\BlogPost;
 use App\Services\BlogCardImageGenerator;
+use App\Services\BlogImageOptimizer;
 use Illuminate\Console\Command;
 use Throwable;
 
@@ -16,7 +17,7 @@ class GenerateBlogCardImages extends Command
 
     protected $description = 'Создаёт миниатюры статей 1200×675 с размытым фоном без обрезания исходного изображения';
 
-    public function handle(BlogCardImageGenerator $generator): int
+    public function handle(BlogCardImageGenerator $generator, BlogImageOptimizer $optimizer): int
     {
         $query = BlogPost::query()
             ->whereNotNull('cover_image_path')
@@ -34,9 +35,13 @@ class GenerateBlogCardImages extends Command
         }
 
         $errors = [];
-        $this->withProgressBar($posts, function (BlogPost $post) use ($generator, &$errors): void {
+        $this->withProgressBar($posts, function (BlogPost $post) use ($generator, $optimizer, &$errors): void {
             try {
-                $generator->generate($post, (bool) $this->option('show-logo'));
+                $generator->generate(
+                    $post,
+                    (bool) $this->option('show-logo') || (bool) $post->show_card_logo,
+                );
+                $optimizer->optimizePost($post->refresh());
             } catch (Throwable $exception) {
                 $errors[] = $post->slug.': '.$exception->getMessage();
             }

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\BlogImageOptimizer;
 use App\Services\ImageVariantGenerator;
 use App\Services\LandingImageOptimizer;
 use App\Support\ImageVariants;
@@ -18,6 +19,7 @@ class OptimizeImagesCommand extends Command
 
     public function handle(
         ImageVariantGenerator $generator,
+        BlogImageOptimizer $blogOptimizer,
         LandingImageOptimizer $landingOptimizer,
     ): int {
         $directory = trim((string) $this->option('directory'), '/\\ ');
@@ -55,6 +57,7 @@ class OptimizeImagesCommand extends Command
         $this->withProgressBar($files, function (string $path) use (
             $force,
             $generator,
+            $blogOptimizer,
             $landingOptimizer,
             &$generated,
             &$skipped,
@@ -62,7 +65,9 @@ class OptimizeImagesCommand extends Command
         ): void {
             $result = $generator->generate(
                 $path,
-                $landingOptimizer->widthsForPath($path),
+                str_starts_with($path, 'blog/')
+                    ? $blogOptimizer->widthsForPath($path)
+                    : $landingOptimizer->widthsForPath($path),
                 $force,
             );
 

@@ -255,7 +255,7 @@ class FreightForwarderSeptember2026ArticleSeeder extends Seeder
 <p style="text-align: center;"><em>Актуально на 21 августа 2026 года</em></p>
 HTML,
                 'cover_image_path' => 'images/blog/ekspeditor-2026/cover.png',
-                'card_image_path' => 'images/blog/ekspeditor-2026/cover.png',
+                'card_source_image_path' => 'images/blog/ekspeditor-2026/cover.png',
                 'show_card_logo' => true,
                 'card_logo_position' => 'top-left',
                 'cover_image_alt' => 'Работа экспедиторской компании с электронными документами и ЭТрН с 1 сентября 2026 года',

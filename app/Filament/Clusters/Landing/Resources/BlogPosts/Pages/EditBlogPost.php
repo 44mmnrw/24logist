@@ -4,6 +4,7 @@ namespace App\Filament\Clusters\Landing\Resources\BlogPosts\Pages;
 
 use App\Filament\Clusters\Landing\Resources\BlogPosts\BlogPostResource;
 use App\Services\BlogCardImageGenerator;
+use App\Services\BlogImageOptimizer;
 use App\Services\SitemapService;
 use App\Support\FilamentMediaUpload;
 use Filament\Actions\Action;
@@ -31,7 +32,7 @@ class EditBlogPost extends EditRecord
     protected function mutateFormDataBeforeFill(array $data): array
     {
         $data = FilamentMediaUpload::wrapPathForFill($data, 'cover_image_path');
-        $data = FilamentMediaUpload::wrapPathForFill($data, 'card_image_path');
+        $data = FilamentMediaUpload::wrapPathForFill($data, 'card_source_image_path');
         $data = FilamentMediaUpload::wrapPathForFill($data, 'og_image_path');
         $data = FilamentMediaUpload::wrapPathForFill($data, 'twitter_image_path');
         $data = FilamentMediaUpload::wrapPathForFill($data, 'schema_image_path');
@@ -42,16 +43,22 @@ class EditBlogPost extends EditRecord
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $data['cover_image_path'] = FilamentMediaUpload::persist($data['cover_image_path'] ?? null, 'blog/covers');
-        $data['card_image_path'] = FilamentMediaUpload::persist($data['card_image_path'] ?? null, 'blog/cards');
+        $data['card_source_image_path'] = FilamentMediaUpload::persist($data['card_source_image_path'] ?? null, 'blog/cards');
         $data['og_image_path'] = FilamentMediaUpload::persist($data['og_image_path'] ?? null, 'blog/og');
         $data['twitter_image_path'] = FilamentMediaUpload::persist($data['twitter_image_path'] ?? null, 'blog/twitter');
         $data['schema_image_path'] = FilamentMediaUpload::persist($data['schema_image_path'] ?? null, 'blog/schema');
 
         $coverChanged = $data['cover_image_path'] !== $this->record->cover_image_path;
-        $usesGeneratedCard = str_starts_with((string) ($data['card_image_path'] ?? ''), 'blog/cards/generated/');
+        $sourceChanged = $data['card_source_image_path'] !== $this->record->card_source_image_path;
+        $logoChanged = (bool) ($data['show_card_logo'] ?? false) !== (bool) $this->record->show_card_logo;
+        $positionChanged = ($data['card_logo_position'] ?? 'top-left') !== $this->record->logoPosition();
 
-        $this->shouldGenerateCardImage = filled($data['cover_image_path'])
-            && (blank($data['card_image_path']) || ($coverChanged && $usesGeneratedCard));
+        $this->shouldGenerateCardImage = filled($data['card_source_image_path'] ?: $data['cover_image_path'])
+            && (blank($this->record->card_image_path)
+                || $coverChanged
+                || $sourceChanged
+                || $logoChanged
+                || $positionChanged);
 
         return $data;
     }
@@ -64,6 +71,8 @@ class EditBlogPost extends EditRecord
                 (bool) $this->record->show_card_logo,
             );
         }
+
+        app(BlogImageOptimizer::class)->optimizePost($this->record->refresh());
 
         app(SitemapService::class)->clearCache();
     }

@@ -79,6 +79,8 @@ chmod 775 storage/app/public/livewire-tmp
 
 log "generate AVIF/WebP image variants"
 php artisan images:optimize --directory=landing
+php artisan blog-cards:generate --force
+php artisan images:optimize --directory=blog
 
 log "clear caches"
 php artisan optimize:clear

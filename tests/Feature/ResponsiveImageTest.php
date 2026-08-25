@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\BlogPost;
 use App\Models\LandingSection;
 use App\Support\ImageVariants;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -65,5 +66,38 @@ class ResponsiveImageTest extends TestCase
         $this->assertTrue(ImageVariants::isOptimizableOriginal('landing/hero/dashboard.png'));
         $this->assertFalse(ImageVariants::isOptimizableOriginal('landing/hero/dashboard--640w.webp'));
         $this->assertFalse(ImageVariants::isOptimizableOriginal('landing/hero/dashboard--640w.avif'));
+    }
+
+    public function test_blog_cards_prefer_avif_with_webp_and_original_fallbacks(): void
+    {
+        Storage::disk('public')->put('blog/cards/card.webp', 'original');
+        Storage::disk('public')->put('blog/cards/card--640w.avif', 'avif');
+        Storage::disk('public')->put('blog/cards/card--640w.webp', 'webp');
+
+        BlogPost::query()->create([
+            'title' => 'Responsive blog card',
+            'slug' => 'responsive-blog-card',
+            'body' => 'Article body',
+            'card_image_path' => 'blog/cards/card.webp',
+            'is_published' => true,
+            'published_at' => now()->subDay(),
+        ]);
+
+        $this->get('/blog')
+            ->assertOk()
+            ->assertSee('type="image/avif"', false)
+            ->assertSee('/storage/blog/cards/card--640w.avif 640w', false)
+            ->assertSee('type="image/webp"', false)
+            ->assertSee('/storage/blog/cards/card--640w.webp 640w', false)
+            ->assertSee('src="/storage/blog/cards/card.webp"', false);
+    }
+
+    public function test_committed_blog_images_can_use_public_avif_variants(): void
+    {
+        $image = ImageVariants::data('images/blog/ekspeditor-2026/cover.png');
+
+        $this->assertStringContainsString('cover--640w.avif 640w', (string) $image['avif_srcset']);
+        $this->assertStringContainsString('cover--1280w.webp 1280w', (string) $image['webp_srcset']);
+        $this->assertStringEndsWith('/images/blog/ekspeditor-2026/cover.png', (string) $image['url']);
     }
 }

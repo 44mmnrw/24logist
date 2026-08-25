@@ -55,19 +55,13 @@ final class ImageVariants
             return [];
         }
 
-        $disk = Storage::disk('public');
-
-        if (! $disk->exists($sourcePath)) {
-            return [];
-        }
-
         $directory = pathinfo($sourcePath, PATHINFO_DIRNAME);
         $directory = $directory === '.' ? '' : $directory;
         $baseName = pathinfo($sourcePath, PATHINFO_FILENAME);
         $pattern = '/^'.preg_quote($baseName, '/').'--([1-9][0-9]*)w\.'.preg_quote($format, '/').'$/i';
         $variants = [];
 
-        foreach ($disk->files($directory) as $path) {
+        foreach (self::filesBeside($sourcePath, $directory) as $path) {
             if (! preg_match($pattern, basename($path), $matches)) {
                 continue;
             }
@@ -78,6 +72,49 @@ final class ImageVariants
         ksort($variants, SORT_NUMERIC);
 
         return $variants;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function filesBeside(string $sourcePath, string $directory): array
+    {
+        if (str_starts_with($sourcePath, 'images/')) {
+            $imagesRoot = realpath(public_path('images'));
+            $source = realpath(public_path($sourcePath));
+
+            if ($imagesRoot === false || $source === false) {
+                return [];
+            }
+
+            $imagesRoot = rtrim(str_replace('\\', '/', $imagesRoot), '/').'/';
+            $normalizedSource = str_replace('\\', '/', $source);
+
+            if (! str_starts_with($normalizedSource, $imagesRoot)) {
+                return [];
+            }
+
+            $absoluteDirectory = dirname($source);
+
+            if (! is_file($source) || ! is_dir($absoluteDirectory)) {
+                return [];
+            }
+
+            $prefix = $directory === '' ? '' : rtrim($directory, '/').'/';
+            $files = [];
+
+            foreach (new \FilesystemIterator($absoluteDirectory, \FilesystemIterator::SKIP_DOTS) as $file) {
+                if ($file->isFile()) {
+                    $files[] = $prefix.$file->getFilename();
+                }
+            }
+
+            return $files;
+        }
+
+        $disk = Storage::disk('public');
+
+        return $disk->exists($sourcePath) ? $disk->files($directory) : [];
     }
 
     public static function isVariantPath(string $path): bool

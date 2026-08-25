@@ -10,5 +10,7 @@ return [
     'widths' => [
         'hero' => [640, 1280],
         'mobile' => [320, 640],
+        'blog_card' => [640, 1200],
+        'blog_cover' => [640, 1280],
     ],
 ];

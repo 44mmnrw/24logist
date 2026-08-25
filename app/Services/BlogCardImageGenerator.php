@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\BlogPost;
+use App\Support\ImageVariants;
 use GdImage;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
@@ -17,22 +18,26 @@ class BlogCardImageGenerator
 
     private const BACKGROUND_HEIGHT = 90;
 
-    private const LAYOUT_VERSION = '1';
+    private const LAYOUT_VERSION = '2';
+
+    private const LOGO_WIDTH = 360;
+
+    private const LOGO_INSET = 36;
 
     public function generate(BlogPost $post, bool $showLogo = false): string
     {
         $this->assertGdIsAvailable();
 
-        $coverPath = trim((string) $post->cover_image_path);
+        $coverPath = trim((string) ($post->card_source_image_path ?: $post->cover_image_path));
 
         if ($coverPath === '') {
             throw new RuntimeException('У статьи не задана обложка.');
         }
 
         $disk = Storage::disk('public');
-        $sourcePath = $disk->path($coverPath);
+        $sourcePath = $this->resolveSourcePath($coverPath, $disk->path(''));
 
-        if (! is_file($sourcePath)) {
+        if ($sourcePath === null) {
             throw new RuntimeException('Файл обложки не найден: '.$coverPath);
         }
 
@@ -48,7 +53,16 @@ class BlogCardImageGenerator
             $this->renderBlurredBackground($canvas, $source);
             $this->renderContainedImage($canvas, $source);
 
-            $hash = substr(hash('sha256', self::LAYOUT_VERSION.'|'.hash_file('sha256', $sourcePath)), 0, 12);
+            if ($showLogo) {
+                $this->placeLogo($canvas, $post->logoPosition());
+            }
+
+            $hash = substr(hash('sha256', implode('|', [
+                self::LAYOUT_VERSION,
+                hash_file('sha256', $sourcePath),
+                $showLogo ? 'logo' : 'no-logo',
+                $post->logoPosition(),
+            ])), 0, 12);
             $path = 'blog/cards/generated/'.$post->slug.'-'.$hash.'.webp';
             $disk->makeDirectory(dirname($path));
 
@@ -59,7 +73,11 @@ class BlogCardImageGenerator
             $oldPath = trim((string) $post->card_image_path);
 
             if ($oldPath !== '' && $oldPath !== $path && str_starts_with($oldPath, 'blog/cards/generated/')) {
-                $disk->delete($oldPath);
+                $disk->delete([
+                    $oldPath,
+                    ...array_values(ImageVariants::for($oldPath, 'avif')),
+                    ...array_values(ImageVariants::for($oldPath, 'webp')),
+                ]);
             }
 
             $post->forceFill([
@@ -76,10 +94,80 @@ class BlogCardImageGenerator
 
     private function assertGdIsAvailable(): void
     {
-        foreach (['imagecreatetruecolor', 'imagecreatefromstring', 'imagefilter', 'imagewebp'] as $function) {
+        foreach (['imagecreatetruecolor', 'imagecreatefromstring', 'imagecreatefrompng', 'imagefilter', 'imagewebp'] as $function) {
             if (! function_exists($function)) {
                 throw new RuntimeException('Для генерации миниатюр необходимо PHP-расширение GD с WebP.');
             }
+        }
+    }
+
+    private function resolveSourcePath(string $path, string $storageRoot): ?string
+    {
+        if (str_starts_with($path, 'images/')) {
+            $publicImages = realpath(public_path('images'));
+            $source = realpath(public_path($path));
+
+            if ($publicImages === false || $source === false) {
+                return null;
+            }
+
+            $publicImages = rtrim(str_replace('\\', '/', $publicImages), '/').'/';
+            $normalizedSource = str_replace('\\', '/', $source);
+
+            return str_starts_with($normalizedSource, $publicImages) && is_file($source)
+                ? $source
+                : null;
+        }
+
+        $storageRoot = rtrim(str_replace('\\', '/', $storageRoot), '/').'/';
+        $source = realpath($storageRoot.ltrim($path, '/'));
+
+        if ($source === false) {
+            return null;
+        }
+
+        $normalizedSource = str_replace('\\', '/', $source);
+
+        return str_starts_with($normalizedSource, $storageRoot) && is_file($source)
+            ? $source
+            : null;
+    }
+
+    private function placeLogo(GdImage $canvas, string $position): void
+    {
+        $logoPath = resource_path('images/blog-tag-logo.png');
+        $logo = @imagecreatefrompng($logoPath);
+
+        if (! $logo) {
+            throw new RuntimeException('Не найден логотип для карточки статьи: '.$logoPath);
+        }
+
+        try {
+            $logoWidth = imagesx($logo);
+            $logoHeight = imagesy($logo);
+            $renderedHeight = (int) round($logoHeight * (self::LOGO_WIDTH / $logoWidth));
+            $x = str_ends_with($position, 'right')
+                ? self::WIDTH - self::LOGO_INSET - self::LOGO_WIDTH
+                : self::LOGO_INSET;
+            $y = str_starts_with($position, 'bottom')
+                ? self::HEIGHT - self::LOGO_INSET - $renderedHeight
+                : self::LOGO_INSET;
+
+            imagealphablending($canvas, true);
+            imagecopyresampled(
+                $canvas,
+                $logo,
+                $x,
+                $y,
+                0,
+                0,
+                self::LOGO_WIDTH,
+                $renderedHeight,
+                $logoWidth,
+                $logoHeight,
+            );
+        } finally {
+            imagedestroy($logo);
         }
     }
 

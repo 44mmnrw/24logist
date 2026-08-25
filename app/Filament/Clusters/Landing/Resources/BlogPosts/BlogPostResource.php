@@ -262,8 +262,8 @@ class BlogPostResource extends Resource
             Section::make('Миниатюра карточки')
                 ->description('При сохранении статьи миниатюра 16:9 автоматически создаётся из обложки. При необходимости здесь можно загрузить отдельный вариант.')
                 ->schema([
-                    FileUpload::make('card_image_path')
-                        ->label('Изображение карточки 16:9')
+                    FileUpload::make('card_source_image_path')
+                        ->label('Исходник карточки 16:9')
                         ->disk('public')
                         ->directory('blog/cards')
                         ->visibility('public')
@@ -283,7 +283,7 @@ class BlogPostResource extends Resource
                         ->openable()
                         ->downloadable()
                         ->getUploadedFileUsing(static::uploadPreview(...))
-                        ->helperText('Необязательно. Если оставить поле пустым, сайт создаст изображение 1200×675 px с размытым фоном без растягивания оригинала.')
+                        ->helperText('Необязательно. Если оставить поле пустым, карточка будет создана из обложки. Логотип физически встраивается в скачиваемый файл.')
                         ->columnSpanFull(),
                     Toggle::make('show_card_logo')
                         ->label('Показывать логотип ЛогистРу на изображениях статьи')

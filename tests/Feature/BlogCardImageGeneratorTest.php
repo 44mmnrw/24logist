@@ -63,5 +63,48 @@ class BlogCardImageGeneratorTest extends TestCase
 
         $this->assertTrue($post->hasPreparedCardImage());
         $this->assertTrue($post->shouldShowCardLogo());
+        $this->assertSame('blog/cards/card.webp', $post->articleImagePath());
+
+        $post->show_card_logo = false;
+
+        $this->assertSame('blog/covers/cover.jpg', $post->articleImagePath());
+    }
+
+    public function test_logo_is_baked_into_generated_card_and_position_changes_the_file(): void
+    {
+        if (! function_exists('imagecreatetruecolor') || ! function_exists('imagewebp')) {
+            $this->markTestSkipped('GD with WebP support is required.');
+        }
+
+        Storage::fake('public');
+
+        $coverPath = 'blog/covers/logo-source.jpg';
+        $source = imagecreatetruecolor(1200, 675);
+        $background = imagecolorallocate($source, 240, 240, 240);
+        imagefilledrectangle($source, 0, 0, 1199, 674, $background);
+        Storage::disk('public')->makeDirectory('blog/covers');
+        imagejpeg($source, Storage::disk('public')->path($coverPath), 90);
+        imagedestroy($source);
+
+        $post = BlogPost::query()->create([
+            'title' => 'Branded card',
+            'slug' => 'branded-card',
+            'body' => 'Article body',
+            'cover_image_path' => $coverPath,
+            'show_card_logo' => true,
+            'card_logo_position' => 'top-left',
+        ]);
+
+        $firstPath = app(BlogCardImageGenerator::class)->generate($post, true);
+        $firstHash = hash_file('sha256', Storage::disk('public')->path($firstPath));
+
+        $post->forceFill(['card_logo_position' => 'bottom-right'])->saveQuietly();
+        $secondPath = app(BlogCardImageGenerator::class)->generate($post, true);
+        $secondHash = hash_file('sha256', Storage::disk('public')->path($secondPath));
+
+        $this->assertNotSame($firstPath, $secondPath);
+        $this->assertNotSame($firstHash, $secondHash);
+        Storage::disk('public')->assertMissing($firstPath);
+        Storage::disk('public')->assertExists($secondPath);
     }
 }

@@ -31,6 +31,7 @@ class BlogPost extends Model
         'excerpt',
         'body',
         'cover_image_path',
+        'card_source_image_path',
         'card_image_path',
         'show_card_logo',
         'card_logo_position',
@@ -198,6 +199,20 @@ class BlogPost extends Model
         return LandingMedia::url($this->cover_image_path);
     }
 
+    public function articleImagePath(): ?string
+    {
+        return LandingMedia::normalizePath(
+            $this->show_card_logo && filled($this->card_image_path)
+                ? $this->card_image_path
+                : $this->cover_image_path,
+        );
+    }
+
+    public function articleImageUrl(): ?string
+    {
+        return LandingMedia::url($this->articleImagePath());
+    }
+
     public function cardImageUrl(): ?string
     {
         return LandingMedia::url($this->card_image_path ?: $this->cover_image_path);
@@ -257,6 +272,7 @@ class BlogPost extends Model
             }
 
             $post->cover_image_path = LandingMedia::normalizePath($post->cover_image_path);
+            $post->card_source_image_path = LandingMedia::normalizePath($post->card_source_image_path);
             $post->card_image_path = LandingMedia::normalizePath($post->card_image_path);
             $post->og_image_path = LandingMedia::normalizePath($post->og_image_path);
             $post->twitter_image_path = LandingMedia::normalizePath($post->twitter_image_path);

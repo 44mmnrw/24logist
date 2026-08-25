@@ -74,15 +74,24 @@
                 <div @class([
                     'landing-shell',
                     'blog-post-layout',
-                    'blog-post-layout--without-cover' => ! $post->coverImageUrl(),
+                    'blog-post-layout--without-cover' => ! $post->articleImageUrl(),
                 ])>
-                    @if ($post->coverImageUrl())
+                    @if ($post->articleImageUrl())
                         <figure @class([
                             'blog-post-cover',
                             'blog-post-cover--branded' => $post->shouldShowArticleLogo(),
                             $post->logoPositionClass() => $post->shouldShowArticleLogo(),
                         ])>
-                            <img src="{{ $post->coverImageUrl() }}" alt="{{ $post->cover_image_alt ?: $post->title }}">
+                            <x-landing.responsive-image
+                                :path="$post->articleImagePath()"
+                                :alt="$post->cover_image_alt ?: $post->title"
+                                width="1200"
+                                height="675"
+                                loading="eager"
+                                fetchpriority="high"
+                                sizes="(max-width: 860px) calc(100vw - 32px), 75vw"
+                                picture-class="blog-post-cover__picture"
+                            />
                         </figure>
                     @endif
 
@@ -137,10 +146,19 @@
                                         $relatedPost->logoPositionClass() => $relatedPost->shouldShowCardLogo(),
                                     ]) href="{{ $relatedPost->getUrl() }}" aria-label="{{ $relatedPost->title }}">
                                         @if ($relatedPost->cardImageUrl())
-                                            <img @class([
-                                                'blog-card__image',
-                                                'blog-card__image--prepared' => $relatedPost->hasPreparedCardImage(),
-                                            ]) src="{{ $relatedPost->cardImageUrl() }}" alt="{{ $relatedPost->cover_image_alt ?: $relatedPost->title }}" loading="lazy">
+                                            <x-landing.responsive-image
+                                                :path="$relatedPost->card_image_path ?: $relatedPost->cover_image_path"
+                                                :alt="$relatedPost->cover_image_alt ?: $relatedPost->title"
+                                                width="1200"
+                                                height="675"
+                                                loading="lazy"
+                                                sizes="(max-width: 760px) calc(100vw - 32px), 33vw"
+                                                :class="\Illuminate\Support\Arr::toCssClasses([
+                                                    'blog-card__image',
+                                                    'blog-card__image--prepared' => $relatedPost->hasPreparedCardImage(),
+                                                ])"
+                                                picture-class="blog-card__picture"
+                                            />
                                         @else
                                             <div class="blog-card__image-placeholder">24L</div>
                                         @endif
