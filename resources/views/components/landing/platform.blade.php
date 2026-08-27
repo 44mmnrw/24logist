@@ -101,7 +101,7 @@
                         @endif
                     </div>
                 </div>
-                <p>{{ $extra['deadline_text'] }}</p>
+                <p>{!! nl2br(e($extra['deadline_text'])) !!}</p>
                 @if (! empty($extra['deadline_button_text']))
                     <button type="button" class="btn btn--primary btn--sm">{{ $extra['deadline_button_text'] }}</button>
                 @endif

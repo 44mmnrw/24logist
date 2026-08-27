@@ -413,6 +413,7 @@ class LandingSectionResource extends Resource
                         Textarea::make('deadline_text')
                             ->label('Текст плашки')
                             ->rows(3)
+                            ->helperText('Нажимайте Enter, чтобы переносить текст на новую строку.')
                             ->columnSpanFull(),
                     ])
                     ->columns(2)
