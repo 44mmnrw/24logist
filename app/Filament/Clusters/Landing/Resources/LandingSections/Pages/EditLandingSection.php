@@ -6,6 +6,7 @@ use App\Filament\Clusters\Landing\Resources\LandingSections\LandingSectionResour
 use App\Services\LandingImageOptimizer;
 use App\Services\LandingPageService;
 use App\Services\SitemapService;
+use App\Support\LandingDeadlineForm;
 use App\Support\LandingFooterForm;
 use App\Support\LandingFunctionalForm;
 use App\Support\LandingGrowthForm;
@@ -27,12 +28,14 @@ class EditLandingSection extends EditRecord
     protected function mutateFormDataBeforeFill(array $data): array
     {
         return LandingGrowthForm::hydrate(
-            LandingFunctionalForm::hydrate(
-                LandingQuizForm::hydrate(
-                    LandingPricingForm::hydrate(
-                        LandingFooterForm::hydrate(
-                            LandingMobileForm::hydrate(
-                                LandingHeroCarouselForm::hydrate($data),
+            LandingDeadlineForm::hydrate(
+                LandingFunctionalForm::hydrate(
+                    LandingQuizForm::hydrate(
+                        LandingPricingForm::hydrate(
+                            LandingFooterForm::hydrate(
+                                LandingMobileForm::hydrate(
+                                    LandingHeroCarouselForm::hydrate($data),
+                                ),
                             ),
                         ),
                     ),
@@ -44,12 +47,14 @@ class EditLandingSection extends EditRecord
     protected function mutateFormDataBeforeSave(array $data): array
     {
         return LandingGrowthForm::dehydrate(
-            LandingFunctionalForm::dehydrate(
-                LandingQuizForm::dehydrate(
-                    LandingPricingForm::dehydrate(
-                        LandingFooterForm::dehydrate(
-                            LandingMobileForm::dehydrate(
-                                LandingHeroCarouselForm::dehydrate($data),
+            LandingDeadlineForm::dehydrate(
+                LandingFunctionalForm::dehydrate(
+                    LandingQuizForm::dehydrate(
+                        LandingPricingForm::dehydrate(
+                            LandingFooterForm::dehydrate(
+                                LandingMobileForm::dehydrate(
+                                    LandingHeroCarouselForm::dehydrate($data),
+                                ),
                             ),
                         ),
                     ),

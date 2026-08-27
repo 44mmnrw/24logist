@@ -400,17 +400,17 @@ class LandingSectionResource extends Resource
                 Section::make('Плашка «Дедлайн»')
                     ->description('Плашка о переходе на обязательный транспортный ЭДО внизу секции «Преимущества».')
                     ->schema([
-                        TextInput::make('extra.deadline_kicker')
+                        TextInput::make('deadline_kicker')
                             ->label('Надзаголовок')
                             ->maxLength(255),
-                        TextInput::make('extra.deadline_date')
+                        TextInput::make('deadline_date')
                             ->label('Дата')
                             ->maxLength(255),
-                        static::iconSelect('extra.deadline_icon', 'Иконка'),
-                        TextInput::make('extra.deadline_button_text')
+                        static::iconSelect('deadline_icon', 'Иконка'),
+                        TextInput::make('deadline_button_text')
                             ->label('Текст кнопки')
                             ->maxLength(255),
-                        Textarea::make('extra.deadline_text')
+                        Textarea::make('deadline_text')
                             ->label('Текст плашки')
                             ->rows(3)
                             ->columnSpanFull(),
