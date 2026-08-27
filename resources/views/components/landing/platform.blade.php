@@ -5,7 +5,9 @@
 @if ($section)
 <section class="platform-section" @if($section->anchorId()) id="{{ $section->anchorId() }}" @endif>
     @php
-        $extra = $section?->extra ?? [];
+        // The deadline banner is displayed here, but managed with the
+        // "Advantages" section in the admin panel.
+        $extra = $landing->section('why')?->extra ?? [];
         $cards = $landing->blocks('platform', 'card');
     @endphp
 

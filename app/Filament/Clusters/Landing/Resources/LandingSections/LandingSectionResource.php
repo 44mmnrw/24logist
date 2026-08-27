@@ -399,24 +399,24 @@ class LandingSectionResource extends Resource
                 TextInput::make('extra.deadline_kicker')
                     ->label('Дедлайн — надзаголовок')
                     ->maxLength(255)
-                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'platform'),
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'why'),
                 TextInput::make('extra.deadline_date')
                     ->label('Дедлайн — дата')
                     ->maxLength(255)
-                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'platform'),
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'why'),
                 static::iconSelect(
                     'extra.deadline_icon',
                     'Дедлайн — иконка',
-                    fn (?LandingSection $record): bool => $record?->slug === 'platform',
+                    fn (?LandingSection $record): bool => $record?->slug === 'why',
                 ),
                 Textarea::make('extra.deadline_text')
                     ->label('Дедлайн — текст')
                     ->rows(3)
-                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'platform'),
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'why'),
                 TextInput::make('extra.deadline_button_text')
                     ->label('Дедлайн — кнопка')
                     ->maxLength(255)
-                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'platform'),
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'why'),
                 static::iconSelect(
                     'extra.toggle_icon',
                     'Иконка раскрытия вопроса',
