@@ -22,6 +22,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
@@ -396,27 +397,27 @@ class LandingSectionResource extends Resource
                     'Иконка кнопки «Далее»',
                     fn (?LandingSection $record): bool => $record?->slug === 'quiz',
                 ),
-                TextInput::make('extra.deadline_kicker')
-                    ->label('Дедлайн — надзаголовок')
-                    ->maxLength(255)
-                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'why'),
-                TextInput::make('extra.deadline_date')
-                    ->label('Дедлайн — дата')
-                    ->maxLength(255)
-                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'why'),
-                static::iconSelect(
-                    'extra.deadline_icon',
-                    'Дедлайн — иконка',
-                    fn (?LandingSection $record): bool => $record?->slug === 'why',
-                ),
-                Textarea::make('extra.deadline_text')
-                    ->label('Дедлайн — текст')
-                    ->rows(3)
-                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'why'),
-                TextInput::make('extra.deadline_button_text')
-                    ->label('Дедлайн — кнопка')
-                    ->maxLength(255)
-                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'why'),
+                Section::make('Плашка «Дедлайн»')
+                    ->description('Плашка о переходе на обязательный транспортный ЭДО внизу секции «Преимущества».')
+                    ->schema([
+                        TextInput::make('extra.deadline_kicker')
+                            ->label('Надзаголовок')
+                            ->maxLength(255),
+                        TextInput::make('extra.deadline_date')
+                            ->label('Дата')
+                            ->maxLength(255),
+                        static::iconSelect('extra.deadline_icon', 'Иконка'),
+                        TextInput::make('extra.deadline_button_text')
+                            ->label('Текст кнопки')
+                            ->maxLength(255),
+                        Textarea::make('extra.deadline_text')
+                            ->label('Текст плашки')
+                            ->rows(3)
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(2)
+                    ->columnSpanFull()
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'platform'),
                 static::iconSelect(
                     'extra.toggle_icon',
                     'Иконка раскрытия вопроса',
