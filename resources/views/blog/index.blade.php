@@ -51,21 +51,31 @@
                         <article class="blog-featured">
                             <a @class([
                                 'blog-featured__media',
-                                'blog-card__media--branded' => $featuredPost->shouldShowCardLogo(),
-                                $featuredPost->logoPositionClass() => $featuredPost->shouldShowCardLogo(),
+                                'blog-featured__media--branded' => $featuredPost->shouldShowArticleLogo(),
+                                $featuredPost->logoPositionClass() => $featuredPost->shouldShowArticleLogo(),
                             ]) href="{{ $featuredPost->getUrl() }}" aria-label="{{ $featuredPost->title }}">
-                                @if ($featuredPost->cardImageUrl())
+                                @if ($featuredPost->coverImageUrl())
                                     <x-landing.responsive-image
-                                        :path="$featuredPost->card_image_path ?: $featuredPost->cover_image_path"
+                                        :path="$featuredPost->cover_image_path"
                                         :alt="$featuredPost->cover_image_alt ?: $featuredPost->title"
                                         width="1200"
-                                        height="675"
+                                        height="800"
                                         loading="eager"
                                         fetchpriority="high"
-                                        sizes="(max-width: 860px) calc(100vw - 32px), 52vw"
+                                        sizes="(max-width: 1024px) calc(100vw - 32px), 520px"
                                         class="blog-featured__image"
                                         picture-class="blog-featured__picture"
                                     />
+                                    @if ($featuredPost->shouldShowArticleLogo())
+                                        <img
+                                            class="blog-featured__logo"
+                                            src="{{ asset('images/logo/logo_platform.png') }}"
+                                            alt=""
+                                            aria-hidden="true"
+                                            width="360"
+                                            height="87"
+                                        >
+                                    @endif
                                 @else
                                     <div class="blog-card__image-placeholder">24L</div>
                                 @endif

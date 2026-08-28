@@ -115,6 +115,29 @@ class BlogTest extends TestCase
             ->assertDontSee('/storage/blog/covers/original.jpg', false);
     }
 
+    public function test_featured_post_uses_original_cover_without_generated_card_fields(): void
+    {
+        BlogPost::query()->create([
+            'title' => 'Featured original cover',
+            'slug' => 'featured-original-cover',
+            'body' => 'Article body',
+            'cover_image_path' => 'blog/covers/featured.jpg',
+            'card_image_path' => 'blog/cards/generated/featured.webp',
+            'show_card_logo' => true,
+            'card_logo_position' => 'top-left',
+            'is_featured' => true,
+            'is_published' => true,
+            'published_at' => now()->subDay(),
+        ]);
+
+        $this->get('/blog')
+            ->assertOk()
+            ->assertSee('src="/storage/blog/covers/featured.jpg"', false)
+            ->assertSee('class="blog-featured__logo"', false)
+            ->assertSee('blog-logo--top-left', false)
+            ->assertDontSee('/storage/blog/cards/generated/featured.webp', false);
+    }
+
     public function test_blog_index_shows_fixed_category_name(): void
     {
         $category = BlogCategory::query()->create([
