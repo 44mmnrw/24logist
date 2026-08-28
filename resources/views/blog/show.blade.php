@@ -90,6 +90,16 @@
                                 sizes="(max-width: 1024px) calc(100vw - 32px), 920px"
                                 picture-class="blog-post-cover__picture"
                             />
+                            @if ($post->shouldShowArticleLogo())
+                                <img
+                                    class="blog-post-cover__logo"
+                                    src="{{ asset('images/logo/logo_platform.png') }}"
+                                    alt=""
+                                    aria-hidden="true"
+                                    width="360"
+                                    height="88"
+                                >
+                            @endif
                         </figure>
                     @endif
 

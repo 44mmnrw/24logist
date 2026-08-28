@@ -2549,6 +2549,34 @@ body {
     height: auto;
 }
 
+.blog-post-cover .blog-post-cover__logo {
+    position: absolute;
+    z-index: 2;
+    width: min(30%, 360px);
+    height: auto;
+    pointer-events: none;
+}
+
+.blog-post-cover.blog-logo--top-left .blog-post-cover__logo {
+    top: 3%;
+    left: 3%;
+}
+
+.blog-post-cover.blog-logo--top-right .blog-post-cover__logo {
+    top: 3%;
+    right: 3%;
+}
+
+.blog-post-cover.blog-logo--bottom-left .blog-post-cover__logo {
+    bottom: 3%;
+    left: 3%;
+}
+
+.blog-post-cover.blog-logo--bottom-right .blog-post-cover__logo {
+    right: 3%;
+    bottom: 3%;
+}
+
 .blog-post-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 280px;

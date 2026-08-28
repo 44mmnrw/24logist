@@ -332,7 +332,9 @@ class BlogTest extends TestCase
         $this->get($post->getUrl())
             ->assertOk()
             ->assertSee('blog-post-cover--branded', false)
-            ->assertSee('blog-logo--bottom-right', false);
+            ->assertSee('blog-logo--bottom-right', false)
+            ->assertSee('class="blog-post-cover__logo"', false)
+            ->assertSee('/images/logo/logo_platform.png', false);
     }
 
     public function test_blog_post_page_outputs_extended_seo_metadata(): void
