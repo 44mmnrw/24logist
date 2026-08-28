@@ -87,7 +87,7 @@
                                 height="675"
                                 loading="eager"
                                 fetchpriority="high"
-                                sizes="(max-width: 1240px) calc(100vw - 32px), 1200px"
+                                sizes="(max-width: 1024px) calc(100vw - 32px), 920px"
                                 picture-class="blog-post-cover__picture"
                             />
                         </figure>

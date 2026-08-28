@@ -204,11 +204,7 @@ class BlogPost extends Model
 
     public function articleImagePath(): ?string
     {
-        return LandingMedia::normalizePath(
-            $this->show_card_logo && filled($this->card_image_path)
-                ? $this->card_image_path
-                : $this->cover_image_path,
-        );
+        return LandingMedia::normalizePath($this->cover_image_path);
     }
 
     public function articleImageUrl(): ?string

@@ -2536,7 +2536,7 @@ body {
     margin: 0;
     width: 100%;
     min-width: 0;
-    grid-column: 1 / -1;
+    grid-column: 1;
     justify-self: stretch;
     border-radius: 18px;
     overflow: hidden;

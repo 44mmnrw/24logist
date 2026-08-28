@@ -48,7 +48,7 @@ class BlogCardImageGeneratorTest extends TestCase
         $this->assertFalse($post->shouldShowCardLogo());
     }
 
-    public function test_card_image_falls_back_to_cover_and_logo_requires_prepared_image(): void
+    public function test_card_image_falls_back_to_cover_while_article_always_uses_original_cover(): void
     {
         $post = new BlogPost([
             'cover_image_path' => 'blog/covers/cover.jpg',
@@ -63,7 +63,7 @@ class BlogCardImageGeneratorTest extends TestCase
 
         $this->assertTrue($post->hasPreparedCardImage());
         $this->assertTrue($post->shouldShowCardLogo());
-        $this->assertSame('blog/cards/card.webp', $post->articleImagePath());
+        $this->assertSame('blog/covers/cover.jpg', $post->articleImagePath());
 
         $post->show_card_logo = false;
 
