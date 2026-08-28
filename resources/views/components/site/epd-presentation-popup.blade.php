@@ -4,7 +4,7 @@
     $popupVariant = $registrationVariant ? 'registration' : 'presentation';
 @endphp
 
-@if ($settings->epd_popup_enabled)
+@if ($settings->epd_popup_enabled || $settings->epd_popup_registration_enabled)
 <div
     class="epd-popup"
     data-epd-popup
@@ -52,6 +52,8 @@
                     <a
                         class="epd-popup__submit epd-popup__registration-cta"
                         href="https://logistsystem.ru/register"
+                        target="_blank"
+                        rel="noopener noreferrer"
                         data-epd-registration-cta
                     >Создать личный кабинет</a>
                 </div>

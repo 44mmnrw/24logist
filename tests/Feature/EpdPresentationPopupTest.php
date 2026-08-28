@@ -36,7 +36,7 @@ class EpdPresentationPopupTest extends TestCase
     public function test_registration_banner_variant_is_rendered_when_selected(): void
     {
         SiteSetting::instance()->update([
-            'epd_popup_enabled' => true,
+            'epd_popup_enabled' => false,
             'epd_popup_registration_enabled' => true,
         ]);
         app(SiteSettingsService::class)->clearCache();

@@ -376,16 +376,16 @@ final class GeneralSiteSettingForm
     private static function epdPopupTab(): array
     {
         return [
-            Section::make('Всплывающий баннер ЭПД')
-                ->description('Включите баннер и выберите, какой из двух вариантов показывать на сайте.')
+            Section::make('Всплывающие баннеры')
+                ->description('Каждый слайдер отдельно включает или выключает свой баннер.')
                 ->schema([
                     Toggle::make('epd_popup_enabled')
-                        ->label('Баннер включён')
-                        ->helperText('После сохранения баннер будет добавлен или удалён со всех публичных страниц сайта.')
+                        ->label('Всплывающий баннер ЭПД «Приглашение на презентацию»')
+                        ->helperText('Включает или выключает баннер с формой записи на презентацию.')
                         ->default(true),
                     Toggle::make('epd_popup_registration_enabled')
                         ->label('Показывать баннер «Создать личный кабинет»')
-                        ->helperText('Выключено — запись на презентацию. Включено — 14 дней бесплатно и скидка 50% на пакет ЭПД.')
+                        ->helperText('Включает или выключает баннер: 14 дней бесплатно и скидка 50% на пакет ЭПД.')
                         ->default(false),
                 ])
                 ->columnSpanFull(),
