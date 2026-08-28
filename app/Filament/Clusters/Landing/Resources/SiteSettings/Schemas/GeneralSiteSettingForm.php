@@ -45,7 +45,7 @@ final class GeneralSiteSettingForm
                         ->icon('heroicon-o-paper-airplane')
                         ->schema(self::telegramPopupTab()),
                     Tab::make('epd_popup')
-                        ->label('Баннер ЭПД')
+                        ->label('Баннеры')
                         ->icon('heroicon-o-document-text')
                         ->schema(self::epdPopupTab()),
                     Tab::make('organization')
@@ -376,13 +376,17 @@ final class GeneralSiteSettingForm
     private static function epdPopupTab(): array
     {
         return [
-            Section::make('Анонс презентации модуля ЭПД')
-                ->description('Управляет всплывающим баннером 27.08 с формой заявки на презентацию.')
+            Section::make('Всплывающий баннер ЭПД')
+                ->description('Включите баннер и выберите, какой из двух вариантов показывать на сайте.')
                 ->schema([
                     Toggle::make('epd_popup_enabled')
                         ->label('Баннер включён')
                         ->helperText('После сохранения баннер будет добавлен или удалён со всех публичных страниц сайта.')
                         ->default(true),
+                    Toggle::make('epd_popup_registration_enabled')
+                        ->label('Показывать баннер «Создать личный кабинет»')
+                        ->helperText('Выключено — запись на презентацию. Включено — 14 дней бесплатно и скидка 50% на пакет ЭПД.')
+                        ->default(false),
                 ])
                 ->columnSpanFull(),
         ];

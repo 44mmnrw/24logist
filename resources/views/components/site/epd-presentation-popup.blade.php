@@ -1,12 +1,17 @@
 @php
     $settings = app(\App\Services\SiteSettingsService::class)->get();
+    $registrationVariant = (bool) ($settings->epd_popup_registration_enabled ?? false);
+    $popupVariant = $registrationVariant ? 'registration' : 'presentation';
 @endphp
 
 @if ($settings->epd_popup_enabled)
 <div
     class="epd-popup"
     data-epd-popup
-    data-submit-url="{{ route('leads.epd-presentation.store') }}"
+    data-popup-variant="{{ $popupVariant }}"
+    @unless ($registrationVariant)
+        data-submit-url="{{ route('leads.epd-presentation.store') }}"
+    @endunless
     data-show-delay="4"
     data-cooldown-days="3"
     role="dialog"
@@ -23,8 +28,8 @@
 
         <div class="epd-popup__visual">
             <img
-                src="{{ asset('images/epd-announcement-27-08.png') }}"
-                alt="27.08 — открываем доступ к модулю ЭПД"
+                src="{{ asset($registrationVariant ? 'images/epd-test-access-14-days.png' : 'images/epd-announcement-27-08.png') }}"
+                alt="{{ $registrationVariant ? 'Бесплатный тестовый доступ 14 дней и скидка 50% на пакет ЭПД' : '27.08 — открываем доступ к модулю ЭПД' }}"
                 width="1254"
                 height="1254"
                 loading="lazy"
@@ -32,7 +37,25 @@
             >
         </div>
 
-        <div class="epd-popup__content">
+        <div class="epd-popup__content{{ $registrationVariant ? ' epd-popup__content--registration' : '' }}">
+            @if ($registrationVariant)
+                <div class="epd-popup__registration">
+                    <span class="epd-popup__eyebrow">Специальное предложение</span>
+                    <h2 id="epd-popup-title">14 дней бесплатно</h2>
+                    <p id="epd-popup-description">Создайте личный кабинет и получите бесплатный тестовый доступ, а также скидку 50% на пакет ЭПД.</p>
+
+                    <div class="epd-popup__registration-benefits" aria-label="Условия предложения">
+                        <span><strong>14 дней</strong> бесплатного доступа</span>
+                        <span><strong>50% скидка</strong> на пакет ЭПД</span>
+                    </div>
+
+                    <a
+                        class="epd-popup__submit epd-popup__registration-cta"
+                        href="https://logistsystem.ru/register"
+                        data-epd-registration-cta
+                    >Создать личный кабинет</a>
+                </div>
+            @else
             <div class="epd-popup__form-state" data-epd-form-state>
                 <span class="epd-popup__eyebrow">Презентация модуля ЭПД</span>
                 <h2 id="epd-popup-title">Оставить заявку</h2>
@@ -90,6 +113,7 @@
                 <p data-epd-success-message>Мы свяжемся с вами для согласования времени презентации.</p>
                 <button class="epd-popup__submit" type="button" data-epd-popup-close>Хорошо</button>
             </div>
+            @endif
         </div>
     </div>
 </div>

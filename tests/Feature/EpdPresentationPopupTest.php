@@ -33,6 +33,25 @@ class EpdPresentationPopupTest extends TestCase
             ->assertSee('Оставить заявку');
     }
 
+    public function test_registration_banner_variant_is_rendered_when_selected(): void
+    {
+        SiteSetting::instance()->update([
+            'epd_popup_enabled' => true,
+            'epd_popup_registration_enabled' => true,
+        ]);
+        app(SiteSettingsService::class)->clearCache();
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('data-popup-variant="registration"', false)
+            ->assertSee('images/epd-test-access-14-days.png', false)
+            ->assertSee('https://logistsystem.ru/register', false)
+            ->assertSee('Создать личный кабинет')
+            ->assertSee('50% скидка')
+            ->assertDontSee('data-epd-form', false)
+            ->assertDontSee(route('leads.epd-presentation.store'), false);
+    }
+
     public function test_popup_can_be_disabled_in_site_settings(): void
     {
         SiteSetting::instance()->update(['epd_popup_enabled' => false]);

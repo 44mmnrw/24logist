@@ -3,8 +3,13 @@ import { postJson } from './landing-forms.js';
 const popup = document.querySelector('[data-epd-popup]');
 
 if (popup) {
-    const dismissedStorageKey = 'epd-presentation-popup-last-dismissed';
-    const completedStorageKey = 'epd-presentation-popup-completed';
+    const variant = popup.dataset.popupVariant || 'presentation';
+    const dismissedStorageKey = variant === 'presentation'
+        ? 'epd-presentation-popup-last-dismissed'
+        : `epd-popup-${variant}-last-dismissed`;
+    const completedStorageKey = variant === 'presentation'
+        ? 'epd-presentation-popup-completed'
+        : `epd-popup-${variant}-completed`;
     const delay = Math.max(0, Number(popup.dataset.showDelay) || 0) * 1000;
     const cooldownDays = Math.max(1, Number(popup.dataset.cooldownDays) || 3);
     const cooldownMs = cooldownDays * 24 * 60 * 60 * 1000;
@@ -87,6 +92,10 @@ if (popup) {
         control.addEventListener('click', () => close());
     });
 
+    popup.querySelector('[data-epd-registration-cta]')?.addEventListener('click', () => {
+        writeStorage(completedStorageKey, '1');
+    });
+
     document.addEventListener('keydown', (event) => {
         if (!popup.hidden && event.key === 'Escape') {
             close();
@@ -140,8 +149,13 @@ if (popup) {
 
             form.reset();
             writeStorage(completedStorageKey, '1');
-            formState.hidden = true;
-            successState.hidden = false;
+            if (formState) {
+                formState.hidden = true;
+            }
+
+            if (successState) {
+                successState.hidden = false;
+            }
 
             if (payload.message && successMessage) {
                 successMessage.textContent = payload.message;
