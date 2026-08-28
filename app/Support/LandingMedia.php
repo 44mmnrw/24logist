@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Storage;
 
 final class LandingMedia
@@ -26,8 +27,11 @@ final class LandingMedia
             return asset($path);
         }
 
-        if (Storage::disk('public')->exists($path)) {
-            $url = Storage::disk('public')->url($path);
+        /** @var FilesystemAdapter $disk */
+        $disk = Storage::disk('public');
+
+        if ($disk->exists($path)) {
+            $url = $disk->url($path);
             $relative = parse_url($url, PHP_URL_PATH);
 
             if (is_string($relative) && $relative !== '' && str_starts_with($relative, '/storage/')) {

@@ -292,6 +292,30 @@ class BlogTest extends TestCase
         $response->assertSee('/blog/seo-post');
     }
 
+    public function test_blog_post_hero_displays_only_subtitle_not_card_excerpt(): void
+    {
+        $post = BlogPost::query()->create([
+            'title' => 'Article heading',
+            'slug' => 'article-subtitle',
+            'subtitle' => 'Article subtitle',
+            'excerpt' => 'Card summary only',
+            'body' => 'Article body',
+            'is_published' => true,
+            'published_at' => now()->subDay(),
+        ]);
+
+        $this->get($post->getUrl())
+            ->assertOk()
+            ->assertSee('<p>Article subtitle</p>', false)
+            ->assertDontSee('<p>Card summary only</p>', false);
+
+        $post->update(['subtitle' => null]);
+
+        $this->get($post->getUrl())
+            ->assertOk()
+            ->assertDontSee('<p>Card summary only</p>', false);
+    }
+
     public function test_blog_post_cover_shows_logo_when_enabled(): void
     {
         $post = BlogPost::query()->create([

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\LandingMedia;
+use App\Support\BlogBodyImages;
 use App\Support\RichContent\FontSizeRichContentPlugin;
 use Filament\Forms\Components\RichEditor\RichContentRenderer;
 use Illuminate\Database\Eloquent\Builder;
@@ -187,11 +188,13 @@ class BlogPost extends Model
 
     public function renderBody(): string
     {
-        return RichContentRenderer::make($this->body ?? '')
+        $html = RichContentRenderer::make($this->body ?? '')
             ->plugins([FontSizeRichContentPlugin::make()])
             ->fileAttachmentsDisk('public')
             ->fileAttachmentsVisibility('public')
             ->toHtml();
+
+        return BlogBodyImages::renderResponsive($html);
     }
 
     public function coverImageUrl(): ?string

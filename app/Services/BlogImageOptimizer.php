@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\BlogPost;
+use App\Support\BlogBodyImages;
 use App\Support\LandingMedia;
 
 final class BlogImageOptimizer
@@ -27,6 +28,13 @@ final class BlogImageOptimizer
             ],
         ];
 
+        foreach (BlogBodyImages::paths($post->body) as $path) {
+            $images[] = [
+                'path' => $path,
+                'widths' => $this->configuredWidths('blog_body', [480, 960, 1440]),
+            ];
+        }
+
         return collect($images)
             ->filter(fn (array $image): bool => $image['path'] !== null)
             ->unique('path')
@@ -44,9 +52,15 @@ final class BlogImageOptimizer
      */
     public function widthsForPath(string $path): array
     {
-        return str_starts_with($path, 'blog/cards/')
-            ? $this->configuredWidths('blog_card', [640, 1200])
-            : $this->configuredWidths('blog_cover', [640, 1280]);
+        if (str_starts_with($path, 'blog/cards/')) {
+            return $this->configuredWidths('blog_card', [640, 1200]);
+        }
+
+        if (str_starts_with($path, 'blog/body/')) {
+            return $this->configuredWidths('blog_body', [480, 960, 1440]);
+        }
+
+        return $this->configuredWidths('blog_cover', [640, 1280]);
     }
 
     /**

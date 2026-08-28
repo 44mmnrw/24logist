@@ -62,10 +62,13 @@
 }
 
 /* Редактор блога: визуальная модель журнальной статьи. */
+.blog-article-editor.fi-fo-rich-editor .fi-fo-rich-editor-toolbar,
 .blog-article-editor .fi-fo-rich-editor-toolbar {
-    position: sticky;
+    position: sticky !important;
     top: 0;
-    z-index: 2;
+    z-index: 30;
+    background: #fff;
+    box-shadow: 0 6px 16px -14px rgb(15 23 42 / 55%);
 }
 
 .blog-article-editor .fi-fo-rich-editor-content {

@@ -65,8 +65,6 @@
                         <h1>{{ $post->title }}</h1>
                         @if ($post->subtitle)
                             <p>{{ $post->subtitle }}</p>
-                        @elseif ($post->displayExcerpt())
-                            <p>{{ $post->displayExcerpt() }}</p>
                         @endif
                     </div>
                 </header>
@@ -89,7 +87,7 @@
                                 height="675"
                                 loading="eager"
                                 fetchpriority="high"
-                                sizes="(max-width: 860px) calc(100vw - 32px), 75vw"
+                                sizes="(max-width: 1240px) calc(100vw - 32px), 1200px"
                                 picture-class="blog-post-cover__picture"
                             />
                         </figure>

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\BlogPost;
 use App\Models\LandingSection;
+use App\Support\BlogBodyImages;
 use App\Support\ImageVariants;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
@@ -90,6 +91,44 @@ class ResponsiveImageTest extends TestCase
             ->assertSee('type="image/webp"', false)
             ->assertSee('/storage/blog/cards/card--640w.webp 640w', false)
             ->assertSee('src="/storage/blog/cards/card.webp"', false);
+    }
+
+    public function test_article_body_images_prefer_responsive_avif_and_webp(): void
+    {
+        Storage::disk('public')->put('blog/body/diagram.png', 'original');
+        Storage::disk('public')->put('blog/body/diagram--480w.avif', 'avif');
+        Storage::disk('public')->put('blog/body/diagram--480w.webp', 'webp');
+        Storage::disk('public')->put('blog/body/diagram--960w.avif', 'avif-large');
+
+        $post = BlogPost::query()->create([
+            'title' => 'Responsive article image',
+            'slug' => 'responsive-article-image',
+            'body' => '<p><img data-id="blog/body/diagram.png" alt="Article diagram"></p>',
+            'is_published' => true,
+            'published_at' => now()->subDay(),
+        ]);
+
+        $this->assertSame(['blog/body/diagram.png'], BlogBodyImages::paths($post->body));
+
+        $this->get($post->getUrl())
+            ->assertOk()
+            ->assertSee('<picture class="blog-post-body__picture">', false)
+            ->assertSee('type="image/avif"', false)
+            ->assertSee('/storage/blog/body/diagram--480w.avif 480w', false)
+            ->assertSee('/storage/blog/body/diagram--960w.avif 960w', false)
+            ->assertSee('type="image/webp"', false)
+            ->assertSee('/storage/blog/body/diagram--480w.webp 480w', false)
+            ->assertSee('src="/storage/blog/body/diagram.png"', false);
+    }
+
+    public function test_article_body_image_paths_are_restricted_to_the_body_directory(): void
+    {
+        $content = '<img data-id="blog/body/first.jpg"><img src="/storage/blog/body/second.png?version=2"><img data-id="blog/covers/not-body.jpg"><img src="https://example.com/external.jpg">';
+
+        $this->assertSame([
+            'blog/body/first.jpg',
+            'blog/body/second.png',
+        ], BlogBodyImages::paths($content));
     }
 
     public function test_committed_blog_images_can_use_public_avif_variants(): void
