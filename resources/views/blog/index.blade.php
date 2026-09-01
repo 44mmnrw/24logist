@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru-RU">
 <head>
-    <x-analytics.google-analytics />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <x-csrf-meta />
@@ -181,5 +180,6 @@
     <x-site.telegram-popup />
     <x-site.cookie-consent />
     <x-analytics.yandex-metrika />
+    <x-analytics.google-analytics />
 </body>
 </html>

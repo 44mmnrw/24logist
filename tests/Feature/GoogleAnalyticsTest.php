@@ -45,8 +45,12 @@ class GoogleAnalyticsTest extends TestCase
             ->assertDontSee('google-analytics.com', false)
             ->assertDontSee('G-ABC123XYZ9', false);
 
+        $this->assertGreaterThan(
+            strpos($response->getContent(), 'data-cookie-consent'),
+            strpos($response->getContent(), "const endpoint = 'https://a.24logist.ru/'"),
+        );
         $this->assertLessThan(
-            strpos($response->getContent(), '<meta charset='),
+            strpos($response->getContent(), '</body>'),
             strpos($response->getContent(), "const endpoint = 'https://a.24logist.ru/'"),
         );
     }
