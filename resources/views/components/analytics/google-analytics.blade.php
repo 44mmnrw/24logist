@@ -7,8 +7,8 @@
         (() => {
             const endpoint = 'https://a.24logist.ru/';
             const consentCookie = 'logistru_cookie_notice=acknowledged';
-            const clientStorageKey = 'logistru_analytics_client';
-            const sessionStorageKey = 'logistru_analytics_session';
+            const clientStorageKey = 'logistru_client_id';
+            const sessionStorageKey = 'logistru_session_id';
             let started = false;
             let clientId = '';
             let sessionId = 0;

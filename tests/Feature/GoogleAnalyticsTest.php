@@ -37,6 +37,10 @@ class GoogleAnalyticsTest extends TestCase
             ->assertSee("const endpoint = 'https://a.24logist.ru/'", false)
             ->assertSee("send('page_view'", false)
             ->assertSee('logistru_cookie_notice=acknowledged', false)
+            ->assertSee("const clientStorageKey = 'logistru_client_id'", false)
+            ->assertSee("const sessionStorageKey = 'logistru_session_id'", false)
+            ->assertDontSee('logistru_analytics_client', false)
+            ->assertDontSee('logistru_analytics_session', false)
             ->assertDontSee('googletagmanager.com', false)
             ->assertDontSee('google-analytics.com', false)
             ->assertDontSee('G-ABC123XYZ9', false);
