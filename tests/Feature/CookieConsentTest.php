@@ -9,6 +9,13 @@ class CookieConsentTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->withoutVite();
+    }
+
     public function test_public_page_contains_compact_cookie_notice(): void
     {
         $this->get('/')

@@ -11,11 +11,18 @@ class GoogleAnalyticsTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->withoutVite();
+    }
+
     public function test_google_analytics_is_loaded_only_when_enabled_with_valid_measurement_id(): void
     {
         $this->get('/')
             ->assertOk()
-            ->assertDontSee('googletagmanager.com/gtag/js', false);
+            ->assertDontSee('https://a.24logist.ru/', false);
 
         SiteSetting::instance()->update([
             'google_analytics_enabled' => true,
@@ -27,13 +34,16 @@ class GoogleAnalyticsTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertSee('https://www.googletagmanager.com/gtag/js?id=G-ABC123XYZ9', false)
-            ->assertSee("gtag('config', \"G-ABC123XYZ9\")", false)
-            ->assertSee('<script async src="https://www.googletagmanager.com', false);
+            ->assertSee("const endpoint = 'https://a.24logist.ru/'", false)
+            ->assertSee("send('page_view'", false)
+            ->assertSee('logistru_cookie_notice=acknowledged', false)
+            ->assertDontSee('googletagmanager.com', false)
+            ->assertDontSee('google-analytics.com', false)
+            ->assertDontSee('G-ABC123XYZ9', false);
 
         $this->assertLessThan(
             strpos($response->getContent(), '<meta charset='),
-            strpos($response->getContent(), 'googletagmanager.com/gtag/js'),
+            strpos($response->getContent(), "const endpoint = 'https://a.24logist.ru/'"),
         );
     }
 
@@ -47,6 +57,6 @@ class GoogleAnalyticsTest extends TestCase
 
         $this->get('/')
             ->assertOk()
-            ->assertDontSee('googletagmanager.com/gtag/js', false);
+            ->assertDontSee('https://a.24logist.ru/', false);
     }
 }
