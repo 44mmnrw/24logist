@@ -84,6 +84,15 @@ class MaxCommunityAuthTest extends TestCase
         Storage::disk('public')->assertExists(CommunityLoginChallenge::query()->firstOrFail()->communityUser->avatar_path);
     }
 
+    public function test_max_challenge_creation_is_rate_limited(): void
+    {
+        foreach (range(1, 10) as $attempt) {
+            $this->get(route('community.auth.max.start'))->assertOk();
+        }
+
+        $this->get(route('community.auth.max.start'))->assertTooManyRequests();
+    }
+
     private function signedInitData(int $userId): string
     {
         $data = [

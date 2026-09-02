@@ -121,6 +121,9 @@ if (maxAuth) {
                 } else if (result.status === 'expired') {
                     window.clearInterval(poll);
                     statusNode.textContent = 'Ссылка истекла. Обновите страницу.';
+                } else if (result.status === 'failed') {
+                    window.clearInterval(poll);
+                    statusNode.textContent = 'Не удалось связать аккаунт MAX. Возможно, он уже привязан к другому профилю.';
                 }
             } catch (_) {}
         }, 2000);

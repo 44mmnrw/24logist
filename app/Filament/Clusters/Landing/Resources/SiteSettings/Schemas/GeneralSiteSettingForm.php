@@ -334,23 +334,25 @@ final class GeneralSiteSettingForm
                         ->placeholder('https://24logist.ru/community/auth/telegram/callback'),
                     Placeholder::make('community_telegram_client_secret_status')
                         ->label('Client Secret')
-                        ->content(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_telegram_client_secret') ? 'Настроен' : 'Не настроен'),
+                        ->content(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_telegram_client_secret') ? '***' : 'Не настроен'),
                     TextInput::make('community_telegram_client_secret')
                         ->label('Новый Client Secret')
                         ->password()
                         ->revealable()
                         ->autocomplete('new-password')
                         ->dehydrated()
+                        ->placeholder(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_telegram_client_secret') ? '***' : '')
                         ->helperText('Оставьте пустым, чтобы сохранить действующее значение.'),
                     Placeholder::make('community_telegram_bot_token_status')
                         ->label('Bot Token')
-                        ->content(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_telegram_bot_token') ? 'Настроен' : 'Не настроен'),
+                        ->content(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_telegram_bot_token') ? '***' : 'Не настроен'),
                     TextInput::make('community_telegram_bot_token')
                         ->label('Новый Bot Token')
                         ->password()
                         ->revealable()
                         ->autocomplete('new-password')
                         ->dehydrated()
+                        ->placeholder(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_telegram_bot_token') ? '***' : '')
                         ->helperText('Нужен для доставки уведомлений. Оставьте пустым, чтобы сохранить действующее значение.'),
                 ])
                 ->columns(2)
@@ -403,23 +405,25 @@ final class GeneralSiteSettingForm
                         ->helperText('Без символа @. Используется в ссылке https://max.ru/<имя_бота>?start=<одноразовый_код>.'),
                     Placeholder::make('community_max_bot_token_status')
                         ->label('Bot Token')
-                        ->content(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_max_bot_token') ? 'Настроен' : 'Не настроен'),
+                        ->content(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_max_bot_token') ? '***' : 'Не настроен'),
                     TextInput::make('community_max_bot_token')
                         ->label('Новый Bot Token')
                         ->password()
                         ->revealable()
                         ->autocomplete('new-password')
                         ->dehydrated()
+                        ->placeholder(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_max_bot_token') ? '***' : '')
                         ->helperText('Оставьте пустым, чтобы сохранить действующее значение.'),
                     Placeholder::make('community_max_webhook_secret_status')
                         ->label('Webhook Secret')
-                        ->content(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_max_webhook_secret') ? 'Настроен' : 'Не настроен'),
+                        ->content(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_max_webhook_secret') ? '***' : 'Не настроен'),
                     TextInput::make('community_max_webhook_secret')
                         ->label('Новый Webhook Secret')
                         ->password()
                         ->revealable()
                         ->autocomplete('new-password')
                         ->dehydrated()
+                        ->placeholder(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_max_webhook_secret') ? '***' : '')
                         ->helperText('MAX передаёт значение в заголовке X-Max-Bot-Api-Secret. Допустимы 5–256 символов: латиница, цифры, _ и -. Оставьте пустым, чтобы сохранить действующее значение.'),
                     Placeholder::make('community_max_webhook_url')
                         ->label('Webhook URL')
@@ -738,7 +742,7 @@ final class GeneralSiteSettingForm
                         ->label('Статус пароля')
                         ->content(function (?SiteSetting $record): string {
                             if ($record?->hasMailPassword()) {
-                                return '✓ Пароль сохранён в базе. В поле ниже пароль намеренно не показывается — так безопаснее.';
+                                return '*** — пароль сохранён';
                             }
 
                             return '✗ Пароль не задан. Введите ниже и нажмите «Сохранить» внизу страницы.';
@@ -751,9 +755,9 @@ final class GeneralSiteSettingForm
                         ->autocomplete('new-password')
                         ->dehydrated()
                         ->placeholder(fn (?SiteSetting $record): string => $record?->hasMailPassword()
-                            ? 'Оставьте пустым, если не меняете пароль'
+                            ? '***'
                             : 'Пароль почтового ящика')
-                        ->helperText('После ввода нажмите «Сохранить». Появится уведомление «Пароль почты сохранён».')
+                        ->helperText('Если видите ***, пароль уже сохранён. Оставьте поле пустым, чтобы не менять его.')
                         ->columnSpanFull(),
                 ])
                 ->columns(2)

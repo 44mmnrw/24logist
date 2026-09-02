@@ -113,7 +113,7 @@ Route::middleware(['community.locale', 'community.enabled'])->prefix('community'
     Route::get('/auth/telegram/callback', [TelegramCommunityAuthController::class, 'callback'])->name('auth.telegram.callback');
     Route::get('/auth/vk', [VkCommunityAuthController::class, 'redirect'])->name('auth.vk.redirect');
     Route::get('/auth/vk/callback', [VkCommunityAuthController::class, 'callback'])->name('auth.vk.callback');
-    Route::get('/auth/max', [MaxCommunityAuthController::class, 'start'])->name('auth.max.start');
+    Route::get('/auth/max', [MaxCommunityAuthController::class, 'start'])->middleware('throttle:10,1')->name('auth.max.start');
     Route::post('/auth/max/approve', [MaxCommunityAuthController::class, 'approve'])->middleware('throttle:20,1')->name('auth.max.approve');
     Route::post('/auth/max/session', [MaxCommunityAuthController::class, 'session'])->middleware('throttle:20,1')->name('auth.max.session');
     Route::get('/auth/max/status/{challenge}', [MaxCommunityAuthController::class, 'status'])->middleware('throttle:60,1')->name('auth.max.status');
