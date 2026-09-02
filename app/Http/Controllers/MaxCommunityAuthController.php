@@ -32,13 +32,17 @@ class MaxCommunityAuthController extends Controller
             'MAX-вход ещё не настроен.',
         );
         $token = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
+        $linkToUserId = auth('community')->user()?->getAuthIdentifier();
         CommunityLoginChallenge::query()->create([
             'token_hash' => hash('sha256', $token),
             'browser_session_hash' => hash('sha256', random_bytes(32)),
-            'link_to_user_id' => auth('community')->id(),
+            'link_to_user_id' => $linkToUserId,
             'expires_at' => now()->addSeconds((int) config('community.max.challenge_ttl', 300)),
         ]);
-        $deepLink = 'https://max.ru/'.ltrim($this->siteSettings->maxBotUsername(), '@').'?startapp='.rawurlencode($token);
+        // MAX Web/Desktop may open only the bot for a startapp deep link without
+        // launching the attached Mini App. A bot deep link reliably delivers the
+        // one-time token in bot_started; the webhook then sends an open_app button.
+        $deepLink = 'https://max.ru/'.ltrim($this->siteSettings->maxBotUsername(), '@').'?start='.rawurlencode($token);
 
         return redirect()->away($deepLink);
     }

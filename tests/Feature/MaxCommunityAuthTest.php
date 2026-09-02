@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\CommunityLoginChallenge;
+use App\Models\CommunityUser;
 use App\Models\SiteSetting;
 use App\Services\SiteSettingsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -35,15 +36,47 @@ class MaxCommunityAuthTest extends TestCase
         $this->withoutVite();
     }
 
-    public function test_site_opens_max_mini_app_instead_of_starting_bot(): void
+    public function test_site_opens_bot_with_one_time_challenge(): void
     {
         $response = $this->get(route('community.auth.max.start'))->assertRedirect();
         $location = (string) $response->headers->get('Location');
         $token = $this->tokenFromDeepLink($location);
         $this->assertNotSame('', $token);
-        $this->assertStringStartsWith('https://max.ru/community_bot?startapp=', $location);
-        $this->assertStringNotContainsString('?start=', $location);
+        $this->assertStringStartsWith('https://max.ru/community_bot?start=', $location);
+        $this->assertStringNotContainsString('?startapp=', $location);
         $this->assertDatabaseCount('community_login_challenges', 1);
+        $this->assertDatabaseCount('community_users', 0);
+    }
+
+    public function test_stale_deleted_user_session_does_not_break_challenge_creation(): void
+    {
+        $user = CommunityUser::factory()->create();
+        $this->actingAs($user, 'community');
+        $user->forceDelete();
+        $this->app['auth']->forgetGuards();
+
+        $this->get(route('community.auth.max.start'))->assertRedirect();
+
+        $this->assertNull(CommunityLoginChallenge::query()->firstOrFail()->link_to_user_id);
+    }
+
+    public function test_bot_sends_challenge_bound_authorize_button(): void
+    {
+        $token = $this->startToken();
+
+        $this->postJson(route('community.webhooks.max'), [
+            'update_type' => 'bot_started',
+            'user' => ['user_id' => 9911],
+            'payload' => $token,
+        ], [
+            'X-Max-Bot-Api-Secret' => 'max_webhook-secret',
+        ])->assertOk();
+
+        Http::assertSent(fn (ClientRequest $request): bool => data_get($request->data(), 'attachments.0.payload.buttons.0.0.type') === 'open_app'
+            && data_get($request->data(), 'attachments.0.payload.buttons.0.0.web_app') === 'community_bot'
+            && data_get($request->data(), 'attachments.0.payload.buttons.0.0.payload') === $token
+        );
+        $this->assertSame('pending', CommunityLoginChallenge::query()->firstOrFail()->status);
         $this->assertDatabaseCount('community_users', 0);
     }
 
@@ -178,7 +211,7 @@ class MaxCommunityAuthTest extends TestCase
     private function tokenFromDeepLink(string $deepLink): string
     {
         parse_str((string) parse_url($deepLink, PHP_URL_QUERY), $query);
-        $token = $query['startapp'] ?? null;
+        $token = $query['start'] ?? null;
         $this->assertIsString($token);
         $this->assertNotSame('', $token);
 

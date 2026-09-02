@@ -12,13 +12,13 @@ final class MaxLoginPromptService
         private readonly MaxApiClient $api,
     ) {}
 
-    public function send(string $providerUserId): void
+    public function send(string $providerUserId, ?string $challengeToken = null): void
     {
         $button = [
             'type' => 'open_app',
             'text' => 'Авторизоваться',
             'web_app' => ltrim($this->settings->maxBotUsername(), '@'),
-            'payload' => 'community-login',
+            'payload' => $challengeToken ?: 'community-login',
         ];
 
         $response = $this->api->request()
