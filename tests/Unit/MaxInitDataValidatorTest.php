@@ -25,7 +25,7 @@ class MaxInitDataValidatorTest extends TestCase
         $valid = $this->signed(time());
         $this->assertSame(42, app(MaxInitDataValidator::class)->validate($valid)['user']['id']);
 
-        foreach ([$valid.'x', $this->signed(time() - 4000), $valid.'&auth_date='.time()] as $invalid) {
+        foreach ([$valid.'x', $this->signed(time() - 4000), $valid.'&auth_date='.time(), $this->signed(time(), false)] as $invalid) {
             try {
                 app(MaxInitDataValidator::class)->validate($invalid);
                 $this->fail('Invalid MAX payload must be rejected.');
@@ -35,9 +35,15 @@ class MaxInitDataValidatorTest extends TestCase
         }
     }
 
-    private function signed(int $authDate): string
+    private function signed(int $authDate, bool $includeQueryId = true): string
     {
-        $data = ['auth_date' => (string) $authDate, 'user' => json_encode(['id' => 42])];
+        $data = [
+            'auth_date' => (string) $authDate,
+            'user' => json_encode(['id' => 42]),
+        ];
+        if ($includeQueryId) {
+            $data['query_id'] = 'validator-query';
+        }
         ksort($data);
         $check = implode("\n", array_map(fn ($key, $value) => $key.'='.$value, array_keys($data), array_values($data)));
         $secret = hash_hmac('sha256', 'validator-token', 'WebAppData', true);

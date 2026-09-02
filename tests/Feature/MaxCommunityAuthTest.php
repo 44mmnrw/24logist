@@ -137,6 +137,25 @@ class MaxCommunityAuthTest extends TestCase
         $this->assertAuthenticated('community');
     }
 
+    public function test_signed_max_init_data_cannot_be_replayed(): void
+    {
+        $initData = $this->signedInitData(9934, 'replay-query');
+
+        $this->postJson(route('community.auth.max.session'), [
+            'init_data' => $initData,
+        ])->assertOk();
+
+        $this->postJson(route('community.auth.max.session'), [
+            'init_data' => $initData,
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors('max');
+
+        $this->assertDatabaseCount('community_users', 1);
+        $this->assertDatabaseCount('community_identities', 1);
+        $this->assertDatabaseCount('community_login_challenges', 1);
+        $this->assertDatabaseCount('community_max_init_data_uses', 1);
+    }
+
     public function test_unsigned_max_return_link_is_rejected(): void
     {
         $challenge = CommunityLoginChallenge::query()->create([
@@ -201,11 +220,11 @@ class MaxCommunityAuthTest extends TestCase
         $this->get(route('community.auth.max.start'))->assertOk();
     }
 
-    private function signedInitData(int $userId): string
+    private function signedInitData(int $userId, string $queryId = 'test-query'): string
     {
         $data = [
             'auth_date' => (string) time(),
-            'query_id' => 'test-query',
+            'query_id' => $queryId,
             'user' => json_encode(['id' => $userId, 'first_name' => 'Private', 'photo_url' => 'https://images.example.test/max-avatar.png'], JSON_UNESCAPED_UNICODE),
         ];
         ksort($data);

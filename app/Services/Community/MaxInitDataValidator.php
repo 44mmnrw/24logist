@@ -9,7 +9,7 @@ final class MaxInitDataValidator
 {
     public function __construct(private readonly SiteSettingsService $settings) {}
 
-    /** @return array{user: array{id: int|string}, auth_date: int, query_id?: string} */
+    /** @return array{user: array{id: int|string}, auth_date: int, query_id: string} */
     public function validate(string $initData): array
     {
         $pairs = explode('&', $initData);
@@ -60,8 +60,14 @@ final class MaxInitDataValidator
         }
 
         $user = json_decode($data['user'] ?? '', true);
+        $queryId = $data['query_id'] ?? null;
 
-        if (! is_array($user) || ! isset($user['id']) || ! is_scalar($user['id'])) {
+        if (! is_array($user)
+            || ! isset($user['id'])
+            || ! is_scalar($user['id'])
+            || ! is_string($queryId)
+            || $queryId === ''
+            || strlen($queryId) > 512) {
             throw $this->invalid();
         }
 
