@@ -4,12 +4,13 @@ const popup = document.querySelector('[data-epd-popup]');
 
 if (popup) {
     const variant = popup.dataset.popupVariant || 'presentation';
+    const popupVersion = popup.dataset.popupVersion || '1';
     const dismissedStorageKey = variant === 'presentation'
         ? 'epd-presentation-popup-last-dismissed'
-        : `epd-popup-${variant}-last-dismissed`;
+        : `epd-popup-${variant}-${popupVersion}-last-dismissed`;
     const completedStorageKey = variant === 'presentation'
         ? 'epd-presentation-popup-completed'
-        : `epd-popup-${variant}-completed`;
+        : `epd-popup-${variant}-${popupVersion}-completed`;
     const delay = Math.max(0, Number(popup.dataset.showDelay) || 0) * 1000;
     const cooldownDays = Math.max(1, Number(popup.dataset.cooldownDays) || 3);
     const cooldownMs = cooldownDays * 24 * 60 * 60 * 1000;
@@ -79,12 +80,16 @@ if (popup) {
         previouslyFocusedElement = document.activeElement;
         popup.hidden = false;
         popup.setAttribute('aria-hidden', 'false');
-        document.documentElement.classList.add('epd-popup-open');
+        if (variant !== 'registration') {
+            document.documentElement.classList.add('epd-popup-open');
+        }
         document.dispatchEvent(new CustomEvent('epd-popup:open'));
 
         window.requestAnimationFrame(() => {
             popup.classList.add('is-visible');
-            popup.querySelector('.epd-popup__close')?.focus();
+            if (variant !== 'registration') {
+                popup.querySelector('.epd-popup__close')?.focus();
+            }
         });
     };
 
@@ -92,8 +97,10 @@ if (popup) {
         control.addEventListener('click', () => close());
     });
 
-    popup.querySelector('[data-epd-registration-cta]')?.addEventListener('click', () => {
-        writeStorage(completedStorageKey, '1');
+    popup.querySelectorAll('[data-epd-registration-cta]').forEach((control) => {
+        control.addEventListener('click', () => {
+            writeStorage(completedStorageKey, '1');
+        });
     });
 
     document.addEventListener('keydown', (event) => {

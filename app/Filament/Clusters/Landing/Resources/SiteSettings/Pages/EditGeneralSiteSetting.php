@@ -116,7 +116,7 @@ class EditGeneralSiteSetting extends EditRecord
         $data['community_max_enabled'] ??= false;
         $data['community_vk_enabled'] ??= false;
 
-        foreach (['community_telegram_client_secret', 'community_telegram_bot_token', 'community_vk_client_secret', 'community_vk_service_token', 'community_max_bot_token', 'community_max_webhook_secret'] as $field) {
+        foreach (['community_telegram_client_secret', 'community_telegram_bot_token', 'community_vk_client_secret', 'community_vk_service_token', 'community_max_bot_token', 'community_max_webhook_secret', 'route_api_secret'] as $field) {
             $data[$field] = '';
         }
 
@@ -136,7 +136,7 @@ class EditGeneralSiteSetting extends EditRecord
 
         unset($data['mail_password']);
 
-        foreach (['community_telegram_client_secret', 'community_telegram_bot_token', 'community_vk_client_secret', 'community_vk_service_token', 'community_max_bot_token', 'community_max_webhook_secret'] as $field) {
+        foreach (['community_telegram_client_secret', 'community_telegram_bot_token', 'community_vk_client_secret', 'community_vk_service_token', 'community_max_bot_token', 'community_max_webhook_secret', 'route_api_secret'] as $field) {
             if (filled($data[$field] ?? null)) {
                 $this->pendingCommunitySecrets[$field] = (string) $data[$field];
             }
@@ -167,7 +167,7 @@ class EditGeneralSiteSetting extends EditRecord
             $this->pendingCommunitySecrets = [];
 
             Notification::make()
-                ->title('Секреты сообщества сохранены')
+                ->title('Секретные настройки сохранены')
                 ->body('Сохранённые значения отображаются в форме как ***.')
                 ->success()
                 ->send();

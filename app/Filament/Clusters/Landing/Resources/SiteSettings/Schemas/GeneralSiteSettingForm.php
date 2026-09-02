@@ -41,6 +41,10 @@ final class GeneralSiteSettingForm
                         ->label('Блог')
                         ->icon('heroicon-o-newspaper')
                         ->schema(self::blogTab()),
+                    Tab::make('route_calculator')
+                        ->label('Калькулятор маршрута')
+                        ->icon('heroicon-o-map')
+                        ->schema(self::routeCalculatorTab()),
                     Tab::make('community')
                         ->label('Сообщество')
                         ->icon('heroicon-o-chat-bubble-left-right')
@@ -300,6 +304,50 @@ final class GeneralSiteSettingForm
     /**
      * @return array<int, mixed>
      */
+    private static function routeCalculatorTab(): array
+    {
+        return [
+            Section::make('Карта и калькулятор маршрута')
+                ->description('Самостоятельный публичный раздел /route-calculator. Сайт обращается к платформе ЛогистРу только с сервера; API-секрет хранится в базе зашифрованно и никогда не передаётся в браузер.')
+                ->schema([
+                    Toggle::make('route_calculator_enabled')
+                        ->label('Включить калькулятор маршрута')
+                        ->default(false),
+                    TextInput::make('route_api_base_url')
+                        ->label('Адрес API платформы')
+                        ->url()
+                        ->maxLength(2048)
+                        ->placeholder('https://platform.example.ru/api/internal/site/routes')
+                        ->helperText('Укажите адрес до /api/internal/site/routes без завершающего слеша.'),
+                    TextInput::make('route_api_timeout')
+                        ->label('Тайм-аут, секунд')
+                        ->numeric()
+                        ->integer()
+                        ->minValue(2)
+                        ->maxValue(60)
+                        ->default(15),
+                    Placeholder::make('route_api_secret_status')
+                        ->label('API-секрет')
+                        ->content(fn (?SiteSetting $record): string => $record?->hasSecret('route_api_secret') ? '***' : 'Не настроен'),
+                    TextInput::make('route_api_secret')
+                        ->label('Новый API-секрет')
+                        ->password()
+                        ->revealable()
+                        ->autocomplete('new-password')
+                        ->dehydrated()
+                        ->minLength(32)
+                        ->maxLength(512)
+                        ->placeholder(fn (?SiteSetting $record): string => $record?->hasSecret('route_api_secret') ? '***' : '')
+                        ->helperText('Должен полностью совпадать с секретом в админке платформы: «API и интеграции» → «API калькулятора для сайта 24logist.ru». Оставьте пустым, чтобы не менять.'),
+                ])
+                ->columns(2)
+                ->columnSpanFull(),
+        ];
+    }
+
+    /**
+     * @return array<int, mixed>
+     */
     private static function communityTab(): array
     {
         return [
@@ -546,7 +594,7 @@ final class GeneralSiteSettingForm
                         ->helperText('Включает или выключает баннер: 14 дней тестового доступа, встроенный ЭДО/ЭПД и бесплатная настройка.')
                         ->default(false),
                     Section::make('Баннер «Создать личный кабинет»')
-                        ->description('Изображение, плашка поверх него и весь текст правой части всплывающего баннера.')
+                        ->description('Компактный баннер с инфографикой, кнопкой закрытия и переходом к регистрации.')
                         ->schema([
                             FileUpload::make('epd_popup_registration_image_path')
                                 ->label('Изображение баннера')
@@ -569,50 +617,6 @@ final class GeneralSiteSettingForm
                                 ->maxLength(255)
                                 ->helperText('Текст для доступности и поисковых систем.')
                                 ->columnSpanFull(),
-                            TextInput::make('epd_popup_registration_badge_value')
-                                ->label('Крупный текст плашки')
-                                ->placeholder('−50%')
-                                ->maxLength(30)
-                                ->helperText('Например: −50%, Подарок или Бесплатно.'),
-                            Select::make('epd_popup_registration_badge_value_font')
-                                ->label('Шрифт крупного текста')
-                                ->options([
-                                    'geologica' => 'Geologica — фирменный',
-                                    'arial_black' => 'Arial Black — массивный',
-                                    'arial' => 'Arial — нейтральный',
-                                    'verdana' => 'Verdana — широкий',
-                                    'trebuchet' => 'Trebuchet MS — мягкий',
-                                    'georgia' => 'Georgia — с засечками',
-                                ])
-                                ->default('geologica')
-                                ->native(false)
-                                ->required()
-                                ->helperText('Применяется только к крупному значению слева.'),
-                            TextInput::make('epd_popup_registration_badge_label')
-                                ->label('Подпись плашки')
-                                ->placeholder('на пакет ЭПД')
-                                ->maxLength(100)
-                                ->helperText('Текст справа от крупного значения.'),
-                            TextInput::make('epd_popup_registration_eyebrow')
-                                ->label('Надзаголовок')
-                                ->maxLength(100),
-                            TextInput::make('epd_popup_registration_title')
-                                ->label('Заголовок')
-                                ->maxLength(255),
-                            Textarea::make('epd_popup_registration_description')
-                                ->label('Описание')
-                                ->rows(3)
-                                ->maxLength(1000)
-                                ->columnSpanFull(),
-                            TextInput::make('epd_popup_registration_benefit_1')
-                                ->label('Преимущество 1')
-                                ->maxLength(255),
-                            TextInput::make('epd_popup_registration_benefit_2')
-                                ->label('Преимущество 2')
-                                ->maxLength(255),
-                            TextInput::make('epd_popup_registration_benefit_3')
-                                ->label('Преимущество 3')
-                                ->maxLength(255),
                             TextInput::make('epd_popup_registration_button_text')
                                 ->label('Текст кнопки')
                                 ->maxLength(100),

@@ -47,9 +47,12 @@ class EpdPresentationPopupTest extends TestCase
             ->assertSee('images/logistru-special-offer-1254x1254.png', false)
             ->assertSee('https://logistsystem.ru/register', false)
             ->assertSee('Создать личный кабинет')
-            ->assertSee('Бесплатная настройка')
-            ->assertSee('Встроенный ЭДО/ЭПД')
-            ->assertDontSee('50% скидка')
+            ->assertSee('epd-popup__card--registration', false)
+            ->assertSee('data-popup-version=', false)
+            ->assertSee('data-show-delay="30"', false)
+            ->assertSee('epd-popup__registration-image-link', false)
+            ->assertDontSee('data-registration-offer-badge', false)
+            ->assertDontSee('epd-popup__content--registration', false)
             ->assertDontSee('data-epd-form', false)
             ->assertDontSee(route('leads.epd-presentation.store'), false);
     }
@@ -61,15 +64,6 @@ class EpdPresentationPopupTest extends TestCase
             'epd_popup_registration_enabled' => true,
             'epd_popup_registration_image_path' => 'site/banners/custom-offer.png',
             'epd_popup_registration_image_alt' => 'Описание нового баннера',
-            'epd_popup_registration_badge_value' => '−30%',
-            'epd_popup_registration_badge_value_font' => 'georgia',
-            'epd_popup_registration_badge_label' => 'на первый месяц',
-            'epd_popup_registration_eyebrow' => 'Только сегодня',
-            'epd_popup_registration_title' => 'Новый заголовок',
-            'epd_popup_registration_description' => 'Новое описание предложения.',
-            'epd_popup_registration_benefit_1' => 'Первое преимущество',
-            'epd_popup_registration_benefit_2' => null,
-            'epd_popup_registration_benefit_3' => null,
             'epd_popup_registration_button_text' => 'Получить доступ',
             'epd_popup_registration_button_url' => 'https://example.com/register',
         ]);
@@ -79,15 +73,8 @@ class EpdPresentationPopupTest extends TestCase
             ->assertOk()
             ->assertSee('/storage/site/banners/custom-offer.png', false)
             ->assertSee('Описание нового баннера')
-            ->assertSee('data-registration-offer-badge', false)
-            ->assertSee('−30%')
-            ->assertSee('epd-popup__offer-value--georgia', false)
-            ->assertSee('на первый месяц')
-            ->assertSee('Только сегодня')
-            ->assertSee('Новый заголовок')
-            ->assertSee('Новое описание предложения.')
-            ->assertSee('Первое преимущество')
-            ->assertDontSee('Второе преимущество')
+            ->assertSee('epd-popup__registration-image-link', false)
+            ->assertDontSee('data-registration-offer-badge', false)
             ->assertSee('Получить доступ')
             ->assertSee('https://example.com/register', false);
     }

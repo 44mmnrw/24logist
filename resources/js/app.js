@@ -7,3 +7,4 @@ import './telegram-popup.js';
 import './landing-mobile-menu.js';
 import './landing-growth-dashboard.js';
 import './community.js';
+import './route-calculator.js';

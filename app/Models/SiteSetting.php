@@ -77,6 +77,10 @@ class SiteSetting extends Model
         'community_max_bot_username',
         'community_max_bot_token',
         'community_max_webhook_secret',
+        'route_calculator_enabled',
+        'route_api_base_url',
+        'route_api_secret',
+        'route_api_timeout',
         'leads_notifications_enabled',
         'leads_notification_emails',
         'leads_notification_subject',
@@ -126,6 +130,10 @@ class SiteSetting extends Model
             'community_max_bot_username' => 'encrypted',
             'community_max_bot_token' => 'encrypted',
             'community_max_webhook_secret' => 'encrypted',
+            'route_calculator_enabled' => 'boolean',
+            'route_api_base_url' => 'encrypted',
+            'route_api_secret' => 'encrypted',
+            'route_api_timeout' => 'integer',
             'leads_welcome_enabled' => 'boolean',
             'mail_port' => 'integer',
             'mail_password' => 'encrypted',
@@ -222,6 +230,11 @@ TEXT;
     }
 
     public function hasCommunitySecret(string $attribute): bool
+    {
+        return $this->hasSecret($attribute);
+    }
+
+    public function hasSecret(string $attribute): bool
     {
         return filled($this->attributes[$attribute] ?? null);
     }

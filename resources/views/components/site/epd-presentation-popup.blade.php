@@ -4,14 +4,7 @@
     $popupVariant = $registrationVariant ? 'registration' : 'presentation';
     $registrationImage = \App\Support\LandingMedia::url($settings->epd_popup_registration_image_path)
         ?? asset('images/logistru-special-offer-1254x1254.png');
-    $registrationBenefits = collect([
-        $settings->epd_popup_registration_benefit_1,
-        $settings->epd_popup_registration_benefit_2,
-        $settings->epd_popup_registration_benefit_3,
-    ])->filter(fn ($benefit) => filled($benefit));
-    $registrationBadgeFont = in_array($settings->epd_popup_registration_badge_value_font, [
-        'geologica', 'arial_black', 'arial', 'verdana', 'trebuchet', 'georgia',
-    ], true) ? $settings->epd_popup_registration_badge_value_font : 'geologica';
+    $registrationPopupVersion = $settings->updated_at?->getTimestamp() ?? 1;
 @endphp
 
 @if ($settings->epd_popup_enabled || $settings->epd_popup_registration_enabled)
@@ -19,65 +12,63 @@
     class="epd-popup"
     data-epd-popup
     data-popup-variant="{{ $popupVariant }}"
+    data-popup-version="{{ $registrationVariant ? $registrationPopupVersion : 1 }}"
     @unless ($registrationVariant)
         data-submit-url="{{ route('leads.epd-presentation.store') }}"
     @endunless
-    data-show-delay="4"
+    data-show-delay="{{ $registrationVariant ? 30 : 4 }}"
     data-cooldown-days="3"
     role="dialog"
-    aria-modal="true"
-    aria-labelledby="epd-popup-title"
-    aria-describedby="epd-popup-description"
+    aria-modal="{{ $registrationVariant ? 'false' : 'true' }}"
+    @if ($registrationVariant)
+        aria-label="Специальное предложение ЛогистРу"
+    @else
+        aria-labelledby="epd-popup-title"
+        aria-describedby="epd-popup-description"
+    @endif
     aria-hidden="true"
     hidden
 >
     <div class="epd-popup__backdrop" aria-hidden="true"></div>
 
-    <div class="epd-popup__card" role="document">
+    <div class="epd-popup__card{{ $registrationVariant ? ' epd-popup__card--registration' : '' }}" role="document">
         <button class="epd-popup__close" type="button" data-epd-popup-close aria-label="Закрыть">×</button>
 
         <div class="epd-popup__visual">
             <div class="epd-popup__visual-frame">
-                <img
-                    src="{{ $registrationVariant ? $registrationImage : asset('images/epd-announcement-27-08.png') }}"
-                    alt="{{ $registrationVariant ? ($settings->epd_popup_registration_image_alt ?: 'Специальное предложение ЛогистРу') : '27.08 — открываем доступ к модулю ЭПД' }}"
-                    width="1254"
-                    height="1254"
-                    loading="lazy"
-                    decoding="async"
-                >
-
                 @if ($registrationVariant)
-                    <div class="epd-popup__offer-badge" data-registration-offer-badge>
-                        <strong class="epd-popup__offer-value epd-popup__offer-value--{{ $registrationBadgeFont }}">{{ $settings->epd_popup_registration_badge_value ?: '−50%' }}</strong>
-                        <span>{{ $settings->epd_popup_registration_badge_label ?: 'на пакет ЭПД' }}</span>
-                    </div>
-                @endif
-            </div>
-        </div>
-
-        <div class="epd-popup__content{{ $registrationVariant ? ' epd-popup__content--registration' : '' }}">
-            @if ($registrationVariant)
-                <div class="epd-popup__registration">
-                    <span class="epd-popup__eyebrow">{{ $settings->epd_popup_registration_eyebrow ?: 'Специальное предложение' }}</span>
-                    <h2 id="epd-popup-title">{{ $settings->epd_popup_registration_title ?: '14 дней тестового доступа' }}</h2>
-                    <p id="epd-popup-description">{{ $settings->epd_popup_registration_description ?: 'Создайте личный кабинет и получите тестовый доступ к системе.' }}</p>
-
-                    @if ($registrationBenefits->isNotEmpty())
-                        <div class="epd-popup__registration-benefits" aria-label="Условия предложения">
-                            @foreach ($registrationBenefits as $benefit)<span>{{ $benefit }}</span>@endforeach
-                        </div>
-                    @endif
-
                     <a
-                        class="epd-popup__submit epd-popup__registration-cta"
+                        class="epd-popup__registration-image-link"
                         href="{{ $settings->epd_popup_registration_button_url ?: 'https://logistsystem.ru/register' }}"
                         target="_blank"
                         rel="noopener noreferrer"
                         data-epd-registration-cta
-                    >{{ $settings->epd_popup_registration_button_text ?: 'Создать личный кабинет' }}</a>
-                </div>
-            @else
+                        aria-label="{{ $settings->epd_popup_registration_button_text ?: 'Создать личный кабинет' }}"
+                    >
+                        <img
+                            src="{{ $registrationImage }}"
+                            alt="{{ $settings->epd_popup_registration_image_alt ?: 'Специальное предложение ЛогистРу' }}"
+                            width="1254"
+                            height="1254"
+                            loading="lazy"
+                            decoding="async"
+                        >
+                    </a>
+                @else
+                    <img
+                        src="{{ asset('images/epd-announcement-27-08.png') }}"
+                        alt="27.08 — открываем доступ к модулю ЭПД"
+                        width="1254"
+                        height="1254"
+                        loading="lazy"
+                        decoding="async"
+                    >
+                @endif
+            </div>
+        </div>
+
+        @unless ($registrationVariant)
+        <div class="epd-popup__content">
             <div class="epd-popup__form-state" data-epd-form-state>
                 <span class="epd-popup__eyebrow">Презентация модуля ЭПД</span>
                 <h2 id="epd-popup-title">Оставить заявку</h2>
@@ -135,8 +126,8 @@
                 <p data-epd-success-message>Мы свяжемся с вами для согласования времени презентации.</p>
                 <button class="epd-popup__submit" type="button" data-epd-popup-close>Хорошо</button>
             </div>
-            @endif
         </div>
+        @endunless
     </div>
 </div>
 @endif

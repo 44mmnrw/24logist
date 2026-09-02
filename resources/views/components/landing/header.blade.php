@@ -19,6 +19,9 @@
             @foreach ($navLinks as $link)
                 <a href="{{ \App\Support\LandingLinks::resolve($link->link) }}">{{ $link->title }}</a>
             @endforeach
+            @if (app(\App\Services\SiteSettingsService::class)->routeApiConfigured())
+                <a href="{{ route('route-calculator.index') }}">Калькулятор маршрута</a>
+            @endif
             {{--
             @if (app(\App\Services\SiteSettingsService::class)->communityEnabled())
                 <a href="{{ route('community.index') }}">Сообщество</a>
@@ -45,6 +48,9 @@
                         @foreach ($navLinks as $link)
                             <a href="{{ \App\Support\LandingLinks::resolve($link->link) }}">{{ $link->title }}</a>
                         @endforeach
+                        @if (app(\App\Services\SiteSettingsService::class)->routeApiConfigured())
+                            <a href="{{ route('route-calculator.index') }}">Калькулятор маршрута</a>
+                        @endif
                         {{--
                         @if (app(\App\Services\SiteSettingsService::class)->communityEnabled())
                             <a href="{{ route('community.index') }}">Сообщество</a>

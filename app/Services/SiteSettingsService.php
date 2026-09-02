@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Cache;
 
 class SiteSettingsService
 {
-    private const CACHE_KEY = 'site.settings.v19';
+    private const CACHE_KEY = 'site.settings.v20';
 
     public function get(): SiteSetting
     {
@@ -150,9 +150,37 @@ class SiteSettingsService
         return (string) $this->get()->getAttribute('community_max_webhook_secret');
     }
 
+    public function routeCalculatorEnabled(): bool
+    {
+        return (bool) $this->get()->getAttribute('route_calculator_enabled');
+    }
+
+    public function routeApiBaseUrl(): string
+    {
+        return rtrim(trim((string) $this->get()->getAttribute('route_api_base_url')), '/');
+    }
+
+    public function routeApiSecret(): string
+    {
+        return trim((string) $this->get()->getAttribute('route_api_secret'));
+    }
+
+    public function routeApiTimeout(): int
+    {
+        return min(60, max(2, (int) ($this->get()->getAttribute('route_api_timeout') ?: 15)));
+    }
+
+    public function routeApiConfigured(): bool
+    {
+        return $this->routeCalculatorEnabled()
+            && filter_var($this->routeApiBaseUrl(), FILTER_VALIDATE_URL) !== false
+            && strlen($this->routeApiSecret()) >= 32;
+    }
+
     public function clearCache(): void
     {
         Cache::forget(self::CACHE_KEY);
+        Cache::forget('site.settings.v19');
         Cache::forget('site.settings.v18');
         Cache::forget('site.settings.v17');
         Cache::forget('site.settings.v16');

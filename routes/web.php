@@ -20,6 +20,7 @@ use App\Http\Controllers\MaxCommunityWebhookController;
 use App\Http\Controllers\OgHeroCardController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PwaIconController;
+use App\Http\Controllers\RouteCalculatorController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\TelegramCommunityAuthController;
 use App\Http\Controllers\VkCommunityAuthController;
@@ -98,6 +99,15 @@ Route::get('/privacy-policy', [PageController::class, 'show'])
 Route::get('/pages/{slug}', [PageController::class, 'show'])
     ->name('pages.show')
     ->where('slug', '[a-z0-9\-]+');
+
+Route::get('/route-calculator', [RouteCalculatorController::class, 'index'])
+    ->name('route-calculator.index');
+Route::get('/route-calculator/cities', [RouteCalculatorController::class, 'cities'])
+    ->middleware('throttle:60,1')
+    ->name('route-calculator.cities');
+Route::post('/route-calculator/calculate', [RouteCalculatorController::class, 'calculate'])
+    ->middleware('throttle:20,1')
+    ->name('route-calculator.calculate');
 
 Route::middleware(['community.locale', 'community.enabled'])->prefix('community')->name('community.')->group(function (): void {
     Route::get('/', [CommunityController::class, 'index'])->name('index');
