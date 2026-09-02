@@ -2,8 +2,8 @@
 
 namespace App\Filament\Clusters\Landing\Resources\SiteSettings\Schemas;
 
+use App\Filament\Clusters\Landing\Resources\SiteSettings\Pages\EditGeneralSiteSetting;
 use App\Models\SiteSetting;
-use App\Services\Community\MaxWebhookSubscriptionService;
 use App\Services\LlmsTxtService;
 use App\Support\FilamentUploadPreview;
 use Filament\Actions\Action;
@@ -438,24 +438,8 @@ final class GeneralSiteSettingForm
                             ->color('primary')
                             ->requiresConfirmation()
                             ->modalHeading('Подключить webhook MAX?')
-                            ->modalDescription('Сначала сохраните имя бота, Bot Token и Webhook Secret. После подтверждения сайт подпишет бота на необходимые события MAX.')
-                            ->action(function (MaxWebhookSubscriptionService $webhook): void {
-                                try {
-                                    $message = $webhook->register();
-
-                                    Notification::make()
-                                        ->title('Webhook MAX подключён')
-                                        ->body($message)
-                                        ->success()
-                                        ->send();
-                                } catch (\Throwable $exception) {
-                                    Notification::make()
-                                        ->title('Не удалось подключить webhook MAX')
-                                        ->body($exception->getMessage())
-                                        ->danger()
-                                        ->send();
-                                }
-                            }),
+                            ->modalDescription('Сайт сохранит текущие настройки формы и затем подпишет бота на необходимые события MAX.')
+                            ->action(fn (EditGeneralSiteSetting $livewire) => $livewire->saveAndRegisterMaxWebhook()),
                     ])->columnSpanFull(),
                 ])
                 ->columns(2)

@@ -4,6 +4,7 @@ namespace App\Filament\Clusters\Landing\Resources\SiteSettings\Pages;
 
 use App\Filament\Clusters\Landing\Resources\SiteSettings\GeneralSiteSettingResource;
 use App\Models\SiteSetting;
+use App\Services\Community\MaxWebhookSubscriptionService;
 use App\Services\SiteMailService;
 use App\Services\SiteSettingsService;
 use App\Support\AppleTouchIcon;
@@ -77,6 +78,29 @@ class EditGeneralSiteSetting extends EditRecord
                     }
                 }),
         ];
+    }
+
+    public function saveAndRegisterMaxWebhook(): void
+    {
+        // The schema action lives inside the edit form. Persist its current state
+        // first so newly entered encrypted credentials are available to the API call.
+        $this->save(shouldRedirect: false, shouldSendSavedNotification: false);
+
+        try {
+            $message = app(MaxWebhookSubscriptionService::class)->register();
+
+            Notification::make()
+                ->title('Webhook MAX подключён')
+                ->body($message)
+                ->success()
+                ->send();
+        } catch (Throwable $exception) {
+            Notification::make()
+                ->title('Не удалось подключить webhook MAX')
+                ->body($exception->getMessage())
+                ->danger()
+                ->send();
+        }
     }
 
     protected function mutateFormDataBeforeFill(array $data): array
