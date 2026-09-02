@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\CommunityNotificationDelivery;
+use App\Services\Community\MaxApiClient;
 use App\Services\SiteSettingsService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -20,7 +21,7 @@ class DeliverCommunityNotification implements ShouldQueue
 
     public function __construct(public int $deliveryId) {}
 
-    public function handle(SiteSettingsService $settings): void
+    public function handle(SiteSettingsService $settings, MaxApiClient $maxApi): void
     {
         $delivery = CommunityNotificationDelivery::query()
             ->with(['notification', 'identity'])
@@ -50,7 +51,8 @@ class DeliverCommunityNotification implements ShouldQueue
                     'https://api.telegram.org/bot'.$settings->telegramBotToken().'/sendMessage',
                     ['chat_id' => $identity->provider_user_id, 'text' => $message, 'disable_web_page_preview' => true],
                 ),
-                'max' => Http::timeout(8)
+                'max' => $maxApi->request()
+                    ->timeout(8)
                     ->withHeaders(['Authorization' => $settings->maxBotToken()])
                     ->post('https://platform-api2.max.ru/messages?'.http_build_query(['user_id' => $identity->provider_user_id]), [
                         'text' => $message,

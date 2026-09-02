@@ -133,7 +133,11 @@ class SiteSettingsService
 
     public function maxBotUsername(): string
     {
-        return (string) $this->get()->getAttribute('community_max_bot_username');
+        $username = trim((string) $this->get()->getAttribute('community_max_bot_username'));
+        $username = (string) preg_replace('#^(?:https?://)?(?:www\.)?max\.ru/#i', '', $username);
+        $username = (string) preg_replace('/[?#].*$/', '', $username);
+
+        return trim($username, " \t\n\r\0\x0B@/");
     }
 
     public function maxBotToken(): string

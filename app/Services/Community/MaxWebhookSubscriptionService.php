@@ -3,14 +3,16 @@
 namespace App\Services\Community;
 
 use App\Services\SiteSettingsService;
-use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
 final class MaxWebhookSubscriptionService
 {
     private const ENDPOINT = 'https://platform-api2.max.ru/subscriptions';
 
-    public function __construct(private readonly SiteSettingsService $settings) {}
+    public function __construct(
+        private readonly SiteSettingsService $settings,
+        private readonly MaxApiClient $api,
+    ) {}
 
     public function register(): string
     {
@@ -33,7 +35,8 @@ final class MaxWebhookSubscriptionService
         }
 
         try {
-            $response = Http::acceptJson()
+            $response = $this->api->request()
+                ->acceptJson()
                 ->withHeaders(['Authorization' => $token])
                 ->timeout(10)
                 ->post(self::ENDPOINT, [

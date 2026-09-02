@@ -50,6 +50,16 @@ class CommunitySettingsTest extends TestCase
         $this->assertFalse(app(SiteSettingsService::class)->communityMaxEnabled());
     }
 
+    public function test_max_bot_username_is_normalized_when_admin_pastes_full_url(): void
+    {
+        SiteSetting::instance()->update([
+            'community_max_bot_username' => 'https://max.ru/id5074081476_bot?start=old',
+        ]);
+        app(SiteSettingsService::class)->clearCache();
+
+        $this->assertSame('id5074081476_bot', app(SiteSettingsService::class)->maxBotUsername());
+    }
+
     public function test_provider_credentials_are_encrypted_at_rest(): void
     {
         $setting = SiteSetting::instance();

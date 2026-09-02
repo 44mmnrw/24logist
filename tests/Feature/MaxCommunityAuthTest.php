@@ -93,6 +93,18 @@ class MaxCommunityAuthTest extends TestCase
         $this->get(route('community.auth.max.start'))->assertTooManyRequests();
     }
 
+    public function test_status_polling_does_not_consume_challenge_creation_limit(): void
+    {
+        $this->get(route('community.auth.max.start'))->assertOk();
+        $challenge = CommunityLoginChallenge::query()->firstOrFail();
+
+        foreach (range(1, 10) as $attempt) {
+            $this->getJson(route('community.auth.max.status', $challenge))->assertOk();
+        }
+
+        $this->get(route('community.auth.max.start'))->assertOk();
+    }
+
     private function signedInitData(int $userId): string
     {
         $data = [
