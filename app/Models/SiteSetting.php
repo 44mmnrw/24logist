@@ -50,6 +50,20 @@ class SiteSetting extends Model
         'telegram_popup_auto_close_delay',
         'epd_popup_enabled',
         'epd_popup_registration_enabled',
+        'community_enabled',
+        'community_max_enabled',
+        'community_vk_enabled',
+        'community_vk_client_id',
+        'community_vk_client_secret',
+        'community_vk_service_token',
+        'community_vk_redirect_uri',
+        'community_telegram_client_id',
+        'community_telegram_client_secret',
+        'community_telegram_bot_token',
+        'community_telegram_redirect_uri',
+        'community_max_bot_username',
+        'community_max_bot_token',
+        'community_max_webhook_secret',
         'leads_notifications_enabled',
         'leads_notification_emails',
         'leads_notification_subject',
@@ -85,6 +99,20 @@ class SiteSetting extends Model
             'telegram_popup_auto_close_delay' => 'integer',
             'epd_popup_enabled' => 'boolean',
             'epd_popup_registration_enabled' => 'boolean',
+            'community_enabled' => 'boolean',
+            'community_max_enabled' => 'boolean',
+            'community_vk_enabled' => 'boolean',
+            'community_vk_client_id' => 'encrypted',
+            'community_vk_client_secret' => 'encrypted',
+            'community_vk_service_token' => 'encrypted',
+            'community_vk_redirect_uri' => 'encrypted',
+            'community_telegram_client_id' => 'encrypted',
+            'community_telegram_client_secret' => 'encrypted',
+            'community_telegram_bot_token' => 'encrypted',
+            'community_telegram_redirect_uri' => 'encrypted',
+            'community_max_bot_username' => 'encrypted',
+            'community_max_bot_token' => 'encrypted',
+            'community_max_webhook_secret' => 'encrypted',
             'leads_welcome_enabled' => 'boolean',
             'mail_port' => 'integer',
             'mail_password' => 'encrypted',
@@ -178,6 +206,11 @@ TEXT;
     public function hasMailPassword(): bool
     {
         return filled($this->attributes['mail_password'] ?? null);
+    }
+
+    public function hasCommunitySecret(string $attribute): bool
+    {
+        return filled($this->attributes[$attribute] ?? null);
     }
 
     public static function instance(): self

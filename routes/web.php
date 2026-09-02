@@ -2,15 +2,27 @@
 
 use App\Http\Controllers\AppleTouchIconController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CommunityAccountController;
+use App\Http\Controllers\CommunityActionController;
+use App\Http\Controllers\CommunityCommentController;
+use App\Http\Controllers\CommunityController;
+use App\Http\Controllers\CommunityLegalController;
+use App\Http\Controllers\CommunityModerationController;
+use App\Http\Controllers\CommunityNotificationController;
+use App\Http\Controllers\CommunityPostController;
 use App\Http\Controllers\CsrfTokenController;
 use App\Http\Controllers\FaviconController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LandingLeadController;
 use App\Http\Controllers\ManifestController;
+use App\Http\Controllers\MaxCommunityAuthController;
+use App\Http\Controllers\MaxCommunityWebhookController;
 use App\Http\Controllers\OgHeroCardController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PwaIconController;
 use App\Http\Controllers\SeoController;
+use App\Http\Controllers\TelegramCommunityAuthController;
+use App\Http\Controllers\VkCommunityAuthController;
 use App\Http\Middleware\CachePublicLandingPage;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Session\Middleware\StartSession;
@@ -86,3 +98,57 @@ Route::get('/privacy-policy', [PageController::class, 'show'])
 Route::get('/pages/{slug}', [PageController::class, 'show'])
     ->name('pages.show')
     ->where('slug', '[a-z0-9\-]+');
+
+Route::middleware('community.enabled')->prefix('community')->name('community.')->group(function (): void {
+    Route::get('/', [CommunityController::class, 'index'])->name('index');
+    Route::get('/c/{category}', [CommunityController::class, 'category'])->name('categories.show');
+    Route::get('/p/{post}/{slug?}', [CommunityPostController::class, 'show'])
+        ->whereNumber('post')->name('posts.show');
+    Route::get('/u/{user}', [CommunityAccountController::class, 'profile'])->name('profile');
+    Route::get('/rules', [CommunityLegalController::class, 'rules'])->name('rules');
+    Route::get('/privacy', [CommunityLegalController::class, 'privacy'])->name('privacy');
+
+    Route::get('/login', [CommunityAccountController::class, 'login'])->name('login');
+    Route::get('/auth/telegram', [TelegramCommunityAuthController::class, 'redirect'])->name('auth.telegram.redirect');
+    Route::get('/auth/telegram/callback', [TelegramCommunityAuthController::class, 'callback'])->name('auth.telegram.callback');
+    Route::get('/auth/vk', [VkCommunityAuthController::class, 'redirect'])->name('auth.vk.redirect');
+    Route::get('/auth/vk/callback', [VkCommunityAuthController::class, 'callback'])->name('auth.vk.callback');
+    Route::get('/auth/max', [MaxCommunityAuthController::class, 'start'])->name('auth.max.start');
+    Route::post('/auth/max/approve', [MaxCommunityAuthController::class, 'approve'])->middleware('throttle:20,1')->name('auth.max.approve');
+    Route::post('/auth/max/session', [MaxCommunityAuthController::class, 'session'])->middleware('throttle:20,1')->name('auth.max.session');
+    Route::get('/auth/max/status/{challenge}', [MaxCommunityAuthController::class, 'status'])->middleware('throttle:60,1')->name('auth.max.status');
+
+    Route::middleware('community.auth')->group(function (): void {
+        Route::get('/onboarding', [CommunityAccountController::class, 'onboarding'])->name('onboarding');
+        Route::post('/onboarding', [CommunityAccountController::class, 'completeOnboarding'])->name('onboarding.store');
+        Route::post('/logout', [CommunityAccountController::class, 'logout'])->name('logout');
+
+        Route::middleware('community.onboarded')->group(function (): void {
+            Route::get('/submit', [CommunityPostController::class, 'create'])->name('posts.create');
+            Route::post('/posts', [CommunityPostController::class, 'store'])->middleware('throttle:community-posts')->name('posts.store');
+            Route::get('/posts/{post}/edit', [CommunityPostController::class, 'edit'])->name('posts.edit');
+            Route::put('/posts/{post}', [CommunityPostController::class, 'update'])->name('posts.update');
+            Route::delete('/posts/{post}', [CommunityPostController::class, 'destroy'])->name('posts.destroy');
+            Route::post('/posts/{post}/comments', [CommunityCommentController::class, 'store'])->middleware('throttle:community-comments')->name('comments.store');
+            Route::put('/comments/{comment}', [CommunityCommentController::class, 'update'])->name('comments.update');
+            Route::delete('/comments/{comment}', [CommunityCommentController::class, 'destroy'])->name('comments.destroy');
+            Route::post('/actions/vote', [CommunityActionController::class, 'vote'])->middleware('throttle:120,1')->name('vote');
+            Route::post('/actions/report', [CommunityActionController::class, 'report'])->middleware('throttle:10,1')->name('report');
+            Route::get('/notifications', [CommunityNotificationController::class, 'index'])->name('notifications');
+            Route::get('/notifications/{notification}', [CommunityNotificationController::class, 'read'])->name('notifications.read');
+            Route::post('/notifications/read-all', [CommunityNotificationController::class, 'readAll'])->name('notifications.read_all');
+            Route::get('/settings', [CommunityAccountController::class, 'settings'])->name('settings');
+            Route::put('/settings', [CommunityAccountController::class, 'updateSettings'])->name('settings.update');
+            Route::delete('/settings/account', [CommunityAccountController::class, 'destroy'])->name('settings.destroy');
+
+            Route::middleware('community.moderator')->prefix('moderation')->name('moderation.')->group(function (): void {
+                Route::get('/', [CommunityModerationController::class, 'index'])->name('index');
+                Route::post('/reports/{report}', [CommunityModerationController::class, 'act'])->name('act');
+            });
+        });
+    });
+});
+
+Route::post('/community/webhooks/max', MaxCommunityWebhookController::class)
+    ->middleware('throttle:120,1')
+    ->name('community.webhooks.max');

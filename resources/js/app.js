@@ -6,3 +6,4 @@ import './epd-presentation-popup.js';
 import './telegram-popup.js';
 import './landing-mobile-menu.js';
 import './landing-growth-dashboard.js';
+import './community.js';

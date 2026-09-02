@@ -37,10 +37,9 @@ if ($method === 'OPTIONS') {
 }
 
 if ($method === 'GET') {
-    respond(200, [
-        'status' => 'ok',
-        'configured' => collectorIsConfigured($config),
-    ]);
+    http_response_code(404);
+    header('Content-Length: 0');
+    exit;
 }
 
 if ($method !== 'POST') {

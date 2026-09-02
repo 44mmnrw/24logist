@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Cache;
 
 class SiteSettingsService
 {
-    private const CACHE_KEY = 'site.settings.v14';
+    private const CACHE_KEY = 'site.settings.v18';
 
     public function get(): SiteSetting
     {
@@ -72,9 +72,87 @@ class SiteSettingsService
             : null;
     }
 
+    public function communityEnabled(): bool
+    {
+        return (bool) $this->get()->getAttribute('community_enabled');
+    }
+
+    public function communityMaxEnabled(): bool
+    {
+        if (! $this->communityEnabled()) {
+            return false;
+        }
+
+        return (bool) $this->get()->getAttribute('community_max_enabled');
+    }
+
+    public function communityVkEnabled(): bool
+    {
+        return $this->communityEnabled() && (bool) $this->get()->getAttribute('community_vk_enabled');
+    }
+
+    public function vkClientId(): string
+    {
+        return (string) $this->get()->getAttribute('community_vk_client_id');
+    }
+
+    public function vkClientSecret(): string
+    {
+        return (string) $this->get()->getAttribute('community_vk_client_secret');
+    }
+
+    public function vkServiceToken(): string
+    {
+        return (string) $this->get()->getAttribute('community_vk_service_token');
+    }
+
+    public function vkRedirectUri(): string
+    {
+        return (string) $this->get()->getAttribute('community_vk_redirect_uri');
+    }
+
+    public function telegramClientId(): string
+    {
+        return (string) $this->get()->getAttribute('community_telegram_client_id');
+    }
+
+    public function telegramClientSecret(): string
+    {
+        return (string) $this->get()->getAttribute('community_telegram_client_secret');
+    }
+
+    public function telegramBotToken(): string
+    {
+        return (string) $this->get()->getAttribute('community_telegram_bot_token');
+    }
+
+    public function telegramRedirectUri(): string
+    {
+        return (string) $this->get()->getAttribute('community_telegram_redirect_uri');
+    }
+
+    public function maxBotUsername(): string
+    {
+        return (string) $this->get()->getAttribute('community_max_bot_username');
+    }
+
+    public function maxBotToken(): string
+    {
+        return (string) $this->get()->getAttribute('community_max_bot_token');
+    }
+
+    public function maxWebhookSecret(): string
+    {
+        return (string) $this->get()->getAttribute('community_max_webhook_secret');
+    }
+
     public function clearCache(): void
     {
         Cache::forget(self::CACHE_KEY);
+        Cache::forget('site.settings.v17');
+        Cache::forget('site.settings.v16');
+        Cache::forget('site.settings.v15');
+        Cache::forget('site.settings.v14');
         Cache::forget('site.settings.v13');
         Cache::forget('site.settings.v12');
         app(PublicPageCache::class)->forgetLanding();

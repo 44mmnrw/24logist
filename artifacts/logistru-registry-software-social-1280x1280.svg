@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1280" height="1280" viewBox="0 0 1080 1080" role="img" aria-labelledby="title desc">
+  <title id="title">ЛогистРу включена в Реестр российского ПО</title>
+  <desc id="desc">Фирменная карточка ЛогистРу со знаком подтверждения и символом официального реестра.</desc>
+  <defs>
+    <font-face font-family="Geologica">
+      <font-face-src><font-face-uri xlink:href="geologica.woff2"/></font-face-src>
+    </font-face>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F7FAFF"/>
+      <stop offset="1" stop-color="#EDF5FF"/>
+    </linearGradient>
+    <linearGradient id="blueCard" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0D67F3"/>
+      <stop offset="1" stop-color="#2A7BEE"/>
+    </linearGradient>
+    <filter id="shadow" x="-25%" y="-25%" width="150%" height="160%">
+      <feDropShadow dx="0" dy="20" stdDeviation="26" flood-color="#0D2147" flood-opacity="0.12"/>
+    </filter>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#0D2147" flood-opacity="0.13"/>
+    </filter>
+  </defs>
+
+  <rect width="1080" height="1080" fill="#FFFFFF"/>
+  <image x="110" y="96" width="290" height="70" xlink:href="logistru-logo.svg" preserveAspectRatio="xMinYMid meet"/>
+  <rect x="735" y="101" width="245" height="56" rx="28" fill="#EAF8EF"/>
+  <circle cx="772" cy="129" r="12" fill="#19BD49"/>
+  <path d="M766 129l4 4 9-11" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="798" y="135" font-family="Geologica, Arial, sans-serif" font-size="18" font-weight="650" fill="#137D36">Подтверждено</text>
+
+  <text x="100" y="275" font-family="Geologica, Arial, sans-serif" font-size="27" font-weight="650" letter-spacing="1.8" fill="#0D67F3">ВАЖНАЯ НОВОСТЬ</text>
+  <text x="100" y="356" font-family="Geologica, Arial, sans-serif" font-size="50" font-weight="780" fill="#0D2147">
+    <tspan x="100" dy="0">ЛогистРу</tspan>
+    <tspan x="100" dy="62">включена в Реестр</tspan>
+    <tspan x="100" dy="62">российского ПО</tspan>
+  </text>
+
+  <g transform="translate(750 250) scale(0.86)" filter="url(#softShadow)">
+    <rect x="0" y="0" width="252" height="310" rx="32" fill="url(#blueCard)"/>
+    <path d="M66 58h98l34 34v111c0 13-10 23-23 23H66c-13 0-23-10-23-23V81c0-13 10-23 23-23z" fill="#FFFFFF"/>
+    <path d="M164 58v34h34" fill="#D9E9FF"/>
+    <rect x="72" y="113" width="93" height="9" rx="4.5" fill="#BFD8FA"/>
+    <rect x="72" y="139" width="73" height="9" rx="4.5" fill="#D6E6FA"/>
+    <rect x="72" y="165" width="86" height="9" rx="4.5" fill="#D6E6FA"/>
+    <circle cx="172" cy="207" r="52" fill="#19BD49" stroke="#FFFFFF" stroke-width="8"/>
+    <path d="M146 207l18 18 35-43" fill="none" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="126" y="280" text-anchor="middle" font-family="Geologica, Arial, sans-serif" font-size="18" font-weight="650" letter-spacing="1.6" fill="#FFFFFF">РОССИЙСКОЕ ПО</text>
+  </g>
+
+  <rect x="100" y="639" width="880" height="143" rx="28" fill="#F7FAFF" stroke="#DCE8F8" stroke-width="2"/>
+  <rect x="100" y="639" width="9" height="143" rx="4.5" fill="#19BD49"/>
+  <text x="142" y="698" font-family="Geologica, Arial, sans-serif" font-size="23" font-weight="680" fill="#0D2147">Официальный статус отечественного ПО</text>
+  <text x="142" y="743" font-family="Geologica, Arial, sans-serif" font-size="21" font-weight="450" fill="#50617D">Новый важный этап в развитии сервиса</text>
+
+  <g transform="translate(100 838)">
+    <circle cx="29" cy="29" r="29" fill="#EAF2FF"/>
+    <path d="M18 34c6-13 13-19 23-22M23 42c8-11 14-15 23-17" fill="none" stroke="#0D67F3" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="18" cy="34" r="4" fill="#0D67F3"/>
+    <circle cx="41" cy="12" r="4" fill="#19BD49"/>
+    <circle cx="46" cy="25" r="4" fill="#0D67F3"/>
+    <text x="78" y="24" font-family="Geologica, Arial, sans-serif" font-size="20" font-weight="600" fill="#0D67F3">Цифровая экосистема</text>
+    <text x="78" y="51" font-family="Geologica, Arial, sans-serif" font-size="20" font-weight="450" fill="#50617D">для управления перевозками</text>
+  </g>
+
+  <line x1="100" y1="941" x2="980" y2="941" stroke="#DCE8F8" stroke-width="2"/>
+  <text x="100" y="987" font-family="Geologica, Arial, sans-serif" font-size="20" font-weight="550" fill="#50617D">ЛОГИСТРУ • ТЕХНОЛОГИИ ДЛЯ ЛОГИСТИКИ</text>
+  <circle cx="947" cy="981" r="5" fill="#0D67F3"/>
+  <circle cx="965" cy="981" r="5" fill="#19BD49"/>
+  <circle cx="983" cy="981" r="5" fill="#0D67F3"/>
+</svg>

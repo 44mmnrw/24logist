@@ -42,6 +42,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'community' => [
+            'driver' => 'session',
+            'provider' => 'community_users',
+        ],
     ],
 
     /*
@@ -65,6 +69,10 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
+        ],
+        'community_users' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\CommunityUser::class,
         ],
 
         // 'users' => [

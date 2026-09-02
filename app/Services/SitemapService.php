@@ -6,6 +6,8 @@ use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Models\BlogTag;
 use App\Models\CmsPage;
+use App\Models\CommunityCategory;
+use App\Models\CommunityPost;
 use App\Models\LandingSection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -25,6 +27,13 @@ final class SitemapService
         '/storage/',
         '/vendor/',
         '/bootstrap/',
+        '/community/auth/',
+        '/community/login',
+        '/community/moderation/',
+        '/community/notifications',
+        '/community/onboarding',
+        '/community/settings',
+        '/community/submit',
     ];
 
     public function robots(): string
@@ -203,6 +212,34 @@ final class SitemapService
                     'priority' => '0.5',
                 ];
             }
+        }
+
+        if (app(SiteSettingsService::class)->communityEnabled()) {
+            $communityLastmod = CommunityPost::query()->published()->max('updated_at');
+            $urls[] = [
+                'loc' => route('community.index'),
+                'lastmod' => $this->formatLastmod($communityLastmod),
+                'changefreq' => 'daily',
+                'priority' => '0.8',
+            ];
+
+            CommunityCategory::query()->active()->orderBy('sort_order')->get()->each(function (CommunityCategory $category) use (&$urls): void {
+                $urls[] = [
+                    'loc' => route('community.categories.show', $category),
+                    'lastmod' => $this->formatLastmod($category->updated_at),
+                    'changefreq' => 'daily',
+                    'priority' => '0.6',
+                ];
+            });
+
+            CommunityPost::query()->published()->orderByDesc('published_at')->get()->each(function (CommunityPost $post) use (&$urls): void {
+                $urls[] = [
+                    'loc' => $post->getUrl(),
+                    'lastmod' => $this->formatLastmod($post->updated_at),
+                    'changefreq' => 'weekly',
+                    'priority' => '0.6',
+                ];
+            });
         }
 
         return $urls;

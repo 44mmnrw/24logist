@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1280, initial-scale=1">
+  <title>Система ЛогистРу включена в Реестр российского ПО</title>
+  <style>
+    @font-face {
+      font-family: "Geologica";
+      src: url("./geologica.woff2") format("woff2");
+      font-style: normal;
+      font-weight: 100 900;
+      font-display: block;
+    }
+
+    :root {
+      --blue: #0D67F3;
+      --navy: #0D2147;
+      --green: #19BD49;
+      --line: #DCE8F8;
+      --muted: #52637E;
+      --safe: 92px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 1280px; height: 1280px; overflow: hidden; }
+    body { font-family: "Geologica", Arial, sans-serif; background: #fff; }
+
+    #canvas {
+      position: relative;
+      width: 1280px;
+      height: 1280px;
+      overflow: hidden;
+      color: var(--navy);
+      background:
+        radial-gradient(circle at 97% 8%, rgba(13,103,243,.065), transparent 25%),
+        radial-gradient(circle at 1% 99%, rgba(25,189,73,.045), transparent 24%),
+        #fff;
+    }
+
+    .logo {
+      position: absolute;
+      z-index: 4;
+      left: 92px;
+      top: 88px;
+      width: 402px;
+      height: 98px;
+      object-fit: contain;
+      object-position: left center;
+    }
+
+    .route-top {
+      position: absolute;
+      right: -18px;
+      top: 74px;
+      width: 465px;
+      height: 205px;
+      opacity: .65;
+    }
+
+    .eyebrow {
+      position: absolute;
+      z-index: 4;
+      left: 92px;
+      top: 229px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      color: var(--blue);
+      font-size: 25px;
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: 1.8px;
+      white-space: nowrap;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 58px;
+      height: 3px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--blue), var(--green));
+    }
+    h1 {
+      position: absolute;
+      z-index: 4;
+      left: 92px;
+      top: 291px;
+      width: 815px;
+      margin: 0;
+      font-size: 80px;
+      line-height: 1.05;
+      font-weight: 820;
+      letter-spacing: -2.1px;
+    }
+    h1 span { display: table; white-space: nowrap; }
+    h1 .blue { color: var(--blue); }
+
+    .hero-art {
+      position: absolute;
+      z-index: 2;
+      left: 397px;
+      top: 397px;
+      width: 795px;
+      height: 795px;
+      object-fit: contain;
+      pointer-events: none;
+    }
+
+    .message {
+      position: absolute;
+      z-index: 5;
+      left: 92px;
+      top: 655px;
+      width: 525px;
+      padding-left: 28px;
+      border-left: 7px solid var(--green);
+    }
+    .message .success {
+      display: table;
+      margin-bottom: 25px;
+      color: var(--navy);
+      font-size: 35px;
+      line-height: 1.12;
+      font-weight: 680;
+    }
+    .message .horizon {
+      display: table;
+      color: var(--blue);
+      font-size: 58px;
+      line-height: 1.03;
+      font-weight: 820;
+      letter-spacing: -1.3px;
+    }
+    .message .service {
+      display: table;
+      margin-top: 11px;
+      color: var(--navy);
+      font-size: 39px;
+      line-height: 1.15;
+      font-weight: 680;
+    }
+
+    .bottom-rule {
+      position: absolute;
+      z-index: 6;
+      left: 92px;
+      bottom: 84px;
+      width: 445px;
+      height: 4px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--blue), #23B8F2 65%, transparent);
+    }
+
+    .accent-square {
+      position: absolute;
+      z-index: 1;
+      width: 13px;
+      height: 13px;
+      background: var(--blue);
+      transform: rotate(12deg);
+    }
+    .accent-square.one { left: 55px; bottom: 230px; }
+    .accent-square.two { right: 55px; top: 340px; background: var(--green); }
+
+    #safe-zone {
+      position: absolute;
+      inset: var(--safe);
+      pointer-events: none;
+    }
+
+    html[data-layout-status="overflow"] #canvas::after {
+      content: "LAYOUT OVERFLOW";
+      position: absolute;
+      z-index: 99;
+      inset: 12px;
+      display: grid;
+      place-items: center;
+      border: 18px solid #E00000;
+      color: #E00000;
+      background: rgba(255,255,255,.65);
+      font: 800 72px/1 Arial, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <main id="canvas">
+    <div id="safe-zone" aria-hidden="true"></div>
+    <img class="logo checked" src="./logistru-logo.svg" alt="ЛогистРу">
+
+    <svg class="route-top" viewBox="0 0 465 205" aria-hidden="true">
+      <path d="M38 28c76 9 104 61 176 65 86 4 108-67 218-45" fill="none" stroke="#DCE8F8" stroke-width="3"/>
+      <path d="M103 8c60 25 82 77 153 91 64 12 102-25 181-23" fill="none" stroke="#0D67F3" stroke-opacity=".18" stroke-width="2" stroke-dasharray="8 12"/>
+      <circle cx="214" cy="93" r="7" fill="#0D67F3" fill-opacity=".26"/>
+      <circle cx="432" cy="48" r="7" fill="#19BD49" fill-opacity=".34"/>
+    </svg>
+
+    <div class="eyebrow checked">ОТЕЧЕСТВЕННОЕ ПРОГРАММНОЕ ОБЕСПЕЧЕНИЕ</div>
+
+    <h1 class="checked">
+      <span>Система ЛогистРу</span>
+      <span class="blue">включена в Реестр</span>
+      <span>российского ПО</span>
+    </h1>
+
+    <section class="message checked" aria-label="Значение события">
+      <div class="success">Большой успех</div>
+      <div class="horizon">Новый горизонт</div>
+      <div class="service">в развитии сервиса</div>
+    </section>
+
+    <img class="hero-art checked" src="./logistru-registry-horizon-art.png" alt="Грузовик движется к новому горизонту рядом с подтверждённым документом">
+    <div class="bottom-rule" aria-hidden="true"></div>
+    <div class="accent-square one" aria-hidden="true"></div>
+    <div class="accent-square two" aria-hidden="true"></div>
+  </main>
+
+  <script>
+    async function validateLayout() {
+      await document.fonts.ready;
+      const canvas = document.getElementById('canvas').getBoundingClientRect();
+      const safe = 88;
+      const failures = [];
+      document.querySelectorAll('.checked, h1 span, .message > div').forEach((node) => {
+        const rect = node.getBoundingClientRect();
+        const inside = rect.left >= canvas.left + safe &&
+          rect.top >= canvas.top + safe &&
+          rect.right <= canvas.right - safe &&
+          rect.bottom <= canvas.bottom - safe;
+        if (!inside) failures.push({
+          element: node.className || node.tagName,
+          left: Math.round(rect.left), top: Math.round(rect.top),
+          right: Math.round(rect.right), bottom: Math.round(rect.bottom)
+        });
+      });
+      document.documentElement.dataset.layoutReport = JSON.stringify({
+        status: failures.length ? 'overflow' : 'ok',
+        failures
+      });
+      document.documentElement.dataset.layoutStatus = failures.length ? 'overflow' : 'ok';
+    }
+    validateLayout();
+  </script>
+</body>
+</html>

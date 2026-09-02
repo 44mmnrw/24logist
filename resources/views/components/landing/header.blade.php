@@ -19,6 +19,11 @@
             @foreach ($navLinks as $link)
                 <a href="{{ \App\Support\LandingLinks::resolve($link->link) }}">{{ $link->title }}</a>
             @endforeach
+            {{--
+            @if (app(\App\Services\SiteSettingsService::class)->communityEnabled())
+                <a href="{{ route('community.index') }}">Сообщество</a>
+            @endif
+            --}}
         </nav>
 
         <div class="landing-header__actions">
@@ -40,6 +45,11 @@
                         @foreach ($navLinks as $link)
                             <a href="{{ \App\Support\LandingLinks::resolve($link->link) }}">{{ $link->title }}</a>
                         @endforeach
+                        {{--
+                        @if (app(\App\Services\SiteSettingsService::class)->communityEnabled())
+                            <a href="{{ route('community.index') }}">Сообщество</a>
+                        @endif
+                        --}}
                     </nav>
                 </details>
             @endif

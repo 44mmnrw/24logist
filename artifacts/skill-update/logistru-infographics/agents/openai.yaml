@@ -1,0 +1,7 @@
+interface:
+  display_name: "Инфографика ЛогистРу"
+  short_description: "Фирменная инфографика для блога и соцсетей"
+  icon_small: "./assets/logistru-logo.svg"
+  icon_large: "./assets/logistru-logo.svg"
+  brand_color: "#0D67F3"
+  default_prompt: "Use $logistru-infographics to create a polished LogistRu infographic from my Russian brief."

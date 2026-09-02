@@ -25,6 +25,9 @@ class EditGeneralSiteSetting extends EditRecord
 
     private ?string $pendingMailPassword = null;
 
+    /** @var array<string, string> */
+    private array $pendingCommunitySecrets = [];
+
     public function mount(int|string|null $record = null): void
     {
         parent::mount(SiteSetting::instance()->getKey());
@@ -85,6 +88,13 @@ class EditGeneralSiteSetting extends EditRecord
         }
 
         $data['mail_password'] = '';
+        $data['community_enabled'] ??= false;
+        $data['community_max_enabled'] ??= false;
+        $data['community_vk_enabled'] ??= false;
+
+        foreach (['community_telegram_client_secret', 'community_telegram_bot_token', 'community_vk_client_secret', 'community_vk_service_token', 'community_max_bot_token', 'community_max_webhook_secret'] as $field) {
+            $data[$field] = '';
+        }
 
         return $data;
     }
@@ -102,6 +112,14 @@ class EditGeneralSiteSetting extends EditRecord
 
         unset($data['mail_password']);
 
+        foreach (['community_telegram_client_secret', 'community_telegram_bot_token', 'community_vk_client_secret', 'community_vk_service_token', 'community_max_bot_token', 'community_max_webhook_secret'] as $field) {
+            if (filled($data[$field] ?? null)) {
+                $this->pendingCommunitySecrets[$field] = (string) $data[$field];
+            }
+
+            unset($data[$field]);
+        }
+
         return $data;
     }
 
@@ -118,6 +136,17 @@ class EditGeneralSiteSetting extends EditRecord
             $this->record->save();
             $this->mailPasswordUpdated = true;
             $this->pendingMailPassword = null;
+        }
+
+        if ($this->pendingCommunitySecrets !== []) {
+            $this->record->fill($this->pendingCommunitySecrets)->save();
+            $this->pendingCommunitySecrets = [];
+
+            Notification::make()
+                ->title('Секреты сообщества сохранены')
+                ->body('Сохранённые значения отображаются в форме как ***.')
+                ->success()
+                ->send();
         }
 
         app(SiteSettingsService::class)->clearCache();

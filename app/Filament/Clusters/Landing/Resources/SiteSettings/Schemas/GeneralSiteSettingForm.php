@@ -40,6 +40,10 @@ final class GeneralSiteSettingForm
                         ->label('Блог')
                         ->icon('heroicon-o-newspaper')
                         ->schema(self::blogTab()),
+                    Tab::make('community')
+                        ->label('Сообщество')
+                        ->icon('heroicon-o-chat-bubble-left-right')
+                        ->schema(self::communityTab()),
                     Tab::make('telegram_popup')
                         ->label('Telegram-окно')
                         ->icon('heroicon-o-paper-airplane')
@@ -288,6 +292,135 @@ final class GeneralSiteSettingForm
                 ])
                 ->columns(2)
                 ->collapsed()
+                ->columnSpanFull(),
+        ];
+    }
+
+    /**
+     * @return array<int, mixed>
+     */
+    private static function communityTab(): array
+    {
+        return [
+            Section::make('Сообщество 24Logist')
+                ->description('Управление доступностью публичного раздела /community.')
+                ->schema([
+                    Toggle::make('community_enabled')
+                        ->label('Включить раздел сообщества')
+                        ->default(false)
+                        ->helperText('Показывает ссылки в шапке и подвале и открывает публичные страницы сообщества.'),
+                    Toggle::make('community_max_enabled')
+                        ->label('Включить авторизацию через MAX')
+                        ->default(false)
+                        ->helperText('Включайте только после настройки бота, Mini App и webhook в MAX.'),
+                    Toggle::make('community_vk_enabled')
+                        ->label('Включить авторизацию через VK ID')
+                        ->default(false)
+                        ->helperText('Включайте после создания приложения VK ID и регистрации точного Redirect URI.'),
+                ])
+                ->columns(1)
+                ->columnSpanFull(),
+            Section::make('Авторизация через Telegram')
+                ->description('Значения хранятся в базе в зашифрованном виде. Секреты после сохранения повторно не показываются.')
+                ->schema([
+                    TextInput::make('community_telegram_client_id')
+                        ->label('Client ID')
+                        ->maxLength(500),
+                    TextInput::make('community_telegram_redirect_uri')
+                        ->label('Redirect URI')
+                        ->url()
+                        ->maxLength(2048)
+                        ->placeholder('https://24logist.ru/community/auth/telegram/callback'),
+                    Placeholder::make('community_telegram_client_secret_status')
+                        ->label('Client Secret')
+                        ->content(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_telegram_client_secret') ? 'Настроен' : 'Не настроен'),
+                    TextInput::make('community_telegram_client_secret')
+                        ->label('Новый Client Secret')
+                        ->password()
+                        ->revealable()
+                        ->autocomplete('new-password')
+                        ->dehydrated()
+                        ->helperText('Оставьте пустым, чтобы сохранить действующее значение.'),
+                    Placeholder::make('community_telegram_bot_token_status')
+                        ->label('Bot Token')
+                        ->content(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_telegram_bot_token') ? 'Настроен' : 'Не настроен'),
+                    TextInput::make('community_telegram_bot_token')
+                        ->label('Новый Bot Token')
+                        ->password()
+                        ->revealable()
+                        ->autocomplete('new-password')
+                        ->dehydrated()
+                        ->helperText('Нужен для доставки уведомлений. Оставьте пустым, чтобы сохранить действующее значение.'),
+                ])
+                ->columns(2)
+                ->columnSpanFull(),
+            Section::make('Авторизация через VK ID')
+                ->description('Для серверного обмена кода выберите в VK ID уровень «Конфиденциальное» и укажите IP бэкенда. Секреты хранятся в базе в зашифрованном виде.')
+                ->schema([
+                    TextInput::make('community_vk_client_id')
+                        ->label('ID приложения')
+                        ->maxLength(500)
+                        ->helperText('ID приложения из кабинета VK ID.'),
+                    Placeholder::make('community_vk_client_secret_status')
+                        ->label('Защищённый ключ')
+                        ->content(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_vk_client_secret') ? '***' : 'Не настроен'),
+                    TextInput::make('community_vk_client_secret')
+                        ->label('Новый защищённый ключ')
+                        ->password()
+                        ->revealable()
+                        ->autocomplete('new-password')
+                        ->dehydrated()
+                        ->placeholder(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_vk_client_secret') ? '***' : '')
+                        ->helperText('Параметр client_secret из раздела «Ключи доступа». Оставьте пустым, чтобы сохранить действующее значение.'),
+                    Placeholder::make('community_vk_service_token_status')
+                        ->label('Сервисный ключ доступа')
+                        ->content(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_vk_service_token') ? '***' : 'Не настроен'),
+                    TextInput::make('community_vk_service_token')
+                        ->label('Новый сервисный ключ доступа')
+                        ->password()
+                        ->revealable()
+                        ->autocomplete('new-password')
+                        ->dehydrated()
+                        ->placeholder(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_vk_service_token') ? '***' : '')
+                        ->helperText('Обязателен как service_token для конфиденциального приложения с обменом кода на бэкенде. Оставьте пустым, чтобы сохранить действующее значение.'),
+                    TextInput::make('community_vk_redirect_uri')
+                        ->label('Redirect URI')
+                        ->url()
+                        ->maxLength(2048)
+                        ->placeholder('https://24logist.ru/community/auth/vk/callback')
+                        ->helperText('Должен полностью совпадать с адресом, зарегистрированным в VK ID.'),
+                ])
+                ->columns(2)
+                ->columnSpanFull(),
+            Section::make('Авторизация через MAX')
+                ->description('Включайте интеграцию после регистрации бота и Mini App. Webhook: /community/webhooks/max')
+                ->schema([
+                    TextInput::make('community_max_bot_username')
+                        ->label('Bot Username')
+                        ->maxLength(500)
+                        ->placeholder('community_bot'),
+                    Placeholder::make('community_max_bot_token_status')
+                        ->label('Bot Token')
+                        ->content(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_max_bot_token') ? 'Настроен' : 'Не настроен'),
+                    TextInput::make('community_max_bot_token')
+                        ->label('Новый Bot Token')
+                        ->password()
+                        ->revealable()
+                        ->autocomplete('new-password')
+                        ->dehydrated()
+                        ->helperText('Оставьте пустым, чтобы сохранить действующее значение.'),
+                    Placeholder::make('community_max_webhook_secret_status')
+                        ->label('Webhook Secret')
+                        ->content(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_max_webhook_secret') ? 'Настроен' : 'Не настроен'),
+                    TextInput::make('community_max_webhook_secret')
+                        ->label('Новый Webhook Secret')
+                        ->password()
+                        ->revealable()
+                        ->autocomplete('new-password')
+                        ->dehydrated()
+                        ->helperText('MAX передаёт значение в заголовке X-Max-Bot-Api-Secret. Допустимы 5–256 символов: латиница, цифры, _ и -. Оставьте пустым, чтобы сохранить действующее значение.'),
+                ])
+                ->columns(2)
                 ->columnSpanFull(),
         ];
     }

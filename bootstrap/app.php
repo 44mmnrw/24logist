@@ -5,6 +5,10 @@ use App\Console\Commands\GenerateBlogCardImages;
 use App\Console\Commands\GenerateBlogTagImages;
 use App\Console\Commands\ImportWordstatCsv;
 use App\Http\Middleware\EnforceCanonicalUrl;
+use App\Http\Middleware\EnsureCommunityAuthenticated;
+use App\Http\Middleware\EnsureCommunityEnabled;
+use App\Http\Middleware\EnsureCommunityModerator;
+use App\Http\Middleware\EnsureCommunityOnboarded;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -31,6 +35,13 @@ return Application::configure(basePath: dirname(__DIR__))
         // Patched Livewire endpoint: /lw-{hash}/upload (see script_ai/patch-livewire-upload.sh).
         $middleware->validateCsrfTokens(except: [
             'lw-*/upload',
+            'community/webhooks/max',
+        ]);
+        $middleware->alias([
+            'community.enabled' => EnsureCommunityEnabled::class,
+            'community.auth' => EnsureCommunityAuthenticated::class,
+            'community.onboarded' => EnsureCommunityOnboarded::class,
+            'community.moderator' => EnsureCommunityModerator::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

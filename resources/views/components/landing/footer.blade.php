@@ -39,6 +39,9 @@
             <span>{{ $extra['copyright'] ?? '' }}</span>
             <span>
                 <a href="{{ route('blog.index') }}">Блог</a>
+                @if (app(\App\Services\SiteSettingsService::class)->communityEnabled())
+                    <span aria-hidden="true"> · </span><a href="{{ route('community.index') }}">Сообщество</a>
+                @endif
                 @if (! empty($extra['tagline']))
                     <span aria-hidden="true"> · </span>{{ $extra['tagline'] }}
                 @endif

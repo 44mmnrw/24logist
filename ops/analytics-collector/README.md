@@ -14,7 +14,8 @@ The environment file must be readable only by the site user and must never be
 placed in the public web root. Keep `ANALYTICS_ENABLED=false` until the GA4
 measurement ID and Measurement Protocol API secret have been configured.
 
-`GET /` returns a health response. `POST /` accepts payloads in this form:
+Public `GET /` requests return an empty `404`; collector configuration is not
+exposed over HTTP. `POST /` accepts payloads in this form:
 
 ```json
 {
