@@ -6,6 +6,8 @@ use App\Models\CommunityLoginChallenge;
 use App\Models\SiteSetting;
 use App\Services\SiteSettingsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\Factory;
+use Illuminate\Http\Client\Request as ClientRequest;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -20,6 +22,7 @@ class MaxCommunityAuthTest extends TestCase
         Storage::fake('public');
         Http::fake([
             'https://images.example.test/max-avatar.png' => Http::response(base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='), 200, ['Content-Type' => 'image/png']),
+            'https://platform-api2.max.ru/messages*' => Http::response(['message' => ['body' => ['text' => 'ok']]], 200),
         ]);
         SiteSetting::instance()->update([
             'community_enabled' => true,
@@ -32,12 +35,22 @@ class MaxCommunityAuthTest extends TestCase
         $this->withoutVite();
     }
 
-    public function test_external_max_bot_challenge_is_single_use(): void
+    public function test_site_opens_max_mini_app_instead_of_starting_bot(): void
     {
         $response = $this->get(route('community.auth.max.start'))->assertOk();
-        preg_match('/[?&]start=([A-Za-z0-9_%\-]+)/', $response->getContent(), $matches);
+        preg_match('/[?&]startapp=([A-Za-z0-9_%\-]+)/', $response->getContent(), $matches);
         $token = rawurldecode($matches[1] ?? '');
         $this->assertNotSame('', $token);
+        $this->assertStringNotContainsString('?start=', $response->getContent());
+        $this->assertDatabaseCount('community_login_challenges', 1);
+        $this->assertDatabaseCount('community_users', 0);
+    }
+
+    public function test_bot_sends_authorize_button_without_authorizing_on_bot_started(): void
+    {
+        $response = $this->get(route('community.auth.max.start'))->assertOk();
+        preg_match('/[?&]startapp=([A-Za-z0-9_%\-]+)/', $response->getContent(), $matches);
+        $token = rawurldecode($matches[1] ?? '');
         $challenge = CommunityLoginChallenge::query()->firstOrFail();
 
         $webhook = [
@@ -50,38 +63,121 @@ class MaxCommunityAuthTest extends TestCase
             'X-Max-Bot-Api-Secret' => 'max_webhook-secret',
         ])->assertOk();
 
-        $this->getJson(route('community.auth.max.status', $challenge))
-            ->assertOk()->assertJson(['status' => 'consumed']);
-        $this->assertAuthenticated('community');
-        $this->assertNotNull($challenge->fresh()->consumed_at);
-        $this->assertDatabaseHas('community_identities', [
-            'community_user_id' => auth('community')->id(),
-            'provider' => 'max',
-            'provider_user_id' => '9911',
-            'bot_access' => true,
-            'bot_status' => 'active',
-        ]);
+        $this->assertSame('pending', $challenge->fresh()->status);
+        $this->assertNotNull($challenge->fresh()->prompt_sent_at);
+        $this->assertDatabaseCount('community_users', 0);
+        $this->assertDatabaseCount('community_identities', 0);
+        Http::assertSent(fn (ClientRequest $request): bool => data_get($request->data(), 'attachments.0.payload.buttons.0.0.type') === 'open_app'
+            && data_get($request->data(), 'attachments.0.payload.buttons.0.0.text') === 'Авторизоваться'
+            && data_get($request->data(), 'attachments.0.payload.buttons.0.0.web_app') === 'community_bot'
+            && data_get($request->data(), 'attachments.0.payload.buttons.0.0.payload') === $token
+        );
 
         $this->postJson(route('community.webhooks.max'), $webhook, [
             'X-Max-Bot-Api-Secret' => 'max_webhook-secret',
         ])->assertOk();
-        $this->assertDatabaseCount('community_users', 1);
-        $this->assertDatabaseCount('community_identities', 1);
+        Http::assertSentCount(1);
     }
 
-    public function test_signed_mini_app_data_can_still_approve_challenge(): void
+    public function test_bot_sends_authorize_button_when_started_without_site_challenge(): void
     {
-        $response = $this->get(route('community.auth.max.start'))->assertOk();
-        preg_match('/[?&]start=([A-Za-z0-9_%\-]+)/', $response->getContent(), $matches);
-        $token = rawurldecode($matches[1] ?? '');
-
-        $this->postJson(route('community.auth.max.approve'), [
-            'challenge' => $token,
-            'init_data' => $this->signedInitData(9922),
+        $this->postJson(route('community.webhooks.max'), [
+            'update_type' => 'bot_started',
+            'user' => ['user_id' => 9912],
+        ], [
+            'X-Max-Bot-Api-Secret' => 'max_webhook-secret',
         ])->assertOk();
 
-        $this->assertSame('max', CommunityLoginChallenge::query()->firstOrFail()->fresh()->communityUser?->avatar_source);
-        Storage::disk('public')->assertExists(CommunityLoginChallenge::query()->firstOrFail()->communityUser->avatar_path);
+        Http::assertSent(fn (ClientRequest $request): bool => data_get($request->data(), 'attachments.0.payload.buttons.0.0.type') === 'open_app'
+            && data_get($request->data(), 'attachments.0.payload.buttons.0.0.text') === 'Авторизоваться'
+            && data_get($request->data(), 'attachments.0.payload.buttons.0.0.web_app') === 'community_bot'
+            && data_get($request->data(), 'attachments.0.payload.buttons.0.0.payload') === 'community-login'
+        );
+        $this->assertDatabaseCount('community_users', 0);
+    }
+
+    public function test_signed_mini_app_data_approves_challenge_and_returns_to_site(): void
+    {
+        $response = $this->get(route('community.auth.max.start'))->assertOk();
+        preg_match('/[?&]startapp=([A-Za-z0-9_%\-]+)/', $response->getContent(), $matches);
+        $token = rawurldecode($matches[1] ?? '');
+
+        $result = $this->postJson(route('community.auth.max.approve'), [
+            'challenge' => $token,
+            'init_data' => $this->signedInitData(9922),
+        ])->assertOk()->assertJsonStructure(['return_url']);
+
+        $challenge = CommunityLoginChallenge::query()->firstOrFail();
+        $this->assertSame('approved', $challenge->fresh()->status);
+        $this->assertSame('max', $challenge->fresh()->communityUser?->avatar_source);
+        Storage::disk('public')->assertExists($challenge->communityUser->avatar_path);
+
+        $this->app['session']->flush();
+        $this->assertGuest('community');
+        $this->get($result->json('return_url'))->assertRedirect(route('community.onboarding'));
+        $this->assertAuthenticated('community');
+        $this->get($result->json('return_url'))->assertGone();
+    }
+
+    public function test_mini_app_without_start_parameter_can_authorize_and_return_to_site(): void
+    {
+        $this->get(route('community.auth.max.mini-app'))
+            ->assertOk()
+            ->assertSee('Подтверждаем вход');
+        $result = $this->postJson(route('community.auth.max.session'), [
+            'init_data' => $this->signedInitData(9933),
+        ])->assertOk()->assertJsonStructure(['return_url']);
+
+        $this->assertDatabaseCount('community_users', 1);
+        $this->assertDatabaseCount('community_identities', 1);
+        $this->app['session']->flush();
+        $this->assertGuest('community');
+
+        $this->get($result->json('return_url'))->assertRedirect(route('community.onboarding'));
+        $this->assertAuthenticated('community');
+    }
+
+    public function test_unsigned_max_return_link_is_rejected(): void
+    {
+        $challenge = CommunityLoginChallenge::query()->create([
+            'token_hash' => hash('sha256', 'return-test'),
+            'browser_session_hash' => hash('sha256', 'browser-test'),
+            'status' => 'approved',
+            'expires_at' => now()->addMinutes(5),
+            'approved_at' => now(),
+        ]);
+
+        $this->get(route('community.auth.max.complete', $challenge, absolute: false))->assertForbidden();
+    }
+
+    public function test_max_retries_authorization_prompt_without_creating_account(): void
+    {
+        Http::swap(new Factory($this->app['events']));
+        Http::fake([
+            'https://platform-api2.max.ru/messages*' => Http::sequence()
+                ->push(['message' => 'temporary error'], 500)
+                ->push(['message' => ['body' => ['text' => 'ok']]], 200),
+        ]);
+        $response = $this->get(route('community.auth.max.start'))->assertOk();
+        preg_match('/[?&]startapp=([A-Za-z0-9_%\-]+)/', $response->getContent(), $matches);
+        $token = rawurldecode($matches[1] ?? '');
+        $webhook = [
+            'update_type' => 'bot_started',
+            'user' => ['user_id' => 9944],
+            'payload' => $token,
+        ];
+        $headers = ['X-Max-Bot-Api-Secret' => 'max_webhook-secret'];
+
+        $this->postJson(route('community.webhooks.max'), $webhook, $headers)->assertServerError();
+        $this->assertNull(CommunityLoginChallenge::query()->firstOrFail()->prompt_sent_at);
+
+        $this->postJson(route('community.webhooks.max'), $webhook, $headers)->assertOk();
+        $this->assertNotNull(CommunityLoginChallenge::query()->firstOrFail()->prompt_sent_at);
+
+        $this->postJson(route('community.webhooks.max'), $webhook, $headers)->assertOk();
+        $this->assertDatabaseCount('community_users', 0);
+        $this->assertDatabaseCount('community_identities', 0);
+        Http::assertSentCount(2);
     }
 
     public function test_max_challenge_creation_is_rate_limited(): void

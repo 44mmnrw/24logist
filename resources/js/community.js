@@ -81,9 +81,42 @@ const maxAuth = document.querySelector('[data-max-auth]');
 
 if (maxAuth) {
     const statusNode = maxAuth.querySelector('[data-max-status]');
+    const startedAt = Date.now();
+    const poll = window.setInterval(async () => {
+        if (Date.now() - startedAt > 310000) {
+            window.clearInterval(poll);
+            statusNode.textContent = 'Ссылка истекла. Обновите страницу.';
+            return;
+        }
+        try {
+            const response = await fetch(maxAuth.dataset.statusUrl, {headers: {'Accept': 'application/json'}, credentials: 'same-origin'});
+            const result = await response.json();
+            if (result.redirect) {
+                window.clearInterval(poll);
+                window.location.assign(result.redirect);
+            } else if (result.status === 'expired') {
+                window.clearInterval(poll);
+                statusNode.textContent = 'Ссылка истекла. Обновите страницу.';
+            } else if (result.status === 'failed') {
+                window.clearInterval(poll);
+                statusNode.textContent = 'Не удалось связать аккаунт MAX. Возможно, он уже привязан к другому профилю.';
+            }
+        } catch (_) {}
+    }, 2000);
+}
+
+const maxMiniApp = document.querySelector('[data-max-mini-app]');
+
+if (maxMiniApp) {
+    const returnButton = maxMiniApp.querySelector('[data-max-return]');
+    const statusNode = maxMiniApp.querySelector('[data-max-mini-status]');
+    const initData = window.WebApp?.initData;
+    const startParam = window.WebApp?.initDataUnsafe?.start_param;
+
     const post = async (url, payload) => {
         const response = await fetch(url, {
-            method: 'POST', credentials: 'same-origin',
+            method: 'POST',
+            credentials: 'same-origin',
             headers: {'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken},
             body: JSON.stringify(payload),
         });
@@ -92,40 +125,32 @@ if (maxAuth) {
         return result;
     };
 
-    const initData = window.WebApp?.initData;
-    const startParam = window.WebApp?.initDataUnsafe?.start_param;
-
-    if (initData) {
-        statusNode.textContent = 'Подтверждаем данные MAX…';
-        post(startParam ? maxAuth.dataset.approveUrl : maxAuth.dataset.sessionUrl,
-            startParam ? {challenge: startParam, init_data: initData} : {init_data: initData})
-            .then((result) => {
-                if (result.redirect) window.location.assign(result.redirect);
-                else statusNode.textContent = 'Вход подтверждён. Вернитесь в браузер.';
-            })
-            .catch(() => { statusNode.textContent = 'Не удалось подтвердить вход. Откройте ссылку заново.'; });
+    if (!initData) {
+        statusNode.textContent = 'Откройте эту страницу внутри приложения MAX.';
     } else {
-        const startedAt = Date.now();
-        const poll = window.setInterval(async () => {
-            if (Date.now() - startedAt > 310000) {
-                window.clearInterval(poll);
-                statusNode.textContent = 'Ссылка истекла. Обновите страницу.';
-                return;
-            }
+        const completeLogin = async () => {
+            const hasChallenge = startParam && startParam !== 'community-login';
             try {
-                const response = await fetch(maxAuth.dataset.statusUrl, {headers: {'Accept': 'application/json'}, credentials: 'same-origin'});
-                const result = await response.json();
-                if (result.redirect) {
-                    window.clearInterval(poll);
-                    window.location.assign(result.redirect);
-                } else if (result.status === 'expired') {
-                    window.clearInterval(poll);
-                    statusNode.textContent = 'Ссылка истекла. Обновите страницу.';
-                } else if (result.status === 'failed') {
-                    window.clearInterval(poll);
-                    statusNode.textContent = 'Не удалось связать аккаунт MAX. Возможно, он уже привязан к другому профилю.';
-                }
-            } catch (_) {}
-        }, 2000);
+                const result = await post(
+                    hasChallenge ? maxMiniApp.dataset.approveUrl : maxMiniApp.dataset.sessionUrl,
+                    hasChallenge ? {challenge: startParam, init_data: initData} : {init_data: initData},
+                );
+
+                returnButton.href = result.return_url;
+                returnButton.hidden = false;
+                statusNode.textContent = 'Вход подтверждён. Нажмите кнопку, чтобы открыть сообщество.';
+            } catch (_) {
+                statusNode.textContent = 'Не удалось подтвердить вход. Откройте ссылку заново.';
+            }
+        };
+
+        completeLogin();
     }
+
+    returnButton.addEventListener('click', (event) => {
+        if (typeof window.WebApp?.openLink !== 'function') return;
+
+        event.preventDefault();
+        window.WebApp.openLink(returnButton.href);
+    });
 }

@@ -7,6 +7,7 @@ return [
     'max' => [
         'init_data_ttl' => 3600,
         'challenge_ttl' => 300,
+        'return_link_ttl' => 600,
     ],
     'limits' => [
         'post_title' => 180,

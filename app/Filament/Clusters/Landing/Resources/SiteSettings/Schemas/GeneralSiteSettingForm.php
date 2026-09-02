@@ -396,13 +396,16 @@ final class GeneralSiteSettingForm
                 ->columns(2)
                 ->columnSpanFull(),
             Section::make('Авторизация через MAX')
-                ->description('Вход работает через deep link бота и событие bot_started. Mini App не обязателен. Webhook: '.route('community.webhooks.max'))
+                ->description('Вход работает через Mini App: MAX проверяет пользователя, затем сайт выдаёт одноразовую ссылку возврата. Webhook нужен для кнопки «Авторизоваться» в сообщении бота.')
                 ->schema([
                     TextInput::make('community_max_bot_username')
                         ->label('Имя бота')
                         ->maxLength(500)
                         ->placeholder('community_bot')
-                        ->helperText('Без символа @. Используется в ссылке https://max.ru/<имя_бота>?start=<одноразовый_код>.'),
+                        ->helperText('Без символа @. Используется в ссылке https://max.ru/<имя_бота>?startapp=<одноразовый_код>.'),
+                    Placeholder::make('community_max_mini_app_url')
+                        ->label('URL мини-приложения')
+                        ->content(route('community.auth.max.mini-app')),
                     Placeholder::make('community_max_bot_token_status')
                         ->label('Bot Token')
                         ->content(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_max_bot_token') ? '***' : 'Не настроен'),

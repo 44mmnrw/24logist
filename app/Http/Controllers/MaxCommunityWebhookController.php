@@ -4,20 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\CommunityIdentity;
 use App\Models\CommunityLoginChallenge;
-use App\Models\CommunityUser;
-use App\Services\Community\CommunityIdentityManager;
+use App\Services\Community\MaxLoginPromptService;
 use App\Services\SiteSettingsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 
 class MaxCommunityWebhookController extends Controller
 {
     public function __construct(private readonly SiteSettingsService $siteSettings) {}
 
-    public function __invoke(Request $request, CommunityIdentityManager $identities): JsonResponse
-    {
+    public function __invoke(
+        Request $request,
+        MaxLoginPromptService $loginPrompt,
+    ): JsonResponse {
         abort_unless($this->siteSettings->communityMaxEnabled(), 404);
         $secret = $this->siteSettings->maxWebhookSecret();
         $provided = (string) $request->header('X-Max-Bot-Api-Secret', '');
@@ -30,10 +29,8 @@ class MaxCommunityWebhookController extends Controller
 
         if (is_scalar($userId) && in_array($type, ['bot_started', 'bot_stopped', 'dialog_removed'], true)) {
             $active = $type === 'bot_started';
-
-            if ($active && is_scalar($request->input('payload'))) {
-                $this->approveLoginChallenge((string) $request->input('payload'), (string) $userId, $identities);
-            }
+            $payload = is_scalar($request->input('payload')) ? (string) $request->input('payload') : null;
+            $challenge = $active ? $this->pendingChallenge($payload) : null;
 
             $identity = CommunityIdentity::query()
                 ->where('provider', 'max')
@@ -46,64 +43,39 @@ class MaxCommunityWebhookController extends Controller
                 'bot_status' => $active ? 'active' : 'stopped',
                 'last_verified_at' => now(),
             ]);
+
+            if ($active) {
+                $loginPrompt->send(
+                    (string) $userId,
+                    $challenge,
+                    $challenge !== null ? $payload : null,
+                );
+            }
         }
 
         return response()->json(['ok' => true]);
     }
 
-    private function approveLoginChallenge(
-        string $payload,
-        string $providerUserId,
-        CommunityIdentityManager $identities,
-    ): void {
-        if ($payload === '' || strlen($payload) > 128) {
-            return;
+    private function pendingChallenge(?string $payload): ?CommunityLoginChallenge
+    {
+        if ($payload === null || $payload === '' || strlen($payload) > 128) {
+            return null;
         }
 
-        DB::transaction(function () use ($payload, $providerUserId, $identities): void {
-            $challenge = CommunityLoginChallenge::query()
-                ->where('token_hash', hash('sha256', $payload))
-                ->lockForUpdate()
-                ->first();
+        $challenge = CommunityLoginChallenge::query()
+            ->where('token_hash', hash('sha256', $payload))
+            ->first();
 
-            if ($challenge === null || $challenge->status !== 'pending') {
-                return;
-            }
+        if ($challenge === null || $challenge->status !== 'pending') {
+            return null;
+        }
 
-            if ($challenge->expires_at->isPast()) {
-                $challenge->update(['status' => 'expired']);
+        if ($challenge->expires_at->isPast()) {
+            $challenge->update(['status' => 'expired']);
 
-                return;
-            }
+            return null;
+        }
 
-            $linkTo = $challenge->link_to_user_id
-                ? CommunityUser::query()->find($challenge->link_to_user_id)
-                : null;
-
-            try {
-                $user = $identities->resolve('max', $providerUserId, $linkTo, true);
-            } catch (ValidationException) {
-                $challenge->update(['status' => 'failed']);
-
-                return;
-            }
-
-            if ($user->trashed()) {
-                $challenge->update(['status' => 'failed']);
-
-                return;
-            }
-
-            $user->identities()->where('provider', 'max')->update([
-                'bot_access' => true,
-                'bot_status' => 'active',
-                'last_verified_at' => now(),
-            ]);
-            $challenge->update([
-                'community_user_id' => $user->id,
-                'status' => 'approved',
-                'approved_at' => now(),
-            ]);
-        }, 3);
+        return $challenge;
     }
 }
