@@ -10,7 +10,6 @@ use App\Services\Community\MaxInitDataReplayGuard;
 use App\Services\Community\MaxInitDataValidator;
 use App\Services\Community\MaxLoginReturnService;
 use App\Services\SiteSettingsService;
-use chillerlan\QRCode\QRCode;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,7 +21,7 @@ class MaxCommunityAuthController extends Controller
 {
     public function __construct(private readonly SiteSettingsService $siteSettings) {}
 
-    public function start(Request $request): View
+    public function start(): RedirectResponse
     {
         abort_unless($this->siteSettings->communityMaxEnabled(), 404);
         abort_if(
@@ -33,18 +32,15 @@ class MaxCommunityAuthController extends Controller
             'MAX-вход ещё не настроен.',
         );
         $token = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
-        $browserBinding = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
-        $challenge = CommunityLoginChallenge::query()->create([
+        CommunityLoginChallenge::query()->create([
             'token_hash' => hash('sha256', $token),
-            'browser_session_hash' => hash('sha256', $browserBinding),
+            'browser_session_hash' => hash('sha256', random_bytes(32)),
             'link_to_user_id' => auth('community')->id(),
             'expires_at' => now()->addSeconds((int) config('community.max.challenge_ttl', 300)),
         ]);
-        $request->session()->put('community.max_challenges.'.$challenge->id, $browserBinding);
         $deepLink = 'https://max.ru/'.ltrim($this->siteSettings->maxBotUsername(), '@').'?startapp='.rawurlencode($token);
-        $qr = (new QRCode)->render($deepLink);
 
-        return view('community.auth.max', compact('challenge', 'deepLink', 'qr'));
+        return redirect()->away($deepLink);
     }
 
     public function miniApp(): View
@@ -138,46 +134,6 @@ class MaxCommunityAuthController extends Controller
         return response()->json([
             'ok' => true,
             'return_url' => $returnLinks->url($challenge),
-        ]);
-    }
-
-    public function status(Request $request, CommunityLoginChallenge $challenge): JsonResponse
-    {
-        abort_unless($this->siteSettings->communityMaxEnabled(), 404);
-
-        $browserBinding = (string) $request->session()->get('community.max_challenges.'.$challenge->id);
-        abort_if($browserBinding === '', 403);
-        abort_unless(hash_equals($challenge->browser_session_hash, hash('sha256', $browserBinding)), 403);
-
-        if ($challenge->expires_at->isPast() && $challenge->status === 'pending') {
-            $challenge->update(['status' => 'expired']);
-        }
-
-        if ($challenge->status !== 'approved' || $challenge->consumed_at !== null) {
-            return response()->json(['status' => $challenge->status]);
-        }
-
-        $challenge = DB::transaction(function () use ($challenge): CommunityLoginChallenge {
-            $locked = CommunityLoginChallenge::query()->lockForUpdate()->findOrFail($challenge->id);
-
-            if ($locked->status !== 'approved' || $locked->consumed_at !== null) {
-                throw ValidationException::withMessages(['challenge' => 'Вход уже завершён.']);
-            }
-
-            $locked->update(['status' => 'consumed', 'consumed_at' => now()]);
-
-            return $locked;
-        });
-        $user = CommunityUser::query()->findOrFail($challenge->community_user_id);
-        auth('community')->login($user, true);
-        $request->session()->forget('community.max_challenges.'.$challenge->id);
-        $request->session()->regenerate();
-
-        return response()->json([
-            'status' => 'consumed',
-            'redirect' => $user->isOnboarded()
-                ? $request->session()->pull('url.intended', route('community.index'))
-                : route('community.onboarding'),
         ]);
     }
 

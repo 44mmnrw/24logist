@@ -77,34 +77,6 @@ if (reportDialog) {
     });
 }
 
-const maxAuth = document.querySelector('[data-max-auth]');
-
-if (maxAuth) {
-    const statusNode = maxAuth.querySelector('[data-max-status]');
-    const startedAt = Date.now();
-    const poll = window.setInterval(async () => {
-        if (Date.now() - startedAt > 310000) {
-            window.clearInterval(poll);
-            statusNode.textContent = 'Ссылка истекла. Обновите страницу.';
-            return;
-        }
-        try {
-            const response = await fetch(maxAuth.dataset.statusUrl, {headers: {'Accept': 'application/json'}, credentials: 'same-origin'});
-            const result = await response.json();
-            if (result.redirect) {
-                window.clearInterval(poll);
-                window.location.assign(result.redirect);
-            } else if (result.status === 'expired') {
-                window.clearInterval(poll);
-                statusNode.textContent = 'Ссылка истекла. Обновите страницу.';
-            } else if (result.status === 'failed') {
-                window.clearInterval(poll);
-                statusNode.textContent = 'Не удалось связать аккаунт MAX. Возможно, он уже привязан к другому профилю.';
-            }
-        } catch (_) {}
-    }, 2000);
-}
-
 const maxMiniApp = document.querySelector('[data-max-mini-app]');
 
 if (maxMiniApp) {

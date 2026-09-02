@@ -37,46 +37,14 @@ class MaxCommunityAuthTest extends TestCase
 
     public function test_site_opens_max_mini_app_instead_of_starting_bot(): void
     {
-        $response = $this->get(route('community.auth.max.start'))->assertOk();
-        preg_match('/[?&]startapp=([A-Za-z0-9_%\-]+)/', $response->getContent(), $matches);
-        $token = rawurldecode($matches[1] ?? '');
+        $response = $this->get(route('community.auth.max.start'))->assertRedirect();
+        $location = (string) $response->headers->get('Location');
+        $token = $this->tokenFromDeepLink($location);
         $this->assertNotSame('', $token);
-        $this->assertStringNotContainsString('?start=', $response->getContent());
+        $this->assertStringStartsWith('https://max.ru/community_bot?startapp=', $location);
+        $this->assertStringNotContainsString('?start=', $location);
         $this->assertDatabaseCount('community_login_challenges', 1);
         $this->assertDatabaseCount('community_users', 0);
-    }
-
-    public function test_bot_sends_authorize_button_without_authorizing_on_bot_started(): void
-    {
-        $response = $this->get(route('community.auth.max.start'))->assertOk();
-        preg_match('/[?&]startapp=([A-Za-z0-9_%\-]+)/', $response->getContent(), $matches);
-        $token = rawurldecode($matches[1] ?? '');
-        $challenge = CommunityLoginChallenge::query()->firstOrFail();
-
-        $webhook = [
-            'update_type' => 'bot_started',
-            'user' => ['user_id' => 9911],
-            'payload' => $token,
-        ];
-
-        $this->postJson(route('community.webhooks.max'), $webhook, [
-            'X-Max-Bot-Api-Secret' => 'max_webhook-secret',
-        ])->assertOk();
-
-        $this->assertSame('pending', $challenge->fresh()->status);
-        $this->assertNotNull($challenge->fresh()->prompt_sent_at);
-        $this->assertDatabaseCount('community_users', 0);
-        $this->assertDatabaseCount('community_identities', 0);
-        Http::assertSent(fn (ClientRequest $request): bool => data_get($request->data(), 'attachments.0.payload.buttons.0.0.type') === 'open_app'
-            && data_get($request->data(), 'attachments.0.payload.buttons.0.0.text') === 'Авторизоваться'
-            && data_get($request->data(), 'attachments.0.payload.buttons.0.0.web_app') === 'community_bot'
-            && data_get($request->data(), 'attachments.0.payload.buttons.0.0.payload') === $token
-        );
-
-        $this->postJson(route('community.webhooks.max'), $webhook, [
-            'X-Max-Bot-Api-Secret' => 'max_webhook-secret',
-        ])->assertOk();
-        Http::assertSentCount(1);
     }
 
     public function test_bot_sends_authorize_button_when_started_without_site_challenge(): void
@@ -98,9 +66,7 @@ class MaxCommunityAuthTest extends TestCase
 
     public function test_signed_mini_app_data_approves_challenge_and_returns_to_site(): void
     {
-        $response = $this->get(route('community.auth.max.start'))->assertOk();
-        preg_match('/[?&]startapp=([A-Za-z0-9_%\-]+)/', $response->getContent(), $matches);
-        $token = rawurldecode($matches[1] ?? '');
+        $token = $this->startToken();
 
         $result = $this->postJson(route('community.auth.max.approve'), [
             'challenge' => $token,
@@ -177,22 +143,13 @@ class MaxCommunityAuthTest extends TestCase
                 ->push(['message' => 'temporary error'], 500)
                 ->push(['message' => ['body' => ['text' => 'ok']]], 200),
         ]);
-        $response = $this->get(route('community.auth.max.start'))->assertOk();
-        preg_match('/[?&]startapp=([A-Za-z0-9_%\-]+)/', $response->getContent(), $matches);
-        $token = rawurldecode($matches[1] ?? '');
         $webhook = [
             'update_type' => 'bot_started',
             'user' => ['user_id' => 9944],
-            'payload' => $token,
         ];
         $headers = ['X-Max-Bot-Api-Secret' => 'max_webhook-secret'];
 
         $this->postJson(route('community.webhooks.max'), $webhook, $headers)->assertServerError();
-        $this->assertNull(CommunityLoginChallenge::query()->firstOrFail()->prompt_sent_at);
-
-        $this->postJson(route('community.webhooks.max'), $webhook, $headers)->assertOk();
-        $this->assertNotNull(CommunityLoginChallenge::query()->firstOrFail()->prompt_sent_at);
-
         $this->postJson(route('community.webhooks.max'), $webhook, $headers)->assertOk();
         $this->assertDatabaseCount('community_users', 0);
         $this->assertDatabaseCount('community_identities', 0);
@@ -202,22 +159,27 @@ class MaxCommunityAuthTest extends TestCase
     public function test_max_challenge_creation_is_rate_limited(): void
     {
         foreach (range(1, 10) as $attempt) {
-            $this->get(route('community.auth.max.start'))->assertOk();
+            $this->get(route('community.auth.max.start'))->assertRedirect();
         }
 
         $this->get(route('community.auth.max.start'))->assertTooManyRequests();
     }
 
-    public function test_status_polling_does_not_consume_challenge_creation_limit(): void
+    private function startToken(): string
     {
-        $this->get(route('community.auth.max.start'))->assertOk();
-        $challenge = CommunityLoginChallenge::query()->firstOrFail();
+        $response = $this->get(route('community.auth.max.start'))->assertRedirect();
 
-        foreach (range(1, 10) as $attempt) {
-            $this->getJson(route('community.auth.max.status', $challenge))->assertOk();
-        }
+        return $this->tokenFromDeepLink((string) $response->headers->get('Location'));
+    }
 
-        $this->get(route('community.auth.max.start'))->assertOk();
+    private function tokenFromDeepLink(string $deepLink): string
+    {
+        parse_str((string) parse_url($deepLink, PHP_URL_QUERY), $query);
+        $token = $query['startapp'] ?? null;
+        $this->assertIsString($token);
+        $this->assertNotSame('', $token);
+
+        return $token;
     }
 
     private function signedInitData(int $userId, string $queryId = 'test-query'): string

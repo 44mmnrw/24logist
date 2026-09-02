@@ -117,7 +117,6 @@ Route::middleware(['community.locale', 'community.enabled'])->prefix('community'
     Route::get('/auth/max/mini-app', [MaxCommunityAuthController::class, 'miniApp'])->name('auth.max.mini-app');
     Route::post('/auth/max/approve', [MaxCommunityAuthController::class, 'approve'])->middleware('throttle:20,1,max-approve:')->name('auth.max.approve');
     Route::post('/auth/max/session', [MaxCommunityAuthController::class, 'session'])->middleware('throttle:20,1,max-session:')->name('auth.max.session');
-    Route::get('/auth/max/status/{challenge}', [MaxCommunityAuthController::class, 'status'])->middleware('throttle:60,1,max-status:')->name('auth.max.status');
     Route::get('/auth/max/complete/{challenge}', [MaxCommunityAuthController::class, 'complete'])
         ->middleware(['signed', 'throttle:10,1,max-complete:'])
         ->name('auth.max.complete');

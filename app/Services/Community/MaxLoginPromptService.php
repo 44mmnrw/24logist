@@ -2,7 +2,6 @@
 
 namespace App\Services\Community;
 
-use App\Models\CommunityLoginChallenge;
 use App\Services\SiteSettingsService;
 use RuntimeException;
 
@@ -13,19 +12,13 @@ final class MaxLoginPromptService
         private readonly MaxApiClient $api,
     ) {}
 
-    public function send(string $providerUserId, ?CommunityLoginChallenge $challenge = null, ?string $payload = null): void
+    public function send(string $providerUserId): void
     {
-        if ($challenge?->prompt_sent_at !== null) {
-            return;
-        }
-
         $button = [
             'type' => 'open_app',
             'text' => 'Авторизоваться',
             'web_app' => ltrim($this->settings->maxBotUsername(), '@'),
-            'payload' => $challenge !== null && $payload !== null && $payload !== ''
-                ? $payload
-                : 'community-login',
+            'payload' => 'community-login',
         ];
 
         $response = $this->api->request()
@@ -42,13 +35,6 @@ final class MaxLoginPromptService
 
         if (! $response->successful()) {
             throw new RuntimeException('MAX не принял сообщение с кнопкой авторизации.');
-        }
-
-        if ($challenge !== null) {
-            CommunityLoginChallenge::query()
-                ->whereKey($challenge->getKey())
-                ->whereNull('prompt_sent_at')
-                ->update(['prompt_sent_at' => now()]);
         }
     }
 }

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\CommunityIdentity;
-use App\Models\CommunityLoginChallenge;
 use App\Services\Community\MaxLoginPromptService;
 use App\Services\SiteSettingsService;
 use Illuminate\Http\JsonResponse;
@@ -29,8 +28,6 @@ class MaxCommunityWebhookController extends Controller
 
         if (is_scalar($userId) && in_array($type, ['bot_started', 'bot_stopped', 'dialog_removed'], true)) {
             $active = $type === 'bot_started';
-            $payload = is_scalar($request->input('payload')) ? (string) $request->input('payload') : null;
-            $challenge = $active ? $this->pendingChallenge($payload) : null;
 
             $identity = CommunityIdentity::query()
                 ->where('provider', 'max')
@@ -45,37 +42,10 @@ class MaxCommunityWebhookController extends Controller
             ]);
 
             if ($active) {
-                $loginPrompt->send(
-                    (string) $userId,
-                    $challenge,
-                    $challenge !== null ? $payload : null,
-                );
+                $loginPrompt->send((string) $userId);
             }
         }
 
         return response()->json(['ok' => true]);
-    }
-
-    private function pendingChallenge(?string $payload): ?CommunityLoginChallenge
-    {
-        if ($payload === null || $payload === '' || strlen($payload) > 128) {
-            return null;
-        }
-
-        $challenge = CommunityLoginChallenge::query()
-            ->where('token_hash', hash('sha256', $payload))
-            ->first();
-
-        if ($challenge === null || $challenge->status !== 'pending') {
-            return null;
-        }
-
-        if ($challenge->expires_at->isPast()) {
-            $challenge->update(['status' => 'expired']);
-
-            return null;
-        }
-
-        return $challenge;
     }
 }
