@@ -50,6 +50,19 @@ class SiteSetting extends Model
         'telegram_popup_auto_close_delay',
         'epd_popup_enabled',
         'epd_popup_registration_enabled',
+        'epd_popup_registration_image_path',
+        'epd_popup_registration_image_alt',
+        'epd_popup_registration_badge_value',
+        'epd_popup_registration_badge_value_font',
+        'epd_popup_registration_badge_label',
+        'epd_popup_registration_eyebrow',
+        'epd_popup_registration_title',
+        'epd_popup_registration_description',
+        'epd_popup_registration_benefit_1',
+        'epd_popup_registration_benefit_2',
+        'epd_popup_registration_benefit_3',
+        'epd_popup_registration_button_text',
+        'epd_popup_registration_button_url',
         'community_enabled',
         'community_max_enabled',
         'community_vk_enabled',
@@ -247,6 +260,18 @@ TEXT;
                 'telegram_popup_auto_close_delay' => 0,
                 'epd_popup_enabled' => true,
                 'epd_popup_registration_enabled' => false,
+                'epd_popup_registration_image_alt' => '14 дней тестового доступа, встроенный ЭДО и ЭПД, бесплатная настройка',
+                'epd_popup_registration_badge_value' => '−50%',
+                'epd_popup_registration_badge_value_font' => 'geologica',
+                'epd_popup_registration_badge_label' => 'на пакет ЭПД',
+                'epd_popup_registration_eyebrow' => 'Специальное предложение',
+                'epd_popup_registration_title' => '14 дней тестового доступа',
+                'epd_popup_registration_description' => 'Создайте личный кабинет — бесплатно настроим систему и откроем тестовый доступ со встроенным ЭДО/ЭПД.',
+                'epd_popup_registration_benefit_1' => '14 дней тестового доступа',
+                'epd_popup_registration_benefit_2' => 'Встроенный ЭДО/ЭПД для работы с документами',
+                'epd_popup_registration_benefit_3' => 'Бесплатная настройка системы',
+                'epd_popup_registration_button_text' => 'Создать личный кабинет',
+                'epd_popup_registration_button_url' => 'https://logistsystem.ru/register',
                 'leads_notifications_enabled' => true,
                 'leads_notification_emails' => 'info@24logist.ru',
                 'leads_notification_subject' => static::defaultLeadsNotificationSubject(),
@@ -276,6 +301,7 @@ TEXT;
             $settings->apple_touch_icon_path = LandingMedia::normalizePath($settings->apple_touch_icon_path);
             $settings->og_image_path = LandingMedia::normalizePath($settings->og_image_path);
             $settings->org_logo_path = LandingMedia::normalizePath($settings->org_logo_path);
+            $settings->epd_popup_registration_image_path = LandingMedia::normalizePath($settings->epd_popup_registration_image_path);
         });
     }
 }

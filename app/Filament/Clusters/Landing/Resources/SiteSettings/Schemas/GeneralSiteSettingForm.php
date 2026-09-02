@@ -3,6 +3,7 @@
 namespace App\Filament\Clusters\Landing\Resources\SiteSettings\Schemas;
 
 use App\Models\SiteSetting;
+use App\Services\Community\MaxWebhookSubscriptionService;
 use App\Services\LlmsTxtService;
 use App\Support\FilamentUploadPreview;
 use Filament\Actions\Action;
@@ -393,12 +394,13 @@ final class GeneralSiteSettingForm
                 ->columns(2)
                 ->columnSpanFull(),
             Section::make('Авторизация через MAX')
-                ->description('Включайте интеграцию после регистрации бота и Mini App. Webhook: /community/webhooks/max')
+                ->description('Вход работает через deep link бота и событие bot_started. Mini App не обязателен. Webhook: '.route('community.webhooks.max'))
                 ->schema([
                     TextInput::make('community_max_bot_username')
-                        ->label('Bot Username')
+                        ->label('Имя бота')
                         ->maxLength(500)
-                        ->placeholder('community_bot'),
+                        ->placeholder('community_bot')
+                        ->helperText('Без символа @. Используется в ссылке https://max.ru/<имя_бота>?start=<одноразовый_код>.'),
                     Placeholder::make('community_max_bot_token_status')
                         ->label('Bot Token')
                         ->content(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_max_bot_token') ? 'Настроен' : 'Не настроен'),
@@ -419,6 +421,38 @@ final class GeneralSiteSettingForm
                         ->autocomplete('new-password')
                         ->dehydrated()
                         ->helperText('MAX передаёт значение в заголовке X-Max-Bot-Api-Secret. Допустимы 5–256 символов: латиница, цифры, _ и -. Оставьте пустым, чтобы сохранить действующее значение.'),
+                    Placeholder::make('community_max_webhook_url')
+                        ->label('Webhook URL')
+                        ->content(route('community.webhooks.max')),
+                    Placeholder::make('community_max_webhook_events')
+                        ->label('События webhook')
+                        ->content('bot_started, bot_stopped, dialog_removed'),
+                    Actions::make([
+                        Action::make('registerMaxWebhook')
+                            ->label('Зарегистрировать webhook в MAX')
+                            ->icon('heroicon-o-link')
+                            ->color('primary')
+                            ->requiresConfirmation()
+                            ->modalHeading('Подключить webhook MAX?')
+                            ->modalDescription('Сначала сохраните имя бота, Bot Token и Webhook Secret. После подтверждения сайт подпишет бота на необходимые события MAX.')
+                            ->action(function (MaxWebhookSubscriptionService $webhook): void {
+                                try {
+                                    $message = $webhook->register();
+
+                                    Notification::make()
+                                        ->title('Webhook MAX подключён')
+                                        ->body($message)
+                                        ->success()
+                                        ->send();
+                                } catch (\Throwable $exception) {
+                                    Notification::make()
+                                        ->title('Не удалось подключить webhook MAX')
+                                        ->body($exception->getMessage())
+                                        ->danger()
+                                        ->send();
+                                }
+                            }),
+                    ])->columnSpanFull(),
                 ])
                 ->columns(2)
                 ->columnSpanFull(),
@@ -518,8 +552,87 @@ final class GeneralSiteSettingForm
                         ->default(true),
                     Toggle::make('epd_popup_registration_enabled')
                         ->label('Показывать баннер «Создать личный кабинет»')
-                        ->helperText('Включает или выключает баннер: 14 дней бесплатно и скидка 50% на пакет ЭПД.')
+                        ->helperText('Включает или выключает баннер: 14 дней тестового доступа, встроенный ЭДО/ЭПД и бесплатная настройка.')
                         ->default(false),
+                    Section::make('Баннер «Создать личный кабинет»')
+                        ->description('Изображение, плашка поверх него и весь текст правой части всплывающего баннера.')
+                        ->schema([
+                            FileUpload::make('epd_popup_registration_image_path')
+                                ->label('Изображение баннера')
+                                ->disk('public')
+                                ->directory('site/banners')
+                                ->visibility('public')
+                                ->image()
+                                ->imagePreviewHeight('240')
+                                ->maxFiles(1)
+                                ->maxSize(10240)
+                                ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
+                                ->fetchFileInformation(false)
+                                ->openable()
+                                ->downloadable()
+                                ->getUploadedFileUsing(self::uploadPreview(...))
+                                ->helperText('Рекомендуемый размер — 1254×1254 px. PNG, JPG или WebP до 10 МБ. Если поле пустое, используется стандартная картинка.')
+                                ->columnSpanFull(),
+                            TextInput::make('epd_popup_registration_image_alt')
+                                ->label('Описание изображения')
+                                ->maxLength(255)
+                                ->helperText('Текст для доступности и поисковых систем.')
+                                ->columnSpanFull(),
+                            TextInput::make('epd_popup_registration_badge_value')
+                                ->label('Крупный текст плашки')
+                                ->placeholder('−50%')
+                                ->maxLength(30)
+                                ->helperText('Например: −50%, Подарок или Бесплатно.'),
+                            Select::make('epd_popup_registration_badge_value_font')
+                                ->label('Шрифт крупного текста')
+                                ->options([
+                                    'geologica' => 'Geologica — фирменный',
+                                    'arial_black' => 'Arial Black — массивный',
+                                    'arial' => 'Arial — нейтральный',
+                                    'verdana' => 'Verdana — широкий',
+                                    'trebuchet' => 'Trebuchet MS — мягкий',
+                                    'georgia' => 'Georgia — с засечками',
+                                ])
+                                ->default('geologica')
+                                ->native(false)
+                                ->required()
+                                ->helperText('Применяется только к крупному значению слева.'),
+                            TextInput::make('epd_popup_registration_badge_label')
+                                ->label('Подпись плашки')
+                                ->placeholder('на пакет ЭПД')
+                                ->maxLength(100)
+                                ->helperText('Текст справа от крупного значения.'),
+                            TextInput::make('epd_popup_registration_eyebrow')
+                                ->label('Надзаголовок')
+                                ->maxLength(100),
+                            TextInput::make('epd_popup_registration_title')
+                                ->label('Заголовок')
+                                ->maxLength(255),
+                            Textarea::make('epd_popup_registration_description')
+                                ->label('Описание')
+                                ->rows(3)
+                                ->maxLength(1000)
+                                ->columnSpanFull(),
+                            TextInput::make('epd_popup_registration_benefit_1')
+                                ->label('Преимущество 1')
+                                ->maxLength(255),
+                            TextInput::make('epd_popup_registration_benefit_2')
+                                ->label('Преимущество 2')
+                                ->maxLength(255),
+                            TextInput::make('epd_popup_registration_benefit_3')
+                                ->label('Преимущество 3')
+                                ->maxLength(255),
+                            TextInput::make('epd_popup_registration_button_text')
+                                ->label('Текст кнопки')
+                                ->maxLength(100),
+                            TextInput::make('epd_popup_registration_button_url')
+                                ->label('Ссылка кнопки')
+                                ->url()
+                                ->maxLength(2048)
+                                ->columnSpanFull(),
+                        ])
+                        ->columns(2)
+                        ->columnSpanFull(),
                 ])
                 ->columnSpanFull(),
         ];

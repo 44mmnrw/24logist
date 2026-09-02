@@ -76,7 +76,7 @@ class CommunityCommentController extends Controller
                 'comment',
                 $comment->id,
                 [
-                    'message' => '@'.$user->username.' ответил в теме «'.$post->title.'»',
+                    'message' => $user->displayName().' ответил в теме «'.$post->title.'»',
                     'url' => $post->getUrl().'#comment-'.$comment->id,
                 ],
             );

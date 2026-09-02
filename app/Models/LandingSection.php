@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Support\LandingIcons;
 use App\Support\LandingMedia;
 use App\Support\LandingSectionAnchor;
+use Filament\Forms\Components\RichEditor\RichContentRenderer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -116,5 +117,10 @@ class LandingSection extends Model
     public function anchorLink(): ?string
     {
         return LandingSectionAnchor::hash($this);
+    }
+
+    public function renderDescription(): string
+    {
+        return RichContentRenderer::make($this->description ?? '')->toHtml();
     }
 }

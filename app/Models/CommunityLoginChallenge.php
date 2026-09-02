@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CommunityLoginChallenge extends Model
 {
@@ -18,5 +19,10 @@ class CommunityLoginChallenge extends Model
             'approved_at' => 'datetime',
             'consumed_at' => 'datetime',
         ];
+    }
+
+    public function communityUser(): BelongsTo
+    {
+        return $this->belongsTo(CommunityUser::class);
     }
 }

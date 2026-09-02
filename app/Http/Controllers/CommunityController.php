@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CommunityCategory;
 use App\Models\CommunityPost;
+use App\Models\CommunityPostVote;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -58,8 +59,17 @@ class CommunityController extends Controller
             ->orderBy('name')
             ->get();
 
+        $posts = $posts->paginate(20)->withQueryString();
+        $postVotes = auth('community')->check()
+            ? CommunityPostVote::query()
+                ->where('community_user_id', auth('community')->id())
+                ->whereIn('community_post_id', $posts->getCollection()->pluck('id'))
+                ->pluck('value', 'community_post_id')
+            : collect();
+
         return view('community.index', [
-            'posts' => $posts->paginate(20)->withQueryString(),
+            'posts' => $posts,
+            'postVotes' => $postVotes,
             'categories' => $categories,
             'activeCategory' => $category,
             'sort' => $sort,

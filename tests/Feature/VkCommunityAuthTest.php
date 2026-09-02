@@ -9,6 +9,7 @@ use App\Services\SiteSettingsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request as HttpRequest;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class VkCommunityAuthTest extends TestCase
@@ -18,6 +19,7 @@ class VkCommunityAuthTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        Storage::fake('public');
 
         SiteSetting::instance()->update([
             'community_enabled' => true,
@@ -53,6 +55,14 @@ class VkCommunityAuthTest extends TestCase
                 'state' => $flow['state'],
                 'user_id' => 778899,
             ]),
+            'https://id.vk.ru/oauth2/user_info' => Http::response([
+                'user' => ['user_id' => 778899, 'avatar' => 'https://images.example.test/vk-avatar.png'],
+            ]),
+            'https://images.example.test/vk-avatar.png' => Http::response(
+                base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='),
+                200,
+                ['Content-Type' => 'image/png'],
+            ),
         ]);
 
         $this->get(route('community.auth.vk.callback', [
@@ -67,6 +77,8 @@ class VkCommunityAuthTest extends TestCase
         $this->assertSame('778899', $identity->provider_user_id);
         $this->assertFalse($identity->bot_access);
         $this->assertStringNotContainsString('must-not-be-stored', $identity->toJson());
+        $this->assertSame('vk', auth('community')->user()->fresh()->avatar_source);
+        Storage::disk('public')->assertExists(auth('community')->user()->fresh()->avatar_path);
         Http::assertSent(fn (HttpRequest $request): bool => $request->url() === 'https://id.vk.ru/oauth2/auth'
             && $request['code'] === 'one-time-code'
             && $request['client_id'] === '12345678'

@@ -9,6 +9,7 @@ use App\Http\Middleware\EnsureCommunityAuthenticated;
 use App\Http\Middleware\EnsureCommunityEnabled;
 use App\Http\Middleware\EnsureCommunityModerator;
 use App\Http\Middleware\EnsureCommunityOnboarded;
+use App\Http\Middleware\UseRussianCommunityLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -38,6 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'community/webhooks/max',
         ]);
         $middleware->alias([
+            'community.locale' => UseRussianCommunityLocale::class,
             'community.enabled' => EnsureCommunityEnabled::class,
             'community.auth' => EnsureCommunityAuthenticated::class,
             'community.onboarded' => EnsureCommunityOnboarded::class,

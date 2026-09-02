@@ -79,14 +79,22 @@ class CommunityPostController extends Controller
         }
 
         $post->load(['author', 'category']);
-        $roots = CommunityComment::query()
+        $commentSort = in_array($request->query('comment_sort'), ['best', 'new', 'old'], true)
+            ? (string) $request->query('comment_sort')
+            : 'best';
+        $rootsQuery = CommunityComment::query()
             ->with('author')
             ->where('community_post_id', $post->id)
             ->whereNull('parent_id')
-            ->whereIn('status', ['published', 'deleted'])
-            ->orderByDesc('score')
-            ->orderBy('created_at')
-            ->paginate(20);
+            ->whereIn('status', ['published', 'deleted']);
+
+        match ($commentSort) {
+            'new' => $rootsQuery->orderByDesc('created_at'),
+            'old' => $rootsQuery->orderBy('created_at'),
+            default => $rootsQuery->orderByDesc('score')->orderBy('created_at'),
+        };
+
+        $roots = $rootsQuery->paginate(20)->withQueryString();
         $rootIds = $roots->getCollection()->pluck('id');
         $descendants = $rootIds->isEmpty()
             ? collect()
@@ -112,7 +120,7 @@ class CommunityPostController extends Controller
                 ->pluck('value', 'community_comment_id');
         }
 
-        return view('community.posts.show', compact('post', 'roots', 'children', 'postVote', 'commentVotes'));
+        return view('community.posts.show', compact('post', 'roots', 'children', 'postVote', 'commentVotes', 'commentSort'));
     }
 
     public function edit(CommunityPost $post): View

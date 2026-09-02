@@ -29,6 +29,54 @@ document.addEventListener('click', async (event) => {
     }
 });
 
+document.addEventListener('click', async (event) => {
+    const button = event.target.closest('[data-share-url]');
+    if (!button) return;
+
+    const url = button.dataset.shareUrl;
+    const label = button.querySelector('[data-share-label]');
+
+    try {
+        if (navigator.share) {
+            await navigator.share({title: document.title, url});
+            return;
+        }
+
+        await navigator.clipboard.writeText(url);
+        if (label) {
+            const previous = label.textContent;
+            label.textContent = 'Ссылка скопирована';
+            window.setTimeout(() => { label.textContent = previous; }, 1800);
+        }
+    } catch (_) {}
+});
+
+const reportDialog = document.querySelector('[data-report-dialog]');
+
+if (reportDialog) {
+    document.addEventListener('click', (event) => {
+        const openButton = event.target.closest('[data-report-open]');
+        const closeButton = event.target.closest('[data-report-close]');
+
+        if (openButton) {
+            const form = reportDialog.querySelector('form');
+            form.reset();
+            form.querySelector('[data-report-target-type]').value = openButton.dataset.reportType;
+            form.querySelector('[data-report-target-id]').value = openButton.dataset.reportId;
+
+            if (typeof reportDialog.showModal === 'function') reportDialog.showModal();
+            else reportDialog.setAttribute('open', '');
+        } else if (closeButton) {
+            if (typeof reportDialog.close === 'function') reportDialog.close();
+            else reportDialog.removeAttribute('open');
+        }
+    });
+
+    reportDialog.addEventListener('click', (event) => {
+        if (event.target === reportDialog) reportDialog.close();
+    });
+}
+
 const maxAuth = document.querySelector('[data-max-auth]');
 
 if (maxAuth) {

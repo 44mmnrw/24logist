@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\Community\CommunityIdentityManager;
+use App\Services\Community\CommunityAvatarService;
 use App\Services\Community\TelegramIdTokenVerifier;
 use App\Services\SiteSettingsService;
 use Illuminate\Http\RedirectResponse;
@@ -49,6 +50,7 @@ class TelegramCommunityAuthController extends Controller
         Request $request,
         TelegramIdTokenVerifier $verifier,
         CommunityIdentityManager $identities,
+        CommunityAvatarService $avatars,
     ): RedirectResponse {
         $flow = $request->session()->pull('community.telegram');
 
@@ -76,6 +78,7 @@ class TelegramCommunityAuthController extends Controller
         $claims = $verifier->verify((string) $response->json('id_token'), (string) $flow['nonce']);
         $linkTo = ($flow['link'] ?? false) ? auth('community')->user() : null;
         $user = $identities->resolve('telegram', (string) $claims['sub'], $linkTo, (bool) ($flow['notify'] ?? false));
+        $avatars->syncFromProvider($user, 'telegram', is_string($claims['picture'] ?? null) ? $claims['picture'] : null);
         auth('community')->login($user, true);
         $request->session()->regenerate();
 

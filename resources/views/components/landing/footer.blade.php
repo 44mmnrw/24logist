@@ -15,7 +15,9 @@
                 <x-landing.logo variant="footer" />
             </a>
             @if ($section?->description)
-                <p>{{ $section->description }}</p>
+                <div class="landing-footer__description">
+                    {!! $section->renderDescription() !!}
+                </div>
             @endif
         </div>
 

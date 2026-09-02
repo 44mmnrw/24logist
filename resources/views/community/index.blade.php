@@ -8,7 +8,7 @@
     <section class="community-feed">
         <header class="community-hero">
             <div>
-                <span class="section-kicker">Открытое сообщество</span>
+                <span class="section-kicker">Сообщество 24Logist</span>
                 <h1>{{ $activeCategory?->name ?: 'Обсуждаем логистику вместе' }}</h1>
                 <p>{{ $activeCategory?->description ?: 'Задавайте вопросы, делитесь опытом и находите практические решения.' }}</p>
             </div>
@@ -22,9 +22,10 @@
         </header>
 
         <nav class="community-sort" aria-label="Сортировка тем">
-            <a @class(['is-active' => $sort === 'hot']) href="{{ request()->fullUrlWithQuery(['sort' => 'hot', 'period' => null, 'page' => null]) }}">Актуальное</a>
-            <a @class(['is-active' => $sort === 'new']) href="{{ request()->fullUrlWithQuery(['sort' => 'new', 'period' => null, 'page' => null]) }}">Новое</a>
-            <a @class(['is-active' => $sort === 'top']) href="{{ request()->fullUrlWithQuery(['sort' => 'top', 'page' => null]) }}">Лучшее</a>
+            <span class="community-sort__label">Сортировка:</span>
+            <a @class(['is-active' => $sort === 'hot']) href="{{ request()->fullUrlWithQuery(['sort' => 'hot', 'period' => null, 'page' => null]) }}">🔥 Актуальное</a>
+            <a @class(['is-active' => $sort === 'new']) href="{{ request()->fullUrlWithQuery(['sort' => 'new', 'period' => null, 'page' => null]) }}">✦ Новое</a>
+            <a @class(['is-active' => $sort === 'top']) href="{{ request()->fullUrlWithQuery(['sort' => 'top', 'page' => null]) }}">↑ Лучшее</a>
             @if ($sort === 'top')
                 <select aria-label="Период" onchange="location.href=this.value">
                     @foreach (['day' => 'Сутки', 'week' => 'Неделя', 'month' => 'Месяц', 'all' => 'Всё время'] as $value => $label)

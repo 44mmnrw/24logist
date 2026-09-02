@@ -14,6 +14,7 @@ class CommunityUserFactory extends Factory
     {
         return [
             'username' => fake()->unique()->userName(),
+            'display_name' => fn (array $attributes): string => $attributes['username'],
             'role' => 'user',
             'onboarded_at' => now(),
             'terms_accepted_at' => now(),

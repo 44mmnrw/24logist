@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\Community\CommunityIdentityManager;
+use App\Services\Community\CommunityAvatarService;
 use App\Services\SiteSettingsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -46,7 +47,11 @@ class VkCommunityAuthController extends Controller
         ], '', '&', PHP_QUERY_RFC3986));
     }
 
-    public function callback(Request $request, CommunityIdentityManager $identities): RedirectResponse
+    public function callback(
+        Request $request,
+        CommunityIdentityManager $identities,
+        CommunityAvatarService $avatars,
+    ): RedirectResponse
     {
         abort_unless($this->settings->communityVkEnabled(), 404);
 
@@ -92,6 +97,8 @@ class VkCommunityAuthController extends Controller
 
         $linkTo = ($flow['link'] ?? false) ? auth('community')->user() : null;
         $user = $identities->resolve('vk', (string) $providerUserId, $linkTo);
+        $avatarUrl = $this->vkAvatarUrl($response->json('access_token'), (string) $providerUserId);
+        $avatars->syncFromProvider($user, 'vk', $avatarUrl);
         auth('community')->login($user, true);
         $request->session()->regenerate();
 
@@ -100,5 +107,30 @@ class VkCommunityAuthController extends Controller
         return $user->isOnboarded()
             ? redirect()->intended(route('community.index'))->with('status', $message)
             : redirect()->route('community.onboarding')->with('status', $message);
+    }
+
+    private function vkAvatarUrl(mixed $accessToken, string $providerUserId): ?string
+    {
+        if (! is_string($accessToken) || $accessToken === '') {
+            return null;
+        }
+
+        try {
+            $response = Http::asForm()->timeout(8)->post('https://id.vk.ru/oauth2/user_info', [
+                'client_id' => $this->settings->vkClientId(),
+                'access_token' => $accessToken,
+            ]);
+            $userId = $response->json('user.user_id');
+            $avatar = $response->json('user.avatar');
+
+            return $response->successful()
+                && is_scalar($userId)
+                && hash_equals($providerUserId, (string) $userId)
+                && is_string($avatar)
+                ? $avatar
+                : null;
+        } catch (\Throwable) {
+            return null;
+        }
     }
 }

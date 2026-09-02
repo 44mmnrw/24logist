@@ -105,6 +105,9 @@ class LandingSectionResource extends Resource
                         'hero' => 1,
                         default => 4,
                     })
+                    ->helperText(fn (?LandingSection $record): ?string => $record?->slug === 'footer'
+                        ? 'Можно использовать безопасную HTML-разметку: ссылки, переносы, жирный текст и списки.'
+                        : null)
                     ->columnSpan(fn (?LandingSection $record): int|string => $record?->slug === 'hero' ? 1 : 'full'),
                 TextInput::make('hero_subtitle_2_font_size')
                     ->label('Размер подзаголовка 2')

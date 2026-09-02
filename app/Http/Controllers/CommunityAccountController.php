@@ -8,10 +8,12 @@ use App\Models\CommunityPost;
 use App\Models\CommunityPostVote;
 use App\Models\CommunityUser;
 use App\Services\Community\CommunityRanking;
+use App\Services\Community\CommunityAvatarService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class CommunityAccountController extends Controller
@@ -64,6 +66,7 @@ class CommunityAccountController extends Controller
 
         $user->update([
             'username' => $data['username'],
+            'display_name' => $data['username'],
             'onboarded_at' => now(),
             'terms_accepted_at' => now(),
         ]);
@@ -93,12 +96,37 @@ class CommunityAccountController extends Controller
         return view('community.auth.settings', compact('user'));
     }
 
-    public function updateSettings(Request $request): RedirectResponse
+    public function updateSettings(Request $request, CommunityAvatarService $avatars): RedirectResponse
     {
         $user = auth('community')->user();
+        $request->merge([
+            'display_name' => preg_replace('/\s+/u', ' ', trim((string) $request->input('display_name', $user->displayName()))),
+            'bio' => trim((string) $request->input('bio', $user->bio)),
+        ]);
         $data = $request->validate([
+            'display_name' => ['required', 'string', 'min:2', 'max:50', 'regex:/^[\pL\pN][\pL\pN ._-]*$/u'],
+            'transport_role' => ['nullable', Rule::in(array_keys(CommunityUser::TRANSPORT_ROLES))],
+            'bio' => ['nullable', 'string', 'max:1000'],
             'telegram_notifications' => ['nullable', 'boolean'],
             'max_notifications' => ['nullable', 'boolean'],
+            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072', 'dimensions:max_width=4096,max_height=4096'],
+            'remove_avatar' => ['nullable', 'boolean'],
+        ], [
+            'display_name.regex' => 'Никнейм может содержать буквы, цифры, пробелы, точку, дефис и подчёркивание.',
+        ]);
+
+        if ((bool) ($data['remove_avatar'] ?? false)) {
+            $avatars->remove($user);
+        } elseif ($request->hasFile('avatar') && ! $avatars->storeUpload($user, $request->file('avatar'))) {
+            throw ValidationException::withMessages(['avatar' => 'Не удалось обработать изображение. Выберите другой файл.']);
+        }
+
+        $user->update([
+            'display_name' => $data['display_name'],
+            'transport_role' => array_key_exists('transport_role', $data)
+                ? (filled($data['transport_role']) ? $data['transport_role'] : null)
+                : $user->transport_role,
+            'bio' => filled($data['bio'] ?? null) ? $data['bio'] : null,
         ]);
 
         foreach (['telegram', 'max'] as $provider) {
@@ -111,14 +139,15 @@ class CommunityAccountController extends Controller
             }
         }
 
-        return back()->with('status', 'Настройки уведомлений сохранены.');
+        return back()->with('status', 'Настройки профиля сохранены.');
     }
 
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request, CommunityAvatarService $avatars): RedirectResponse
     {
         $request->validate(['confirmation' => ['required', 'in:УДАЛИТЬ']]);
         /** @var CommunityUser $user */
         $user = auth('community')->user();
+        $avatarPath = $user->avatar_path;
 
         DB::transaction(function () use ($user): void {
             CommunityPostVote::query()->where('community_user_id', $user->id)->get()->each(function (CommunityPostVote $vote): void {
@@ -138,6 +167,7 @@ class CommunityAccountController extends Controller
             $user->identities()->delete();
             $user->forceDelete();
         });
+        $avatars->deletePath($avatarPath);
 
         auth('community')->logout();
         $request->session()->invalidate();

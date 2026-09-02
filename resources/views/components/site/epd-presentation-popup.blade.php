@@ -2,6 +2,16 @@
     $settings = app(\App\Services\SiteSettingsService::class)->get();
     $registrationVariant = (bool) ($settings->epd_popup_registration_enabled ?? false);
     $popupVariant = $registrationVariant ? 'registration' : 'presentation';
+    $registrationImage = \App\Support\LandingMedia::url($settings->epd_popup_registration_image_path)
+        ?? asset('images/logistru-special-offer-1254x1254.png');
+    $registrationBenefits = collect([
+        $settings->epd_popup_registration_benefit_1,
+        $settings->epd_popup_registration_benefit_2,
+        $settings->epd_popup_registration_benefit_3,
+    ])->filter(fn ($benefit) => filled($benefit));
+    $registrationBadgeFont = in_array($settings->epd_popup_registration_badge_value_font, [
+        'geologica', 'arial_black', 'arial', 'verdana', 'trebuchet', 'georgia',
+    ], true) ? $settings->epd_popup_registration_badge_value_font : 'geologica';
 @endphp
 
 @if ($settings->epd_popup_enabled || $settings->epd_popup_registration_enabled)
@@ -27,35 +37,45 @@
         <button class="epd-popup__close" type="button" data-epd-popup-close aria-label="Закрыть">×</button>
 
         <div class="epd-popup__visual">
-            <img
-                src="{{ asset($registrationVariant ? 'images/epd-test-access-14-days.png' : 'images/epd-announcement-27-08.png') }}"
-                alt="{{ $registrationVariant ? 'Бесплатный тестовый доступ 14 дней и скидка 50% на пакет ЭПД' : '27.08 — открываем доступ к модулю ЭПД' }}"
-                width="1254"
-                height="1254"
-                loading="lazy"
-                decoding="async"
-            >
+            <div class="epd-popup__visual-frame">
+                <img
+                    src="{{ $registrationVariant ? $registrationImage : asset('images/epd-announcement-27-08.png') }}"
+                    alt="{{ $registrationVariant ? ($settings->epd_popup_registration_image_alt ?: 'Специальное предложение ЛогистРу') : '27.08 — открываем доступ к модулю ЭПД' }}"
+                    width="1254"
+                    height="1254"
+                    loading="lazy"
+                    decoding="async"
+                >
+
+                @if ($registrationVariant)
+                    <div class="epd-popup__offer-badge" data-registration-offer-badge>
+                        <strong class="epd-popup__offer-value epd-popup__offer-value--{{ $registrationBadgeFont }}">{{ $settings->epd_popup_registration_badge_value ?: '−50%' }}</strong>
+                        <span>{{ $settings->epd_popup_registration_badge_label ?: 'на пакет ЭПД' }}</span>
+                    </div>
+                @endif
+            </div>
         </div>
 
         <div class="epd-popup__content{{ $registrationVariant ? ' epd-popup__content--registration' : '' }}">
             @if ($registrationVariant)
                 <div class="epd-popup__registration">
-                    <span class="epd-popup__eyebrow">Специальное предложение</span>
-                    <h2 id="epd-popup-title">14 дней бесплатно</h2>
-                    <p id="epd-popup-description">Создайте личный кабинет и получите бесплатный тестовый доступ, а также скидку 50% на пакет ЭПД.</p>
+                    <span class="epd-popup__eyebrow">{{ $settings->epd_popup_registration_eyebrow ?: 'Специальное предложение' }}</span>
+                    <h2 id="epd-popup-title">{{ $settings->epd_popup_registration_title ?: '14 дней тестового доступа' }}</h2>
+                    <p id="epd-popup-description">{{ $settings->epd_popup_registration_description ?: 'Создайте личный кабинет и получите тестовый доступ к системе.' }}</p>
 
-                    <div class="epd-popup__registration-benefits" aria-label="Условия предложения">
-                        <span><strong>14 дней</strong> бесплатного доступа</span>
-                        <span><strong>50% скидка</strong> на пакет ЭПД</span>
-                    </div>
+                    @if ($registrationBenefits->isNotEmpty())
+                        <div class="epd-popup__registration-benefits" aria-label="Условия предложения">
+                            @foreach ($registrationBenefits as $benefit)<span>{{ $benefit }}</span>@endforeach
+                        </div>
+                    @endif
 
                     <a
                         class="epd-popup__submit epd-popup__registration-cta"
-                        href="https://logistsystem.ru/register"
+                        href="{{ $settings->epd_popup_registration_button_url ?: 'https://logistsystem.ru/register' }}"
                         target="_blank"
                         rel="noopener noreferrer"
                         data-epd-registration-cta
-                    >Создать личный кабинет</a>
+                    >{{ $settings->epd_popup_registration_button_text ?: 'Создать личный кабинет' }}</a>
                 </div>
             @else
             <div class="epd-popup__form-state" data-epd-form-state>

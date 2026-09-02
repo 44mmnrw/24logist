@@ -15,4 +15,25 @@ class CommunityReport extends Model
     {
         return ['resolved_at' => 'datetime'];
     }
+
+    public function targetLabel(): string
+    {
+        return match ($this->target_type) {
+            'post' => 'Тема',
+            'comment' => 'Комментарий',
+            default => 'Материал',
+        };
+    }
+
+    public function reasonLabel(): string
+    {
+        return match ($this->reason) {
+            'spam' => 'Спам или реклама',
+            'abuse' => 'Оскорбления',
+            'illegal' => 'Незаконный материал',
+            'personal_data' => 'Персональные данные',
+            'other' => 'Другое',
+            default => 'Не указана',
+        };
+    }
 }

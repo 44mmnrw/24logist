@@ -22,7 +22,7 @@
             <nav aria-label="Профиль сообщества">
                 @auth('community')
                     <a href="{{ route('community.notifications') }}">Уведомления</a>
-                    <a href="{{ route('community.profile', auth('community')->user()) }}">{{ '@'.auth('community')->user()->username }}</a>
+                    <a class="community-toolbar__profile" href="{{ route('community.profile', auth('community')->user()) }}"><x-community.avatar :user="auth('community')->user()" size="sm" /><span>{{ auth('community')->user()->displayName() }}</span></a>
                     <a href="{{ route('community.settings') }}">Настройки</a>
                     @if (auth('community')->user()->isModerator())
                         <a href="{{ route('community.moderation.index') }}">Модерация</a>

@@ -9,7 +9,7 @@
         @forelse($notifications as $notification)
             <a @class(['community-notification', 'is-unread' => !$notification->read_at]) href="{{ route('community.notifications.read', $notification) }}">
                 <strong>{{ $notification->data['message'] ?? 'Новое уведомление' }}</strong>
-                <time>{{ $notification->created_at->diffForHumans() }}</time>
+                <time>{{ \App\Support\CommunityDate::relative($notification->created_at) }}</time>
             </a>
         @empty<div class="community-empty">Новых уведомлений нет.</div>@endforelse
     </div>

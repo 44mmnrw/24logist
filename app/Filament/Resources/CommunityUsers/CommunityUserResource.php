@@ -10,10 +10,12 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
@@ -34,8 +36,11 @@ class CommunityUserResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            TextInput::make('username')->label('Псевдоним')->required()->maxLength(30)->unique(ignoreRecord: true),
-            Select::make('role')->label('Роль')->options(['user' => 'Участник', 'moderator' => 'Модератор'])->required(),
+            TextInput::make('username')->label('ID профиля')->disabled(),
+            TextInput::make('display_name')->label('Никнейм')->required()->maxLength(50),
+            Select::make('transport_role')->label('Роль в перевозках')->options(CommunityUser::TRANSPORT_ROLES)->placeholder('Не указана'),
+            Select::make('role')->label('Права в сообществе')->options(['user' => 'Участник', 'moderator' => 'Модератор'])->required(),
+            Textarea::make('bio')->label('О себе')->rows(5)->maxLength(1000)->columnSpanFull(),
             TextInput::make('karma')->label('Рейтинг')->numeric()->disabled(),
             DateTimePicker::make('suspended_until')->label('Ограничен до'),
             DateTimePicker::make('banned_at')->label('Заблокирован с'),
@@ -45,8 +50,11 @@ class CommunityUserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->columns([
-            TextColumn::make('username')->label('Псевдоним')->searchable()->sortable(),
-            TextColumn::make('role')->label('Роль')->badge(),
+            ImageColumn::make('avatar_path')->label('Аватар')->disk('public')->circular()->defaultImageUrl(null),
+            TextColumn::make('display_name')->label('Никнейм')->searchable()->sortable(),
+            TextColumn::make('username')->label('ID')->searchable()->sortable(),
+            TextColumn::make('transport_role')->label('В перевозках')->formatStateUsing(fn (?string $state): string => CommunityUser::TRANSPORT_ROLES[$state] ?? 'Не указана'),
+            TextColumn::make('role')->label('Права')->badge(),
             TextColumn::make('karma')->label('Рейтинг')->sortable(),
             TextColumn::make('posts_count')->label('Тем')->counts('posts'),
             TextColumn::make('comments_count')->label('Комментариев')->counts('comments'),

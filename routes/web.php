@@ -99,7 +99,7 @@ Route::get('/pages/{slug}', [PageController::class, 'show'])
     ->name('pages.show')
     ->where('slug', '[a-z0-9\-]+');
 
-Route::middleware('community.enabled')->prefix('community')->name('community.')->group(function (): void {
+Route::middleware(['community.locale', 'community.enabled'])->prefix('community')->name('community.')->group(function (): void {
     Route::get('/', [CommunityController::class, 'index'])->name('index');
     Route::get('/c/{category}', [CommunityController::class, 'category'])->name('categories.show');
     Route::get('/p/{post}/{slug?}', [CommunityPostController::class, 'show'])

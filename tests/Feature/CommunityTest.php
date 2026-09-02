@@ -10,6 +10,7 @@ use App\Models\CommunityReport;
 use App\Models\CommunityUser;
 use App\Models\SiteSetting;
 use App\Services\SiteSettingsService;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -155,6 +156,90 @@ class CommunityTest extends TestCase
         $this->assertSame('hidden', $post->fresh()->status);
         $this->assertSame('actioned', $report->fresh()->status);
         $this->assertDatabaseHas('community_moderation_actions', ['community_user_id' => $moderator->id, 'action' => 'hide']);
+    }
+
+    public function test_authenticated_reader_sees_functional_report_controls(): void
+    {
+        $author = CommunityUser::factory()->create();
+        $reader = CommunityUser::factory()->create();
+        $post = $this->postBy($author);
+
+        $this->actingAs($reader, 'community')
+            ->get($post->getUrl())
+            ->assertOk()
+            ->assertSee('data-report-open', false)
+            ->assertSee('data-report-dialog', false)
+            ->assertSee('Отправить жалобу');
+    }
+
+    public function test_feed_card_has_a_full_card_link_to_the_topic(): void
+    {
+        $post = $this->postBy(CommunityUser::factory()->create());
+
+        $this->get(route('community.index'))
+            ->assertOk()
+            ->assertSee('community-post-card__overlay', false)
+            ->assertSee('href="'.$post->getUrl().'"', false)
+            ->assertSee('aria-labelledby="community-post-title-'.$post->id.'"', false)
+            ->assertSee('data-vote', false)
+            ->assertSee('data-share-url="'.$post->getUrl().'"', false)
+            ->assertSee('community-action-chip--comments', false);
+    }
+
+    public function test_topic_comments_can_be_sorted_like_a_discussion_feed(): void
+    {
+        $author = CommunityUser::factory()->create();
+        $post = $this->postBy($author);
+        CommunityComment::query()->create([
+            'community_post_id' => $post->id,
+            'community_user_id' => $author->id,
+            'depth' => 0,
+            'body_markdown' => 'Старый ответ',
+            'body_html' => '<p>Старый ответ</p>',
+            'status' => 'published',
+        ]);
+        CommunityComment::query()->where('body_markdown', 'Старый ответ')->update(['created_at' => now()->subHour()]);
+        CommunityComment::query()->create([
+            'community_post_id' => $post->id,
+            'community_user_id' => $author->id,
+            'depth' => 0,
+            'body_markdown' => 'Новый ответ',
+            'body_html' => '<p>Новый ответ</p>',
+            'status' => 'published',
+            'created_at' => now(),
+        ]);
+
+        $this->get($post->getUrl().'?comment_sort=new')
+            ->assertOk()
+            ->assertSeeInOrder(['Новый ответ', 'Старый ответ'])
+            ->assertSee('community-comments__toolbar', false);
+
+        $this->get($post->getUrl().'?comment_sort=old')
+            ->assertOk()
+            ->assertSeeInOrder(['Старый ответ', 'Новый ответ']);
+    }
+
+    public function test_community_dates_are_always_displayed_in_russian(): void
+    {
+        app()->setLocale('en');
+        Carbon::setLocale('en');
+
+        $user = CommunityUser::factory()->create([
+            'username' => 'russian_date',
+            'onboarded_at' => Carbon::create(2026, 9, 2, 12),
+        ]);
+        $post = $this->postBy($user);
+        $post->update(['published_at' => now()->subSeconds(30)]);
+
+        $this->get(route('community.profile', $user))
+            ->assertOk()
+            ->assertSee('в сообществе с сентября 2026')
+            ->assertDontSee('September 2026');
+
+        $this->get(route('community.index'))
+            ->assertOk()
+            ->assertSee('30 секунд назад')
+            ->assertDontSee('seconds ago');
     }
 
     public function test_sitemap_contains_only_public_community_routes(): void
