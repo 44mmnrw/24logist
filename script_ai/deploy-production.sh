@@ -7,7 +7,7 @@ set -euo pipefail
 WEB_DIR="${DEPLOY_WEB_DIR:-/var/www/logist_sys/data/www/24logist.ru}"
 APP_DIR="${DEPLOY_APP_DIR:-${WEB_DIR}/.app}"
 BRANCH="${DEPLOY_BRANCH:-main}"
-REPO="${DEPLOY_REPO:-https://github.com/44mmnrw/24logist.git}"
+REPO="${DEPLOY_REPO:-git@github.com:44mmnrw/24logist.git}"
 SKIP_FRONTEND_BUILD="${SKIP_FRONTEND_BUILD:-0}"
 
 log() { printf '[deploy] %s\n' "$*"; }
@@ -24,6 +24,7 @@ if [[ ! -d .git ]]; then
 fi
 
 log "git pull origin $BRANCH"
+git remote set-url origin "$REPO"
 git fetch origin "$BRANCH"
 git checkout "$BRANCH"
 git pull --ff-only origin "$BRANCH"

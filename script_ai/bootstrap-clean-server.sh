@@ -3,7 +3,7 @@ set -euo pipefail
 
 WEB="/var/www/logist_sys/data/www/24logist.ru"
 APP="${WEB}/.app"
-REPO="https://github.com/44mmnrw/24logist.git"
+REPO="git@github.com:44mmnrw/24logist.git"
 
 mkdir -p "${WEB}"
 

@@ -9,7 +9,7 @@ mkdir -p "${WEB}"
 if [[ ! -d "${APP}/.git" ]]; then
   rm -rf "${APP}"
   mkdir -p "${APP}"
-  git clone --branch main https://github.com/44mmnrw/24logist.git "${APP}"
+  git clone --branch main git@github.com:44mmnrw/24logist.git "${APP}"
 fi
 
 cd "${APP}"

@@ -17,8 +17,8 @@ set "SERVER_APP=/var/www/logist_sys/data/www/24logist.ru/.app"
 set "GIT_BRANCH=main"
 set "GIT_REMOTE=origin"
 set "GIT_REPO_SSH_URL=git@github.com:44mmnrw/24logist.git"
-REM Server clone uses HTTPS; leave empty unless deploy key is configured on server
-set "SERVER_GIT_SSH_COMMAND="
+REM Server fetch uses the forwarded local ssh-agent (-A in :fn_run_ssh).
+set "SERVER_GIT_SSH_COMMAND=ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new"
 
 set "BUILD_NODE_MAX_OLD_SPACE=512"
 set "BUILD_TIMEOUT_MINUTES=20"
@@ -241,7 +241,7 @@ if errorlevel 1 exit /b 1
 echo.
 echo [2] git sync on server ^(fetch + reset to origin/%GIT_BRANCH%^)...
 if defined SERVER_GIT_SSH_COMMAND (
-	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "test -d %SERVER_APP%/.git || (echo [ERROR] No git in %SERVER_APP% && exit 1); cd %SERVER_APP% && GIT_SSH_COMMAND='%SERVER_GIT_SSH_COMMAND%' git fetch %GIT_REMOTE% %GIT_BRANCH% && git reset --hard %GIT_REMOTE%/%GIT_BRANCH% && git clean -fd -e composer.phar"
+	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "test -d %SERVER_APP%/.git || (echo [ERROR] No git in %SERVER_APP% && exit 1); cd %SERVER_APP% && git remote set-url %GIT_REMOTE% %GIT_REPO_SSH_URL% && GIT_SSH_COMMAND='%SERVER_GIT_SSH_COMMAND%' git fetch %GIT_REMOTE% %GIT_BRANCH% && git reset --hard %GIT_REMOTE%/%GIT_BRANCH% && git clean -fd -e composer.phar"
 ) else (
 	call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "test -d %SERVER_APP%/.git || (echo [ERROR] No git in %SERVER_APP% && exit 1); cd %SERVER_APP% && git fetch %GIT_REMOTE% %GIT_BRANCH% && git reset --hard %GIT_REMOTE%/%GIT_BRANCH% && git clean -fd -e composer.phar"
 )
