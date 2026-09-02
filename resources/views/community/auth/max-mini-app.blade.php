@@ -21,8 +21,12 @@
             <span class="section-kicker">MAX</span>
             <h1>Вход в сообщество</h1>
             <p>Безопасно проверяем ваш аккаунт MAX.</p>
-            <a class="community-provider community-provider--max" data-max-return hidden>
-                Вернуться в сообщество
+            <a class="community-provider community-provider--max"
+               data-max-return
+               target="_blank"
+               rel="noopener noreferrer"
+               hidden>
+                Авторизоваться
             </a>
             <p data-max-mini-status class="community-auth-status">Подтверждаем вход…</p>
         </div>

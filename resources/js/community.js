@@ -110,7 +110,7 @@ if (maxMiniApp) {
 
                 returnButton.href = result.return_url;
                 returnButton.hidden = false;
-                statusNode.textContent = 'Вход подтверждён. Нажмите кнопку, чтобы открыть сообщество.';
+                statusNode.textContent = 'Аккаунт MAX подтверждён. Нажмите «Авторизоваться».';
             } catch (_) {
                 statusNode.textContent = 'Не удалось подтвердить вход. Откройте ссылку заново.';
             }
@@ -120,7 +120,9 @@ if (maxMiniApp) {
     }
 
     returnButton.addEventListener('click', (event) => {
-        if (typeof window.WebApp?.openLink !== 'function') return;
+        const platform = window.WebApp?.platform;
+
+        if (platform === 'web' || typeof window.WebApp?.openLink !== 'function') return;
 
         event.preventDefault();
         window.WebApp.openLink(returnButton.href);

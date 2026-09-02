@@ -89,7 +89,10 @@ class MaxCommunityAuthTest extends TestCase
     {
         $this->get(route('community.auth.max.mini-app'))
             ->assertOk()
-            ->assertSee('Подтверждаем вход');
+            ->assertSee('Подтверждаем вход')
+            ->assertSee('Авторизоваться')
+            ->assertSee('target="_blank"', false)
+            ->assertSee('rel="noopener noreferrer"', false);
         $result = $this->postJson(route('community.auth.max.session'), [
             'init_data' => $this->signedInitData(9933),
         ])->assertOk()->assertJsonStructure(['return_url']);
