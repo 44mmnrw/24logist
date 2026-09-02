@@ -21,13 +21,14 @@
             @foreach ($user->identities as $identity)
                 @if ($identity->bot_access)
                     <label class="community-check">
-                        <input type="checkbox" name="{{ $identity->provider }}_notifications" value="1" @checked(old($identity->provider.'_notifications'))>
+                        <input type="hidden" name="{{ $identity->provider }}_notifications" value="0">
+                        <input type="checkbox" name="{{ $identity->provider }}_notifications" value="1" @checked((bool) old($identity->provider.'_notifications', true))>
                         <span>Получать ответы через {{ $identity->provider === 'telegram' ? 'Telegram' : 'MAX' }}</span>
                     </label>
                 @endif
             @endforeach
             <label class="community-check community-consent">
-                <input type="checkbox" name="accept_terms" value="1" required @checked(old('accept_terms'))>
+                <input type="checkbox" name="accept_terms" value="1" required @checked((bool) old('accept_terms', true))>
                 <span>Я принимаю <a href="{{ route('community.rules') }}" target="_blank" rel="noopener">правила сообщества</a> и <a href="{{ route('community.privacy') }}" target="_blank" rel="noopener">политику конфиденциальности</a></span>
             </label>
             <button class="btn btn--primary" type="submit">Открыть сообщество</button>

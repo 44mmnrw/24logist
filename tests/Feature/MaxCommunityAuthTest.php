@@ -48,6 +48,17 @@ class MaxCommunityAuthTest extends TestCase
         $this->assertDatabaseCount('community_users', 0);
     }
 
+    public function test_mobile_site_opens_mini_app_directly(): void
+    {
+        $response = $this->withHeader('User-Agent', 'Mozilla/5.0 (Linux; Android 15; Mobile)')
+            ->get(route('community.auth.max.start'))
+            ->assertRedirect();
+
+        $location = (string) $response->headers->get('Location');
+        $this->assertStringStartsWith('https://max.ru/community_bot?startapp=', $location);
+        $this->assertNotSame('', $this->tokenFromDeepLink($location));
+    }
+
     public function test_stale_deleted_user_session_does_not_break_challenge_creation(): void
     {
         $user = CommunityUser::factory()->create();
@@ -211,7 +222,7 @@ class MaxCommunityAuthTest extends TestCase
     private function tokenFromDeepLink(string $deepLink): string
     {
         parse_str((string) parse_url($deepLink, PHP_URL_QUERY), $query);
-        $token = $query['start'] ?? null;
+        $token = $query['start'] ?? $query['startapp'] ?? null;
         $this->assertIsString($token);
         $this->assertNotSame('', $token);
 

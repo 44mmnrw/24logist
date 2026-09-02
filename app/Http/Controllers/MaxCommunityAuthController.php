@@ -21,7 +21,7 @@ class MaxCommunityAuthController extends Controller
 {
     public function __construct(private readonly SiteSettingsService $siteSettings) {}
 
-    public function start(): RedirectResponse
+    public function start(Request $request): RedirectResponse
     {
         abort_unless($this->siteSettings->communityMaxEnabled(), 404);
         abort_if(
@@ -39,10 +39,11 @@ class MaxCommunityAuthController extends Controller
             'link_to_user_id' => $linkToUserId,
             'expires_at' => now()->addSeconds((int) config('community.max.challenge_ttl', 300)),
         ]);
-        // MAX Web/Desktop may open only the bot for a startapp deep link without
-        // launching the attached Mini App. A bot deep link reliably delivers the
-        // one-time token in bot_started; the webhook then sends an open_app button.
-        $deepLink = 'https://max.ru/'.ltrim($this->siteSettings->maxBotUsername(), '@').'?start='.rawurlencode($token);
+        $isMobile = preg_match('/Android|iPhone|iPad|iPod|Mobile/i', (string) $request->userAgent()) === 1;
+        // Mobile MAX opens an attached Mini App directly. MAX Web/Desktop may
+        // open only the bot, so there we use bot_started and an open_app button.
+        $startParameter = $isMobile ? 'startapp' : 'start';
+        $deepLink = 'https://max.ru/'.ltrim($this->siteSettings->maxBotUsername(), '@').'?'.$startParameter.'='.rawurlencode($token);
 
         return redirect()->away($deepLink);
     }
