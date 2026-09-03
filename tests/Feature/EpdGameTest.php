@@ -23,6 +23,7 @@ final class EpdGameTest extends TestCase
             ->assertSee('data-epd-operator', false)
             ->assertSee('data-epd-reel', false)
             ->assertSee('data-epd-result', false)
+            ->assertSee('data-epd-route-animation', false)
             ->assertSee('data-epd-sound', false)
             ->assertSee('Установите связь ЭПД')
             ->assertSee('АО «ПФ «СКБ Контур»')

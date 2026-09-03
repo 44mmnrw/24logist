@@ -1,3 +1,6 @@
+import lottie from 'lottie-web';
+import routeSearchAnimationData from '../icons/wired-outline-3366-road-hover-pinch.json';
+
 const games = document.querySelectorAll('[data-epd-game]');
 
 const DOCUMENTS = [
@@ -32,6 +35,7 @@ games.forEach((game) => {
     const resultKicker = game.querySelector('[data-epd-result-kicker]');
     const resultOperator = game.querySelector('[data-epd-result-operator]');
     const status = game.querySelector('[data-epd-status]');
+    const routeAnimationElement = game.querySelector('[data-epd-route-animation]');
     const soundButton = game.querySelector('[data-epd-sound]');
     const soundLabel = game.querySelector('[data-epd-sound-label]');
     const operators = [...operatorSelect.options].map((option) => option.value).filter(Boolean);
@@ -45,6 +49,16 @@ games.forEach((game) => {
     let isSpinning = false;
     let hasPlayed = false;
     let isMuted = false;
+    const routeAnimation = lottie.loadAnimation({
+        container: routeAnimationElement,
+        renderer: 'svg',
+        loop: true,
+        autoplay: false,
+        animationData: structuredClone(routeSearchAnimationData),
+        rendererSettings: {
+            preserveAspectRatio: 'xMidYMid meet',
+        },
+    });
 
     try {
         isMuted = window.localStorage.getItem('epd-game-muted') === 'true';
@@ -243,12 +257,18 @@ games.forEach((game) => {
         status.textContent = 'Передаём пакет документов';
         reelHint.textContent = 'Документы отправляются по защищённому каналу';
         controlHint.textContent = 'Подождите, устанавливаем соединение';
+        if (reducedMotion.matches) {
+            routeAnimation.goToAndStop(60, true);
+        } else {
+            routeAnimation.goToAndPlay(0, true);
+        }
         playSound('pull');
 
         await Promise.all(reels.map((reel, index) => spinReel(reel, index)));
 
         const connected = randomFloat() < 0.7;
         result.dataset.state = connected ? 'success' : 'failure';
+        routeAnimation.stop();
         resultKicker.textContent = connected ? 'Маршрут проложен' : 'Маршрут не найден';
         resultOperator.textContent = randomItem(operators);
         status.textContent = connected ? 'Связь установлена' : 'Связь не установлена';

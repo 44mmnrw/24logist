@@ -608,13 +608,25 @@
     transition: color 220ms ease, background 220ms ease, transform 220ms ease;
 }
 
-.epd-game__result-icon svg {
+.epd-game__result-icon > svg {
     width: 31px;
     fill: none;
     stroke: currentColor;
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke-width: 1.8;
+}
+
+.epd-game__route-animation {
+    display: none;
+    width: 54px;
+    height: 54px;
+}
+
+.epd-game__route-animation svg {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
 }
 
 .epd-game__result-kicker {
@@ -655,7 +667,14 @@
 .epd-game__result[data-state="searching"] .epd-game__result-icon {
     color: #2470d8;
     background: #e3efff;
-    animation: epd-search-pulse 800ms ease-in-out infinite alternate;
+}
+
+.epd-game__result[data-state="searching"] .epd-game__result-idle {
+    display: none;
+}
+
+.epd-game__result[data-state="searching"] .epd-game__route-animation {
+    display: block;
 }
 
 .epd-game__result[data-state="success"] {
@@ -679,8 +698,10 @@
     transform: translateY(-3px) rotate(-45deg);
 }
 
-.epd-game__result[data-state="success"] .epd-game__result-icon svg,
-.epd-game__result[data-state="failure"] .epd-game__result-icon svg {
+.epd-game__result[data-state="success"] .epd-game__result-icon > svg,
+.epd-game__result[data-state="failure"] .epd-game__result-icon > svg,
+.epd-game__result[data-state="success"] .epd-game__route-animation,
+.epd-game__result[data-state="failure"] .epd-game__route-animation {
     display: none;
 }
 
@@ -805,11 +826,6 @@
     0% { transform: translateY(-7px); }
     65% { transform: translateY(3px); }
     100% { transform: translateY(0); }
-}
-
-@keyframes epd-search-pulse {
-    from { transform: scale(0.94); opacity: 0.72; }
-    to { transform: scale(1.04); opacity: 1; }
 }
 
 @keyframes epd-button-spin {
@@ -945,8 +961,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .is-spinning .epd-game__spin-icon,
-    .epd-game__result[data-state="searching"] .epd-game__result-icon {
+    .is-spinning .epd-game__spin-icon {
         animation: none;
     }
 }
