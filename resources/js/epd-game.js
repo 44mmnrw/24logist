@@ -24,6 +24,17 @@ const randomFloat = () => {
 
 const randomItem = (items) => items[Math.floor(randomFloat() * items.length)];
 
+const shuffledItems = (items) => {
+    const shuffled = [...items];
+
+    for (let index = shuffled.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(randomFloat() * (index + 1));
+        [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+    }
+
+    return shuffled;
+};
+
 games.forEach((game) => {
     const operatorSelect = game.querySelector('[data-epd-operator]');
     const selectedOperator = game.querySelector('[data-epd-selected]');
@@ -161,9 +172,8 @@ games.forEach((game) => {
         reel.setAttribute('aria-label', `${documentType.code} — ${documentType.label}`);
     };
 
-    const spinReel = (reel, index) => new Promise((resolve) => {
+    const spinReel = (reel, index, finalDocument) => new Promise((resolve) => {
         const track = reel.querySelector('[data-epd-reel-track]');
-        const finalDocument = randomItem(DOCUMENTS);
         const visibleCode = track.querySelector('.epd-game__reel-label')?.textContent;
         const firstDocument = DOCUMENTS.find((item) => item.code === visibleCode) || randomItem(DOCUMENTS);
         const itemCount = 29 + (index * 3);
@@ -294,9 +304,14 @@ games.forEach((game) => {
         }
         playSound('pull');
 
-        await Promise.all(reels.map((reel, index) => spinReel(reel, index)));
-
         const connected = randomFloat() < 0.7;
+        const successfulDocument = randomItem(DOCUMENTS);
+        const finalDocuments = connected
+            ? reels.map(() => successfulDocument)
+            : shuffledItems(DOCUMENTS).slice(0, reels.length);
+
+        await Promise.all(reels.map((reel, index) => spinReel(reel, index, finalDocuments[index])));
+
         result.dataset.state = connected ? 'success' : 'failure';
         routeAnimation.stop();
         if (connected) {
