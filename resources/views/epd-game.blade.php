@@ -32,16 +32,16 @@
     <meta property="og:title" content="Рулетка роуминга ЭПД">
     <meta property="og:description" content="Игровая проверка связи между операторами электронных перевозочных документов.">
     <meta property="og:url" content="{{ request()->fullUrl() }}">
-    <meta property="og:image" content="{{ asset('images/epd-game-og.png') }}">
-    <meta property="og:image:secure_url" content="{{ asset('images/epd-game-og.png') }}">
-    <meta property="og:image:type" content="image/png">
+    <meta property="og:image" content="{{ asset('images/epd-game-og-v2.jpg') }}">
+    <meta property="og:image:secure_url" content="{{ asset('images/epd-game-og-v2.jpg') }}">
+    <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="Рулетка роуминга ЭПД">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Рулетка роуминга ЭПД">
     <meta name="twitter:description" content="Игровая проверка связи между операторами электронных перевозочных документов.">
-    <meta name="twitter:image" content="{{ asset('images/epd-game-og.png') }}">
+    <meta name="twitter:image" content="{{ asset('images/epd-game-og-v2.jpg') }}">
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
     <x-fonts.preload />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
