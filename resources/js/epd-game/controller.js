@@ -167,6 +167,8 @@ export const createEpdGame = (game) => {
 
     elements.sender.addEventListener('change', handleOperatorChange);
     elements.target.addEventListener('change', handleOperatorChange);
+    elements.sender.addEventListener('input', handleOperatorChange);
+    elements.target.addEventListener('input', handleOperatorChange);
     elements.spinButton.addEventListener('click', runRound);
     elements.spinButton.addEventListener('mouseenter', () => media.showRetry());
     elements.spinButton.addEventListener('focus', () => media.showRetry());

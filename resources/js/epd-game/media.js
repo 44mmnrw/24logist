@@ -4,12 +4,18 @@ import routeFailureAnimationData from '../../icons/wired-lineal-926-road-barrier
 import routeSuccessAnimationData from '../../icons/wired-lineal-11-link-hover-bounce.json';
 import retryAnimationData from '../../icons/wired-lineal-213-three-arrows-rotate-hover-pinch.json';
 
+const cloneAnimationData = (animationData) => (
+    typeof structuredClone === 'function'
+        ? structuredClone(animationData)
+        : JSON.parse(JSON.stringify(animationData))
+);
+
 const loadLottie = (container, animationData, loop = false) => lottie.loadAnimation({
     container,
     renderer: 'svg',
     loop,
     autoplay: false,
-    animationData: structuredClone(animationData),
+    animationData: cloneAnimationData(animationData),
     rendererSettings: { preserveAspectRatio: 'xMidYMid meet' },
 });
 
