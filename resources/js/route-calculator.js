@@ -98,6 +98,30 @@ const initRouteCalculator = (root) => {
         scrollWheelZoom: true,
         attributionControl: false,
     }).setView([56.2, 47.2], 5);
+    const licenseControl = L.control({ position: 'bottomright' });
+    licenseControl.onAdd = () => {
+        const container = L.DomUtil.create('div', 'route-calculator-map-license');
+        const link = document.createElement('a');
+        const icon = document.createElement('span');
+        const text = document.createElement('span');
+
+        link.href = 'https://www.openstreetmap.org/copyright';
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.setAttribute('aria-label', 'Данные карты: OpenStreetMap contributors');
+        link.title = 'Данные карты: OpenStreetMap contributors';
+        icon.className = 'route-calculator-map-license__icon';
+        icon.setAttribute('aria-hidden', 'true');
+        icon.textContent = 'ⓘ';
+        text.className = 'route-calculator-map-license__text';
+        text.textContent = '© OpenStreetMap contributors';
+        link.append(icon, text);
+        container.append(link);
+        L.DomEvent.disableClickPropagation(container);
+
+        return container;
+    };
+    licenseControl.addTo(map);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; OpenStreetMap contributors',

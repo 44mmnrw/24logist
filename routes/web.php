@@ -109,6 +109,9 @@ Route::post('/route-calculator/calculate', [RouteCalculatorController::class, 'c
     ->middleware('throttle:20,1')
     ->name('route-calculator.calculate');
 
+Route::view('/epd-game', 'epd-game')
+    ->name('epd-game');
+
 Route::middleware(['community.locale', 'community.enabled'])->prefix('community')->name('community.')->group(function (): void {
     Route::get('/', [CommunityController::class, 'index'])->name('index');
     Route::get('/c/{category}', [CommunityController::class, 'category'])->name('categories.show');
