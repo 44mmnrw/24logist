@@ -35,7 +35,7 @@ final class EpdGameTest extends TestCase
             ->assertSee('data-epd-retry-animation', false)
             ->assertSee('data-epd-sound', false)
             ->assertSee('href="'.url('/').'"', false)
-            ->assertSee('<h1>Роуминг ЭПД</h1>', false)
+            ->assertSee('<h1>Рулетка роуминга ЭПД</h1>', false)
             ->assertSee('Испытать удачу')
             ->assertSee('ПФ СКБ Контур')
             ->assertSee('НТЦ СТЭК');
