@@ -21,18 +21,25 @@ final class EpdGameTest extends TestCase
             ->assertSee('<meta name="robots" content="noindex, nofollow">', false)
             ->assertSee('data-epd-game', false)
             ->assertSee('data-epd-operator', false)
+            ->assertSee('data-epd-target-operator', false)
+            ->assertSee('data-epd-route', false)
             ->assertSee('data-epd-reel', false)
+            ->assertSee('images/icons/epd-slot-frame.svg', false)
+            ->assertSee('data-epd-core-state', false)
             ->assertSee('data-epd-result', false)
+            ->assertSee('data-epd-outcome-dialog', false)
+            ->assertSee('data-epd-result-sender', false)
             ->assertSee('data-epd-route-animation', false)
             ->assertSee('data-epd-route-failure-animation', false)
             ->assertSee('data-epd-route-success-animation', false)
             ->assertSee('images/icons/epd-sender.svg', false)
             ->assertSee('data-epd-retry-animation', false)
             ->assertSee('data-epd-sound', false)
-            ->assertSee('Установите связь ЭПД')
+            ->assertSee('<h1>Связь ЭПД</h1>', false)
+            ->assertSee('Проверить связь')
             ->assertSee('АО «ПФ «СКБ Контур»')
             ->assertSee('АО «НТЦ СТЭК»');
 
-        $this->assertSame(17, substr_count($response->getContent(), '<option'));
+        $this->assertSame(34, substr_count($response->getContent(), '<option'));
     }
 }
