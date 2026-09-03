@@ -819,13 +819,17 @@
     text-align: center;
 }
 
-.epd-game__disclaimer {
-    max-width: 920px;
+p.epd-game__disclaimer {
+    width: min(720px, calc(100% - 32px));
     margin: 58px auto 0;
     color: #929dac;
     font-size: 9px;
     line-height: 1.6;
     text-align: center;
+}
+
+.epd-game__disclaimer span {
+    display: block;
 }
 
 .epd-game__feedback {
@@ -1231,7 +1235,7 @@
         font-size: 12px;
     }
 
-    .epd-game__disclaimer {
+    p.epd-game__disclaimer {
         margin-top: 8px;
         font-size: 7px;
         line-height: 1.35;
