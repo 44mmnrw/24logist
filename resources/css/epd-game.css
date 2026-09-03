@@ -511,13 +511,13 @@
 .epd-game[data-state="ready"] .epd-game__slot-lights i:nth-child(5) { animation-delay: 2080ms; }
 
 .epd-game[data-state="spinning"] .epd-game__slot-lights i {
-    animation: epd-slot-light-blink 1200ms ease-in-out infinite;
+    animation: epd-slot-light-blink 600ms ease-in-out infinite;
 }
 
-.epd-game[data-state="spinning"] .epd-game__slot-lights i:nth-child(2) { animation-delay: 210ms; }
-.epd-game[data-state="spinning"] .epd-game__slot-lights i:nth-child(3) { animation-delay: 420ms; }
-.epd-game[data-state="spinning"] .epd-game__slot-lights i:nth-child(4) { animation-delay: 630ms; }
-.epd-game[data-state="spinning"] .epd-game__slot-lights i:nth-child(5) { animation-delay: 840ms; }
+.epd-game[data-state="spinning"] .epd-game__slot-lights i:nth-child(2) { animation-delay: 105ms; }
+.epd-game[data-state="spinning"] .epd-game__slot-lights i:nth-child(3) { animation-delay: 210ms; }
+.epd-game[data-state="spinning"] .epd-game__slot-lights i:nth-child(4) { animation-delay: 315ms; }
+.epd-game[data-state="spinning"] .epd-game__slot-lights i:nth-child(5) { animation-delay: 420ms; }
 
 .epd-game__slot-machine .epd-game__reels {
     position: absolute;
@@ -1098,50 +1098,148 @@
     .epd-game { overflow: visible; }
 
     .epd-game__topbar {
-        min-height: 70px;
-        padding: 14px 16px;
+        min-height: 54px;
+        padding: 9px 14px;
     }
 
     .epd-game__brand { gap: 9px; }
 
     .epd-game__logo-wrap {
-        width: 112px;
-        height: 36px;
+        width: 104px;
+        height: 34px;
     }
 
     .epd-game__brand-meta {
-        max-width: 92px;
+        max-width: 82px;
         padding-left: 9px;
-        font-size: 8px;
+        font-size: 7px;
         line-height: 1.3;
         white-space: normal;
     }
 
-    .epd-game__main { padding: 25px 16px 30px; }
-    .epd-game__intro { margin-bottom: 30px; }
+    .epd-game__main { padding: 8px 12px 14px; }
+    .epd-game__intro { margin-bottom: 12px; }
 
     .epd-game__intro h1 {
-        font-size: 32px;
-        line-height: 1.25;
+        font-size: 26px;
+        line-height: 1.2;
     }
 
     .epd-game__intro p {
-        font-size: 12px;
-        line-height: 1.55;
+        margin-top: 3px;
+        font-size: 9px;
+        line-height: 1.4;
     }
 
     .epd-game__grid {
-        grid-template-columns: minmax(0, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         grid-template-areas:
-            "sender"
-            "core"
-            "receiver"
-            "controls";
-        gap: 20px;
+            "sender receiver"
+            "core core"
+            "controls controls";
+        gap: 10px;
     }
 
-    .epd-game__node { min-height: 0; }
-    .epd-game__disclaimer { margin-top: 38px; }
+    .epd-game__node {
+        min-height: 0;
+        padding: 0;
+    }
+
+    .epd-game__node-heading {
+        margin-bottom: 7px;
+    }
+
+    .epd-game__node-heading h2 {
+        font-size: 11px;
+    }
+
+    .epd-game__node-role {
+        min-height: 21px;
+        padding: 3px 7px;
+        font-size: 8px;
+    }
+
+    .epd-game__identity {
+        min-height: 48px;
+        margin-bottom: 7px;
+        padding: 6px;
+        border-radius: 10px;
+    }
+
+    .epd-game__identity-icon {
+        width: 31px;
+        height: 31px;
+        border-radius: 9px;
+    }
+
+    .epd-game__identity-icon img {
+        width: 22px;
+        height: 22px;
+    }
+
+    .epd-game__identity small {
+        margin-bottom: 1px;
+        font-size: 7px;
+    }
+
+    .epd-game__identity strong {
+        font-size: 9px;
+        line-height: 1.25;
+    }
+
+    .epd-game__field { gap: 3px; }
+    .epd-game__field-label { font-size: 8px; }
+
+    .epd-game__select-wrap select {
+        min-height: 36px;
+        padding-right: 28px;
+        padding-left: 8px;
+        border-radius: 9px;
+        font-size: 9px;
+    }
+
+    .epd-game__select-wrap svg {
+        right: 8px;
+        width: 14px;
+        height: 14px;
+    }
+
+    .epd-game__core-heading {
+        min-height: 28px;
+        margin-bottom: 3px;
+    }
+
+    .epd-game__core-heading h2 { font-size: 12px; }
+    .epd-game__route-indicator { width: 24px; height: 24px; }
+    .epd-game__route-animation { width: 24px; height: 24px; }
+
+    .epd-game__core-state {
+        min-height: 23px;
+        padding: 4px 8px;
+        font-size: 8px;
+    }
+
+    .epd-game__hint {
+        min-height: 16px;
+        margin: 2px 0 0;
+        font-size: 7px;
+    }
+
+    .epd-game__controls p {
+        margin-top: 4px;
+        font-size: 7px;
+    }
+
+    .epd-game__spin {
+        min-height: 44px;
+        font-size: 12px;
+    }
+
+    .epd-game__disclaimer {
+        margin-top: 8px;
+        font-size: 7px;
+        line-height: 1.35;
+    }
 }
 
 @media (max-width: 520px) {
@@ -1163,13 +1261,13 @@
     }
 
     .epd-game__core-heading {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 9px;
+        align-items: center;
+        flex-direction: row;
+        gap: 6px;
     }
 
     .epd-game__core-meta {
-        width: 100%;
+        width: auto;
         justify-content: space-between;
     }
 
@@ -1191,6 +1289,12 @@
     .epd-game__spin { width: 100%; }
     .epd-game__outcome-dialog { padding: 30px 20px; }
     .epd-game__result-kicker { font-size: 23px; }
+}
+
+@media (max-width: 380px) {
+    .epd-game__node-heading h2 {
+        display: none;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
