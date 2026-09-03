@@ -22,6 +22,8 @@ final class EpdGameTest extends TestCase
 
         $response
             ->assertOk()
+            ->assertHeaderMissing('Set-Cookie')
+            ->assertHeader('Cache-Control', 'max-age=300, public, s-maxage=300')
             ->assertSee('<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">', false)
             ->assertSee('data-epd-game', false)
             ->assertSee('data-epd-operator', false)
@@ -64,6 +66,8 @@ final class EpdGameTest extends TestCase
             ->assertOk()
             ->assertSee('<meta property="og:title" content="Рулетка роуминга ЭПД">', false)
             ->assertSee('<meta property="og:locale" content="ru_RU">', false)
+            ->assertSee('<meta property="og:url" content="'.route('epd-game').'">', false)
+            ->assertSee('<meta property="og:image:url" content="'.asset('images/epd-game-og.png').'">', false)
             ->assertSee('<meta name="twitter:card" content="summary_large_image">', false)
             ->assertSee('<link rel="canonical" href="'.route('epd-game').'">', false)
             ->assertSee('<script type="application/ld+json">', false)

@@ -72,8 +72,9 @@
     <meta property="og:site_name" content="24logist.ru">
     <meta property="og:title" content="{{ $epdSeoTitle }}">
     <meta property="og:description" content="{{ $epdSeoDescription }}">
-    <meta property="og:url" content="{{ request()->fullUrl() }}">
+    <meta property="og:url" content="{{ $epdCanonicalUrl }}">
     <meta property="og:image" content="{{ $epdOgImage }}">
+    <meta property="og:image:url" content="{{ $epdOgImage }}">
     <meta property="og:image:secure_url" content="{{ $epdOgImage }}">
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="1200">

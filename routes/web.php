@@ -26,6 +26,7 @@ use App\Http\Controllers\TelegramCommunityAuthController;
 use App\Http\Controllers\VkCommunityAuthController;
 use App\Http\Middleware\CachePublicLandingPage;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Http\Middleware\SetCacheHeaders;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
@@ -110,6 +111,17 @@ Route::post('/route-calculator/calculate', [RouteCalculatorController::class, 'c
     ->name('route-calculator.calculate');
 
 Route::view('/epd-game', 'epd-game')
+    ->withoutMiddleware([
+        StartSession::class,
+        ShareErrorsFromSession::class,
+        PreventRequestForgery::class,
+    ])
+    ->middleware(SetCacheHeaders::using([
+        'public' => true,
+        'max_age' => 300,
+        's_maxage' => 300,
+        'etag' => true,
+    ]))
     ->name('epd-game');
 
 Route::middleware(['community.locale', 'community.enabled'])->prefix('community')->name('community.')->group(function (): void {
