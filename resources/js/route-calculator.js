@@ -93,7 +93,11 @@ const initRouteCalculator = (root) => {
 
     if (!(mapNode instanceof HTMLElement) || !(form instanceof HTMLFormElement)) return;
 
-    const map = L.map(mapNode, { zoomControl: true, scrollWheelZoom: true }).setView([56.2, 47.2], 5);
+    const map = L.map(mapNode, {
+        zoomControl: true,
+        scrollWheelZoom: true,
+        attributionControl: false,
+    }).setView([56.2, 47.2], 5);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; OpenStreetMap contributors',

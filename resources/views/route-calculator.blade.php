@@ -117,6 +117,9 @@
                     <div class="route-calculator-map" data-route-map aria-label="Карта рассчитанного маршрута"></div>
                 </div>
             </div>
+            <p class="route-calculator-tool__attribution">
+                © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>
+            </p>
         </div>
     </div>
     </main>
