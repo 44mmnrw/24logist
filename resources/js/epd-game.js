@@ -1,5 +1,7 @@
 import lottie from 'lottie-web';
 import routeSearchAnimationData from '../icons/wired-outline-3366-road-hover-pinch.json';
+import routeFailureAnimationData from '../icons/wired-lineal-926-road-barrier-hover-pinch.json';
+import routeSuccessAnimationData from '../icons/wired-lineal-11-link-hover-bounce.json';
 
 const games = document.querySelectorAll('[data-epd-game]');
 
@@ -36,6 +38,8 @@ games.forEach((game) => {
     const resultOperator = game.querySelector('[data-epd-result-operator]');
     const status = game.querySelector('[data-epd-status]');
     const routeAnimationElement = game.querySelector('[data-epd-route-animation]');
+    const routeFailureAnimationElement = game.querySelector('[data-epd-route-failure-animation]');
+    const routeSuccessAnimationElement = game.querySelector('[data-epd-route-success-animation]');
     const soundButton = game.querySelector('[data-epd-sound]');
     const soundLabel = game.querySelector('[data-epd-sound-label]');
     const operators = [...operatorSelect.options].map((option) => option.value).filter(Boolean);
@@ -55,6 +59,27 @@ games.forEach((game) => {
         loop: true,
         autoplay: false,
         animationData: structuredClone(routeSearchAnimationData),
+        rendererSettings: {
+            preserveAspectRatio: 'xMidYMid meet',
+        },
+    });
+    routeAnimation.goToAndStop(0, true);
+    const routeFailureAnimation = lottie.loadAnimation({
+        container: routeFailureAnimationElement,
+        renderer: 'svg',
+        loop: false,
+        autoplay: false,
+        animationData: structuredClone(routeFailureAnimationData),
+        rendererSettings: {
+            preserveAspectRatio: 'xMidYMid meet',
+        },
+    });
+    const routeSuccessAnimation = lottie.loadAnimation({
+        container: routeSuccessAnimationElement,
+        renderer: 'svg',
+        loop: false,
+        autoplay: false,
+        animationData: structuredClone(routeSuccessAnimationData),
         rendererSettings: {
             preserveAspectRatio: 'xMidYMid meet',
         },
@@ -222,6 +247,9 @@ games.forEach((game) => {
     });
 
     const resetResult = () => {
+        routeAnimation.goToAndStop(0, true);
+        routeFailureAnimation.stop();
+        routeSuccessAnimation.stop();
         result.dataset.state = 'idle';
         resultKicker.textContent = 'Ожидание запуска';
         resultOperator.textContent = 'Оператор появится здесь';
@@ -252,6 +280,8 @@ games.forEach((game) => {
         reelsPanel.setAttribute('aria-busy', 'true');
         game.classList.add('is-spinning');
         result.dataset.state = 'searching';
+        routeFailureAnimation.stop();
+        routeSuccessAnimation.stop();
         resultKicker.textContent = 'Поиск маршрута';
         resultOperator.textContent = 'Согласование маршрута…';
         status.textContent = 'Передаём пакет документов';
@@ -269,6 +299,19 @@ games.forEach((game) => {
         const connected = randomFloat() < 0.7;
         result.dataset.state = connected ? 'success' : 'failure';
         routeAnimation.stop();
+        if (connected) {
+            if (reducedMotion.matches) {
+                routeSuccessAnimation.goToAndStop(routeSuccessAnimation.totalFrames - 1, true);
+            } else {
+                routeSuccessAnimation.goToAndPlay(0, true);
+            }
+        } else {
+            if (reducedMotion.matches) {
+                routeFailureAnimation.goToAndStop(routeFailureAnimation.totalFrames - 1, true);
+            } else {
+                routeFailureAnimation.goToAndPlay(0, true);
+            }
+        }
         resultKicker.textContent = connected ? 'Маршрут проложен' : 'Маршрут не найден';
         resultOperator.textContent = randomItem(operators);
         status.textContent = connected ? 'Связь установлена' : 'Связь не установлена';

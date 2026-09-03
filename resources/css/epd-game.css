@@ -411,13 +411,10 @@
     box-shadow: 0 3px 10px rgba(34, 76, 147, 0.09);
 }
 
-.epd-game__identity-icon svg {
-    width: 22px;
-    fill: none;
-    stroke: currentColor;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: 1.7;
+.epd-game__identity-icon img {
+    display: block;
+    width: 28px;
+    height: 28px;
 }
 
 .epd-game__identity small {
@@ -618,15 +615,29 @@
 }
 
 .epd-game__route-animation {
-    display: none;
+    display: block;
     width: 54px;
     height: 54px;
 }
 
-.epd-game__route-animation svg {
+.epd-game__route-animation svg,
+.epd-game__route-failure-animation svg,
+.epd-game__route-success-animation svg {
     display: block;
     width: 100% !important;
     height: 100% !important;
+}
+
+.epd-game__route-failure-animation {
+    display: none;
+    width: 58px;
+    height: 58px;
+}
+
+.epd-game__route-success-animation {
+    display: none;
+    width: 58px;
+    height: 58px;
 }
 
 .epd-game__result-kicker {
@@ -669,10 +680,6 @@
     background: #e3efff;
 }
 
-.epd-game__result[data-state="searching"] .epd-game__result-idle {
-    display: none;
-}
-
 .epd-game__result[data-state="searching"] .epd-game__route-animation {
     display: block;
 }
@@ -683,19 +690,18 @@
 }
 
 .epd-game__result[data-state="success"] .epd-game__result-icon {
-    color: #fff;
-    background: #12a85a;
+    color: #08723b;
+    background: #d9f5e5;
     transform: scale(1.06);
     box-shadow: 0 7px 17px rgba(18, 168, 90, 0.22);
 }
 
 .epd-game__result[data-state="success"] .epd-game__result-icon::before {
-    width: 23px;
-    height: 12px;
-    border-bottom: 3px solid currentColor;
-    border-left: 3px solid currentColor;
-    content: "";
-    transform: translateY(-3px) rotate(-45deg);
+    content: none;
+}
+
+.epd-game__result[data-state="success"] .epd-game__route-success-animation {
+    display: block;
 }
 
 .epd-game__result[data-state="success"] .epd-game__result-icon > svg,
@@ -716,24 +722,18 @@
 }
 
 .epd-game__result[data-state="failure"] .epd-game__result-icon {
-    color: #fff;
-    background: #d84b49;
+    color: #d84b49;
+    background: #fde2e0;
     box-shadow: 0 7px 17px rgba(216, 75, 73, 0.2);
 }
 
 .epd-game__result[data-state="failure"] .epd-game__result-icon::before,
 .epd-game__result[data-state="failure"] .epd-game__result-icon::after {
-    position: absolute;
-    width: 27px;
-    height: 3px;
-    border-radius: 3px;
-    content: "";
-    background: currentColor;
-    transform: rotate(45deg);
+    content: none;
 }
 
-.epd-game__result[data-state="failure"] .epd-game__result-icon::after {
-    transform: rotate(-45deg);
+.epd-game__result[data-state="failure"] .epd-game__route-failure-animation {
+    display: block;
 }
 
 .epd-game__result[data-state="failure"] .epd-game__status {

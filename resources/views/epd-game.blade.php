@@ -100,7 +100,7 @@
 
                             <div class="epd-game__identity" data-epd-identity>
                                 <span class="epd-game__identity-icon" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24"><path d="M8 8V6a4 4 0 0 1 8 0v2M6 8h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Zm6 4v4"/></svg>
+                                    <img src="{{ asset('images/icons/epd-sender.svg') }}" alt="" width="28" height="28">
                                 </span>
                                 <span>
                                     <small>Отправитель</small>
@@ -160,7 +160,8 @@
                             <div class="epd-game__result" data-epd-result data-state="idle">
                                 <span class="epd-game__result-icon" data-epd-result-icon aria-hidden="true">
                                     <span class="epd-game__route-animation" data-epd-route-animation></span>
-                                    <svg class="epd-game__result-idle" viewBox="0 0 32 32"><path d="M11 20.5 8.5 23a4.24 4.24 0 0 1-6-6L8 11.5a4.24 4.24 0 0 1 6 0M21 11.5 23.5 9a4.24 4.24 0 0 1 6 6L24 20.5a4.24 4.24 0 0 1-6 0M11 21l10-10"/></svg>
+                                    <span class="epd-game__route-failure-animation" data-epd-route-failure-animation></span>
+                                    <span class="epd-game__route-success-animation" data-epd-route-success-animation></span>
                                 </span>
                                 <span class="epd-game__result-kicker" data-epd-result-kicker>Ожидание запуска</span>
                                 <strong data-epd-result-operator>Оператор появится здесь</strong>
