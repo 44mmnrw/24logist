@@ -37,7 +37,7 @@
         data-epd-game
         data-sound-pull="{{ asset('sounds/epd/slot-pull.mp3') }}"
         data-sound-stop="{{ asset('sounds/epd/reel-stop.mp3') }}"
-        data-sound-success="{{ asset('sounds/epd/success.mp3') }}"
+        data-sound-success="{{ asset('sounds/epd/success-win31.mp3') }}"
         data-sound-failure="{{ asset('sounds/epd/failure.mp3') }}"
     >
         <header class="epd-game__topbar">
