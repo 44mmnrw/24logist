@@ -41,12 +41,12 @@
         data-sound-failure="{{ asset('sounds/epd/failure.mp3') }}"
     >
         <header class="epd-game__topbar">
-            <div class="epd-game__brand" aria-label="ЛогистРу">
+            <a class="epd-game__brand" href="{{ url('/') }}" aria-label="ЛогистРу — перейти на главную">
                 <span class="epd-game__logo-wrap">
                     <img src="{{ asset('images/logo.svg') }}" alt="ЛогистРу" width="154" height="38">
                 </span>
                 <span class="epd-game__brand-meta">Игровой стенд ЭПД</span>
-            </div>
+            </a>
 
             <div class="epd-game__topbar-actions">
                 <button class="epd-game__sound" type="button" data-epd-sound aria-pressed="false">
