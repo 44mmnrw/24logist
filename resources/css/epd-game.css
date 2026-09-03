@@ -793,7 +793,7 @@
 .epd-game__feedback {
     position: absolute;
     inset: 0;
-    z-index: 5;
+    z-index: 1002;
     pointer-events: none;
 }
 
