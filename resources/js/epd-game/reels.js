@@ -68,7 +68,7 @@ export const createReelController = ({ reducedMotion, playStopSound }) => {
         window.requestAnimationFrame(() => {
             const itemHeight = reel.getBoundingClientRect().height;
             const distance = (itemCount - 1) * itemHeight;
-            const duration = 5100 + (index * 520);
+            const duration = 3400 + (index * 347);
 
             window.requestAnimationFrame(() => {
                 if (typeof track.animate !== 'function') {

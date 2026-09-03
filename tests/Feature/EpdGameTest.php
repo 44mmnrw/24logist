@@ -32,14 +32,13 @@ final class EpdGameTest extends TestCase
             ->assertSee('data-epd-route-animation', false)
             ->assertSee('data-epd-route-failure-animation', false)
             ->assertSee('data-epd-route-success-animation', false)
-            ->assertSee('images/icons/epd-sender.svg', false)
             ->assertSee('data-epd-retry-animation', false)
             ->assertSee('data-epd-sound', false)
             ->assertSee('href="'.url('/').'"', false)
-            ->assertSee('<h1>Связь ЭПД</h1>', false)
-            ->assertSee('Проверить связь')
-            ->assertSee('АО «ПФ «СКБ Контур»')
-            ->assertSee('АО «НТЦ СТЭК»');
+            ->assertSee('<h1>Роуминг ЭПД</h1>', false)
+            ->assertSee('Испытать удачу')
+            ->assertSee('ПФ СКБ Контур')
+            ->assertSee('НТЦ СТЭК');
 
         $this->assertSame(34, substr_count($response->getContent(), '<option'));
     }

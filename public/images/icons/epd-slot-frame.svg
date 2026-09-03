@@ -1,33 +1,39 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 300" fill="none">
   <defs>
-    <linearGradient id="body" x1="280" y1="58" x2="280" y2="286" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#2E73D9"/>
-      <stop offset="1" stop-color="#16468E"/>
+    <linearGradient id="body" x1="280" y1="55" x2="280" y2="286" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset=".2" stop-color="#F7FBFF"/>
+      <stop offset=".62" stop-color="#E8F2FE"/>
+      <stop offset="1" stop-color="#CFDFF3"/>
     </linearGradient>
-    <linearGradient id="star" x1="280" y1="12" x2="280" y2="102" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#55D991"/>
-      <stop offset="1" stop-color="#13A85A"/>
+    <linearGradient id="reelBay" x1="280" y1="101" x2="280" y2="219" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#AFC5E0"/>
+      <stop offset=".14" stop-color="#D8E5F5"/>
+      <stop offset=".82" stop-color="#DCE8F6"/>
+      <stop offset="1" stop-color="#B6CAE3"/>
     </linearGradient>
-    <linearGradient id="starSide" x1="100" y1="42" x2="100" y2="113" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#3DCAD1"/>
-      <stop offset="1" stop-color="#1CA6D8"/>
+    <linearGradient id="star" x1="280" y1="10" x2="280" y2="125" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8CF1BB"/>
+      <stop offset=".42" stop-color="#32CE7A"/>
+      <stop offset="1" stop-color="#07954A"/>
     </linearGradient>
-    <filter id="shadow" x="-10%" y="-12%" width="120%" height="134%" color-interpolation-filters="sRGB">
-      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#153977" flood-opacity=".22"/>
-    </filter>
+    <linearGradient id="starSide" x1="100" y1="42" x2="100" y2="126" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#83E4E0"/>
+      <stop offset=".45" stop-color="#2CC4D2"/>
+      <stop offset="1" stop-color="#168CC7"/>
+    </linearGradient>
   </defs>
 
-  <g filter="url(#shadow)">
-    <path d="M28 73C28 63.059 36.059 55 46 55H514C523.941 55 532 63.059 532 73V276C532 281.523 527.523 286 522 286H38C32.477 286 28 281.523 28 276V73Z" fill="url(#body)" stroke="#0D2E63" stroke-width="8" stroke-linejoin="round"/>
-    <path d="M43 78H517" stroke="#62E1B1" stroke-width="4" stroke-linecap="round" opacity=".72"/>
-    <rect x="42" y="101" width="476" height="118" rx="16" fill="#0D2E63" stroke="#092650" stroke-width="5"/>
-    <path d="M49 226H511" stroke="#76A7EE" stroke-width="2" opacity=".45"/>
+  <path d="M28 73C28 63.059 36.059 55 46 55H514C523.941 55 532 63.059 532 73V276C532 281.523 527.523 286 522 286H38C32.477 286 28 281.523 28 276V73Z" fill="url(#body)" stroke="#2767DB" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M43 78H517" stroke="#52D88D" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+  <rect x="42" y="101" width="476" height="118" rx="16" fill="url(#reelBay)" stroke="#5D83BE" stroke-width="3"/>
+  <rect x="46" y="105" width="468" height="110" rx="12" stroke="#FFFFFF" stroke-width="2" opacity=".72"/>
+  <path d="M49 226H511" stroke="#A9C1E4" stroke-width="1.5" opacity=".65"/>
+  <path d="M42 272H518" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" opacity=".58"/>
 
-    <g stroke="#0D2E63" stroke-width="9" stroke-linejoin="round">
-      <path d="M280 10L296.8 50.5L340.5 54L307.2 82.5L317.4 125L280 102.2L242.6 125L252.8 82.5L219.5 54L263.2 50.5L280 10Z" fill="url(#star)"/>
-      <path d="M104 38L116.9 68.8L150.2 71.5L124.8 93.2L132.6 125.7L104 108.3L75.4 125.7L83.2 93.2L57.8 71.5L91.1 68.8L104 38Z" fill="url(#starSide)"/>
-      <path d="M456 38L468.9 68.8L502.2 71.5L476.8 93.2L484.6 125.7L456 108.3L427.4 125.7L435.2 93.2L409.8 71.5L443.1 68.8L456 38Z" fill="url(#starSide)"/>
-    </g>
-
+  <g stroke="#2767DB" stroke-width="4" stroke-linejoin="round">
+    <path d="M280 10L296.8 50.5L340.5 54L307.2 82.5L317.4 125L280 102.2L242.6 125L252.8 82.5L219.5 54L263.2 50.5L280 10Z" fill="url(#star)"/>
+    <path d="M104 38L116.9 68.8L150.2 71.5L124.8 93.2L132.6 125.7L104 108.3L75.4 125.7L83.2 93.2L57.8 71.5L91.1 68.8L104 38Z" fill="url(#starSide)"/>
+    <path d="M456 38L468.9 68.8L502.2 71.5L476.8 93.2L484.6 125.7L456 108.3L427.4 125.7L435.2 93.2L409.8 71.5L443.1 68.8L456 38Z" fill="url(#starSide)"/>
   </g>
 </svg>

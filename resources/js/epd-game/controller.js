@@ -41,8 +41,6 @@ export const createEpdGame = (game) => {
     const elements = {
         sender: game.querySelector('[data-epd-operator]'),
         target: game.querySelector('[data-epd-target-operator]'),
-        selectedSender: game.querySelector('[data-epd-selected]'),
-        selectedTarget: game.querySelector('[data-epd-selected-target]'),
         reelsPanel: game.querySelector('[data-epd-reels-panel]'),
         reels: [...game.querySelectorAll('[data-epd-reel]')],
         spinButton: game.querySelector('[data-epd-spin]'),
@@ -90,9 +88,7 @@ export const createEpdGame = (game) => {
         elements.sender.disabled = spinning;
         elements.target.disabled = spinning;
         elements.spinButton.disabled = !canStartRound(state);
-        elements.spinLabel.textContent = state.hasPlayed ? 'Попробовать ещё' : 'Проверить связь';
-        elements.selectedSender.textContent = state.sender || 'Оператор не выбран';
-        elements.selectedTarget.textContent = state.target || 'Оператор не выбран';
+        elements.spinLabel.textContent = 'Испытать удачу';
         elements.resultSender.textContent = state.sender || 'Оператор не выбран';
         elements.resultOperator.textContent = state.target || 'Оператор не выбран';
         elements.coreState.textContent = copy.core;

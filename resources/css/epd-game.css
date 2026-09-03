@@ -199,7 +199,7 @@
 .epd-game__node {
     position: relative;
     min-width: 0;
-    min-height: 208px;
+    min-height: 0;
     padding: 8px 0;
     border: 0;
     border-radius: 0;
@@ -399,7 +399,7 @@
     justify-content: space-between;
     gap: 16px;
     min-height: 36px;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
 }
 
 .epd-game__core-heading h2 {
@@ -424,31 +424,58 @@
 .epd-game__core-state {
     display: inline-flex;
     align-items: center;
-    min-height: 28px;
-    padding: 5px 10px;
+    min-height: 24px;
+    padding: 0;
     border-radius: 999px;
     color: #66758a;
-    background: #edf1f6;
+    background: transparent;
     font-size: 9px;
     font-weight: 650;
     white-space: nowrap;
     transition: color 220ms ease, background 220ms ease;
 }
 
+.epd-game__core-state::before {
+    flex: 0 0 auto;
+    width: 6px;
+    height: 6px;
+    margin-right: 7px;
+    border-radius: 50%;
+    content: "";
+    background: #95a3b7;
+    box-shadow: 0 0 0 3px rgba(149, 163, 183, 0.12);
+}
+
 .epd-game[data-state="ready"] .epd-game__core-state,
 .epd-game[data-state="spinning"] .epd-game__core-state {
     color: #1b5baa;
-    background: #e8f2ff;
+    background: transparent;
+}
+
+.epd-game[data-state="ready"] .epd-game__core-state::before,
+.epd-game[data-state="spinning"] .epd-game__core-state::before {
+    background: var(--epd-blue-700);
+    box-shadow: 0 0 0 3px rgba(39, 103, 219, 0.12);
 }
 
 .epd-game[data-state="success"] .epd-game__core-state {
     color: #08723b;
-    background: #e3f7ec;
+    background: transparent;
+}
+
+.epd-game[data-state="success"] .epd-game__core-state::before {
+    background: var(--epd-green);
+    box-shadow: 0 0 0 3px rgba(20, 168, 91, 0.12);
 }
 
 .epd-game[data-state="failure"] .epd-game__core-state {
     color: #a72f2d;
-    background: #fde8e6;
+    background: transparent;
+}
+
+.epd-game[data-state="failure"] .epd-game__core-state::before {
+    background: var(--epd-red);
+    box-shadow: 0 0 0 3px rgba(201, 69, 67, 0.12);
 }
 
 .epd-game__reels {
@@ -472,6 +499,7 @@
     height: 100%;
     pointer-events: none;
     user-select: none;
+    filter: drop-shadow(0 15px 20px rgba(21, 57, 119, 0.16));
 }
 
 .epd-game__slot-lights {
@@ -487,12 +515,12 @@
     left: var(--epd-light-x);
     width: 6.1%;
     aspect-ratio: 1;
-    border: clamp(3px, 0.42vw, 6px) solid #0d2e63;
+    border: clamp(2px, 0.28vw, 4px) solid #2767db;
     border-radius: 50%;
     background:
         radial-gradient(circle at 34% 30%, rgba(255, 255, 255, 0.78) 0 11%, transparent 12%),
         var(--epd-light-color);
-    box-shadow: 0 2px 5px rgba(7, 31, 68, 0.22);
+    box-shadow: 0 2px 4px rgba(21, 57, 119, 0.14);
     transform: translateX(-50%);
     transform-origin: center;
     animation: epd-slot-light-idle 3600ms ease-in-out infinite;
@@ -538,13 +566,16 @@
     min-width: 0;
     height: 132px;
     overflow: hidden;
-    border: 1px solid #d8e1ed;
-    border-radius: 16px;
+    border: 1px solid rgba(156, 178, 209, 0.62);
+    border-radius: 12px;
     color: #2454a0;
     background:
         repeating-linear-gradient(0deg, rgba(35, 75, 142, 0.025) 0 1px, transparent 1px 9px),
         linear-gradient(180deg, #eef3f9 0%, #fff 25%, #fff 75%, #eef3f9 100%);
-    box-shadow: inset 0 1px 7px rgba(37, 76, 139, 0.07), 0 8px 22px rgba(21, 57, 119, 0.06);
+    box-shadow:
+        inset 0 2px 7px rgba(37, 76, 139, 0.09),
+        inset 0 -5px 10px rgba(37, 76, 139, 0.06),
+        0 5px 13px rgba(21, 57, 119, 0.07);
 }
 
 .epd-game__reel::before,
@@ -606,7 +637,7 @@
 }
 
 .epd-game__reel.is-rolling {
-    box-shadow: inset 0 1px 10px rgba(37, 76, 139, 0.1), 0 9px 25px rgba(39, 103, 219, 0.1);
+    box-shadow: inset 0 1px 7px rgba(37, 76, 139, 0.08), 0 5px 14px rgba(39, 103, 219, 0.08);
 }
 
 .epd-game__reel.is-stopped {
@@ -637,7 +668,7 @@
 
 .epd-game__route {
     position: absolute;
-    top: 111px;
+    top: 156px;
     left: 50%;
     z-index: 1;
     width: min(930px, 78%);
@@ -836,37 +867,16 @@
 
 .epd-game__confetti i {
     position: absolute;
-    top: 18%;
-    left: var(--epd-confetti-x);
-    width: 7px;
-    height: 13px;
-    border-radius: 2px;
-    background: var(--epd-confetti-color);
+    top: 0;
+    left: 0;
+    width: 10px;
+    height: 16px;
+    border-radius: 3px;
+    background: #2767db;
+    box-shadow: 0 2px 5px rgba(21, 57, 119, 0.18);
     opacity: 0;
+    will-change: transform, opacity;
 }
-
-.epd-game[data-state="success"] .epd-game__confetti i {
-    animation: epd-confetti-fall 1650ms cubic-bezier(0.12, 0.72, 0.32, 1) var(--epd-confetti-delay) both;
-}
-
-.epd-game__confetti i:nth-child(1) { --epd-confetti-x: 16%; --epd-confetti-delay: 0ms; --epd-confetti-color: #2767db; }
-.epd-game__confetti i:nth-child(2) { --epd-confetti-x: 23%; --epd-confetti-delay: 100ms; --epd-confetti-color: #18b45d; }
-.epd-game__confetti i:nth-child(3) { --epd-confetti-x: 30%; --epd-confetti-delay: 30ms; --epd-confetti-color: #f5b83d; }
-.epd-game__confetti i:nth-child(4) { --epd-confetti-x: 36%; --epd-confetti-delay: 160ms; --epd-confetti-color: #28aee7; }
-.epd-game__confetti i:nth-child(5) { --epd-confetti-x: 41%; --epd-confetti-delay: 70ms; --epd-confetti-color: #e76968; }
-.epd-game__confetti i:nth-child(6) { --epd-confetti-x: 46%; --epd-confetti-delay: 210ms; --epd-confetti-color: #2767db; }
-.epd-game__confetti i:nth-child(7) { --epd-confetti-x: 50%; --epd-confetti-delay: 10ms; --epd-confetti-color: #18b45d; }
-.epd-game__confetti i:nth-child(8) { --epd-confetti-x: 54%; --epd-confetti-delay: 130ms; --epd-confetti-color: #f5b83d; }
-.epd-game__confetti i:nth-child(9) { --epd-confetti-x: 59%; --epd-confetti-delay: 45ms; --epd-confetti-color: #28aee7; }
-.epd-game__confetti i:nth-child(10) { --epd-confetti-x: 64%; --epd-confetti-delay: 190ms; --epd-confetti-color: #e76968; }
-.epd-game__confetti i:nth-child(11) { --epd-confetti-x: 70%; --epd-confetti-delay: 85ms; --epd-confetti-color: #2767db; }
-.epd-game__confetti i:nth-child(12) { --epd-confetti-x: 77%; --epd-confetti-delay: 225ms; --epd-confetti-color: #18b45d; }
-.epd-game__confetti i:nth-child(13) { --epd-confetti-x: 20%; --epd-confetti-delay: 260ms; --epd-confetti-color: #f5b83d; }
-.epd-game__confetti i:nth-child(14) { --epd-confetti-x: 33%; --epd-confetti-delay: 280ms; --epd-confetti-color: #28aee7; }
-.epd-game__confetti i:nth-child(15) { --epd-confetti-x: 44%; --epd-confetti-delay: 310ms; --epd-confetti-color: #e76968; }
-.epd-game__confetti i:nth-child(16) { --epd-confetti-x: 57%; --epd-confetti-delay: 250ms; --epd-confetti-color: #2767db; }
-.epd-game__confetti i:nth-child(17) { --epd-confetti-x: 68%; --epd-confetti-delay: 330ms; --epd-confetti-color: #18b45d; }
-.epd-game__confetti i:nth-child(18) { --epd-confetti-x: 81%; --epd-confetti-delay: 290ms; --epd-confetti-color: #f5b83d; }
 
 .epd-game__outcome-overlay {
     position: fixed;
@@ -1025,12 +1035,6 @@
     to { transform: translateX(430%); }
 }
 
-@keyframes epd-confetti-fall {
-    0% { opacity: 0; transform: translate3d(0, -36px, 0) rotate(0deg); }
-    12% { opacity: 1; }
-    100% { opacity: 0; transform: translate3d(36px, 560px, 0) rotate(540deg); }
-}
-
 @keyframes epd-dialog-in {
     from { opacity: 0; transform: translateY(14px) scale(0.96); }
     to { opacity: 1; transform: translateY(0) scale(1); }
@@ -1044,31 +1048,31 @@
 
 @keyframes epd-slot-light-blink {
     0%, 32%, 100% {
-        filter: saturate(0.65) brightness(0.74);
-        opacity: 0.58;
-        transform: translateX(-50%) scale(0.9);
-        box-shadow: 0 2px 5px rgba(7, 31, 68, 0.2);
+        filter: saturate(0.72) brightness(0.82);
+        opacity: 0.68;
+        transform: translateX(-50%) scale(0.96);
+        box-shadow: 0 2px 4px rgba(21, 57, 119, 0.12);
     }
     48%, 68% {
-        filter: saturate(1.2) brightness(1.16);
+        filter: saturate(1.08) brightness(1.1);
         opacity: 1;
-        transform: translateX(-50%) scale(1.08);
-        box-shadow: 0 0 0 5px color-mix(in srgb, var(--epd-light-color) 24%, transparent), 0 0 18px var(--epd-light-color);
+        transform: translateX(-50%) scale(1.03);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--epd-light-color) 18%, transparent), 0 0 10px color-mix(in srgb, var(--epd-light-color) 78%, transparent);
     }
 }
 
 @keyframes epd-slot-light-idle {
     0%, 38%, 100% {
-        filter: saturate(0.72) brightness(0.82);
-        opacity: 0.7;
-        transform: translateX(-50%) scale(0.94);
-        box-shadow: 0 2px 5px rgba(7, 31, 68, 0.18);
+        filter: saturate(0.78) brightness(0.88);
+        opacity: 0.76;
+        transform: translateX(-50%) scale(0.98);
+        box-shadow: 0 2px 4px rgba(21, 57, 119, 0.1);
     }
     50%, 64% {
-        filter: saturate(1.05) brightness(1.08);
+        filter: saturate(1) brightness(1.04);
         opacity: 1;
-        transform: translateX(-50%) scale(1.03);
-        box-shadow: 0 0 0 4px color-mix(in srgb, var(--epd-light-color) 16%, transparent), 0 0 13px color-mix(in srgb, var(--epd-light-color) 72%, transparent);
+        transform: translateX(-50%) scale(1.01);
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--epd-light-color) 12%, transparent), 0 0 7px color-mix(in srgb, var(--epd-light-color) 62%, transparent);
     }
 }
 
@@ -1087,7 +1091,7 @@
         gap: 26px;
     }
 
-    .epd-game__node { min-height: 215px; }
+    .epd-game__node { min-height: 0; }
 
     .epd-game__core,
     .epd-game__controls {

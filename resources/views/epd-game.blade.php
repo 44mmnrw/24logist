@@ -1,21 +1,21 @@
 @php
     $epdOperators = [
-        'АО «ПФ «СКБ Контур»',
-        'АО «Калуга Астрал»',
-        'ООО «Эдивеб»',
-        'ООО «Такском»',
-        'ООО «СберКорус»',
-        'ООО «Компания «Тензор»',
-        'ООО «Эвотор ОФД»',
-        'ООО «ФораПром»',
-        'ООО «Айтиком»',
-        'ООО «ОПЕРАТОР-ЦРПТ»',
-        'АО «Точка»',
-        'ООО «НТСсофт»',
-        'АО «Энергетические системы и коммуникации»',
-        'АО «НИИАС»',
-        'ООО «АТИ-Доки»',
-        'АО «НТЦ СТЭК»',
+        'ПФ СКБ Контур',
+        'Калуга Астрал',
+        'Эдивеб',
+        'Такском',
+        'СберКорус',
+        'Компания Тензор',
+        'Эвотор ОФД',
+        'ФораПром',
+        'Айтиком',
+        'ОПЕРАТОР-ЦРПТ',
+        'Точка',
+        'НТСсофт',
+        'Энергетические системы и коммуникации',
+        'НИИАС',
+        'АТИ-Доки',
+        'НТЦ СТЭК',
     ];
 @endphp
 <!DOCTYPE html>
@@ -60,7 +60,7 @@
             <div class="epd-game__shell">
                 <header class="epd-game__intro">
                     <div>
-                        <h1>Связь ЭПД</h1>
+                        <h1>Роуминг ЭПД</h1>
                         <p>Выберите операторов и проложите защищённый цифровой маршрут обмена электронными перевозочными документами.</p>
                     </div>
                 </header>
@@ -76,21 +76,6 @@
 
                     <div class="epd-game__grid">
                         <section class="epd-game__node epd-game__node--sender">
-                            <div class="epd-game__node-heading">
-                                <span class="epd-game__node-role">Отправитель</span>
-                                <h2>Оператор ЭПД</h2>
-                            </div>
-
-                            <div class="epd-game__identity" data-epd-identity>
-                                <span class="epd-game__identity-icon" aria-hidden="true">
-                                    <img src="{{ asset('images/icons/epd-sender.svg') }}" alt="" width="28" height="28">
-                                </span>
-                                <span>
-                                    <small>Ваш оператор</small>
-                                    <strong data-epd-selected>Оператор не выбран</strong>
-                                </span>
-                            </div>
-
                             <label class="epd-game__field" for="epd-operator">
                                 <span class="epd-game__field-label">Выберите отправителя</span>
                                 <span class="epd-game__select-wrap">
@@ -153,21 +138,6 @@
                         </section>
 
                         <section class="epd-game__node epd-game__node--receiver">
-                            <div class="epd-game__node-heading">
-                                <span class="epd-game__node-role">Получатель</span>
-                                <h2>Оператор ЭПД</h2>
-                            </div>
-
-                            <div class="epd-game__identity epd-game__identity--receiver" data-epd-target-identity>
-                                <span class="epd-game__identity-icon" aria-hidden="true">
-                                    <img src="{{ asset('images/icons/epd-sender.svg') }}" alt="" width="28" height="28">
-                                </span>
-                                <span>
-                                    <small>Встречный оператор</small>
-                                    <strong data-epd-selected-target>Оператор не выбран</strong>
-                                </span>
-                            </div>
-
                             <label class="epd-game__field" for="epd-target-operator">
                                 <span class="epd-game__field-label">Выберите получателя</span>
                                 <span class="epd-game__select-wrap">
@@ -187,7 +157,7 @@
                                 <span class="epd-game__spin-icon" aria-hidden="true">
                                     <span class="epd-game__retry-animation" data-epd-retry-animation></span>
                                 </span>
-                                <span data-epd-spin-label>Проверить связь</span>
+                                <span data-epd-spin-label>Испытать удачу</span>
                             </button>
                             <p data-epd-control-hint>Сначала выберите своего оператора ЭПД</p>
                         </div>
@@ -196,7 +166,7 @@
                     <div class="epd-game__feedback" data-epd-result data-state="idle">
                         <div class="epd-game__celebration" data-epd-celebration aria-hidden="true">
                             <span class="epd-game__confetti">
-                                @for ($piece = 1; $piece <= 18; $piece++)
+                                @for ($piece = 1; $piece <= 72; $piece++)
                                     <i></i>
                                 @endfor
                             </span>

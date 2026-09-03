@@ -3,6 +3,7 @@ import routeSearchAnimationData from '../../icons/wired-outline-3366-road-hover-
 import routeFailureAnimationData from '../../icons/wired-lineal-926-road-barrier-hover-pinch.json';
 import routeSuccessAnimationData from '../../icons/wired-lineal-11-link-hover-bounce.json';
 import retryAnimationData from '../../icons/wired-lineal-213-three-arrows-rotate-hover-pinch.json';
+import { createConfettiController } from './confetti.js';
 
 const cloneAnimationData = (animationData) => (
     typeof structuredClone === 'function'
@@ -48,6 +49,7 @@ export const createGameMedia = ({ game, reducedMotion }) => {
         success: loadLottie(game.querySelector('[data-epd-route-success-animation]'), routeSuccessAnimationData),
         retry: loadLottie(game.querySelector('[data-epd-retry-animation]'), retryAnimationData),
     };
+    const confetti = createConfettiController({ game, reducedMotion });
 
     animations.search.goToAndStop(0, true);
     animations.retry.goToAndStop(0, true);
@@ -190,6 +192,7 @@ export const createGameMedia = ({ game, reducedMotion }) => {
         animations.search.stop();
         animations.failure.stop();
         animations.success.stop();
+        confetti.stop();
 
         if (phase === 'spinning') {
             animations.retry.loop = true;
@@ -211,6 +214,7 @@ export const createGameMedia = ({ game, reducedMotion }) => {
             } else {
                 animations.success.goToAndPlay(0, true);
             }
+            confetti.start();
             showRetry();
             return;
         }
