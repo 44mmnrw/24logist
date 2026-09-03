@@ -144,6 +144,7 @@ export const createEpdGame = (game) => {
             return;
         }
 
+        media.unlock();
         state.phase = 'spinning';
         renderState();
         media.stopSounds();

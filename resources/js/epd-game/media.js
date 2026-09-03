@@ -17,12 +17,23 @@ export const createGameMedia = ({ game, reducedMotion }) => {
     const soundButton = game.querySelector('[data-epd-sound]');
     const soundLabel = game.querySelector('[data-epd-sound-label]');
     const activeSounds = new Set();
+    const activeBufferSources = new Set();
     const sounds = {
         pull: new Audio(game.dataset.soundPull),
         stop: new Audio(game.dataset.soundStop),
         success: new Audio(game.dataset.soundSuccess),
         failure: new Audio(game.dataset.soundFailure),
     };
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    const audioFilePromises = Object.fromEntries(Object.entries(sounds).map(([name, audio]) => [
+        name,
+        window.fetch(audio.src, { cache: 'force-cache' })
+            .then((response) => (response.ok ? response.arrayBuffer() : null))
+            .catch(() => null),
+    ]));
+    const audioBuffers = new Map();
+    const pendingDecodes = new Set();
+    let audioContext = null;
     let muted = false;
 
     const animations = {
@@ -48,6 +59,53 @@ export const createGameMedia = ({ game, reducedMotion }) => {
     sounds.pull.volume = 0.32;
     sounds.failure.volume = 0.3;
 
+    const ensureAudioContext = () => {
+        if (!AudioContextClass) {
+            return null;
+        }
+
+        audioContext ||= new AudioContextClass();
+        return audioContext;
+    };
+
+    const decodeSounds = (context) => {
+        Object.entries(audioFilePromises).forEach(([name, audioFilePromise]) => {
+            if (audioBuffers.has(name) || pendingDecodes.has(name)) {
+                return;
+            }
+
+            pendingDecodes.add(name);
+            audioFilePromise
+                .then((audioData) => (audioData ? context.decodeAudioData(audioData.slice(0)) : null))
+                .then((buffer) => {
+                    if (buffer) {
+                        audioBuffers.set(name, buffer);
+                    }
+                })
+                .catch(() => {})
+                .finally(() => pendingDecodes.delete(name));
+        });
+    };
+
+    const unlock = () => {
+        if (muted) {
+            return;
+        }
+
+        const context = ensureAudioContext();
+        if (!context) {
+            return;
+        }
+
+        context.resume().catch(() => {});
+        decodeSounds(context);
+
+        const silentSource = context.createBufferSource();
+        silentSource.buffer = context.createBuffer(1, 1, context.sampleRate);
+        silentSource.connect(context.destination);
+        silentSource.start(0);
+    };
+
     const renderSoundState = () => {
         soundButton.dataset.muted = muted ? 'true' : 'false';
         soundButton.setAttribute('aria-pressed', muted ? 'true' : 'false');
@@ -55,6 +113,15 @@ export const createGameMedia = ({ game, reducedMotion }) => {
     };
 
     const stopSounds = () => {
+        activeBufferSources.forEach((source) => {
+            try {
+                source.stop();
+            } catch {
+                // The source may already have stopped naturally.
+            }
+        });
+        activeBufferSources.clear();
+
         activeSounds.forEach((audio) => {
             audio.pause();
             audio.currentTime = 0;
@@ -69,6 +136,19 @@ export const createGameMedia = ({ game, reducedMotion }) => {
 
     const playSound = (name, overlap = false) => {
         if (muted) {
+            return;
+        }
+
+        if (audioContext?.state === 'running' && audioBuffers.has(name)) {
+            const source = audioContext.createBufferSource();
+            const gain = audioContext.createGain();
+            source.buffer = audioBuffers.get(name);
+            gain.gain.value = sounds[name].volume;
+            source.connect(gain);
+            gain.connect(audioContext.destination);
+            activeBufferSources.add(source);
+            source.addEventListener('ended', () => activeBufferSources.delete(source), { once: true });
+            source.start(0);
             return;
         }
 
@@ -154,6 +234,8 @@ export const createGameMedia = ({ game, reducedMotion }) => {
 
         if (muted) {
             stopSounds();
+        } else {
+            unlock();
         }
         renderSoundState();
         if (!muted) {
@@ -168,5 +250,6 @@ export const createGameMedia = ({ game, reducedMotion }) => {
         renderPhase,
         showRetry,
         stopSounds,
+        unlock,
     };
 };
