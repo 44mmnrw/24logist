@@ -68,6 +68,7 @@ final class EpdGameTest extends TestCase
             ->assertSee('<link rel="canonical" href="'.route('epd-game').'">', false)
             ->assertSee('<script type="application/ld+json">', false)
             ->assertSee('"@type":"WebApplication"', false)
-            ->assertSee('images/epd-game-og-v2.jpg', false);
+            ->assertSee('images/epd-game-og.png', false)
+            ->assertSee('<meta property="og:image:type" content="image/png">', false);
     }
 }

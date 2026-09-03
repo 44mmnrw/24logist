@@ -2,7 +2,7 @@
     $epdSeoTitle = 'Рулетка роуминга ЭПД';
     $epdSeoDescription = 'Интерактивная рулетка роуминга ЭПД: выберите операторов и проверьте случайный маршрут обмена ЭТрН, ЭЗЗ и ЭПЭ.';
     $epdCanonicalUrl = route('epd-game');
-    $epdOgImage = asset('images/epd-game-og-v2.jpg');
+    $epdOgImage = asset('images/epd-game-og.png');
     $epdStructuredData = [
         '@context' => 'https://schema.org',
         '@type' => 'WebApplication',
@@ -75,7 +75,7 @@
     <meta property="og:url" content="{{ request()->fullUrl() }}">
     <meta property="og:image" content="{{ $epdOgImage }}">
     <meta property="og:image:secure_url" content="{{ $epdOgImage }}">
-    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="{{ $epdSeoTitle }}">
