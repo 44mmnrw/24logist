@@ -40,7 +40,7 @@ export const getSelectionPhase = (sender, target) => (
 
 export const createRoundOutcome = ({
     random = randomFloat,
-    successRate = 0.7,
+    successRate = 0.45,
     reelCount = 3,
     sender = '',
     target = '',

@@ -32,9 +32,9 @@ test('failed round produces three different documents', () => {
     assert.equal(new Set(outcome.documents.map(({ code }) => code)).size, 3);
 });
 
-test('success threshold remains exactly seventy percent', () => {
-    assert.equal(createRoundOutcome({ random: () => 0.699999 }).connected, true);
-    assert.equal(createRoundOutcome({ random: () => 0.7 }).connected, false);
+test('success threshold remains exactly forty-five percent', () => {
+    assert.equal(createRoundOutcome({ random: () => 0.449999 }).connected, true);
+    assert.equal(createRoundOutcome({ random: () => 0.45 }).connected, false);
 });
 
 test('same sender and target always produce success', () => {
