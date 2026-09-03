@@ -27,6 +27,12 @@
     <meta name="theme-color" content="#f4f7fb">
     <title>Рулетка роуминга ЭПД</title>
     <meta name="description" content="Игровая проверка связи между операторами электронных перевозочных документов.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Рулетка роуминга ЭПД">
+    <meta property="og:description" content="Игровая проверка связи между операторами электронных перевозочных документов.">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Рулетка роуминга ЭПД">
+    <meta name="twitter:description" content="Игровая проверка связи между операторами электронных перевозочных документов.">
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
     <x-fonts.preload />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
