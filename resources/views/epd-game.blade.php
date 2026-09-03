@@ -31,8 +31,9 @@
     <meta property="og:site_name" content="24logist.ru">
     <meta property="og:title" content="Рулетка роуминга ЭПД">
     <meta property="og:description" content="Игровая проверка связи между операторами электронных перевозочных документов.">
-    <meta property="og:url" content="{{ route('epd-game') }}">
+    <meta property="og:url" content="{{ request()->fullUrl() }}">
     <meta property="og:image" content="{{ asset('images/epd-game-og.png') }}">
+    <meta property="og:image:secure_url" content="{{ asset('images/epd-game-og.png') }}">
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
