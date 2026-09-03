@@ -1,4 +1,36 @@
 @php
+    $epdSeoTitle = 'Рулетка роуминга ЭПД';
+    $epdSeoDescription = 'Интерактивная рулетка роуминга ЭПД: выберите операторов и проверьте случайный маршрут обмена ЭТрН, ЭЗЗ и ЭПЭ.';
+    $epdCanonicalUrl = route('epd-game');
+    $epdOgImage = asset('images/epd-game-og-v2.jpg');
+    $epdStructuredData = [
+        '@context' => 'https://schema.org',
+        '@type' => 'WebApplication',
+        'name' => $epdSeoTitle,
+        'description' => $epdSeoDescription,
+        'url' => $epdCanonicalUrl,
+        'applicationCategory' => 'GameApplication',
+        'operatingSystem' => 'Любая операционная система',
+        'browserRequirements' => 'Требуется современный браузер с поддержкой JavaScript.',
+        'isAccessibleForFree' => true,
+        'inLanguage' => 'ru-RU',
+        'image' => [
+            '@type' => 'ImageObject',
+            'url' => $epdOgImage,
+            'width' => 1200,
+            'height' => 630,
+        ],
+        'publisher' => [
+            '@type' => 'Organization',
+            'name' => 'ЛогистРу',
+            'url' => url('/'),
+            'logo' => [
+                '@type' => 'ImageObject',
+                'url' => asset('images/logo.svg'),
+            ],
+        ],
+    ];
+
     $epdOperators = [
         'ПФ СКБ Контур',
         'Калуга Астрал',
@@ -23,25 +55,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="robots" content="noindex, nofollow">
     <meta name="theme-color" content="#f4f7fb">
-    <title>Рулетка роуминга ЭПД</title>
-    <meta name="description" content="Игровая проверка связи между операторами электронных перевозочных документов.">
+    <title>{{ $epdSeoTitle }}</title>
+    <meta name="description" content="{{ $epdSeoDescription }}">
+    <meta name="keywords" content="роуминг ЭПД, операторы ЭПД, электронные перевозочные документы, ЭТрН, ЭЗЗ, ЭПЭ">
+    <meta name="author" content="ЛогистРу">
+    <meta name="application-name" content="{{ $epdSeoTitle }}">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="yandex" content="index, follow">
+    <link rel="canonical" href="{{ $epdCanonicalUrl }}">
+    <link rel="alternate" hreflang="ru-RU" href="{{ $epdCanonicalUrl }}">
+    <link rel="alternate" hreflang="x-default" href="{{ $epdCanonicalUrl }}">
     <meta property="og:type" content="website">
+    <meta property="og:locale" content="ru_RU">
     <meta property="og:site_name" content="24logist.ru">
-    <meta property="og:title" content="Рулетка роуминга ЭПД">
-    <meta property="og:description" content="Игровая проверка связи между операторами электронных перевозочных документов.">
+    <meta property="og:title" content="{{ $epdSeoTitle }}">
+    <meta property="og:description" content="{{ $epdSeoDescription }}">
     <meta property="og:url" content="{{ request()->fullUrl() }}">
-    <meta property="og:image" content="{{ asset('images/epd-game-og-v2.jpg') }}">
-    <meta property="og:image:secure_url" content="{{ asset('images/epd-game-og-v2.jpg') }}">
+    <meta property="og:image" content="{{ $epdOgImage }}">
+    <meta property="og:image:secure_url" content="{{ $epdOgImage }}">
     <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Рулетка роуминга ЭПД">
+    <meta property="og:image:alt" content="{{ $epdSeoTitle }}">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Рулетка роуминга ЭПД">
-    <meta name="twitter:description" content="Игровая проверка связи между операторами электронных перевозочных документов.">
-    <meta name="twitter:image" content="{{ asset('images/epd-game-og-v2.jpg') }}">
+    <meta name="twitter:title" content="{{ $epdSeoTitle }}">
+    <meta name="twitter:description" content="{{ $epdSeoDescription }}">
+    <meta name="twitter:image" content="{{ $epdOgImage }}">
+    <meta name="twitter:image:alt" content="{{ $epdSeoTitle }}">
+    <script type="application/ld+json">@json($epdStructuredData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)</script>
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
     <x-fonts.preload />
     @vite(['resources/css/app.css', 'resources/js/app.js'])

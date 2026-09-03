@@ -125,6 +125,13 @@ final class SitemapService
             'priority' => '1.0',
         ];
 
+        $urls[] = [
+            'loc' => route('epd-game'),
+            'lastmod' => null,
+            'changefreq' => 'monthly',
+            'priority' => '0.6',
+        ];
+
         $pages = CmsPage::query()
             ->where('is_published', true)
             ->orderBy('sort_order')
