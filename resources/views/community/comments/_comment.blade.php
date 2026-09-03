@@ -4,11 +4,13 @@
         <div class="community-comment__content">
             <div class="community-meta">
                 @if ($comment->author)<a href="{{ route('community.profile', $comment->author) }}" title="{{ '@'.$comment->author->username }}">{{ $comment->author->displayName() }}</a>@else<span>[удалён]</span>@endif
+                @if ($comment->author?->transportRoleLabel())<span class="community-author-flair">{{ $comment->author->transportRoleLabel() }}</span>@endif
                 <span>•</span><time>{{ \App\Support\CommunityDate::relative($comment->created_at) }}</time>@if($comment->edited_at)<span>• изменено</span>@endif
             </div>
             @if ($comment->status === 'deleted')<p class="community-deleted">Комментарий удалён автором.</p>@else<div class="community-markdown">{!! $comment->body_html !!}</div>@endif
             <div class="community-comment__actions">
                 @include('community.shared._vote', ['type' => 'comment', 'target' => $comment, 'currentVote' => $commentVotes->get($comment->id), 'variant' => 'inline'])
+                <button class="community-action-button community-action-share" type="button" data-share-url="{{ $post->getUrl().'#comment-'.$comment->id }}"><span aria-hidden="true">↗</span><span data-share-label>Поделиться</span></button>
                 @auth('community')
                     @if ($comment->status === 'published' && !$post->locked_at && $comment->depth < config('community.limits.comment_depth') - 1)
                         <details><summary>Ответить</summary>@include('community.comments._form', ['post' => $post, 'parent' => $comment])</details>

@@ -25,7 +25,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <meta name="theme-color" content="#f4f7fb">
-    <title>Связь ЭПД — ЛогистРу</title>
+    <title>Рулетка роуминга ЭПД</title>
     <meta name="description" content="Игровая проверка связи между операторами электронных перевозочных документов.">
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
     <x-fonts.preload />
@@ -165,11 +165,7 @@
 
                     <div class="epd-game__feedback" data-epd-result data-state="idle">
                         <div class="epd-game__celebration" data-epd-celebration aria-hidden="true">
-                            <span class="epd-game__confetti">
-                                @for ($piece = 1; $piece <= 72; $piece++)
-                                    <i></i>
-                                @endfor
-                            </span>
+                            <canvas class="epd-game__confetti" data-epd-confetti></canvas>
                         </div>
 
                         <p class="epd-game__sr-only" data-epd-announcement aria-live="polite" aria-atomic="true">Связь не проверена</p>
@@ -198,7 +194,7 @@
                     </div>
                 </section>
 
-                <p class="epd-game__disclaimer">Игра создана в развлекательных целях. Результаты игровой проверки формируются случайным образом и не отражают фактическую совместимость операторов.</p>
+                <p class="epd-game__disclaimer">Игра создана в развлекательных целях. Результаты игровой проверки формируются случайным образом и не отражают фактическую совместимость операторов. Все совпадения случайны.</p>
             </div>
         </main>
     </div>

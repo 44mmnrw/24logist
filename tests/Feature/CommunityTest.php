@@ -11,6 +11,7 @@ use App\Models\CommunityUser;
 use App\Models\SiteSetting;
 use App\Services\SiteSettingsService;
 use Carbon\Carbon;
+use Database\Seeders\CommunityDemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -250,6 +251,26 @@ class CommunityTest extends TestCase
         $response->assertSee(route('community.index'), false);
         $response->assertSee($post->getUrl(), false);
         $response->assertDontSee('/community/settings', false);
+    }
+
+    public function test_demo_seeder_creates_one_complete_thread_and_is_idempotent(): void
+    {
+        $this->seed(CommunityDemoSeeder::class);
+        $this->seed(CommunityDemoSeeder::class);
+
+        $post = CommunityPost::query()->where('slug', CommunityDemoSeeder::POST_SLUG)->firstOrFail();
+
+        $this->assertSame(1, CommunityPost::query()->where('slug', CommunityDemoSeeder::POST_SLUG)->count());
+        $this->assertSame(12, $post->comments()->count());
+        $this->assertSame(12, $post->comments_count);
+        $this->assertSame(3, $post->comments()->max('depth'));
+
+        $this->get($post->getUrl())
+            ->assertOk()
+            ->assertSee('Сообщество о логистике')
+            ->assertSee('community-topic-sidebar', false)
+            ->assertSee('community-author-flair', false)
+            ->assertSee('Как снизить простои на погрузке');
     }
 
     public function test_account_deletion_removes_identity_and_anonymizes_content(): void

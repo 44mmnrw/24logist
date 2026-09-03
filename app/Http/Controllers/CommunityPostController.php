@@ -79,6 +79,10 @@ class CommunityPostController extends Controller
         }
 
         $post->load(['author', 'category']);
+        $communityStats = [
+            'members' => CommunityUser::query()->count(),
+            'topics' => CommunityPost::query()->published()->count(),
+        ];
         $commentSort = in_array($request->query('comment_sort'), ['best', 'new', 'old'], true)
             ? (string) $request->query('comment_sort')
             : 'best';
@@ -120,7 +124,7 @@ class CommunityPostController extends Controller
                 ->pluck('value', 'community_comment_id');
         }
 
-        return view('community.posts.show', compact('post', 'roots', 'children', 'postVote', 'commentVotes', 'commentSort'));
+        return view('community.posts.show', compact('post', 'roots', 'children', 'postVote', 'commentVotes', 'commentSort', 'communityStats'));
     }
 
     public function edit(CommunityPost $post): View

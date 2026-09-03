@@ -16,19 +16,24 @@
 
 @section('content')
 <div class="landing-shell community-topic-layout">
+    <div class="community-topic-column">
     <article class="community-topic">
         <header>
             <div class="community-author-line">
                 @if ($post->author)<a class="community-avatar-link" href="{{ route('community.profile', $post->author) }}"><x-community.avatar :user="$post->author" size="md" /></a>@endif
                 <div class="community-meta">
-                    <a class="community-category-pill" href="{{ route('community.categories.show', $post->category) }}">{{ $post->category->name }}</a>
-                    <span>•</span>
                     @if ($post->author)<a href="{{ route('community.profile', $post->author) }}" title="{{ '@'.$post->author->username }}">{{ $post->author->displayName() }}</a>@else<span>[удалён]</span>@endif
                     <span>•</span><time>{{ \App\Support\CommunityDate::relative($post->published_at) }}</time>
                     @if ($post->edited_at)<span>• изменено</span>@endif
                 </div>
             </div>
             <h1>{{ $post->title }}</h1>
+            <div class="community-topic__labels">
+                <a class="community-category-pill" href="{{ route('community.categories.show', $post->category) }}">{{ $post->category->name }}</a>
+                @if ($post->author?->transportRoleLabel())
+                    <span class="community-author-flair">{{ $post->author->transportRoleLabel() }}</span>
+                @endif
+            </div>
         </header>
         <div class="community-topic__content">
             @if ($post->external_url)
@@ -79,6 +84,28 @@
         </div>
         <div class="community-pagination">{{ $roots->links() }}</div>
     </section>
+    </div>
+
+    <aside class="community-sidebar community-topic-sidebar" aria-label="О сообществе">
+        <div class="community-side-card community-about-card">
+            <span class="community-side-card__eyebrow">24Logist</span>
+            <h2>Сообщество о логистике</h2>
+            <p>Практические вопросы перевозчиков, экспедиторов, грузовладельцев и логистов.</p>
+            <dl class="community-about-card__stats">
+                <div><dt>{{ number_format($communityStats['members'], 0, ',', ' ') }}</dt><dd>участников</dd></div>
+                <div><dt>{{ number_format($communityStats['topics'], 0, ',', ' ') }}</dt><dd>обсуждений</dd></div>
+            </dl>
+            <a class="community-side-card__link" href="{{ route('community.index') }}">Все обсуждения</a>
+        </div>
+        <div class="community-side-card community-rules">
+            <h2>Правила</h2>
+            <ol>
+                <li>Уважайте собеседников.</li>
+                <li>Не публикуйте рекламу и персональные данные.</li>
+                <li>Подкрепляйте профессиональные советы фактами.</li>
+            </ol>
+        </div>
+    </aside>
 
     @auth('community')
         @include('community.shared._report_dialog')
