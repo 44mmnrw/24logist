@@ -173,7 +173,7 @@
                     <div class="epd-game__controls">
                         <button class="epd-game__spin" type="button" data-epd-spin disabled>
                             <span class="epd-game__spin-icon" aria-hidden="true">
-                                <svg viewBox="0 0 24 24"><path d="M20 11a8.1 8.1 0 1 0 .1 2M20 5v6h-6"/></svg>
+                                <span class="epd-game__retry-animation" data-epd-retry-animation></span>
                             </span>
                             <span data-epd-spin-label>Установить связь</span>
                         </button>

@@ -2,6 +2,7 @@ import lottie from 'lottie-web';
 import routeSearchAnimationData from '../icons/wired-outline-3366-road-hover-pinch.json';
 import routeFailureAnimationData from '../icons/wired-lineal-926-road-barrier-hover-pinch.json';
 import routeSuccessAnimationData from '../icons/wired-lineal-11-link-hover-bounce.json';
+import retryAnimationData from '../icons/wired-lineal-213-three-arrows-rotate-hover-pinch.json';
 
 const games = document.querySelectorAll('[data-epd-game]');
 
@@ -42,6 +43,7 @@ games.forEach((game) => {
     const reels = [...game.querySelectorAll('[data-epd-reel]')];
     const spinButton = game.querySelector('[data-epd-spin]');
     const spinLabel = game.querySelector('[data-epd-spin-label]');
+    const retryAnimationElement = game.querySelector('[data-epd-retry-animation]');
     const controlHint = game.querySelector('[data-epd-control-hint]');
     const reelHint = game.querySelector('[data-epd-hint]');
     const result = game.querySelector('[data-epd-result]');
@@ -95,6 +97,17 @@ games.forEach((game) => {
             preserveAspectRatio: 'xMidYMid meet',
         },
     });
+    const retryAnimation = lottie.loadAnimation({
+        container: retryAnimationElement,
+        renderer: 'svg',
+        loop: false,
+        autoplay: false,
+        animationData: structuredClone(retryAnimationData),
+        rendererSettings: {
+            preserveAspectRatio: 'xMidYMid meet',
+        },
+    });
+    retryAnimation.goToAndStop(0, true);
 
     try {
         isMuted = window.localStorage.getItem('epd-game-muted') === 'true';
@@ -132,6 +145,18 @@ games.forEach((game) => {
         audio.play().catch(() => {});
     };
 
+    const playRetryAnimation = () => {
+        if (isSpinning) {
+            return;
+        }
+
+        if (reducedMotion.matches) {
+            retryAnimation.goToAndStop(retryAnimation.totalFrames - 1, true);
+        } else {
+            retryAnimation.goToAndPlay(0, true);
+        }
+    };
+
     renderSoundState();
 
     soundButton.addEventListener('click', () => {
@@ -149,6 +174,9 @@ games.forEach((game) => {
             playSound('stop');
         }
     });
+
+    spinButton.addEventListener('mouseenter', playRetryAnimation);
+    spinButton.addEventListener('focus', playRetryAnimation);
 
     const createReelItem = (documentType) => {
         const item = window.document.createElement('span');
@@ -285,6 +313,12 @@ games.forEach((game) => {
         }
 
         isSpinning = true;
+        if (reducedMotion.matches) {
+            retryAnimation.goToAndStop(0, true);
+        } else {
+            retryAnimation.loop = true;
+            retryAnimation.goToAndPlay(0, true);
+        }
         spinButton.disabled = true;
         operatorSelect.disabled = true;
         reelsPanel.setAttribute('aria-busy', 'true');
@@ -335,6 +369,8 @@ games.forEach((game) => {
             : 'Не удалось получить подтверждение';
         playSound(connected ? 'success' : 'failure');
 
+        retryAnimation.loop = false;
+        retryAnimation.stop();
         isSpinning = false;
         hasPlayed = true;
         game.classList.remove('is-spinning');
@@ -342,6 +378,7 @@ games.forEach((game) => {
         operatorSelect.disabled = false;
         spinButton.disabled = false;
         spinLabel.textContent = 'Попробовать ещё';
+        playRetryAnimation();
         controlHint.textContent = 'Можно изменить своего оператора или повторить попытку';
     });
 });

@@ -27,6 +27,7 @@ final class EpdGameTest extends TestCase
             ->assertSee('data-epd-route-failure-animation', false)
             ->assertSee('data-epd-route-success-animation', false)
             ->assertSee('images/icons/epd-sender.svg', false)
+            ->assertSee('data-epd-retry-animation', false)
             ->assertSee('data-epd-sound', false)
             ->assertSee('Установите связь ЭПД')
             ->assertSee('АО «ПФ «СКБ Контур»')
