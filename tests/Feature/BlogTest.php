@@ -93,6 +93,29 @@ class BlogTest extends TestCase
             ->assertSeeInOrder(['Новая статья', 'Средняя статья', 'Старая статья']);
     }
 
+    public function test_blog_pagination_uses_project_styles_and_russian_labels(): void
+    {
+        foreach (range(1, 10) as $number) {
+            BlogPost::query()->create([
+                'title' => "Pagination post {$number}",
+                'slug' => "pagination-post-{$number}",
+                'body' => 'Article body',
+                'is_published' => true,
+                'published_at' => now()->subMinutes($number),
+            ]);
+        }
+
+        $this->get('/blog')
+            ->assertOk()
+            ->assertSee('blog-pagination__nav', false)
+            ->assertSee('Показано с', false)
+            ->assertSee('из <strong>10</strong> материалов', false)
+            ->assertSee('Предыдущая', false)
+            ->assertSee('Следующая', false)
+            ->assertDontSee('Showing', false)
+            ->assertDontSee('class="w-5 h-5"', false);
+    }
+
     public function test_blog_card_uses_prepared_image_and_optional_logo_overlay(): void
     {
         BlogPost::query()->create([

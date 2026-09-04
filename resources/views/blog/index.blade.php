@@ -161,7 +161,7 @@
 
                         @if ($posts->hasPages())
                             <div class="blog-pagination">
-                                {{ $posts->links() }}
+                                {{ $posts->onEachSide(1)->links('blog._pagination') }}
                             </div>
                         @endif
                     @else

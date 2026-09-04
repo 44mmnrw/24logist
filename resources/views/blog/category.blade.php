@@ -86,7 +86,7 @@
                         </div>
 
                         @if ($posts->hasPages())
-                            <div class="blog-pagination">{{ $posts->links() }}</div>
+                            <div class="blog-pagination">{{ $posts->onEachSide(1)->links('blog._pagination') }}</div>
                         @endif
                     @else
                         <div class="blog-empty">

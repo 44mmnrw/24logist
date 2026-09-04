@@ -2732,6 +2732,113 @@ body {
     margin-top: 36px;
 }
 
+.blog-pagination__nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding-top: 24px;
+    border-top: 1px solid #dbe3ef;
+}
+
+.blog-pagination__summary {
+    color: #62748e;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.blog-pagination__summary strong {
+    color: #1f2a3d;
+    font-weight: 600;
+}
+
+.blog-pagination__controls,
+.blog-pagination__pages {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.blog-pagination__link,
+.blog-pagination__ellipsis {
+    min-width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #dbe3ef;
+    border-radius: 9px;
+    background: #fff;
+    color: #334155;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 500;
+}
+
+.blog-pagination__link {
+    padding-inline: 12px;
+    transition: border-color 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+}
+
+.blog-pagination__link--wide {
+    gap: 7px;
+}
+
+.blog-pagination__link:hover,
+.blog-pagination__link:focus-visible {
+    border-color: #1d4ed8;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.blog-pagination__link:focus-visible {
+    outline: 3px solid rgba(29, 78, 216, 0.2);
+    outline-offset: 2px;
+}
+
+.blog-pagination__link.is-current {
+    border-color: #1d4ed8;
+    background: #1d4ed8;
+    color: #fff;
+    cursor: default;
+}
+
+.blog-pagination__link.is-disabled {
+    border-color: #e2e8f0;
+    background: #f1f5f9;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+.blog-pagination__ellipsis {
+    border-color: transparent;
+    background: transparent;
+    color: #62748e;
+}
+
+@media (max-width: 760px) {
+    .blog-pagination__nav {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .blog-pagination__summary {
+        text-align: center;
+    }
+
+    .blog-pagination__controls {
+        justify-content: space-between;
+    }
+
+    .blog-pagination__pages {
+        display: none;
+    }
+
+    .blog-pagination__link--wide {
+        flex: 1;
+    }
+}
+
 .blog-empty {
     max-width: 640px;
     padding: 36px;
