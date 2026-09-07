@@ -1,0 +1,1 @@
+{"name": "models/veo-3.1-generate-preview/operations/oeq69icioiv8", "done": true, "response": {"@type": "type.googleapis.com/google.ai.generativelanguage.v1beta.PredictLongRunningResponse", "generateVideoResponse": {"generatedSamples": [{"video": {"uri": "https://generativelanguage.googleapis.com/v1beta/files/suqma4rne2kn:download?alt=media"}}]}}}

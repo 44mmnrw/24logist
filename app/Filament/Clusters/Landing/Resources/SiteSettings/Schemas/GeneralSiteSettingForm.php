@@ -45,6 +45,10 @@ final class GeneralSiteSettingForm
                         ->label('Калькулятор маршрута')
                         ->icon('heroicon-o-map')
                         ->schema(self::routeCalculatorTab()),
+                    Tab::make('cabinet_login')
+                        ->label('Личный кабинет')
+                        ->icon('heroicon-o-arrow-right-end-on-rectangle')
+                        ->schema(self::cabinetLoginTab()),
                     Tab::make('community')
                         ->label('Сообщество')
                         ->icon('heroicon-o-chat-bubble-left-right')
@@ -492,6 +496,143 @@ final class GeneralSiteSettingForm
                             ->modalDescription('Сайт сохранит текущие настройки формы и затем подпишет бота на необходимые события MAX.')
                             ->action(fn (EditGeneralSiteSetting $livewire) => $livewire->saveAndRegisterMaxWebhook()),
                     ])->columnSpanFull(),
+                ])
+                ->columns(2)
+                ->columnSpanFull(),
+        ];
+    }
+
+    /**
+     * @return array<int, mixed>
+     */
+    private static function cabinetLoginTab(): array
+    {
+        return [
+            Section::make('Кнопки и окна личного кабинета')
+                ->description('Вход и регистрация проходят в модальном окне лендинга, после чего пользователь безопасно переводится в ЛогистРу уже с авторизованной сессией.')
+                ->schema([
+                    Toggle::make('cabinet_login_enabled')
+                        ->label('Показывать кнопку входа в личный кабинет')
+                        ->default(false)
+                        ->helperText('Кнопка появится после заполнения параметров подключения ниже.'),
+                    Toggle::make('cabinet_registration_enabled')
+                        ->label('Показывать кнопку создания личного кабинета')
+                        ->default(false)
+                        ->helperText('Ссылка на регистрацию в шапке будет заменена кнопкой, открывающей форму на лендинге.'),
+                    TextInput::make('cabinet_login_button_text')
+                        ->label('Текст кнопки входа')
+                        ->required()
+                        ->maxLength(100)
+                        ->default('Войти в личный кабинет'),
+                    Select::make('cabinet_login_button_style')
+                        ->label('Стиль кнопки')
+                        ->options([
+                            'ghost' => 'Контурная кнопка',
+                            'primary' => 'Синяя кнопка',
+                            'link' => 'Текстовая ссылка',
+                        ])
+                        ->required()
+                        ->default('ghost'),
+                    TextInput::make('cabinet_registration_button_text')
+                        ->label('Текст кнопки регистрации')
+                        ->required()
+                        ->maxLength(100)
+                        ->default('Создать личный кабинет'),
+                    Select::make('cabinet_registration_button_style')
+                        ->label('Стиль кнопки регистрации')
+                        ->options([
+                            'ghost' => 'Контурная кнопка',
+                            'primary' => 'Синяя кнопка',
+                            'link' => 'Текстовая ссылка',
+                        ])
+                        ->required()
+                        ->default('primary'),
+                    TextInput::make('cabinet_login_eyebrow')
+                        ->label('Надпись над заголовком')
+                        ->required()
+                        ->maxLength(100)
+                        ->default('ЛогистРу'),
+                    TextInput::make('cabinet_login_modal_title')
+                        ->label('Заголовок окна')
+                        ->required()
+                        ->maxLength(160)
+                        ->default('Вход в личный кабинет'),
+                    Textarea::make('cabinet_login_modal_description')
+                        ->label('Описание под заголовком')
+                        ->rows(2)
+                        ->maxLength(500)
+                        ->columnSpanFull(),
+                    TextInput::make('cabinet_login_identifier_label')
+                        ->label('Подпись поля email')
+                        ->required()
+                        ->maxLength(100)
+                        ->default('Email'),
+                    TextInput::make('cabinet_login_password_label')
+                        ->label('Подпись поля пароля')
+                        ->required()
+                        ->maxLength(100)
+                        ->default('Пароль'),
+                    TextInput::make('cabinet_login_submit_text')
+                        ->label('Текст кнопки отправки')
+                        ->required()
+                        ->maxLength(100)
+                        ->default('Войти'),
+                    TextInput::make('cabinet_login_forgot_url')
+                        ->label('Ссылка «Забыли пароль?»')
+                        ->url()
+                        ->maxLength(2048)
+                        ->placeholder('https://platform.example.ru/password/reset'),
+                    TextInput::make('cabinet_login_forgot_text')
+                        ->label('Текст ссылки восстановления пароля')
+                        ->required()
+                        ->maxLength(100)
+                        ->default('Забыли пароль?'),
+                ])
+                ->columns(2)
+                ->columnSpanFull(),
+            Section::make('Подключение к платформе')
+                ->description('Лендинг обращается к ЛогистРу сервер-сервер по внутреннему IP. Домен остаётся в HTTPS-запросе для корректной проверки сертификата; прокси и внешний DNS не используются.')
+                ->schema([
+                    TextInput::make('cabinet_login_url')
+                        ->label('HTTPS-адрес платформы')
+                        ->url()
+                        ->maxLength(2048)
+                        ->placeholder('https://logistsystem.ru')
+                        ->helperText('Только origin без пути, например https://logistsystem.ru.'),
+                    TextInput::make('cabinet_login_origin')
+                        ->label('Публичный origin лендинга')
+                        ->url()
+                        ->maxLength(2048)
+                        ->placeholder('https://24logist.ru')
+                        ->helperText('Должен в точности совпадать с разрешённым origin в настройках API ЛогистРу.'),
+                    TextInput::make('cabinet_login_connect_ip')
+                        ->label('Внутренний IP платформы')
+                        ->required()
+                        ->rule('ip')
+                        ->maxLength(45)
+                        ->placeholder('147.45.236.73')
+                        ->helperText('Адрес интерфейса этого же сервера, на котором HTTPS-сайт ЛогистРу доступен на порту 443. Значение хранится зашифрованно.'),
+                    TextInput::make('cabinet_login_api_timeout')
+                        ->label('Тайм-аут, секунд')
+                        ->numeric()
+                        ->integer()
+                        ->minValue(2)
+                        ->maxValue(60)
+                        ->default(15),
+                    Placeholder::make('cabinet_login_api_secret_status')
+                        ->label('API-секрет')
+                        ->content(fn (?SiteSetting $record): string => $record?->hasSecret('cabinet_login_api_secret') ? '***' : 'Не настроен'),
+                    TextInput::make('cabinet_login_api_secret')
+                        ->label('Новый API-секрет')
+                        ->password()
+                        ->revealable()
+                        ->autocomplete('new-password')
+                        ->dehydrated()
+                        ->minLength(32)
+                        ->maxLength(512)
+                        ->placeholder(fn (?SiteSetting $record): string => $record?->hasSecret('cabinet_login_api_secret') ? '***' : '')
+                        ->helperText('Тот же Bearer-секрет должен быть настроен в ЛогистРу для origin лендинга. Оставьте пустым, чтобы не менять сохранённый секрет.')
+                        ->columnSpanFull(),
                 ])
                 ->columns(2)
                 ->columnSpanFull(),

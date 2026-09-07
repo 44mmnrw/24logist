@@ -65,12 +65,15 @@ if (popup) {
         }, 200);
     };
 
-    document.addEventListener('epd-popup:open', () => {
+    const suppress = () => {
         isSuppressed = true;
         writeStorage(window.sessionStorage, suppressedSessionKey, '1');
         cleanupTriggers();
         close();
-    });
+    };
+
+    document.addEventListener('epd-popup:open', suppress);
+    document.addEventListener('cabinet-login:open', suppress);
 
     const show = () => {
         if (

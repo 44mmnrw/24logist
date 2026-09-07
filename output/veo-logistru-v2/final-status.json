@@ -1,0 +1,14 @@
+{
+  "file": "LogistRu-9x16-v2.mp4",
+  "duration_seconds": 28,
+  "format": "720x1280, 24fps, H264/AAC",
+  "departure": "animated, exits right",
+  "source_veo_audio_used": false,
+  "audio_matches_transcribed_review": true,
+  "end_logo_background": "transparent",
+  "notes": [
+    "Establishing rear views use held frames.",
+    "Turn is represented by a cut to the completed turn and rightward departure.",
+    "Lip synchronization is approximate; no video speed changes were applied."
+  ]
+}

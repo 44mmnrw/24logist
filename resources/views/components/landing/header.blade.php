@@ -8,6 +8,21 @@
         $navLinks = $landing->blocks('header', 'nav_link');
         $headerButtons = $landing->blocks('header', 'header_button');
         $heroSection = $landing->section('hero');
+        $siteSettingsService = app(\App\Services\SiteSettingsService::class);
+        $siteSettings = $siteSettingsService->get();
+        $cabinetLoginEnabled = $siteSettingsService->cabinetLoginConfigured();
+        $cabinetRegistrationEnabled = $siteSettingsService->cabinetRegistrationConfigured();
+        $cabinetLoginButtonClass = match ($siteSettings->cabinet_login_button_style) {
+            'primary' => 'btn btn--primary btn--sm cabinet-login-trigger',
+            'link' => 'landing-header__login cabinet-login-trigger',
+            default => 'btn btn--ghost btn--sm cabinet-login-trigger',
+        };
+        $cabinetRegistrationButtonClass = match ($siteSettings->cabinet_registration_button_style) {
+            'ghost' => 'btn btn--ghost btn--sm cabinet-login-trigger',
+            'link' => 'landing-header__login cabinet-login-trigger',
+            default => 'btn btn--primary btn--sm cabinet-login-trigger',
+        };
+        $cabinetAuthHeaderEnabled = $cabinetLoginEnabled || $cabinetRegistrationEnabled;
     @endphp
 
     <div class="landing-shell landing-header__shell">
@@ -30,15 +45,29 @@
         </nav>
 
         <div class="landing-header__actions">
-            @foreach ($headerButtons as $button)
-                @if ($button->button_style === 'primary')
-                    <a class="btn btn--primary btn--sm" href="{{ \App\Support\LandingLinks::resolve($button->link) }}">{{ $button->title }}</a>
-                @else
-                    <a class="landing-header__login" href="{{ \App\Support\LandingLinks::resolve($button->link) }}">{{ $button->title }}</a>
-                @endif
-            @endforeach
+            @unless ($cabinetAuthHeaderEnabled)
+                @foreach ($headerButtons as $button)
+                    @if ($button->button_style === 'primary')
+                        <a class="btn btn--primary btn--sm" href="{{ \App\Support\LandingLinks::resolve($button->link) }}">{{ $button->title }}</a>
+                    @else
+                        <a class="landing-header__login" href="{{ \App\Support\LandingLinks::resolve($button->link) }}">{{ $button->title }}</a>
+                    @endif
+                @endforeach
+            @endunless
 
-            @if ($navLinks->isNotEmpty())
+            @if ($cabinetRegistrationEnabled)
+                <button class="{{ $cabinetRegistrationButtonClass }}" type="button" data-cabinet-registration-open>
+                    {{ $siteSettings->cabinet_registration_button_text ?: 'Создать личный кабинет' }}
+                </button>
+            @endif
+
+            @if ($cabinetLoginEnabled)
+                <button class="{{ $cabinetLoginButtonClass }}" type="button" data-cabinet-login-open>
+                    {{ $siteSettings->cabinet_login_button_text ?: 'Войти в личный кабинет' }}
+                </button>
+            @endif
+
+            @if ($navLinks->isNotEmpty() || $cabinetLoginEnabled || $cabinetRegistrationEnabled)
                 <details class="landing-mobile-menu">
                     <summary class="landing-mobile-menu__toggle" aria-label="Открыть меню">
                         <span class="landing-mobile-menu__icon" aria-hidden="true"></span>
@@ -48,6 +77,12 @@
                         @foreach ($navLinks as $link)
                             <a href="{{ \App\Support\LandingLinks::resolve($link->link) }}">{{ $link->title }}</a>
                         @endforeach
+                        @if ($cabinetRegistrationEnabled)
+                            <button type="button" data-cabinet-registration-open>{{ $siteSettings->cabinet_registration_button_text ?: 'Создать личный кабинет' }}</button>
+                        @endif
+                        @if ($cabinetLoginEnabled)
+                            <button type="button" data-cabinet-login-open>{{ $siteSettings->cabinet_login_button_text ?: 'Войти в личный кабинет' }}</button>
+                        @endif
                         @if (app(\App\Services\SiteSettingsService::class)->routeApiConfigured())
                             <a href="{{ route('route-calculator.index') }}">Калькулятор маршрута</a>
                         @endif

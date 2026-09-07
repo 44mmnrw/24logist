@@ -9,3 +9,4 @@ import './landing-growth-dashboard.js';
 import './community.js';
 import './route-calculator.js';
 import './epd-game-bootstrap.js';
+import './cabinet-login.js';

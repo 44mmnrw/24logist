@@ -1,0 +1,13 @@
+{
+  "file": "LogistRu-9x16-v3-local.mp4",
+  "duration": 28,
+  "paid_api_calls_this_revision": 0,
+  "camera_motion": "Local zoom and crop animation throughout establishing shots",
+  "departure": "Car isolated from existing take, mirrored independently of the background, composited with contact shadow, followed by a side view",
+  "logo": "Reduced size and opacity on car; original transparent PNG on endcard",
+  "audio": "Previously checked Russian dialogue plus locally synthesized Foley",
+  "limits": [
+    "Departure still changes camera angle; it is not a new continuous photorealistic take.",
+    "Lip synchronization remains approximate."
+  ]
+}

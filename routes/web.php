@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AppleTouchIconController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CabinetLoginController;
 use App\Http\Controllers\CommunityAccountController;
 use App\Http\Controllers\CommunityActionController;
 use App\Http\Controllers\CommunityCommentController;
@@ -69,6 +70,22 @@ Route::post('/leads/contact', [LandingLeadController::class, 'storeContact'])
 Route::post('/leads/epd-presentation', [LandingLeadController::class, 'storeEpdPresentation'])
     ->middleware('throttle:12,1')
     ->name('leads.epd-presentation.store');
+
+Route::post('/cabinet/login', [CabinetLoginController::class, 'login'])
+    ->middleware('throttle:8,1,cabinet-login:')
+    ->name('cabinet.login');
+
+Route::post('/cabinet/register', [CabinetLoginController::class, 'register'])
+    ->middleware('throttle:5,1,cabinet-register:')
+    ->name('cabinet.register');
+
+Route::post('/cabinet/register/party-suggestions', [CabinetLoginController::class, 'partySuggestions'])
+    ->middleware('throttle:30,1,cabinet-party-suggestions:')
+    ->name('cabinet.register.party-suggestions');
+
+Route::post('/cabinet/handoff', [CabinetLoginController::class, 'handoff'])
+    ->middleware('throttle:20,1,cabinet-handoff:')
+    ->name('cabinet.handoff');
 
 Route::get('/blog', [BlogController::class, 'index'])
     ->name('blog.index');

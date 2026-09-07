@@ -73,7 +73,12 @@ if (popup) {
     };
 
     const show = () => {
-        if (readStorage(completedStorageKey) === '1' || wasDismissedRecently() || document.visibilityState !== 'visible') {
+        if (
+            readStorage(completedStorageKey) === '1'
+            || wasDismissedRecently()
+            || document.visibilityState !== 'visible'
+            || document.documentElement.classList.contains('cabinet-login-open')
+        ) {
             return;
         }
 
@@ -96,6 +101,8 @@ if (popup) {
     popup.querySelectorAll('[data-epd-popup-close]').forEach((control) => {
         control.addEventListener('click', () => close());
     });
+
+    document.addEventListener('cabinet-login:open', () => close({ remember: false }));
 
     popup.querySelectorAll('[data-epd-registration-cta]').forEach((control) => {
         control.addEventListener('click', () => {

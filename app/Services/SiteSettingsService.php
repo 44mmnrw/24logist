@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Cache;
 
 class SiteSettingsService
 {
-    private const CACHE_KEY = 'site.settings.v20';
+    private const CACHE_KEY = 'site.settings.v21';
 
     public function get(): SiteSetting
     {
@@ -177,9 +177,89 @@ class SiteSettingsService
             && strlen($this->routeApiSecret()) >= 32;
     }
 
+    public function cabinetLoginEnabled(): bool
+    {
+        return (bool) $this->get()->getAttribute('cabinet_login_enabled');
+    }
+
+    public function cabinetRegistrationEnabled(): bool
+    {
+        return (bool) $this->get()->getAttribute('cabinet_registration_enabled');
+    }
+
+    public function cabinetLoginUrl(): string
+    {
+        $value = trim((string) $this->get()->getAttribute('cabinet_login_url'));
+
+        return self::normalizeHttpsOrigin($value) ?? rtrim($value, '/');
+    }
+
+    public function cabinetLoginOrigin(): string
+    {
+        return self::normalizeHttpsOrigin((string) $this->get()->getAttribute('cabinet_login_origin')) ?? '';
+    }
+
+    public function cabinetLoginConnectIp(): string
+    {
+        return trim((string) $this->get()->getAttribute('cabinet_login_connect_ip'));
+    }
+
+    public function cabinetLoginApiSecret(): string
+    {
+        return trim((string) $this->get()->getAttribute('cabinet_login_api_secret'));
+    }
+
+    public function cabinetLoginApiTimeout(): int
+    {
+        return min(60, max(2, (int) ($this->get()->getAttribute('cabinet_login_api_timeout') ?: 15)));
+    }
+
+    public function cabinetLoginConfigured(): bool
+    {
+        return $this->cabinetLoginEnabled() && $this->cabinetAuthConfigured();
+    }
+
+    public function cabinetRegistrationConfigured(): bool
+    {
+        return $this->cabinetRegistrationEnabled() && $this->cabinetAuthConfigured();
+    }
+
+    public function cabinetAuthConfigured(): bool
+    {
+        $connectIp = $this->cabinetLoginConnectIp();
+
+        return self::normalizeHttpsOrigin($this->cabinetLoginUrl()) !== null
+            && $this->cabinetLoginOrigin() !== ''
+            && filter_var($connectIp, FILTER_VALIDATE_IP) !== false
+            && strlen($this->cabinetLoginApiSecret()) >= 32;
+    }
+
+    public static function normalizeHttpsOrigin(string $value): ?string
+    {
+        $parts = parse_url(trim($value));
+        if ($parts === false
+            || mb_strtolower((string) ($parts['scheme'] ?? '')) !== 'https'
+            || ! isset($parts['host'])
+            || isset($parts['user'])
+            || isset($parts['pass'])
+            || isset($parts['query'])
+            || isset($parts['fragment'])
+            || ! in_array($parts['path'] ?? '', ['', '/'], true)
+            || filter_var(trim($value), FILTER_VALIDATE_URL) === false) {
+            return null;
+        }
+
+        $port = isset($parts['port']) && (int) $parts['port'] !== 443
+            ? ':'.(int) $parts['port']
+            : '';
+
+        return 'https://'.mb_strtolower((string) $parts['host']).$port;
+    }
+
     public function clearCache(): void
     {
         Cache::forget(self::CACHE_KEY);
+        Cache::forget('site.settings.v20');
         Cache::forget('site.settings.v19');
         Cache::forget('site.settings.v18');
         Cache::forget('site.settings.v17');
