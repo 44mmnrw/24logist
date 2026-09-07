@@ -20,7 +20,6 @@ export function initCabinetRegistrationPartySuggestions(modal) {
 
     const showStatus = (message = '', state = '') => {
         statusNode.textContent = message;
-        statusNode.hidden = message === '';
         statusNode.classList.toggle('is-success', state === 'success');
         statusNode.classList.toggle('is-error', state === 'error');
     };

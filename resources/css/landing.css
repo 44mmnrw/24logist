@@ -4691,7 +4691,7 @@ html.cabinet-login-open {
     z-index: 1300;
     display: grid;
     place-items: center;
-    padding: 20px;
+    padding: 12px 20px;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s ease, visibility 0.2s ease;
@@ -4714,14 +4714,15 @@ html.cabinet-login-open {
 .cabinet-login-modal__card {
     position: relative;
     z-index: 1;
-    width: min(720px, 100%);
-    max-height: calc(100vh - 40px);
+    width: min(760px, 100%);
+    max-height: calc(100vh - 24px);
     overflow-y: auto;
-    padding: 38px;
+    padding: 24px 32px 22px;
     border: 1px solid rgba(255, 255, 255, 0.65);
     border-radius: 24px;
     background: #fff;
     box-shadow: 0 32px 90px rgba(3, 16, 43, 0.32);
+    scrollbar-gutter: stable;
     transform: translateY(14px) scale(0.985);
     transition: transform 0.2s ease;
 }
@@ -4730,25 +4731,28 @@ html.cabinet-login-open {
 
 .cabinet-login-modal__close {
     position: absolute;
-    top: 14px;
-    right: 14px;
+    top: 12px;
+    right: 12px;
     display: grid;
     place-items: center;
     width: 38px;
     height: 38px;
-    padding: 0 0 3px;
+    padding: 0;
     border: 1px solid #dbe5f4;
     border-radius: 50%;
     background: #fff;
     color: #0d2147;
-    font-size: 25px;
-    line-height: 1;
     cursor: pointer;
+}
+
+.cabinet-login-modal__close-icon {
+    width: 18px;
+    height: 18px;
 }
 
 .cabinet-login-modal__eyebrow {
     display: inline-flex;
-    padding: 5px 11px;
+    padding: 4px 10px;
     border-radius: 999px;
     background: #eaf3ff;
     color: #0d67f3;
@@ -4759,32 +4763,32 @@ html.cabinet-login-open {
 }
 
 .cabinet-login-modal__card h2 {
-    margin: 14px 44px 0 0;
+    margin: 9px 44px 0 0;
     color: #0d2147;
-    font-size: 30px;
+    font-size: 28px;
     line-height: 1.2;
 }
 
 .cabinet-login-modal__card > p {
-    margin-top: 10px;
+    margin: 6px 0 0;
     color: #566983;
     font-size: 14px;
-    line-height: 1.55;
+    line-height: 1.4;
 }
 
 .cabinet-login-modal__tabs {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 4px;
-    margin-top: 20px;
+    margin-top: 12px;
     padding: 4px;
     border-radius: 12px;
     background: #eef3f9;
 }
 
 .cabinet-login-modal__tabs button {
-    min-height: 40px;
-    padding: 8px 14px;
+    min-height: 38px;
+    padding: 7px 14px;
     border: 0;
     border-radius: 9px;
     background: transparent;
@@ -4806,8 +4810,8 @@ html.cabinet-login-open {
 .cabinet-login-modal__form {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 15px;
-    margin-top: 24px;
+    gap: 10px 14px;
+    margin-top: 14px;
 }
 
 .cabinet-login-modal__form--registration { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -4815,7 +4819,8 @@ html.cabinet-login-open {
 
 .cabinet-login-modal__field {
     display: grid;
-    gap: 7px;
+    align-content: start;
+    gap: 5px;
     color: #314158;
     font-size: 13px;
     font-weight: 650;
@@ -4824,7 +4829,7 @@ html.cabinet-login-open {
 .cabinet-login-modal__field input,
 .cabinet-login-modal__field select {
     width: 100%;
-    height: 48px;
+    height: 44px;
     padding: 0 14px;
     border: 1px solid #cdd9e8;
     border-radius: 11px;
@@ -4849,14 +4854,18 @@ html.cabinet-login-open {
     top: calc(100% + 5px);
     right: 0;
     left: 0;
-    max-height: 220px;
+    max-height: 198px;
     overflow-y: auto;
-    padding: 5px;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    padding: 4px;
     border: 1px solid #cdd9e8;
     border-radius: 11px;
     background: #fff;
     box-shadow: 0 14px 32px rgba(13, 33, 71, 0.18);
 }
+
+.cabinet-login-modal__suggestions::-webkit-scrollbar { display: none; }
 
 .cabinet-login-modal__suggestions[hidden] { display: none; }
 
@@ -4864,7 +4873,7 @@ html.cabinet-login-open {
     display: grid;
     width: 100%;
     gap: 3px;
-    padding: 9px 10px;
+    padding: 7px 9px;
     border: 0;
     border-radius: 8px;
     background: transparent;
@@ -4884,7 +4893,8 @@ html.cabinet-login-open {
 .cabinet-login-modal__suggestion-inn { color: #64748b; font-size: 12px; font-weight: 500; }
 
 .cabinet-login-modal__lookup-status {
-    margin: -5px 0 0;
+    min-height: 34px;
+    margin: 0;
     color: #64748b;
     font-size: 12px;
     line-height: 1.4;
@@ -4895,9 +4905,10 @@ html.cabinet-login-open {
 
 .cabinet-login-modal__fieldset {
     display: grid;
-    gap: 9px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px 12px;
     margin: 0;
-    padding: 14px;
+    padding: 9px 12px 10px;
     border: 1px solid #dbe5f4;
     border-radius: 12px;
 }
@@ -4912,10 +4923,10 @@ html.cabinet-login-open {
 .cabinet-login-modal__check {
     display: flex;
     align-items: flex-start;
-    gap: 9px;
+    gap: 7px;
     color: #42536b;
-    font-size: 13px;
-    line-height: 1.45;
+    font-size: 12px;
+    line-height: 1.35;
     cursor: pointer;
 }
 
@@ -4930,7 +4941,7 @@ html.cabinet-login-open {
 .cabinet-login-modal__check--disabled { cursor: not-allowed; opacity: 0.55; }
 .cabinet-login-modal__check small { margin-left: 4px; color: #64748b; font-size: 11px; font-weight: 700; }
 
-.cabinet-login-modal__consents { display: grid; gap: 9px; }
+.cabinet-login-modal__consents { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; }
 .cabinet-login-modal__consents a { color: #1d4ed8; text-decoration: underline; text-underline-offset: 2px; }
 
 .cabinet-login-modal__submit {
@@ -4938,8 +4949,8 @@ html.cabinet-login-open {
     align-items: center;
     justify-content: center;
     width: 100%;
-    min-height: 50px;
-    padding: 12px 20px;
+    min-height: 44px;
+    padding: 10px 20px;
     border: 0;
     border-radius: 12px;
     background: #1d4ed8;
@@ -4949,12 +4960,12 @@ html.cabinet-login-open {
     cursor: pointer;
 }
 
-.cabinet-login-modal__submit:disabled { cursor: wait; opacity: 0.65; }
+.cabinet-login-modal__submit:disabled { cursor: not-allowed; opacity: 0.55; }
 .cabinet-login-modal__forgot { justify-self: center; color: #1d4ed8; font-size: 13px; }
 
 .cabinet-login-modal__error {
     margin: 0;
-    padding: 10px 12px;
+    padding: 8px 11px;
     border-radius: 9px;
     background: #fff1f2;
     color: #be123c;
@@ -4964,9 +4975,11 @@ html.cabinet-login-open {
 
 @media (max-width: 520px) {
     .cabinet-login-modal { padding: 12px; }
-    .cabinet-login-modal__card { max-height: calc(100vh - 24px); padding: 30px 20px 24px; border-radius: 20px; }
-    .cabinet-login-modal__card h2 { font-size: 26px; }
+    .cabinet-login-modal__card { max-height: calc(100vh - 24px); padding: 24px 18px 20px; border-radius: 20px; }
+    .cabinet-login-modal__card h2 { font-size: 24px; }
     .cabinet-login-modal__form--registration { grid-template-columns: 1fr; }
+    .cabinet-login-modal__fieldset,
+    .cabinet-login-modal__consents { grid-template-columns: 1fr; }
     .cabinet-login-modal__field input,
     .cabinet-login-modal__field select { font-size: 16px; }
 }

@@ -34,6 +34,10 @@
   </symbol>
 
   <!-- UI: стрелки, галочки, chevron -->
+  <symbol id="icon-x" viewBox="0 0 24 24" fill="none">
+    <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
   <symbol id="icon-check" viewBox="0 0 24 24" fill="none">
     <path d="M6.5 12.5l3.5 3.5 7.5-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   </symbol>

@@ -23,6 +23,24 @@ if (modal) {
         errorNode.hidden = message === '';
     };
 
+    const registrationForm = forms.find((form) => form.dataset.cabinetAuthForm === 'registration');
+    const syncRegistrationSubmitState = () => {
+        if (!registrationForm) return;
+
+        const submitButton = registrationForm.querySelector('[type="submit"]');
+        const termsAccepted = registrationForm.querySelector('[name="terms_accepted"]')?.checked === true;
+        const privacyAccepted = registrationForm.querySelector('[name="privacy_policy_accepted"]')?.checked === true;
+        const capabilitySelected = [...registrationForm.querySelectorAll('[name="capabilities[]"]')]
+            .some((input) => input.checked);
+
+        if (submitButton) {
+            submitButton.disabled = registrationForm.dataset.submitting === 'true'
+                || !termsAccepted
+                || !privacyAccepted
+                || !capabilitySelected;
+        }
+    };
+
     const setMode = (requestedMode) => {
         const mode = panels.some((panel) => panel.dataset.cabinetAuthPanel === requestedMode)
             ? requestedMode
@@ -200,6 +218,7 @@ if (modal) {
         }
 
         if (submitButton) {
+            if (mode === 'registration') form.dataset.submitting = 'true';
             submitButton.disabled = true;
             submitButton.textContent = mode === 'registration' ? 'Создаём кабинет…' : 'Входим…';
         }
@@ -219,12 +238,19 @@ if (modal) {
             passwordInputs[0]?.focus();
         } finally {
             if (submitButton) {
-                submitButton.disabled = false;
                 submitButton.textContent = defaultText;
+                if (mode === 'registration') {
+                    delete form.dataset.submitting;
+                    syncRegistrationSubmitState();
+                } else {
+                    submitButton.disabled = false;
+                }
             }
         }
     }));
 
+    registrationForm?.addEventListener('change', syncRegistrationSubmitState);
+    syncRegistrationSubmitState();
     setMode(currentMode);
     initCabinetRegistrationPartySuggestions(modal);
 }

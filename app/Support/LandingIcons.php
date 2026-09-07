@@ -57,6 +57,7 @@ final class LandingIcons
         'brand-mark' => 'Марк логотипа',
         'telegram' => 'Telegram',
         'badge-star' => 'Бейдж (звезда)',
+        'x' => 'Закрыть',
         'check' => 'Галочка',
         'check-blue' => 'Галочка (синяя)',
         'check-circle' => 'Галочка в круге',

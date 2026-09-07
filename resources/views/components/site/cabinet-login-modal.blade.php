@@ -25,7 +25,9 @@
     <button class="cabinet-login-modal__backdrop" type="button" data-cabinet-login-close aria-label="Закрыть окно"></button>
 
     <div class="cabinet-login-modal__card" role="document">
-        <button class="cabinet-login-modal__close" type="button" data-cabinet-login-close aria-label="Закрыть">×</button>
+        <button class="cabinet-login-modal__close" type="button" data-cabinet-login-close aria-label="Закрыть">
+            <x-landing.icon name="x" class="cabinet-login-modal__close-icon" />
+        </button>
 
         <span class="cabinet-login-modal__eyebrow">{{ $siteSettings->cabinet_login_eyebrow ?: 'ЛогистРу' }}</span>
         <h2 id="cabinet-auth-title" data-cabinet-auth-title></h2>
@@ -99,9 +101,8 @@
                             <input id="cabinet-registration-inn" type="text" name="inn" inputmode="numeric" autocomplete="off" required minlength="10" maxlength="12" pattern="[0-9]{10}([0-9]{2})?" data-party-inn>
                             <div class="cabinet-login-modal__suggestions" data-party-inn-suggestions role="listbox" aria-label="Подсказки по ИНН" hidden></div>
                         </div>
+                        <p class="cabinet-login-modal__lookup-status" data-party-lookup-status role="status" aria-live="polite"></p>
                     </div>
-
-                    <p class="cabinet-login-modal__lookup-status cabinet-login-modal__field--wide" data-party-lookup-status role="status" aria-live="polite" hidden></p>
 
                     <label class="cabinet-login-modal__field">
                         <span>Телефон</span>
@@ -152,7 +153,7 @@
 
                     <p class="cabinet-login-modal__error cabinet-login-modal__field--wide" data-cabinet-auth-error role="alert" hidden></p>
 
-                    <button class="cabinet-login-modal__submit cabinet-login-modal__field--wide" type="submit" data-default-text="Создать личный кабинет">
+                    <button class="cabinet-login-modal__submit cabinet-login-modal__field--wide" type="submit" data-default-text="Создать личный кабинет" disabled>
                         Создать личный кабинет
                     </button>
                 </form>
