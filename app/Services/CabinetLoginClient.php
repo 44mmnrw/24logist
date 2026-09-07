@@ -35,7 +35,7 @@ final class CabinetLoginClient
     /**
      * @param array{
      *     name: string,
-     *     account_name: string|null,
+     *     account_name: string,
      *     inn: string,
      *     email: string,
      *     phone: string,

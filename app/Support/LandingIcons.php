@@ -58,6 +58,8 @@ final class LandingIcons
         'telegram' => 'Telegram',
         'badge-star' => 'Бейдж (звезда)',
         'x' => 'Закрыть',
+        'eye' => 'Показать пароль',
+        'eye-off' => 'Скрыть пароль',
         'check' => 'Галочка',
         'check-blue' => 'Галочка (синяя)',
         'check-circle' => 'Галочка в круге',

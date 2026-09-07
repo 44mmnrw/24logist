@@ -8,6 +8,7 @@ if (modal) {
     const description = modal.querySelector('[data-cabinet-auth-description]');
     const panels = [...modal.querySelectorAll('[data-cabinet-auth-panel]')];
     const tabs = [...modal.querySelectorAll('[data-cabinet-auth-tab]')];
+    const tabsList = modal.querySelector('.cabinet-login-modal__tabs');
     const forms = [...modal.querySelectorAll('[data-cabinet-auth-form]')];
     let previouslyFocusedElement = null;
     let currentMode = modal.dataset.initialMode || 'login';
@@ -22,6 +23,30 @@ if (modal) {
         errorNode.textContent = message;
         errorNode.hidden = message === '';
     };
+
+    const resetPasswordFields = (form, clear = false) => {
+        form?.querySelectorAll('[data-password-input]').forEach((input) => {
+            input.type = 'password';
+            if (clear) input.value = '';
+        });
+        form?.querySelectorAll('[data-password-toggle]').forEach((toggle) => {
+            toggle.setAttribute('aria-pressed', 'false');
+            toggle.setAttribute('aria-label', 'Показать пароль');
+        });
+    };
+
+    modal.querySelectorAll('[data-password-toggle]').forEach((toggle) => {
+        const passwordInput = toggle.closest('.cabinet-login-modal__password')?.querySelector('[data-password-input]');
+        if (!passwordInput) return;
+
+        toggle.addEventListener('click', () => {
+            const passwordVisible = passwordInput.type === 'text';
+            passwordInput.type = passwordVisible ? 'password' : 'text';
+            toggle.setAttribute('aria-pressed', String(!passwordVisible));
+            toggle.setAttribute('aria-label', passwordVisible ? 'Показать пароль' : 'Скрыть пароль');
+            passwordInput.focus({ preventScroll: true });
+        });
+    });
 
     const registrationForm = forms.find((form) => form.dataset.cabinetAuthForm === 'registration');
     const syncRegistrationSubmitState = () => {
@@ -59,6 +84,7 @@ if (modal) {
             tab.setAttribute('aria-selected', String(active));
             tab.tabIndex = active ? 0 : -1;
         });
+        if (tabsList) tabsList.dataset.activeTab = mode;
 
         if (title) title.textContent = activePanel?.dataset.title || '';
         if (description) description.textContent = activePanel?.dataset.description || '';
@@ -88,7 +114,7 @@ if (modal) {
         document.documentElement.classList.remove('cabinet-login-open');
         forms.forEach((form) => {
             showError(form);
-            form.querySelectorAll('input[type="password"]').forEach((input) => { input.value = ''; });
+            resetPasswordFields(form, true);
         });
 
         window.setTimeout(() => {
@@ -190,7 +216,7 @@ if (modal) {
         const requestBody = mode === 'registration'
             ? {
                 name: String(formData.get('name') ?? '').trim(),
-                account_name: String(formData.get('account_name') ?? '').trim() || null,
+                account_name: String(formData.get('account_name') ?? '').trim(),
                 inn: String(formData.get('inn') ?? '').replace(/\D/g, ''),
                 phone: String(formData.get('phone') ?? '').trim(),
                 email: String(formData.get('email') ?? '').trim(),
@@ -233,8 +259,8 @@ if (modal) {
             await submitHandoff(payload.handoff_url);
         } catch (error) {
             showError(form, error instanceof Error ? error.message : 'Не удалось выполнить запрос. Попробуйте ещё раз.');
-            const passwordInputs = [...form.querySelectorAll('input[type="password"]')];
-            passwordInputs.forEach((input) => { input.value = ''; });
+            const passwordInputs = [...form.querySelectorAll('[data-password-input]')];
+            resetPasswordFields(form, true);
             passwordInputs[0]?.focus();
         } finally {
             if (submitButton) {

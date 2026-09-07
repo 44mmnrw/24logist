@@ -65,9 +65,15 @@ final class CabinetLoginTest extends TestCase
             ->assertSee('data-cabinet-login-open', false)
             ->assertSee('data-cabinet-registration-open', false)
             ->assertSee('data-cabinet-login-modal', false)
+            ->assertSee('cabinet-login-modal__brand-logo', false)
             ->assertSee('href="#icon-x"', false)
+            ->assertSee('href="#icon-eye"', false)
+            ->assertSee('href="#icon-eye-off"', false)
+            ->assertSee('data-password-toggle', false)
             ->assertSee('data-cabinet-auth-form="registration"', false)
+            ->assertSee('Заполните форму для регистрации в системе. После регистрации проверьте почту.')
             ->assertSee('data-party-account-name', false)
+            ->assertSee('name="account_name" autocomplete="organization" required', false)
             ->assertSee('data-party-inn', false)
             ->assertSee('data-default-text="Создать личный кабинет" disabled', false)
             ->assertSee(route('cabinet.register.party-suggestions'), false)
@@ -151,6 +157,8 @@ final class CabinetLoginTest extends TestCase
             ->assertOk()
             ->assertSee('action="https://platform.example.test/auth/landing/consume"', false)
             ->assertSee('name="ticket" value="'.self::TICKET.'"', false)
+            ->assertSee("document.getElementById('cabinet-platform-handoff').requestSubmit();", false)
+            ->assertDontSee('Открываем личный кабинет')
             ->assertHeader('Cache-Control', 'no-store, private');
 
         $this->post(route('cabinet.handoff'))->assertGone();
@@ -198,6 +206,27 @@ final class CabinetLoginTest extends TestCase
             && $request['client_ip'] === '198.51.100.15'
             && $request['client_user_agent'] === 'Landing browser'
             && $request->hasHeader('Authorization', 'Bearer '.self::SECRET));
+    }
+
+    public function test_registration_requires_account_name_before_contacting_platform(): void
+    {
+        Http::fake();
+
+        $this->postJson(route('cabinet.register'), [
+            'name' => 'Иван Петров',
+            'inn' => '7707083893',
+            'email' => 'owner@example.test',
+            'phone' => '+7 999 111-22-33',
+            'password' => 'strong-password',
+            'password_confirmation' => 'strong-password',
+            'capabilities' => ['forwarder'],
+            'terms_accepted' => true,
+            'privacy_policy_accepted' => true,
+        ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['account_name']);
+
+        Http::assertNothingSent();
     }
 
     public function test_party_suggestions_are_proxied_through_the_internal_platform_connection(): void
@@ -283,7 +312,7 @@ final class CabinetLoginTest extends TestCase
 
         $payload = [
             'name' => 'Иван Петров',
-            'account_name' => null,
+            'account_name' => 'ООО Вектор',
             'inn' => '7707083893',
             'email' => 'owner@example.test',
             'phone' => '+79991112233',
@@ -297,6 +326,7 @@ final class CabinetLoginTest extends TestCase
         $this->withHeader('User-Agent', 'Landing browser')
             ->postJson(route('cabinet.register'), $payload)
             ->assertUnprocessable()
+            ->assertJsonPath('message', 'Пользователь с таким email уже существует.')
             ->assertJsonPath('errors.email.0', 'Пользователь с таким email уже существует.')
             ->assertJsonMissing(['internal_trace' => ['must not leak']]);
     }

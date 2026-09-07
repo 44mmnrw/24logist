@@ -59,7 +59,7 @@ final class CabinetLoginController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'account_name' => ['nullable', 'string', 'max:255'],
+            'account_name' => ['required', 'string', 'max:255'],
             'inn' => ['required', 'string', 'regex:/^\d{10}(\d{2})?$/'],
             'email' => ['required', 'string', 'email', 'max:255'],
             'phone' => ['required', 'string', 'max:20'],
@@ -78,9 +78,7 @@ final class CabinetLoginController extends Controller
 
         $fields = [
             'name' => trim($validated['name']),
-            'account_name' => filled($validated['account_name'] ?? null)
-                ? trim((string) $validated['account_name'])
-                : null,
+            'account_name' => trim($validated['account_name']),
             'inn' => preg_replace('/\D+/', '', $validated['inn']) ?? '',
             'email' => mb_strtolower(trim($validated['email'])),
             'phone' => trim($validated['phone']),
@@ -151,11 +149,14 @@ final class CabinetLoginController extends Controller
             ], 410)->withHeaders($this->privateHeaders());
         }
 
+        $scriptNonce = base64_encode(random_bytes(18));
+
         return response()->view('cabinet-auth-handoff', [
             'ticket' => $handoff['ticket'],
             'handoffUrl' => $handoff['handoff_url'],
+            'scriptNonce' => $scriptNonce,
         ])->withHeaders(array_merge($this->privateHeaders(), [
-            'Content-Security-Policy' => "form-action 'self' ".$this->client->platformOrigin()."; frame-ancestors 'none'; base-uri 'none'",
+            'Content-Security-Policy' => "default-src 'none'; script-src 'nonce-{$scriptNonce}'; style-src 'nonce-{$scriptNonce}'; form-action 'self' ".$this->client->platformOrigin()."; frame-ancestors 'none'; base-uri 'none'",
         ]));
     }
 
@@ -193,11 +194,14 @@ final class CabinetLoginController extends Controller
         }
 
         if ($response->status() === 422) {
+            $validationErrors = $this->validationErrors($payload);
+            $firstValidationMessage = collect($validationErrors)->flatten()->first();
+
             return response()->json([
-                'message' => $registration
-                    ? 'Проверьте данные формы регистрации.'
-                    : 'Проверьте email и пароль.',
-                'errors' => $this->validationErrors($payload),
+                'message' => is_string($firstValidationMessage) && $firstValidationMessage !== ''
+                    ? $firstValidationMessage
+                    : ($registration ? 'Проверьте данные формы регистрации.' : 'Проверьте email и пароль.'),
+                'errors' => $validationErrors,
             ], 422)->withHeaders($this->privateHeaders());
         }
 

@@ -50,7 +50,7 @@ export function initCabinetRegistrationPartySuggestions(modal) {
         accountNameInput.value = accountName;
         innInput.value = inn;
         hideSuggestions();
-        showStatus('Компания и ИНН заполнены по данным DaData.', 'success');
+        showStatus('Компания и ИНН заполнены.', 'success');
     };
 
     const renderSuggestions = (node, suggestions) => {
