@@ -112,7 +112,7 @@
 
                     <label class="cabinet-login-modal__field">
                         <span>Телефон</span>
-                        <input type="tel" name="phone" autocomplete="tel" required maxlength="20">
+                        <input type="tel" name="phone" autocomplete="tel" inputmode="numeric" required minlength="18" maxlength="18" pattern="\+7 \([0-9]{3}\) [0-9]{3}-[0-9]{2}-[0-9]{2}" placeholder="+7 (___) ___-__-__" data-phone-mask>
                     </label>
 
                     <label class="cabinet-login-modal__field cabinet-login-modal__field--wide">

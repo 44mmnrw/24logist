@@ -48,6 +48,62 @@ if (modal) {
         });
     });
 
+    const phoneNationalDigits = (value) => {
+        const digits = String(value ?? '').replace(/\D/g, '');
+        if (digits === '') return '';
+
+        return (digits.startsWith('7') || digits.startsWith('8') ? digits.slice(1) : digits).slice(0, 10);
+    };
+
+    const formatPhone = (value) => {
+        const digits = phoneNationalDigits(value);
+        if (digits === '') return '';
+
+        let formatted = `+7 (${digits.slice(0, 3)}`;
+        if (digits.length >= 3) formatted += ')';
+        if (digits.length > 3) formatted += ` ${digits.slice(3, 6)}`;
+        if (digits.length > 6) formatted += `-${digits.slice(6, 8)}`;
+        if (digits.length > 8) formatted += `-${digits.slice(8, 10)}`;
+
+        return formatted;
+    };
+
+    const normalizePhone = (value) => {
+        const digits = phoneNationalDigits(value);
+
+        return digits.length === 10 ? `+7${digits}` : '';
+    };
+
+    modal.querySelectorAll('[data-phone-mask]').forEach((input) => {
+        const syncPhone = () => {
+            const digits = phoneNationalDigits(input.value);
+            input.value = formatPhone(input.value);
+            input.setCustomValidity(digits.length === 10 ? '' : 'Введите номер полностью: +7 (999) 999-99-99.');
+        };
+
+        input.addEventListener('beforeinput', (event) => {
+            if (event.inputType !== 'deleteContentBackward' || !event.cancelable) return;
+
+            const selectionStart = input.selectionStart;
+            const selectionEnd = input.selectionEnd;
+            if (selectionStart === null || selectionEnd === null || selectionStart !== selectionEnd || selectionStart === 0) return;
+            if (/\d/.test(input.value.charAt(selectionStart - 1))) return;
+
+            let digitIndex = selectionStart - 1;
+            while (digitIndex >= 0 && !/\d/.test(input.value.charAt(digitIndex))) digitIndex -= 1;
+            if (digitIndex < 2) return;
+
+            event.preventDefault();
+            input.value = input.value.slice(0, digitIndex) + input.value.slice(digitIndex + 1);
+            syncPhone();
+            input.setSelectionRange(input.value.length, input.value.length);
+        });
+
+        input.addEventListener('input', syncPhone);
+        input.addEventListener('blur', syncPhone);
+        syncPhone();
+    });
+
     const registrationForm = forms.find((form) => form.dataset.cabinetAuthForm === 'registration');
     const syncRegistrationSubmitState = () => {
         if (!registrationForm) return;
@@ -218,7 +274,7 @@ if (modal) {
                 name: String(formData.get('name') ?? '').trim(),
                 account_name: String(formData.get('account_name') ?? '').trim(),
                 inn: String(formData.get('inn') ?? '').replace(/\D/g, ''),
-                phone: String(formData.get('phone') ?? '').trim(),
+                phone: normalizePhone(formData.get('phone')),
                 email: String(formData.get('email') ?? '').trim(),
                 capabilities: formData.getAll('capabilities[]').map(String),
                 password: String(formData.get('password') ?? ''),

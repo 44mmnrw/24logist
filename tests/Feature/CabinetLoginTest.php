@@ -75,6 +75,8 @@ final class CabinetLoginTest extends TestCase
             ->assertSee('data-party-account-name', false)
             ->assertSee('name="account_name" autocomplete="organization" required', false)
             ->assertSee('data-party-inn', false)
+            ->assertSee('data-phone-mask', false)
+            ->assertSee('placeholder="+7 (___) ___-__-__"', false)
             ->assertSee('data-default-text="Создать личный кабинет" disabled', false)
             ->assertSee(route('cabinet.register.party-suggestions'), false)
             ->assertDontSee(self::SECRET)
@@ -197,7 +199,7 @@ final class CabinetLoginTest extends TestCase
             && $request['account_name'] === 'ООО Вектор'
             && $request['inn'] === '7707083893'
             && $request['email'] === 'owner@example.test'
-            && $request['phone'] === '+7 999 111-22-33'
+            && $request['phone'] === '+79991112233'
             && $request['password_confirmation'] === 'strong-password'
             && $request['capabilities'] === ['forwarder', 'cargo_owner']
             && $request['terms_accepted'] === true
@@ -225,6 +227,31 @@ final class CabinetLoginTest extends TestCase
         ])
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['account_name']);
+
+        Http::assertNothingSent();
+    }
+
+    public function test_registration_rejects_incomplete_and_overlong_phone_numbers(): void
+    {
+        Http::fake();
+
+        $payload = [
+            'name' => 'Иван Петров',
+            'account_name' => 'ООО Вектор',
+            'inn' => '7707083893',
+            'email' => 'owner@example.test',
+            'password' => 'strong-password',
+            'password_confirmation' => 'strong-password',
+            'capabilities' => ['forwarder'],
+            'terms_accepted' => true,
+            'privacy_policy_accepted' => true,
+        ];
+
+        foreach (['+7 (999) 111-22-3', '+7 (999) 111-22-334'] as $phone) {
+            $this->postJson(route('cabinet.register'), [...$payload, 'phone' => $phone])
+                ->assertUnprocessable()
+                ->assertJsonValidationErrors(['phone']);
+        }
 
         Http::assertNothingSent();
     }

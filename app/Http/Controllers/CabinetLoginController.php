@@ -57,12 +57,14 @@ final class CabinetLoginController extends Controller
             return $this->jsonError('Регистрация личного кабинета пока не настроена.', 503);
         }
 
+        $request->merge(['phone' => $this->normalizePhone((string) $request->input('phone'))]);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'account_name' => ['required', 'string', 'max:255'],
             'inn' => ['required', 'string', 'regex:/^\d{10}(\d{2})?$/'],
             'email' => ['required', 'string', 'email', 'max:255'],
-            'phone' => ['required', 'string', 'max:20'],
+            'phone' => ['required', 'string', 'regex:/^\+7\d{10}$/'],
             'password' => ['required', 'string', 'max:1024', 'confirmed', Password::min(8)],
             'password_confirmation' => ['required', 'string', 'max:1024'],
             'capabilities' => ['required', 'array', 'min:1'],
@@ -71,6 +73,7 @@ final class CabinetLoginController extends Controller
             'privacy_policy_accepted' => ['accepted'],
         ], [
             'inn.regex' => 'ИНН должен содержать 10 или 12 цифр.',
+            'phone.regex' => 'Введите корректный номер телефона в формате +7 (999) 999-99-99.',
             'capabilities.required' => 'Выберите хотя бы один вариант работы компании.',
             'terms_accepted.accepted' => 'Необходимо принять пользовательское соглашение.',
             'privacy_policy_accepted.accepted' => 'Необходимо принять политику обработки ПДн.',
@@ -272,6 +275,22 @@ final class CabinetLoginController extends Controller
     {
         return response()->json(['message' => $message], $status)
             ->withHeaders($this->privateHeaders());
+    }
+
+    private function normalizePhone(string $value): string
+    {
+        $trimmedValue = trim($value);
+        $digits = preg_replace('/\D+/', '', $value) ?? '';
+
+        if (strlen($digits) === 10 && ! str_starts_with($trimmedValue, '+')) {
+            $digits = '7'.$digits;
+        } elseif (strlen($digits) === 11 && str_starts_with($digits, '8')) {
+            $digits = '7'.substr($digits, 1);
+        }
+
+        return strlen($digits) === 11 && str_starts_with($digits, '7')
+            ? '+'.$digits
+            : $trimmedValue;
     }
 
     /** @return array<string, string> */
