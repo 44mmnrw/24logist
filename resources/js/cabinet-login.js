@@ -229,11 +229,6 @@ if (modal) {
     document.addEventListener('keydown', (event) => {
         if (modal.hidden) return;
 
-        if (event.key === 'Escape') {
-            close();
-            return;
-        }
-
         if (event.key !== 'Tab') return;
 
         const focusable = [...modal.querySelectorAll(focusableSelector)]

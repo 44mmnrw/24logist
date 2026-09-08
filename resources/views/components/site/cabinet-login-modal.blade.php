@@ -23,7 +23,7 @@
     aria-hidden="true"
     hidden
 >
-    <button class="cabinet-login-modal__backdrop" type="button" data-cabinet-login-close aria-label="Закрыть окно"></button>
+    <div class="cabinet-login-modal__backdrop" aria-hidden="true"></div>
 
     <div class="cabinet-login-modal__card" role="document">
         <button class="cabinet-login-modal__close" type="button" data-cabinet-login-close aria-label="Закрыть">

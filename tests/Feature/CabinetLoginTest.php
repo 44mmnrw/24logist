@@ -66,6 +66,7 @@ final class CabinetLoginTest extends TestCase
             ->assertSee('data-cabinet-registration-open', false)
             ->assertSee('data-cabinet-login-modal', false)
             ->assertSee('cabinet-login-modal__brand-logo', false)
+            ->assertSee('<div class="cabinet-login-modal__backdrop" aria-hidden="true"></div>', false)
             ->assertSee('href="#icon-x"', false)
             ->assertSee('href="#icon-eye"', false)
             ->assertSee('href="#icon-eye-off"', false)
