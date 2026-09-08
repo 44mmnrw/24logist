@@ -70,6 +70,9 @@ final class CabinetLoginTest extends TestCase
             ->assertSee('href="#icon-eye"', false)
             ->assertSee('href="#icon-eye-off"', false)
             ->assertSee('data-password-toggle', false)
+            ->assertSee('data-cabinet-password-reset-open', false)
+            ->assertSee('data-cabinet-auth-form="password-reset"', false)
+            ->assertSee(route('cabinet.password-reset'), false)
             ->assertSee('data-cabinet-auth-form="registration"', false)
             ->assertSee('Заполните форму для регистрации в системе. После регистрации проверьте почту.')
             ->assertSee('data-party-account-name', false)
@@ -82,6 +85,7 @@ final class CabinetLoginTest extends TestCase
             ->assertDontSee(self::SECRET)
             ->assertDontSee('127.0.0.1')
             ->assertDontSee('/api/v1/landing-login/tickets')
+            ->assertDontSee('/api/v1/landing-password-reset')
             ->assertDontSee('/api/v1/landing-registration');
 
         $this->assertNotSame(
@@ -207,6 +211,28 @@ final class CabinetLoginTest extends TestCase
             && $request['origin'] === 'https://landing.example.test'
             && $request['client_ip'] === '198.51.100.15'
             && $request['client_user_agent'] === 'Landing browser'
+            && $request->hasHeader('Authorization', 'Bearer '.self::SECRET));
+    }
+
+    public function test_password_reset_is_proxied_without_exposing_account_existence(): void
+    {
+        Http::fake([
+            'platform.example.test/*' => Http::response([
+                'message' => 'Если указанный email зарегистрирован, мы отправили ссылку для восстановления пароля.',
+            ]),
+        ]);
+
+        $this->withServerVariables(['REMOTE_ADDR' => '192.0.2.25'])
+            ->postJson(route('cabinet.password-reset'), ['email' => 'User@example.test'])
+            ->assertOk()
+            ->assertExactJson([
+                'message' => 'Если указанный email зарегистрирован, мы отправили ссылку для восстановления пароля.',
+            ]);
+
+        Http::assertSent(fn (Request $request): bool => $request->url() === 'https://platform.example.test/api/v1/landing-password-reset'
+            && $request['email'] === 'user@example.test'
+            && $request['origin'] === 'https://landing.example.test'
+            && $request['client_ip'] === '192.0.2.25'
             && $request->hasHeader('Authorization', 'Bearer '.self::SECRET));
     }
 

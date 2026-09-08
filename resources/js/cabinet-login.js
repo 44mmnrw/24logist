@@ -16,12 +16,20 @@ if (modal) {
     const focusableSelector = 'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled])';
 
     const errorNodeFor = (form) => form?.querySelector('[data-cabinet-auth-error]');
+    const successNodeFor = (form) => form?.querySelector('[data-cabinet-auth-success]');
 
     const showError = (form, message = '') => {
         const errorNode = errorNodeFor(form);
         if (!errorNode) return;
         errorNode.textContent = message;
         errorNode.hidden = message === '';
+    };
+
+    const showSuccess = (form, message = '') => {
+        const successNode = successNodeFor(form);
+        if (!successNode) return;
+        successNode.textContent = message;
+        successNode.hidden = message === '';
     };
 
     const resetPasswordFields = (form, clear = false) => {
@@ -140,12 +148,18 @@ if (modal) {
             tab.setAttribute('aria-selected', String(active));
             tab.tabIndex = active ? 0 : -1;
         });
-        if (tabsList) tabsList.dataset.activeTab = mode;
+        if (tabsList) {
+            tabsList.hidden = mode === 'password-reset';
+            tabsList.dataset.activeTab = mode;
+        }
 
         if (title) title.textContent = activePanel?.dataset.title || '';
         if (description) description.textContent = activePanel?.dataset.description || '';
 
-        forms.forEach((form) => showError(form));
+        forms.forEach((form) => {
+            showError(form);
+            showSuccess(form);
+        });
     };
 
     const open = (mode) => {
@@ -170,6 +184,7 @@ if (modal) {
         document.documentElement.classList.remove('cabinet-login-open');
         forms.forEach((form) => {
             showError(form);
+            showSuccess(form);
             resetPasswordFields(form, true);
         });
 
@@ -196,6 +211,19 @@ if (modal) {
             setMode(tab.dataset.cabinetAuthTab);
             modal.querySelector(`[data-cabinet-auth-panel="${currentMode}"] input:not([type="checkbox"])`)?.focus();
         });
+    });
+
+    modal.querySelector('[data-cabinet-password-reset-open]')?.addEventListener('click', () => {
+        const loginEmail = modal.querySelector('[data-cabinet-auth-form="login"] [name="email"]')?.value || '';
+        setMode('password-reset');
+        const resetEmail = modal.querySelector('[data-cabinet-auth-form="password-reset"] [name="email"]');
+        if (resetEmail) resetEmail.value = loginEmail;
+        resetEmail?.focus();
+    });
+
+    modal.querySelector('[data-cabinet-login-back]')?.addEventListener('click', () => {
+        setMode('login');
+        modal.querySelector('[data-cabinet-auth-form="login"] [name="email"]')?.focus();
     });
 
     document.addEventListener('keydown', (event) => {
@@ -250,6 +278,7 @@ if (modal) {
     forms.forEach((form) => form.addEventListener('submit', async (event) => {
         event.preventDefault();
         showError(form);
+        showSuccess(form);
 
         if (!form.checkValidity()) {
             form.reportValidity();
@@ -259,10 +288,16 @@ if (modal) {
         const mode = form.dataset.cabinetAuthForm;
         const submitUrl = mode === 'registration'
             ? modal.dataset.registrationSubmitUrl
-            : modal.dataset.loginSubmitUrl;
+            : mode === 'password-reset'
+                ? modal.dataset.passwordResetSubmitUrl
+                : modal.dataset.loginSubmitUrl;
 
         if (!submitUrl) {
-            showError(form, mode === 'registration' ? 'Регистрация пока не настроена.' : 'Вход пока не настроен.');
+            showError(form, mode === 'registration'
+                ? 'Регистрация пока не настроена.'
+                : mode === 'password-reset'
+                    ? 'Восстановление пароля пока не настроено.'
+                    : 'Вход пока не настроен.');
             return;
         }
 
@@ -282,7 +317,11 @@ if (modal) {
                 terms_accepted: formData.has('terms_accepted'),
                 privacy_policy_accepted: formData.has('privacy_policy_accepted'),
             }
-            : {
+            : mode === 'password-reset'
+                ? {
+                    email: String(formData.get('email') ?? '').trim(),
+                }
+                : {
                 email: String(formData.get('email') ?? '').trim(),
                 password: String(formData.get('password') ?? ''),
                 remember: formData.has('remember'),
@@ -302,11 +341,20 @@ if (modal) {
         if (submitButton) {
             if (mode === 'registration') form.dataset.submitting = 'true';
             submitButton.disabled = true;
-            submitButton.textContent = mode === 'registration' ? 'Создаём кабинет…' : 'Входим…';
+            submitButton.textContent = mode === 'registration'
+                ? 'Создаём кабинет…'
+                : mode === 'password-reset'
+                    ? 'Отправляем…'
+                    : 'Входим…';
         }
 
         try {
             const payload = await postJson(submitUrl, requestBody);
+
+            if (mode === 'password-reset') {
+                showSuccess(form, payload.message || 'Если указанный email зарегистрирован, мы отправили ссылку для восстановления пароля.');
+                return;
+            }
 
             if (payload.method !== 'POST' || !payload.handoff_url) {
                 throw new Error('Платформа не подготовила безопасный переход.');
@@ -315,9 +363,11 @@ if (modal) {
             await submitHandoff(payload.handoff_url);
         } catch (error) {
             showError(form, error instanceof Error ? error.message : 'Не удалось выполнить запрос. Попробуйте ещё раз.');
-            const passwordInputs = [...form.querySelectorAll('[data-password-input]')];
-            resetPasswordFields(form, true);
-            passwordInputs[0]?.focus();
+            if (mode !== 'password-reset') {
+                const passwordInputs = [...form.querySelectorAll('[data-password-input]')];
+                resetPasswordFields(form, true);
+                passwordInputs[0]?.focus();
+            }
         } finally {
             if (submitButton) {
                 submitButton.textContent = defaultText;

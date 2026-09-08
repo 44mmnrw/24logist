@@ -11,6 +11,7 @@
     class="cabinet-login-modal"
     data-cabinet-login-modal
     @if ($loginEnabled) data-login-submit-url="{{ route('cabinet.login') }}" @endif
+    @if ($loginEnabled) data-password-reset-submit-url="{{ route('cabinet.password-reset') }}" @endif
     @if ($registrationEnabled) data-registration-submit-url="{{ route('cabinet.register') }}" @endif
     @if ($registrationEnabled) data-party-suggestions-url="{{ route('cabinet.register.party-suggestions') }}" @endif
     data-handoff-url="{{ route('cabinet.handoff') }}"
@@ -74,9 +75,34 @@
                         {{ $siteSettings->cabinet_login_submit_text ?: 'Войти' }}
                     </button>
 
-                    @if (filled($siteSettings->cabinet_login_forgot_url))
-                        <a class="cabinet-login-modal__forgot cabinet-login-modal__field--wide" href="{{ $siteSettings->cabinet_login_forgot_url }}">{{ $siteSettings->cabinet_login_forgot_text ?: 'Забыли пароль?' }}</a>
-                    @endif
+                    <button class="cabinet-login-modal__forgot cabinet-login-modal__field--wide" type="button" data-cabinet-password-reset-open>
+                        {{ $siteSettings->cabinet_login_forgot_text ?: 'Забыли пароль?' }}
+                    </button>
+                </form>
+            </section>
+
+            <section
+                data-cabinet-auth-panel="password-reset"
+                data-title="Восстановление пароля"
+                data-description="Введите email, указанный при регистрации в ЛогистРу. Мы отправим ссылку для создания нового пароля."
+                hidden
+            >
+                <form class="cabinet-login-modal__form" data-cabinet-auth-form="password-reset" novalidate>
+                    <label class="cabinet-login-modal__field cabinet-login-modal__field--wide">
+                        <span>Email</span>
+                        <input type="email" name="email" autocomplete="email" inputmode="email" required maxlength="255">
+                    </label>
+
+                    <p class="cabinet-login-modal__error cabinet-login-modal__field--wide" data-cabinet-auth-error role="alert" hidden></p>
+                    <p class="cabinet-login-modal__success cabinet-login-modal__field--wide" data-cabinet-auth-success role="status" hidden></p>
+
+                    <button class="cabinet-login-modal__submit cabinet-login-modal__field--wide" type="submit" data-default-text="Отправить ссылку">
+                        Отправить ссылку
+                    </button>
+
+                    <button class="cabinet-login-modal__forgot cabinet-login-modal__field--wide" type="button" data-cabinet-login-back>
+                        Вернуться ко входу
+                    </button>
                 </form>
             </section>
         @endif

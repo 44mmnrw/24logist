@@ -11,6 +11,8 @@ final class CabinetLoginClient
 {
     private const LOGIN_PATH = '/api/v1/landing-login/tickets';
 
+    private const PASSWORD_RESET_PATH = '/api/v1/landing-password-reset';
+
     private const REGISTRATION_PATH = '/api/v1/landing-registration';
 
     private const PARTY_SUGGESTIONS_PATH = '/api/v1/landing-registration/party-suggestions';
@@ -27,6 +29,19 @@ final class CabinetLoginClient
             'email' => mb_strtolower(trim($email)),
             'password' => $password,
             'remember' => $remember,
+            'origin' => $this->settings->cabinetLoginOrigin(),
+            'client_ip' => $clientIp,
+        ]);
+    }
+
+    public function requestPasswordReset(string $email, string $clientIp): Response
+    {
+        if (! $this->settings->cabinetLoginConfigured()) {
+            throw new RuntimeException('Восстановление пароля пока не настроено.');
+        }
+
+        return $this->post(self::PASSWORD_RESET_PATH, [
+            'email' => mb_strtolower(trim($email)),
             'origin' => $this->settings->cabinetLoginOrigin(),
             'client_ip' => $clientIp,
         ]);

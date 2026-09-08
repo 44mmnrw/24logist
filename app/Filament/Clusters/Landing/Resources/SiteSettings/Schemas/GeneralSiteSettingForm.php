@@ -577,13 +577,8 @@ final class GeneralSiteSettingForm
                         ->required()
                         ->maxLength(100)
                         ->default('Войти'),
-                    TextInput::make('cabinet_login_forgot_url')
-                        ->label('Ссылка «Забыли пароль?»')
-                        ->url()
-                        ->maxLength(2048)
-                        ->placeholder('https://platform.example.ru/password/reset'),
                     TextInput::make('cabinet_login_forgot_text')
-                        ->label('Текст ссылки восстановления пароля')
+                        ->label('Текст кнопки восстановления пароля')
                         ->required()
                         ->maxLength(100)
                         ->default('Забыли пароль?'),

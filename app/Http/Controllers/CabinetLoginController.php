@@ -109,6 +109,34 @@ final class CabinetLoginController extends Controller
         }
     }
 
+    public function forgotPassword(Request $request): JsonResponse
+    {
+        if (! $this->settings->cabinetLoginConfigured()) {
+            return $this->jsonError('Восстановление пароля пока не настроено.', 503);
+        }
+
+        $validated = $request->validate([
+            'email' => ['required', 'string', 'email', 'max:255'],
+        ]);
+
+        try {
+            $response = $this->client->requestPasswordReset(
+                $validated['email'],
+                (string) $request->ip(),
+            );
+
+            if (! $response->successful()) {
+                return $this->platformError($response, false);
+            }
+
+            return response()->json([
+                'message' => 'Если указанный email зарегистрирован, мы отправили ссылку для восстановления пароля.',
+            ])->withHeaders($this->privateHeaders());
+        } catch (RuntimeException) {
+            return $this->jsonError('Платформа временно недоступна. Попробуйте ещё раз.', 503);
+        }
+    }
+
     public function partySuggestions(Request $request): JsonResponse
     {
         if (! $this->settings->cabinetRegistrationConfigured()) {

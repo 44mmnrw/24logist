@@ -75,6 +75,10 @@ Route::post('/cabinet/login', [CabinetLoginController::class, 'login'])
     ->middleware('throttle:8,1,cabinet-login:')
     ->name('cabinet.login');
 
+Route::post('/cabinet/forgot-password', [CabinetLoginController::class, 'forgotPassword'])
+    ->middleware('throttle:5,1,cabinet-password-reset:')
+    ->name('cabinet.password-reset');
+
 Route::post('/cabinet/register', [CabinetLoginController::class, 'register'])
     ->middleware('throttle:5,1,cabinet-register:')
     ->name('cabinet.register');

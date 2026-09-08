@@ -5029,7 +5029,16 @@ html.cabinet-login-open {
 }
 
 .cabinet-login-modal__submit:disabled { cursor: not-allowed; opacity: 0.55; }
-.cabinet-login-modal__forgot { justify-self: center; color: #1d4ed8; font-size: 13px; }
+.cabinet-login-modal__forgot {
+    justify-self: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #1d4ed8;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
 
 .cabinet-login-modal__error {
     margin: 0;
@@ -5037,6 +5046,16 @@ html.cabinet-login-open {
     border-radius: 9px;
     background: #fff1f2;
     color: #be123c;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.cabinet-login-modal__success {
+    margin: 0;
+    padding: 8px 11px;
+    border-radius: 9px;
+    background: #ecfdf5;
+    color: #047857;
     font-size: 13px;
     line-height: 1.4;
 }
