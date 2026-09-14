@@ -11,7 +11,7 @@
     <x-site.favicon />
     <x-fonts.preload />
     @stack('structured-data')
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/community.css', 'resources/js/app.js'])
 </head>
 <body>
 <div class="landing-page community-page">

@@ -7,7 +7,7 @@
     <header class="route-calculator-tool__header">
         <div>
             @unless ($embedded ?? false)
-                <a class="community-back" href="{{ url('/') }}">← На главную</a>
+                <a class="route-calculator-back" href="{{ url('/') }}">← На главную</a>
                 <h1>Карта и расчёт маршрута</h1>
             @else
                 <h3>Карта и расчёт маршрута</h3>

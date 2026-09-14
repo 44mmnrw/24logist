@@ -35,6 +35,8 @@ final class RouteCalculatorTest extends TestCase
         $this->get(route('route-calculator.index'))
             ->assertOk()
             ->assertSee('Карта и расчёт маршрута')
+            ->assertSee('class="route-calculator-page__main"', false)
+            ->assertSee('class="route-calculator-back"', false)
             ->assertDontSee('Сообщество 24Logist')
             ->assertDontSee(self::SECRET);
 

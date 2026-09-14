@@ -9,7 +9,7 @@
     <x-site.favicon />
     <x-fonts.preload />
     <script src="https://st.max.ru/js/max-web-app.js"></script>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/community.css', 'resources/js/app.js'])
 </head>
 <body>
 <main class="landing-page community-page community-main">

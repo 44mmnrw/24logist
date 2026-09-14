@@ -15,7 +15,7 @@
 <body>
 <div class="landing-page route-calculator-page">
     <x-landing.header />
-    <main class="community-main">
+    <main class="route-calculator-page__main">
     <div class="landing-shell">
         @include('components.landing.route-calculator-tool')
     </div>

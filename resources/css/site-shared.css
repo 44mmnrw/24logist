@@ -1,0 +1,160 @@
+/* Общие элементы сайта: контейнер, кнопки, логотип и подвал. */
+body {
+    background: #f8fafc;
+    color: #1f2a3d;
+    font-family: var(--font-family);
+}
+.landing-page h1,
+.landing-page h2,
+.landing-page h3,
+.landing-page p {
+    margin: 0;
+}
+
+.landing-shell {
+    width: 100%;
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: 24px;
+}
+
+.section-kicker,
+.landing-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 22px;
+    border: 1px solid rgba(29, 78, 216, 0.18);
+    border-radius: 8px;
+    background: #ecf0f7;
+    color: #1d4ed8;
+    font-size: 12px;
+    line-height: 16px;
+    padding: 3px 9px;
+}
+
+.landing-badge img,
+.landing-badge .landing-icon,
+.section-kicker img,
+.section-kicker .landing-icon {
+    width: 12px;
+    height: 12px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    height: 40px;
+    padding: 0 16px;
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 500;
+    background: transparent;
+    white-space: nowrap;
+}
+
+.btn img,
+.btn .landing-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.btn--sm { height: 36px; }
+.btn--full { width: 100%; }
+.btn--primary { background: #1d4ed8; color: #fff; }
+.btn--ghost { background: #fff; border-color: rgba(0, 0, 0, 0.1); color: #0a0a0a; }
+.btn--ghost-dark { border-color: rgba(255, 255, 255, 0.4); color: #fff; }
+
+.landing-page section[id] {
+    scroll-margin-top: 88px;
+}
+
+.brand { display: flex; align-items: center; }
+.brand-logo {
+    display: block;
+    width: auto;
+    max-width: 180px;
+    height: 32px;
+    object-fit: contain;
+}
+.brand-logo--footer {
+    height: 28px;
+    filter: brightness(0) invert(1);
+}
+.brand-logo--mobile { height: 18px; }
+
+.landing-icon {
+    display: block;
+    width: 1em;
+    height: 1em;
+    flex-shrink: 0;
+}
+
+.landing-icon-sprite {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+.landing-footer {
+    margin-top: 0;
+    background: #0f172b;
+    color: #fff;
+}
+.landing-footer__top {
+    padding-top: 56px;
+    padding-bottom: 56px;
+    display: grid;
+    grid-template-columns: minmax(220px, 1.25fr) repeat(4, minmax(0, 1fr));
+    gap: 24px;
+}
+.landing-footer__brand,
+.landing-footer__col { min-width: 0; }
+.landing-footer__description { margin-top: 16px; color: #90a1b9; font-size: 14px; line-height: 1.5; max-width: 278px; }
+.landing-footer__description > :first-child { margin-top: 0; }
+.landing-footer__description > :last-child { margin-bottom: 0; }
+.landing-footer__description p,
+.landing-footer__description ul,
+.landing-footer__description ol { margin-block: 8px; }
+.landing-footer__description ul,
+.landing-footer__description ol { padding-left: 20px; }
+.landing-footer__description a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.landing-footer__col { display: flex; flex-direction: column; gap: 8px; }
+.landing-footer__col h3 { font-size: 16px; line-height: 24px; font-weight: 600; color: #fff; }
+.landing-footer__col a { font-size: 14px; line-height: 21px; color: #90a1b9; display: inline-flex; align-items: center; gap: 8px; }
+.landing-footer__col a img,
+.landing-footer__col a .landing-icon { width: 16px; height: 16px; }
+.landing-footer__bottom { border-top: 1px solid #1d293d; }
+.landing-footer__bottom-shell {
+    min-height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 13px; line-height: 19.5px; color: #62748e;
+}
+.landing-footer__bottom-shell a {
+    color: #90a1b9;
+    text-decoration: none;
+}
+.landing-footer__bottom-shell a:hover {
+    color: #fff;
+}
+
+@media (max-width: 1024px) {
+    .landing-footer__top {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .landing-footer__brand {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 760px) {
+    .landing-shell { padding-inline: 16px; }
+    .landing-footer__bottom-shell { flex-direction: column; justify-content: center; gap: 8px; padding-block: 8px; }
+    .landing-footer__top { grid-template-columns: 1fr; }
+    .landing-footer__brand { grid-column: auto; }
+}
