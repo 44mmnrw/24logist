@@ -33,7 +33,6 @@
                 <div class="community-toolbar__actions">
                     <a class="community-toolbar__notifications" href="{{ route('community.notifications') }}" aria-label="Уведомления{{ $unreadNotifications > 0 ? ', новых: '.$unreadNotifications : '' }}">
                         <x-community.icon name="bell" size="19" />
-                        <span class="community-toolbar__notifications-label">Уведомления</span>
                         @if ($unreadNotifications > 0)<span class="community-toolbar__unread" aria-hidden="true">{{ $unreadNotifications }}</span>@endif
                     </a>
                     <details class="community-toolbar__menu">

@@ -92,8 +92,9 @@
     position: relative;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    min-height: 40px;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
     color: #34506f;
 }
 
@@ -151,6 +152,9 @@
 }
 
 .community-toolbar__unread {
+    position: absolute;
+    top: -4px;
+    right: -4px;
     display: grid;
     min-width: 18px;
     height: 18px;
@@ -2489,23 +2493,6 @@
     .community-toolbar__search {
         grid-column: 1 / -1;
         grid-row: 2;
-    }
-}
-
-@media (max-width: 900px) {
-    .community-toolbar__notifications-label {
-        display: none;
-    }
-
-    .community-toolbar__notifications {
-        justify-content: center;
-        width: 40px;
-    }
-
-    .community-toolbar__unread {
-        position: absolute;
-        top: -4px;
-        right: -4px;
     }
 }
 
