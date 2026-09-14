@@ -3,6 +3,25 @@ const photoPreviewUrls = new WeakMap();
 let avatarPreviewUrl = null;
 let richEditorModule = null;
 
+const sortDropdowns = [...document.querySelectorAll('[data-community-sort] details')];
+
+if (sortDropdowns.length) {
+    document.addEventListener('click', (event) => {
+        sortDropdowns.forEach((dropdown) => {
+            if (dropdown.open && !dropdown.contains(event.target)) dropdown.open = false;
+        });
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        sortDropdowns.forEach((dropdown) => {
+            if (!dropdown.open) return;
+            dropdown.open = false;
+            dropdown.querySelector('summary')?.focus();
+        });
+    });
+}
+
 if (document.querySelector('[data-rich-editor]')) {
     import('./community-rich-editor.js').then((module) => {
         richEditorModule = module;

@@ -8,18 +8,28 @@
     <section class="community-feed">
         <h1 class="community-feed__heading">{{ $activeCategory?->name ?: 'Обсуждения сообщества' }}</h1>
 
-        <nav class="community-sort" aria-label="Сортировка тем">
-            <span class="community-sort__label">Сортировка:</span>
-            <a @class(['is-active' => $sort === 'hot']) href="{{ request()->fullUrlWithQuery(['sort' => 'hot', 'period' => null, 'page' => null]) }}"><x-community.icon name="flame" />Актуальное</a>
-            <a @class(['is-active' => $sort === 'new']) href="{{ request()->fullUrlWithQuery(['sort' => 'new', 'period' => null, 'page' => null]) }}"><x-community.icon name="sparkles" />Новое</a>
-            <a @class(['is-active' => $sort === 'top']) href="{{ request()->fullUrlWithQuery(['sort' => 'top', 'page' => null]) }}"><x-community.icon name="trophy" />Лучшее</a>
-            <a @class(['is-active' => $sort === 'unanswered']) href="{{ request()->fullUrlWithQuery(['sort' => 'unanswered', 'period' => null, 'page' => null]) }}"><x-community.icon name="message-circle" />Ждут ответа</a>
-            @if ($sort === 'top')
-                <select aria-label="Период" onchange="location.href=this.value">
-                    @foreach (['day' => 'Сутки', 'week' => 'Неделя', 'month' => 'Месяц', 'all' => 'Всё время'] as $value => $label)
-                        <option value="{{ request()->fullUrlWithQuery(['period' => $value, 'page' => null]) }}" @selected($period === $value)>{{ $label }}</option>
+        @php($sortLabels = ['hot' => 'Актуальное', 'new' => 'Новое', 'top' => 'Лучшее', 'unanswered' => 'Ждут ответа'])
+        <nav class="community-sort" aria-label="Сортировка тем" data-community-sort>
+            <details class="community-sort__dropdown">
+                <summary>{{ $sortLabels[$sort] }}<x-community.icon name="chevron-down" size="15" /></summary>
+                <div class="community-sort__menu">
+                    <span class="community-sort__menu-label">Сортировка по</span>
+                    @foreach ($sortLabels as $value => $label)
+                        <a @class(['is-active' => $sort === $value]) href="{{ request()->fullUrlWithQuery(['sort' => $value, 'period' => $value === 'top' ? $period : null, 'page' => null]) }}" @if ($sort === $value) aria-current="page" @endif>{{ $label }}</a>
                     @endforeach
-                </select>
+                </div>
+            </details>
+            @if ($sort === 'top')
+                @php($periodLabels = ['day' => 'Сутки', 'week' => 'Неделя', 'month' => 'Месяц', 'all' => 'Всё время'])
+                <details class="community-sort__dropdown">
+                    <summary aria-label="Период: {{ $periodLabels[$period] }}">{{ $periodLabels[$period] }}<x-community.icon name="chevron-down" size="15" /></summary>
+                    <div class="community-sort__menu">
+                        <span class="community-sort__menu-label">Период</span>
+                        @foreach ($periodLabels as $value => $label)
+                            <a @class(['is-active' => $period === $value]) href="{{ request()->fullUrlWithQuery(['period' => $value, 'page' => null]) }}" @if ($period === $value) aria-current="page" @endif>{{ $label }}</a>
+                        @endforeach
+                    </div>
+                </details>
             @endif
         </nav>
 
