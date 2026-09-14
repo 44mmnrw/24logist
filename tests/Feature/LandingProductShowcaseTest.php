@@ -34,7 +34,10 @@ class LandingProductShowcaseTest extends TestCase
             'landing' => app(LandingPageService::class),
         ])->render();
 
-        $this->assertSame(1, substr_count($html, 'data-scroll-slide'));
+        $this->assertSame(1, substr_count($html, 'data-product-slide'));
+        $this->assertStringContainsString('data-product-carousel', $html);
+        $this->assertStringNotContainsString('data-product-select', $html);
+        $this->assertStringNotContainsString('data-scroll-story', $html);
         $this->assertStringContainsString('список заявок', $html);
         $this->assertStringContainsString('указанием менеджера, статуса документа и быстрыми действиями', $html);
         $this->assertStringContainsString('id="product-showcase"', $html);
@@ -74,7 +77,9 @@ class LandingProductShowcaseTest extends TestCase
             'landing' => app(LandingPageService::class),
         ])->render();
 
-        $this->assertSame(2, substr_count($html, 'data-scroll-slide'));
+        $this->assertSame(2, substr_count($html, 'data-product-slide'));
+        $this->assertSame(2, substr_count($html, 'data-product-select'));
+        $this->assertStringContainsString('loading="eager"', $html);
         $this->assertLessThan(strpos($html, 'список заявок'), strpos($html, 'Второй баннер'));
         $this->assertStringContainsString('Скриншот заявок', $html);
     }
