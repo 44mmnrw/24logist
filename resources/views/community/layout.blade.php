@@ -19,7 +19,7 @@
         <div class="landing-shell community-toolbar__inner">
             <div class="community-toolbar__identity">
                 <a class="community-toolbar__logo" href="{{ url('/') }}" aria-label="На главную страницу 24Logist"><x-landing.logo /></a>
-                <a class="community-toolbar__brand" href="{{ route('community.index') }}">Сообщество <span>24Logist</span></a>
+                <a class="community-toolbar__brand" href="{{ route('community.index') }}">Общение</a>
             </div>
             @php($searchAction = request()->routeIs('community.categories.show') ? route('community.categories.show', request()->route('category')) : route('community.index'))
             @php($headerSearch = is_string(request()->query('q')) ? mb_substr(trim(request()->query('q')), 0, 100) : '')
