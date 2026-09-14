@@ -1,7 +1,7 @@
 @import "./base/fonts.css";
 @import "./base/root.css";
 @import "./base/reset.css";
-@import "./site-shared.css";
+@import "/resources/css/site-shared.css";
 
 /* Основа и шапка */
 
@@ -299,16 +299,6 @@
     color: #11284c;
 }
 
-.community-search button {
-    padding: 9px 16px;
-    border: 0;
-    border-radius: 9px;
-    background: #1d4ed8;
-    color: #fff;
-    font-weight: 600;
-    cursor: pointer;
-}
-
 .community-search a {
     padding: 9px;
     color: #53657a;
@@ -337,11 +327,6 @@
 .community-toolbar__search input {
     width: 100%;
     min-height: 40px;
-}
-
-.community-toolbar__search button {
-    min-height: 40px;
-    white-space: nowrap;
 }
 
 .community-toolbar__search a {

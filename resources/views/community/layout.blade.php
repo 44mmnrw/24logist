@@ -25,8 +25,7 @@
             @php($headerSearch = is_string(request()->query('q')) ? mb_substr(trim(request()->query('q')), 0, 100) : '')
             <form class="community-search community-toolbar__search" method="GET" action="{{ $searchAction }}" role="search">
                 <label for="community-search-input" class="sr-only">Поиск по темам</label>
-                <input id="community-search-input" type="search" name="q" value="{{ $headerSearch }}" maxlength="100" placeholder="Найти тему или ответ" autocomplete="off">
-                <button type="submit">Найти</button>
+                <input id="community-search-input" type="search" name="q" value="{{ $headerSearch }}" maxlength="100" placeholder="Найти тему или ответ" autocomplete="off" enterkeyhint="search">
                 @if ($headerSearch !== '')<a href="{{ $searchAction }}" aria-label="Сбросить поиск">Сбросить</a>@endif
             </form>
             @auth('community')

@@ -379,6 +379,8 @@ class CommunityTest extends TestCase
             ->assertSeeInOrder(['<header class="community-toolbar">', '<form class="community-search community-toolbar__search"', '</header>', '<main class="community-main">'], false)
             ->assertSee('action="'.route('community.index').'"', false)
             ->assertSee('value="ЭТрН"', false)
+            ->assertSee('enterkeyhint="search"', false)
+            ->assertDontSee('<button type="submit">Найти</button>', false)
             ->assertSee('Как оформить ЭТрН')->assertDontSee('Работа с водителями');
         $this->get(route('community.categories.show', ['category' => $matching->category, 'q' => 'ЭТрН']))
             ->assertOk()
