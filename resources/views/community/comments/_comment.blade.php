@@ -18,7 +18,7 @@
             @if ($post->accepted_comment_id === $comment->id)<span class="community-badge community-badge--resolved">Принятый ответ</span>@endif
             <div class="community-comment__actions">
                 @if ($comment->status === 'published')@include('community.shared._vote', ['type' => 'comment', 'target' => $comment, 'currentVote' => $commentVotes->get($comment->id), 'variant' => 'inline'])@endif
-                <button class="community-action-button community-action-share" type="button" data-share-url="{{ $post->getUrl().'#comment-'.$comment->id }}"><span aria-hidden="true">↗</span><span data-share-label>Поделиться</span></button>
+                <button class="community-action-button community-action-share" type="button" data-share-url="{{ $post->getUrl().'#comment-'.$comment->id }}"><x-community.icon name="share-3" size="15" /><span data-share-label>Поделиться</span></button>
                 @auth('community')
                     @if ($comment->status === 'published' && $post->accepted_comment_id !== $comment->id && ($post->community_user_id === auth('community')->id() || auth('community')->user()->isModerator()))
                         <form method="POST" action="{{ route('community.posts.accept_answer', [$post, $comment]) }}">@csrf<button type="submit">Отметить решением</button></form>

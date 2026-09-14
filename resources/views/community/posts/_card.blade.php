@@ -16,14 +16,14 @@
         </div>
         <h2 id="community-post-title-{{ $post->id }}">{{ $post->title }}</h2>
         @if ($post->external_url)
-            <a class="community-external" href="{{ $post->external_url }}" rel="ugc nofollow noopener" target="_blank">{{ parse_url($post->external_url, PHP_URL_HOST) }} ↗</a>
+            <a class="community-external" href="{{ $post->external_url }}" rel="ugc nofollow noopener" target="_blank"><span>{{ parse_url($post->external_url, PHP_URL_HOST) }}</span><x-community.icon name="external-link" size="15" /></a>
         @elseif ($post->body_markdown)
             <p>{{ \Illuminate\Support\Str::limit(strip_tags($post->body_html), 240) }}</p>
         @endif
         @include('community.photos._gallery', ['photos' => $post->photos, 'feed' => true])
         <div class="community-post-card__footer">
-            <a class="community-action-chip community-action-chip--comments" href="{{ $post->getUrl() }}#comments"><span aria-hidden="true">◯</span>{{ $post->comments_count }} {{ \App\Support\CommunityText::comments($post->comments_count) }}</a>
-            <button class="community-action-chip community-action-chip--share" type="button" data-share-url="{{ $post->getUrl() }}"><span aria-hidden="true">↗</span><span data-share-label>Поделиться</span></button>
+            <a class="community-action-chip community-action-chip--comments" href="{{ $post->getUrl() }}#comments"><x-community.icon name="message-circle" size="16" />{{ $post->comments_count }} {{ \App\Support\CommunityText::comments($post->comments_count) }}</a>
+            <button class="community-action-chip community-action-chip--share" type="button" data-share-url="{{ $post->getUrl() }}"><x-community.icon name="share-3" size="16" /><span data-share-label>Поделиться</span></button>
             @if ($post->is_pinned)<span class="community-badge">Закреплено</span>@endif
             @if ($post->locked_at)<span class="community-badge">Закрыто</span>@endif
             @if ($post->accepted_comment_id)<span class="community-badge community-badge--resolved">Есть решение</span>@endif

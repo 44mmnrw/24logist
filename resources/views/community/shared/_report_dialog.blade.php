@@ -4,7 +4,7 @@
             <span class="section-kicker">Обращение модераторам</span>
             <h2 id="community-report-title">Пожаловаться</h2>
         </div>
-        <button class="community-report-dialog__close" type="button" data-report-close aria-label="Закрыть">×</button>
+        <button class="community-report-dialog__close" type="button" data-report-close aria-label="Закрыть"><x-community.icon name="x" size="20" /></button>
     </div>
 
     <form method="POST" action="{{ route('community.report') }}" class="community-report-form">

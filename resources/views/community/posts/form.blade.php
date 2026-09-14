@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="landing-shell community-form-shell">
-    <a class="community-back" href="{{ $post->exists ? $post->getUrl() : route('community.index') }}">← Назад</a>
+    <a class="community-back" href="{{ $post->exists ? $post->getUrl() : route('community.index') }}"><x-community.icon name="arrow-left" />Назад</a>
     <div class="community-form-card">
         <h1>{{ $post->exists ? 'Редактировать тему' : 'Создать тему' }}</h1>
         <form method="POST" action="{{ $post->exists ? route('community.posts.update', $post) : route('community.posts.store') }}" class="community-form" enctype="multipart/form-data">

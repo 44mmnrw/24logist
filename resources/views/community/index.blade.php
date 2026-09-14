@@ -30,9 +30,9 @@
 
         <nav class="community-sort" aria-label="Сортировка тем">
             <span class="community-sort__label">Сортировка:</span>
-            <a @class(['is-active' => $sort === 'hot']) href="{{ request()->fullUrlWithQuery(['sort' => 'hot', 'period' => null, 'page' => null]) }}">🔥 Актуальное</a>
-            <a @class(['is-active' => $sort === 'new']) href="{{ request()->fullUrlWithQuery(['sort' => 'new', 'period' => null, 'page' => null]) }}">✦ Новое</a>
-            <a @class(['is-active' => $sort === 'top']) href="{{ request()->fullUrlWithQuery(['sort' => 'top', 'page' => null]) }}">↑ Лучшее</a>
+            <a @class(['is-active' => $sort === 'hot']) href="{{ request()->fullUrlWithQuery(['sort' => 'hot', 'period' => null, 'page' => null]) }}"><x-community.icon name="flame" />Актуальное</a>
+            <a @class(['is-active' => $sort === 'new']) href="{{ request()->fullUrlWithQuery(['sort' => 'new', 'period' => null, 'page' => null]) }}"><x-community.icon name="sparkles" />Новое</a>
+            <a @class(['is-active' => $sort === 'top']) href="{{ request()->fullUrlWithQuery(['sort' => 'top', 'page' => null]) }}"><x-community.icon name="trophy" />Лучшее</a>
             @if ($sort === 'top')
                 <select aria-label="Период" onchange="location.href=this.value">
                     @foreach (['day' => 'Сутки', 'week' => 'Неделя', 'month' => 'Месяц', 'all' => 'Всё время'] as $value => $label)

@@ -38,7 +38,7 @@
         </header>
         <div class="community-topic__content">
             @if ($post->external_url)
-                <a class="community-link-topic" href="{{ $post->external_url }}" rel="ugc nofollow noopener" target="_blank">Открыть ссылку: {{ parse_url($post->external_url, PHP_URL_HOST) }} ↗</a>
+                <a class="community-link-topic" href="{{ $post->external_url }}" rel="ugc nofollow noopener" target="_blank"><span>Открыть ссылку: {{ parse_url($post->external_url, PHP_URL_HOST) }}</span><x-community.icon name="external-link" size="17" /></a>
             @else
                 <div class="community-markdown">{!! $post->body_html !!}</div>
             @endif
@@ -46,8 +46,8 @@
         </div>
         <div class="community-topic__actions">
             @include('community.shared._vote', ['type' => 'post', 'target' => $post, 'currentVote' => $postVote, 'variant' => 'inline'])
-            <a class="community-action-chip community-action-chip--comments" href="#comments"><span aria-hidden="true">◯</span>{{ $post->comments_count }} {{ \App\Support\CommunityText::comments($post->comments_count) }}</a>
-            <button class="community-action-chip community-action-chip--share" type="button" data-share-url="{{ $post->getUrl() }}"><span aria-hidden="true">↗</span><span data-share-label>Поделиться</span></button>
+            <a class="community-action-chip community-action-chip--comments" href="#comments"><x-community.icon name="message-circle" size="16" />{{ $post->comments_count }} {{ \App\Support\CommunityText::comments($post->comments_count) }}</a>
+            <button class="community-action-chip community-action-chip--share" type="button" data-share-url="{{ $post->getUrl() }}"><x-community.icon name="share-3" size="16" /><span data-share-label>Поделиться</span></button>
             @auth('community')
                 @if ($post->accepted_comment_id && ($post->community_user_id === auth('community')->id() || auth('community')->user()->isModerator()))
                     <form method="POST" action="{{ route('community.posts.clear_answer', $post) }}">@csrf @method('DELETE')<button class="community-action-chip" type="submit">Снять решение</button></form>
