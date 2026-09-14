@@ -12,6 +12,9 @@
                 <span>•</span>
                 @if ($post->author)<a href="{{ route('community.profile', $post->author) }}" title="{{ '@'.$post->author->username }}">{{ $post->author->displayName() }}</a>@else<span>[удалён]</span>@endif
                 <span>•</span><time datetime="{{ $post->published_at?->toIso8601String() }}">{{ \App\Support\CommunityDate::relative($post->published_at) }}</time>
+                @if ($post->is_pinned)<span class="community-post-card__status">Закреплено</span>@endif
+                @if ($post->locked_at)<span class="community-post-card__status">Закрыто</span>@endif
+                @if ($post->accepted_comment_id)<span class="community-post-card__status community-post-card__status--resolved">Есть решение</span>@endif
             </div>
         </div>
         <h2 id="community-post-title-{{ $post->id }}">{{ $post->title }}</h2>
@@ -24,11 +27,8 @@
         <div class="community-post-card__footer">
             @include('community.shared._awards', ['type' => 'post', 'target' => $post, 'social' => $social[$post->id] ?? []])
             @include('community.shared._reactions', ['type' => 'post', 'target' => $post, 'social' => $social[$post->id] ?? []])
-            <a class="community-action-chip community-action-chip--comments" href="{{ $post->getUrl() }}#comments"><x-community.icon name="message-circle" size="16" />{{ $post->comments_count }} {{ \App\Support\CommunityText::comments($post->comments_count) }}</a>
-            <button class="community-action-chip community-action-chip--share" type="button" data-share-url="{{ $post->getUrl() }}"><x-community.icon name="share-3" size="16" /><span data-share-label>Поделиться</span></button>
-            @if ($post->is_pinned)<span class="community-badge">Закреплено</span>@endif
-            @if ($post->locked_at)<span class="community-badge">Закрыто</span>@endif
-            @if ($post->accepted_comment_id)<span class="community-badge community-badge--resolved">Есть решение</span>@endif
+            <a class="community-action-chip community-action-chip--comments" href="{{ $post->getUrl() }}#comments" aria-label="{{ $post->comments_count }} {{ \App\Support\CommunityText::comments($post->comments_count) }}"><x-community.icon name="message-circle" size="16" /><span>{{ $post->comments_count }}</span><span class="community-action-chip__label">{{ \App\Support\CommunityText::comments($post->comments_count) }}</span></a>
+            <button class="community-action-chip community-action-chip--share" type="button" data-share-url="{{ $post->getUrl() }}" aria-label="Поделиться"><x-community.icon name="share-3" size="16" /><span data-share-label>Поделиться</span></button>
         </div>
     </div>
 </article>
