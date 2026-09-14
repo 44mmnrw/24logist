@@ -13,6 +13,7 @@ use App\Support\LandingGrowthForm;
 use App\Support\LandingHeroCarouselForm;
 use App\Support\LandingMobileForm;
 use App\Support\LandingPricingForm;
+use App\Support\LandingProductShowcaseForm;
 use App\Support\LandingQuizForm;
 use Filament\Resources\Pages\EditRecord;
 
@@ -27,7 +28,7 @@ class EditLandingSection extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        return LandingGrowthForm::hydrate(
+        return LandingProductShowcaseForm::hydrate(LandingGrowthForm::hydrate(
             LandingDeadlineForm::hydrate(
                 LandingFunctionalForm::hydrate(
                     LandingQuizForm::hydrate(
@@ -41,12 +42,12 @@ class EditLandingSection extends EditRecord
                     ),
                 ),
             ),
-        );
+        ));
     }
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        return LandingGrowthForm::dehydrate(
+        return LandingProductShowcaseForm::dehydrate(LandingGrowthForm::dehydrate(
             LandingDeadlineForm::dehydrate(
                 LandingFunctionalForm::dehydrate(
                     LandingQuizForm::dehydrate(
@@ -60,7 +61,7 @@ class EditLandingSection extends EditRecord
                     ),
                 ),
             ),
-        );
+        ));
     }
 
     protected function afterSave(): void

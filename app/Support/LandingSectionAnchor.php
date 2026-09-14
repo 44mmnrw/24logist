@@ -11,6 +11,7 @@ final class LandingSectionAnchor
     private const DEFAULTS = [
         'hero' => 'hero',
         'features' => 'features',
+        'product_showcase' => 'product-showcase',
         'why' => 'why',
         'pricing' => 'pricing',
         'growth' => 'growth',

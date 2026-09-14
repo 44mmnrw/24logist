@@ -31,6 +31,10 @@ final class LandingImageOptimizer
      */
     public function widthsForPath(string $path): array
     {
+        if (str_starts_with($path, 'landing/product-showcase/')) {
+            return $this->configuredWidths('product_showcase', [640, 1280, 1920]);
+        }
+
         if (
             str_starts_with($path, 'landing/mobile/')
             || str_starts_with($path, 'landing/driver-cabinet/')
@@ -46,6 +50,22 @@ final class LandingImageOptimizer
      */
     private function pathsForSection(LandingSection $section): array
     {
+        if ($section->slug === 'product_showcase') {
+            $extra = is_array($section->extra) ? $section->extra : [];
+
+            return collect($extra['banners'] ?? [])
+                ->filter(fn (mixed $banner): bool => is_array($banner))
+                ->map(fn (array $banner): ?string => LandingMedia::normalizePath($banner['image'] ?? null))
+                ->filter()
+                ->unique()
+                ->map(fn (string $path): array => [
+                    'path' => $path,
+                    'widths' => $this->configuredWidths('product_showcase', [640, 1280, 1920]),
+                ])
+                ->values()
+                ->all();
+        }
+
         if ($section->slug === 'hero') {
             $extra = is_array($section->extra) ? $section->extra : [];
             $paths = collect($extra['carousel_slides'] ?? [])

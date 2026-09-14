@@ -125,15 +125,15 @@ final class LandingHeroCarouselForm
         return max(12, min(96, (int) $value));
     }
 
-    public static function persistImage(mixed $state): ?string
+    public static function persistImage(mixed $state, string $directory = 'landing/hero'): ?string
     {
         if ($state instanceof TemporaryUploadedFile) {
-            return $state->store('landing/hero', 'public');
+            return $state->store($directory, 'public');
         }
 
         if (is_array($state)) {
             foreach ($state as $item) {
-                $stored = self::persistImage($item);
+                $stored = self::persistImage($item, $directory);
 
                 if ($stored !== null) {
                     return $stored;
@@ -148,7 +148,7 @@ final class LandingHeroCarouselForm
 
             if ($plainPath !== false) {
                 return TemporaryUploadedFile::createFromLivewire($plainPath)
-                    ->store('landing/hero', 'public');
+                    ->store($directory, 'public');
             }
         }
 
@@ -166,7 +166,7 @@ final class LandingHeroCarouselForm
 
         if (Storage::exists($path)) {
             $filename = basename($path);
-            $target = 'landing/hero/'.$filename;
+            $target = trim($directory, '/').'/'.$filename;
             $publicDisk->put($target, Storage::get($path));
 
             return $target;

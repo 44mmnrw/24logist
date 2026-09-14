@@ -26,6 +26,7 @@
                     'why' => 'components.landing.why',
                     'platform' => 'components.landing.platform',
                     'features' => 'components.landing.features',
+                    'product_showcase' => 'components.landing.product-showcase',
                     'pricing' => 'components.landing.pricing',
                     'additional_options' => 'components.landing.additional-options',
                     'epd_platform' => 'components.landing.epd-platform',

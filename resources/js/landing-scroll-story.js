@@ -1,24 +1,21 @@
-document.querySelectorAll('[data-mobile-story]').forEach((story) => {
-    const stage = story.querySelector('[data-mobile-story-stage]');
-    const slides = [...story.querySelectorAll('[data-mobile-story-slide]')];
-    if (!(stage instanceof HTMLElement) || slides.length !== 2) return;
+document.querySelectorAll('[data-scroll-story]').forEach((story) => {
+    const stage = story.querySelector('[data-scroll-stage]');
+    const slides = [...story.querySelectorAll('[data-scroll-slide]')];
+    if (!(stage instanceof HTMLElement) || slides.length < 2) return;
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let scrollDistance = 1;
+    let segmentDistance = 1;
     let stickyTop = 64;
     let frame = 0;
 
     const update = () => {
         frame = 0;
-        const progress = Math.max(0, Math.min(1, (stickyTop - story.getBoundingClientRect().top) / scrollDistance));
-        const visibleProgress = reducedMotion.matches ? Number(progress >= .5) : progress;
+        const progress = Math.max(0, Math.min(slides.length - 1, (stickyTop - story.getBoundingClientRect().top) / segmentDistance));
+        const visibleProgress = reducedMotion.matches ? Math.round(progress) : progress;
 
-        slides[0].style.transform = `translate3d(${-visibleProgress * 100}%, 0, 0)`;
-        slides[1].style.transform = `translate3d(${(1 - visibleProgress) * 100}%, 0, 0)`;
-
-        const activeIndex = progress >= .5 ? 1 : 0;
         slides.forEach((slide, index) => {
-            const active = index === activeIndex;
+            slide.style.transform = `translate3d(${(index - visibleProgress) * 100}%, 0, 0)`;
+            const active = index === Math.round(progress);
             slide.setAttribute('aria-hidden', String(!active));
             slide.inert = !active;
         });
@@ -33,9 +30,9 @@ document.querySelectorAll('[data-mobile-story]').forEach((story) => {
         const stageHeight = Math.ceil(stage.getBoundingClientRect().height);
         const headerHeight = document.querySelector('.landing-header')?.getBoundingClientRect().height ?? 64;
         stickyTop = Math.min(headerHeight, window.innerHeight - stageHeight);
-        scrollDistance = Math.max(360, Math.min(window.innerHeight * .85, 800));
-        story.style.setProperty('--mobile-story-sticky-top', `${stickyTop}px`);
-        story.style.height = `${stageHeight + scrollDistance}px`;
+        segmentDistance = Math.max(360, Math.min(window.innerHeight * .85, 800));
+        story.style.setProperty('--scroll-story-sticky-top', `${stickyTop}px`);
+        story.style.height = `${stageHeight + segmentDistance * (slides.length - 1)}px`;
         scheduleUpdate();
     };
 

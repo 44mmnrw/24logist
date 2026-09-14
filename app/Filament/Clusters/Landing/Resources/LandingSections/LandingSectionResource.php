@@ -68,10 +68,11 @@ class LandingSectionResource extends Resource
                 TextInput::make('kicker')
                     ->label('Надзаголовок')
                     ->maxLength(255)
-                    ->visible(fn (?LandingSection $record): bool => $record?->slug !== 'hero'),
+                    ->visible(fn (?LandingSection $record): bool => ! in_array($record?->slug, ['hero', 'product_showcase'], true)),
                 TextInput::make('title')
                     ->label('Заголовок')
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug !== 'product_showcase'),
                 TextInput::make('hero_title_font_size')
                     ->label('Размер заголовка')
                     ->numeric()
@@ -84,7 +85,8 @@ class LandingSectionResource extends Resource
                     ->label(fn (?LandingSection $record): string => $record?->slug === 'hero'
                         ? 'Подзаголовок 1'
                         : 'Подзаголовок')
-                    ->rows(fn (?LandingSection $record): int => $record?->slug === 'hero' ? 1 : 2),
+                    ->rows(fn (?LandingSection $record): int => $record?->slug === 'hero' ? 1 : 2)
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug !== 'product_showcase'),
                 TextInput::make('hero_subtitle_1_font_size')
                     ->label('Размер подзаголовка 1')
                     ->numeric()
@@ -108,7 +110,8 @@ class LandingSectionResource extends Resource
                     ->helperText(fn (?LandingSection $record): ?string => $record?->slug === 'footer'
                         ? 'Можно использовать безопасную HTML-разметку: ссылки, переносы, жирный текст и списки.'
                         : null)
-                    ->columnSpan(fn (?LandingSection $record): int|string => $record?->slug === 'hero' ? 1 : 'full'),
+                    ->columnSpan(fn (?LandingSection $record): int|string => $record?->slug === 'hero' ? 1 : 'full')
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug !== 'product_showcase'),
                 TextInput::make('hero_subtitle_2_font_size')
                     ->label('Размер подзаголовка 2')
                     ->numeric()
@@ -319,6 +322,43 @@ class LandingSectionResource extends Resource
                     ->columnSpanFull()
                     ->visible(fn (?LandingSection $record): bool => $record?->slug === 'hero')
                     ->helperText('Загрузите одно или несколько изображений. Дождитесь превью, затем «Сохранить». PNG, JPG или WebP до 8 МБ.'),
+                Repeater::make('product_showcase_banners')
+                    ->label('Баннеры')
+                    ->schema([
+                        TextInput::make('title')
+                            ->label('Заголовок')
+                            ->required()
+                            ->maxLength(255)
+                            ->columnSpanFull(),
+                        Textarea::make('description')
+                            ->label('Описание')
+                            ->required()
+                            ->rows(4)
+                            ->maxLength(2000)
+                            ->columnSpanFull(),
+                        static::publicImageUpload(
+                            name: 'image',
+                            label: 'Изображение баннера',
+                            directory: 'landing/product-showcase',
+                            visibleSlug: null,
+                            helperText: 'PNG, JPG или WebP до 8 МБ. Пока изображение не загружено, показывается цветной фон.',
+                        ),
+                        TextInput::make('alt')
+                            ->label('Alt-текст изображения')
+                            ->maxLength(255)
+                            ->placeholder('Скриншот списка заявок'),
+                    ])
+                    ->columns(2)
+                    ->minItems(1)
+                    ->reorderable()
+                    ->collapsible()
+                    ->itemLabel(fn (array $state): string => filled($state['title'] ?? null)
+                        ? (string) $state['title']
+                        : 'Баннер')
+                    ->addActionLabel('Добавить баннер')
+                    ->columnSpanFull()
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'product_showcase')
+                    ->helperText('Баннеры идут в этом порядке и сменяются при прокрутке страницы.'),
                 static::publicImageUpload(
                     name: 'mobile_image',
                     label: 'Изображение в рамке телефона',
@@ -472,7 +512,7 @@ class LandingSectionResource extends Resource
                     ->keyLabel('Ключ')
                     ->valueLabel('Значение')
                     ->reorderable()
-                    ->visible(fn (?LandingSection $record): bool => ! in_array($record?->slug, ['hero', 'mobile', 'driver_cabinet', 'quiz', 'footer', 'faq', 'platform', 'header', 'pricing', 'why', 'growth'], true)),
+                    ->visible(fn (?LandingSection $record): bool => ! in_array($record?->slug, ['hero', 'mobile', 'driver_cabinet', 'quiz', 'footer', 'faq', 'platform', 'header', 'pricing', 'why', 'growth', 'product_showcase'], true)),
                 Toggle::make('is_active')
                     ->label('Активна')
                     ->default(true),

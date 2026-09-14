@@ -9,6 +9,7 @@ return [
     'avif_quality' => (int) env('IMAGE_OPTIMIZER_AVIF_QUALITY', 62),
     'widths' => [
         'hero' => [640, 1280],
+        'product_showcase' => [640, 1280, 1920],
         'mobile' => [320, 640],
         'blog_card' => [640, 1200],
         'blog_cover' => [640, 1280],

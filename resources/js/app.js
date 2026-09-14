@@ -6,7 +6,7 @@ import './epd-presentation-popup.js';
 import './telegram-popup.js';
 import './landing-mobile-menu.js';
 import './landing-growth-dashboard.js';
-import './landing-mobile-story.js';
+import './landing-scroll-story.js';
 import './community.js';
 import './route-calculator.js';
 import './epd-game-bootstrap.js';
