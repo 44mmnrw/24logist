@@ -11,6 +11,7 @@ use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\CommunityLegalController;
 use App\Http\Controllers\CommunityModerationController;
 use App\Http\Controllers\CommunityNotificationController;
+use App\Http\Controllers\CommunityPhotoController;
 use App\Http\Controllers\CommunityPostController;
 use App\Http\Controllers\CommunityPostSubscriptionController;
 use App\Http\Controllers\CsrfTokenController;
@@ -152,6 +153,8 @@ Route::middleware(['community.locale', 'community.enabled'])->prefix('community'
     Route::get('/c/{category}', [CommunityController::class, 'category'])->name('categories.show');
     Route::get('/p/{post}/{slug?}', [CommunityPostController::class, 'show'])
         ->whereNumber('post')->name('posts.show');
+    Route::get('/photos/{photo}', [CommunityPhotoController::class, 'show'])
+        ->whereNumber('photo')->name('photos.show');
     Route::get('/u/{user}', [CommunityAccountController::class, 'profile'])->name('profile');
     Route::get('/rules', [CommunityLegalController::class, 'rules'])->name('rules');
     Route::get('/privacy', [CommunityLegalController::class, 'privacy'])->name('privacy');

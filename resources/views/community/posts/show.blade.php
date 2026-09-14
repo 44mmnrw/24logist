@@ -1,6 +1,6 @@
 @extends('community.layout')
 @section('title', $post->title.' — Сообщество 24Logist')
-@section('description', \Illuminate\Support\Str::limit(strip_tags($post->body_html ?: $post->external_url), 160))
+@section('description', \Illuminate\Support\Str::limit(strip_tags($post->body_html ?: $post->external_url ?: 'Фото и обсуждение в сообществе 24Logist'), 160))
 @section('canonical', $post->getUrl())
 
 @push('structured-data')
@@ -42,6 +42,7 @@
             @else
                 <div class="community-markdown">{!! $post->body_html !!}</div>
             @endif
+            @include('community.photos._gallery', ['photos' => $post->photos])
         </div>
         <div class="community-topic__actions">
             @include('community.shared._vote', ['type' => 'post', 'target' => $post, 'currentVote' => $postVote, 'variant' => 'inline'])

@@ -20,6 +20,7 @@
         @elseif ($post->body_markdown)
             <p>{{ \Illuminate\Support\Str::limit(strip_tags($post->body_html), 240) }}</p>
         @endif
+        @include('community.photos._gallery', ['photos' => $post->photos, 'feed' => true])
         <div class="community-post-card__footer">
             <a class="community-action-chip community-action-chip--comments" href="{{ $post->getUrl() }}#comments"><span aria-hidden="true">◯</span>{{ $post->comments_count }} {{ \App\Support\CommunityText::comments($post->comments_count) }}</a>
             <button class="community-action-chip community-action-chip--share" type="button" data-share-url="{{ $post->getUrl() }}"><span aria-hidden="true">↗</span><span data-share-label>Поделиться</span></button>

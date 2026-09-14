@@ -20,8 +20,8 @@ class CommunityModerationController extends Controller
     {
         $reports = CommunityReport::query()->where('status', 'open')->latest()->paginate(30);
         $targets = [
-            'post' => CommunityPost::withTrashed()->whereIn('id', $reports->getCollection()->where('target_type', 'post')->pluck('target_id'))->get()->keyBy('id'),
-            'comment' => CommunityComment::withTrashed()->with('post')->whereIn('id', $reports->getCollection()->where('target_type', 'comment')->pluck('target_id'))->get()->keyBy('id'),
+            'post' => CommunityPost::withTrashed()->with('photos')->whereIn('id', $reports->getCollection()->where('target_type', 'post')->pluck('target_id'))->get()->keyBy('id'),
+            'comment' => CommunityComment::withTrashed()->with(['post', 'photos'])->whereIn('id', $reports->getCollection()->where('target_type', 'comment')->pluck('target_id'))->get()->keyBy('id'),
         ];
 
         return view('community.moderation.index', compact('reports', 'targets'));

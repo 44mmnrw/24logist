@@ -37,7 +37,7 @@ class CommunityController extends Controller
         $like = '%'.addcslashes($search, '%_\\').'%';
 
         $posts = CommunityPost::query()
-            ->with(['author', 'category'])
+            ->with(['author', 'category', 'photos'])
             ->published()
             ->when($category, fn (Builder $query) => $query->where('community_category_id', $category->id))
             ->when($search !== '', fn (Builder $query) => $query->where(function (Builder $query) use ($like): void {

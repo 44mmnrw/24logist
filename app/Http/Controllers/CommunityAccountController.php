@@ -84,7 +84,7 @@ class CommunityAccountController extends Controller
     public function profile(CommunityUser $user): View
     {
         abort_if($user->trashed() || ! $user->isOnboarded(), 404);
-        $posts = $user->posts()->published()->with('category')->latest('published_at')->paginate(15);
+        $posts = $user->posts()->published()->with(['category', 'photos'])->latest('published_at')->paginate(15);
 
         return view('community.profile', compact('user', 'posts'));
     }

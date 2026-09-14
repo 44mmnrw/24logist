@@ -21,6 +21,9 @@
                     @if ($targetUrl)<a href="{{ $targetUrl }}" target="_blank" rel="noopener">Открыть материал</a>@endif
                     @if ($target instanceof \App\Models\CommunityPost)<p>{{ $target->title }}</p>@endif
                     @if ($target instanceof \App\Models\CommunityComment)<p>{{ \Illuminate\Support\Str::limit(strip_tags((string) $target->body_html), 200) }}</p>@endif
+                    @if ($target && $target->status !== 'deleted')
+                        @include('community.photos._gallery', ['photos' => $target->photos, 'compact' => true])
+                    @endif
                     <span>{{ $report->reasonLabel() }}</span>
                     <p>{{ $report->details }}</p>
                     <time>{{ \App\Support\CommunityDate::relative($report->created_at) }}</time>

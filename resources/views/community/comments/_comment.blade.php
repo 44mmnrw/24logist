@@ -12,7 +12,8 @@
             @elseif ($comment->status === 'hidden')
                 <p class="community-deleted">Комментарий скрыт модератором.</p>
             @else
-                <div class="community-markdown">{!! $comment->body_html !!}</div>
+                @if ($comment->body_html)<div class="community-markdown">{!! $comment->body_html !!}</div>@endif
+                @include('community.photos._gallery', ['photos' => $comment->photos, 'compact' => true])
             @endif
             @if ($post->accepted_comment_id === $comment->id)<span class="community-badge community-badge--resolved">Принятый ответ</span>@endif
             <div class="community-comment__actions">
@@ -26,7 +27,16 @@
                         <details><summary>Ответить</summary>@include('community.comments._form', ['post' => $post, 'parent' => $comment])</details>
                     @endif
                     @if ($comment->status !== 'deleted' && ($comment->community_user_id === auth('community')->id() || auth('community')->user()->isModerator()))
-                        @if ($comment->status === 'published')<details><summary>Изменить</summary><form method="POST" action="{{ route('community.comments.update', $comment) }}" class="community-comment-form">@csrf @method('PUT')<textarea name="body_markdown" maxlength="5000" rows="3" required>{{ $comment->body_markdown }}</textarea><button class="btn btn--sm">Сохранить</button></form></details>@endif
+                        @if ($comment->status === 'published')
+                            <details><summary>Изменить</summary>
+                                <form method="POST" action="{{ route('community.comments.update', $comment) }}" class="community-comment-form" enctype="multipart/form-data">
+                                    @csrf @method('PUT')
+                                    <textarea name="body_markdown" maxlength="5000" rows="3">{{ $comment->body_markdown }}</textarea>
+                                    @include('community.photos._editor', ['existingPhotos' => $comment->photos])
+                                    <button class="btn btn--sm">Сохранить</button>
+                                </form>
+                            </details>
+                        @endif
                         <form method="POST" action="{{ route('community.comments.destroy', $comment) }}">@csrf @method('DELETE')<button>Удалить</button></form>
                     @endif
                     @if ($comment->status === 'published')<button class="community-action-button" type="button" data-report-open data-report-type="comment" data-report-id="{{ $comment->id }}">Пожаловаться</button>@endif

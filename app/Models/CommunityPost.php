@@ -46,6 +46,11 @@ class CommunityPost extends Model
         return $this->hasMany(CommunityComment::class);
     }
 
+    public function photos(): HasMany
+    {
+        return $this->hasMany(CommunityPhoto::class)->orderBy('position')->orderBy('id');
+    }
+
     public function votes(): HasMany
     {
         return $this->hasMany(CommunityPostVote::class);

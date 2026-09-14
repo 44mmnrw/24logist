@@ -2015,6 +2015,24 @@ body {
 .community-markdown pre { overflow-x: auto; padding: 14px; border-radius: 10px; background: #17243b; color: #f3f6fb; }
 .community-markdown blockquote { margin-left: 0; padding-left: 16px; border-left: 3px solid #aac2ed; color: #5a6e88; }
 .community-markdown table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; }.community-markdown th,.community-markdown td{padding:8px;border:1px solid #dfe5ee}
+.community-photo-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 9px; margin-top: 14px; }
+.community-photo-gallery a { display: block; min-width: 0; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 11px; background: #eef2f7; }
+.community-photo-gallery img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.community-photo-gallery--compact { max-width: 430px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 95px), 1fr)); gap: 6px; margin-top: 8px; }
+.community-photo-gallery--feed { max-width: 430px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 110px), 1fr)); margin-top: 10px; }
+.community-photo-editor { display: grid; gap: 9px; min-width: 0; }
+.community-photo-editor__picker { display: grid; gap: 6px; color: #32455f; font-weight: 700; }
+.community-photo-editor__picker input { max-width: 100%; padding: 9px; border: 1px dashed #b8c8df; border-radius: 10px; background: #f8fbff; font: inherit; }
+.community-photo-editor > small { color: #667991; font-size: 12px; font-weight: 500; }
+.community-photo-editor__existing, .community-photo-editor__preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; }
+.community-photo-editor__existing-item { display: grid; gap: 5px; min-width: 0; color: #52657c; font-size: 12px; font-weight: 600; }
+.community-photo-editor__existing-item img, .community-photo-editor__preview img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 9px; background: #edf2f8; }
+.community-photo-editor__existing-item span { display: flex; align-items: center; gap: 5px; }
+.community-photo-editor__existing-item input { width: auto !important; }
+.community-photo-editor__preview:empty { display: none; }
+.community-photo-editor__preview figure { min-width: 0; margin: 0; }
+.community-photo-editor__preview figcaption { overflow: hidden; color: #617087; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.community-comment-form > .community-photo-editor { display: grid; align-items: stretch; }
 .community-link-topic { display: block; padding: 18px; border-radius: 12px; background: #edf4ff; color: #205ab1; font-weight: 700; }
 .community-topic__actions, .community-comment__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-top: 14px; color: #5a6c83; font-size: 12px; }
 .community-topic__actions form, .community-comment__actions form { display: inline; }

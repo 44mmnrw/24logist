@@ -1,5 +1,47 @@
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
+const photoPreviewUrls = new WeakMap();
+
+document.addEventListener('change', (event) => {
+    const input = event.target.closest?.('[data-community-photo-input]')
+        || (event.target.matches?.('input[name="remove_photos[]"]')
+            ? event.target.form?.querySelector('[data-community-photo-input]')
+            : null);
+    if (!input) return;
+
+    const preview = input.closest('.community-photo-editor')?.querySelector('[data-community-photo-preview]');
+    if (!preview) return;
+
+    (photoPreviewUrls.get(input) || []).forEach((url) => URL.revokeObjectURL(url));
+    photoPreviewUrls.set(input, []);
+    preview.replaceChildren();
+
+    const existing = input.form?.querySelectorAll('input[name="remove_photos[]"]:not(:checked)').length || 0;
+    const files = Array.from(input.files || []);
+    const maxPhotos = Number(input.dataset.maxPhotos || 3);
+    const maxBytes = Number(input.dataset.maxBytes || 2 * 1024 * 1024);
+    if (existing + files.length > maxPhotos || files.some((file) => file.size > maxBytes)) {
+        input.value = '';
+        preview.textContent = `Можно добавить не больше ${maxPhotos} фото, каждое до ${maxBytes / 1024 / 1024} МБ.`;
+        return;
+    }
+
+    const urls = [];
+    files.forEach((file) => {
+        const url = URL.createObjectURL(file);
+        urls.push(url);
+        const figure = document.createElement('figure');
+        const image = document.createElement('img');
+        image.src = url;
+        image.alt = `Предпросмотр: ${file.name}`;
+        const caption = document.createElement('figcaption');
+        caption.textContent = file.name;
+        figure.append(image, caption);
+        preview.append(figure);
+    });
+    photoPreviewUrls.set(input, urls);
+});
+
 document.addEventListener('click', async (event) => {
     const button = event.target.closest('[data-vote] button[data-value]');
     if (!button || button.disabled) return;
