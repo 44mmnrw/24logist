@@ -33,6 +33,7 @@
             <a @class(['is-active' => $sort === 'hot']) href="{{ request()->fullUrlWithQuery(['sort' => 'hot', 'period' => null, 'page' => null]) }}"><x-community.icon name="flame" />Актуальное</a>
             <a @class(['is-active' => $sort === 'new']) href="{{ request()->fullUrlWithQuery(['sort' => 'new', 'period' => null, 'page' => null]) }}"><x-community.icon name="sparkles" />Новое</a>
             <a @class(['is-active' => $sort === 'top']) href="{{ request()->fullUrlWithQuery(['sort' => 'top', 'page' => null]) }}"><x-community.icon name="trophy" />Лучшее</a>
+            <a @class(['is-active' => $sort === 'unanswered']) href="{{ request()->fullUrlWithQuery(['sort' => 'unanswered', 'period' => null, 'page' => null]) }}"><x-community.icon name="message-circle" />Ждут ответа</a>
             @if ($sort === 'top')
                 <select aria-label="Период" onchange="location.href=this.value">
                     @foreach (['day' => 'Сутки', 'week' => 'Неделя', 'month' => 'Месяц', 'all' => 'Всё время'] as $value => $label)
@@ -50,6 +51,7 @@
             @endforelse
         </div>
         <div class="community-pagination">{{ $posts->links() }}</div>
+        @include('community.shared._award_dialog')
     </section>
 
     <aside class="community-sidebar">

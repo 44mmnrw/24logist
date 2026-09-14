@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\CommunityComment;
 use App\Models\CommunityPost;
 use App\Models\CommunityReport;
+use App\Models\CommunityNotification;
 use App\Services\Community\CommunityVotingService;
+use App\Services\Community\CommunitySocialService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,6 +26,57 @@ class CommunityActionController extends Controller
         ]);
 
         return response()->json($voting->vote($user, $data['target_type'], $data['target_id'], $data['value']));
+    }
+
+    public function react(Request $request, CommunitySocialService $social): JsonResponse
+    {
+        $user = auth('community')->user();
+        abort_if($user->isRestricted(), 403);
+        $data = $request->validate([
+            'target_type' => ['required', 'in:post,comment'],
+            'target_id' => ['required', 'integer', 'min:1'],
+            'code' => ['required', 'in:'.implode(',', array_keys(CommunitySocialService::REACTIONS))],
+        ]);
+
+        return response()->json($social->react($user, $data['target_type'], $data['target_id'], $data['code']));
+    }
+
+    public function award(Request $request, CommunitySocialService $social): RedirectResponse
+    {
+        $user = auth('community')->user();
+        abort_if($user->isRestricted(), 403);
+        $data = $request->validate([
+            'target_type' => ['required', 'in:post,comment'],
+            'target_id' => ['required', 'integer', 'min:1'],
+            'code' => ['required', 'in:'.implode(',', array_keys(CommunitySocialService::AWARDS))],
+            'message' => ['nullable', 'string', 'max:100'],
+            'is_anonymous' => ['sometimes', 'boolean'],
+        ]);
+
+        $type = $data['target_type'];
+        $id = (int) $data['target_id'];
+        $target = $social->target($type, $id);
+        $message = trim($data['message'] ?? '');
+        $awardId = $social->award($user, $type, $id, $data['code'], $message === '' ? null : $message, $request->boolean('is_anonymous'));
+        if ($awardId === null) {
+            return back()->with('status', 'Вы уже наградили эту публикацию или комментарий.');
+        }
+
+        $url = $type === 'post' ? $target->getUrl() : $target->post->getUrl().'#comment-'.$id;
+        $label = CommunitySocialService::AWARDS[$data['code']]['label'];
+        CommunityNotification::query()->create([
+            'community_user_id' => $target->community_user_id,
+            'actor_id' => $request->boolean('is_anonymous') ? null : $user->id,
+            'type' => 'award_received',
+            'target_type' => 'award',
+            'target_id' => $awardId,
+            'data' => [
+                'message' => ($request->boolean('is_anonymous') ? 'Вам анонимно вручили награду' : $user->displayName().' вручил вам награду').' «'.$label.'»'.($message !== '' ? ': '.$message : ''),
+                'url' => $url,
+            ],
+        ]);
+
+        return redirect($url)->with('status', 'Награда вручена. Спасибо за поддержку участника!');
     }
 
     public function report(Request $request): RedirectResponse

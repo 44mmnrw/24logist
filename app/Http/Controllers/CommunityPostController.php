@@ -12,6 +12,7 @@ use App\Models\CommunityUser;
 use App\Services\Community\CommunityContentRenderer;
 use App\Services\Community\CommunityPhotoService;
 use App\Services\Community\CommunityRanking;
+use App\Services\Community\CommunitySocialService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -134,6 +135,9 @@ class CommunityPostController extends Controller
                 ->orderBy('created_at')
                 ->get();
         $children = $descendants->groupBy(fn (CommunityComment $comment): int => (int) $comment->parent_id);
+        $socialService = app(CommunitySocialService::class);
+        $postSocial = $socialService->summary('post', $post->id, auth('community')->id());
+        $commentSocial = $socialService->summaries('comment', $rootIds->merge($descendants->pluck('id'))->all(), auth('community')->id());
 
         $postVote = null;
         $subscribed = false;
@@ -148,7 +152,7 @@ class CommunityPostController extends Controller
                 ->pluck('value', 'community_comment_id');
         }
 
-        return view('community.posts.show', compact('post', 'roots', 'children', 'postVote', 'subscribed', 'commentVotes', 'commentSort', 'communityStats'));
+        return view('community.posts.show', compact('post', 'roots', 'children', 'postVote', 'subscribed', 'commentVotes', 'commentSort', 'communityStats', 'postSocial', 'commentSocial'));
     }
 
     public function edit(CommunityPost $post): View

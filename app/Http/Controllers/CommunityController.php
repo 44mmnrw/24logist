@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CommunityCategory;
 use App\Models\CommunityPost;
 use App\Models\CommunityPostVote;
+use App\Services\Community\CommunitySocialService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -25,7 +26,7 @@ class CommunityController extends Controller
 
     private function feed(Request $request, ?CommunityCategory $category = null): View
     {
-        $sort = in_array($request->query('sort'), ['hot', 'new', 'top'], true)
+        $sort = in_array($request->query('sort'), ['hot', 'new', 'top', 'unanswered'], true)
             ? (string) $request->query('sort')
             : 'hot';
         $period = in_array($request->query('period'), ['day', 'week', 'month', 'all'], true)
@@ -39,12 +40,15 @@ class CommunityController extends Controller
         $posts = CommunityPost::query()
             ->with(['author', 'category', 'photos'])
             ->published()
+            ->when($sort === 'unanswered', fn (Builder $query) => $query
+                ->whereNull('resolved_at')
+                ->whereDoesntHave('comments', fn (Builder $comments) => $comments->where('status', 'published')))
             ->when($category, fn (Builder $query) => $query->where('community_category_id', $category->id))
             ->when($search !== '', fn (Builder $query) => $query->where(function (Builder $query) use ($like): void {
                 $query->where('title', 'like', $like)->orWhere('body_markdown', 'like', $like);
             }));
 
-        if ($sort === 'new') {
+        if ($sort === 'new' || $sort === 'unanswered') {
             $posts->orderByDesc('is_pinned')->orderByDesc('published_at')->orderByDesc('id');
         } elseif ($sort === 'top') {
             $since = match ($period) {
@@ -67,6 +71,7 @@ class CommunityController extends Controller
             ->get();
 
         $posts = $posts->paginate(20)->withQueryString();
+        $social = app(CommunitySocialService::class)->summaries('post', $posts->getCollection()->pluck('id')->all(), auth('community')->id());
         $postVotes = auth('community')->check()
             ? CommunityPostVote::query()
                 ->where('community_user_id', auth('community')->id())
@@ -82,6 +87,7 @@ class CommunityController extends Controller
             'sort' => $sort,
             'period' => $period,
             'search' => $search,
+            'social' => $social,
         ]);
     }
 }

@@ -191,6 +191,8 @@ Route::middleware(['community.locale', 'community.enabled'])->prefix('community'
             Route::put('/comments/{comment}', [CommunityCommentController::class, 'update'])->name('comments.update');
             Route::delete('/comments/{comment}', [CommunityCommentController::class, 'destroy'])->name('comments.destroy');
             Route::post('/actions/vote', [CommunityActionController::class, 'vote'])->middleware('throttle:120,1')->name('vote');
+            Route::post('/actions/react', [CommunityActionController::class, 'react'])->middleware('throttle:60,1')->name('react');
+            Route::post('/actions/award', [CommunityActionController::class, 'award'])->middleware('throttle:10,1')->name('award');
             Route::post('/actions/report', [CommunityActionController::class, 'report'])->middleware('throttle:10,1')->name('report');
             Route::get('/notifications', [CommunityNotificationController::class, 'index'])->name('notifications');
             Route::get('/notifications/{notification}', [CommunityNotificationController::class, 'read'])->name('notifications.read');

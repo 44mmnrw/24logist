@@ -2094,6 +2094,43 @@ body {
 .community-comment__actions .community-vote--inline { min-height: 26px; padding: 0 2px; background: transparent; }
 .community-comment__actions .community-vote--inline button { width: 24px; height: 24px; font-size: 16px; }
 .community-comment__actions .community-vote--inline strong { min-width: 18px; font-size: 11px; }
+.community-reactions { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.community-page .community-reaction { display: inline-flex; align-items: center; gap: 5px; min-height: 30px; padding: 4px 8px; border: 1px solid #e1e8f0; border-radius: 999px; background: #f7f9fc; color: #41536b; font: inherit; font-size: 12px; line-height: 1; white-space: nowrap; }
+.community-page button.community-reaction { cursor: pointer; }
+.community-page button.community-reaction:hover { border-color: #a5b9df; background: #eef3ff; }
+.community-page button.community-reaction.is-active { border-color: #87a8ef; background: #e8efff; color: #184cb9; }
+.community-page button.community-reaction:disabled { cursor: wait; opacity: .65; }
+.community-reaction__emoji { font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; font-size: 17px; line-height: 1; }
+.community-reaction__count { color: #667890; font-size: 11px; font-weight: 750; }
+@media (max-width: 640px) { .community-post-card .community-reaction__label, .community-comment .community-reaction__label { display: none; } }
+.community-awards { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.community-award-badge, .community-page .community-award-open { display: inline-flex; align-items: center; gap: 5px; min-height: 30px; padding: 3px 8px; border: 1px solid #e7e3d8; border-radius: 999px; background: #fffbec; color: #5c4a22; font: inherit; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.community-award-badge > span:first-child { font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; font-size: 17px; }
+.community-page .community-award-open { border-color: #e4e9ef; background: #f7f9fc; color: #41536b; cursor: pointer; }
+.community-page .community-award-open:hover { border-color: #d5bd67; background: #fff8de; color: #514012; }
+.community-award-dialog { width: min(600px, calc(100% - 24px)); max-height: min(90dvh, 720px); overflow-y: auto; padding: 24px; border: 0; border-radius: 20px; box-shadow: 0 24px 70px rgba(20, 35, 60, .25); color: #17243b; }
+.community-award-dialog::backdrop { background: rgba(15, 28, 48, .55); backdrop-filter: blur(2px); }
+.community-award-dialog__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 15px; }
+.community-award-dialog__top h2 { margin: 0; font-size: clamp(20px, 4vw, 26px); }
+.community-award-dialog__close { display: grid; flex: 0 0 auto; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 50%; background: #eef2f7; color: #41536b; cursor: pointer; }
+.community-award-dialog__target { margin: 4px 0 22px; color: #65758a; font-size: 14px; }
+.community-award-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.community-award-grid legend { margin-bottom: 10px; color: #34465f; font-size: 14px; font-weight: 700; }
+.community-award-choice { position: relative; display: block; min-width: 0; cursor: pointer; }
+.community-award-choice input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.community-award-choice__body { display: flex; min-height: 108px; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 8px 4px; border: 2px solid #e2e9f2; border-radius: 12px; background: #f8fafd; text-align: center; }
+.community-award-choice input:checked + .community-award-choice__body { border-color: #2455d6; background: #edf3ff; }
+.community-award-choice input:focus-visible + .community-award-choice__body { outline: 3px solid #7aa6ff; outline-offset: 2px; }
+.community-award-choice__emoji { font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; font-size: 32px; line-height: 1.2; }
+.community-award-choice__name { color: #283b56; font-size: 11px; font-weight: 700; line-height: 1.2; }
+.community-award-choice__free { color: #1d8348; font-size: 10px; }
+.community-award-dialog__anonymous { display: flex; align-items: center; gap: 8px; margin: 22px 0 16px; font-size: 14px; cursor: pointer; }
+.community-award-dialog__message { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 7px; font-size: 14px; font-weight: 700; }
+.community-award-dialog__message span { color: #74839a; font-size: 12px; font-weight: 400; }
+.community-award-dialog textarea { box-sizing: border-box; width: 100%; min-height: 70px; padding: 12px 14px; border: 1px solid #d7e1ed; border-radius: 12px; font: inherit; resize: vertical; }
+.community-award-dialog__bottom { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; }
+.community-award-dialog__bottom small { color: #687992; }
+@media (max-width: 520px) { .community-award-dialog { max-height: 92dvh; padding: 18px; } .community-award-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .community-award-choice__body { min-height: 82px; } .community-award-dialog__anonymous { margin: 16px 0 12px; } }
 .community-topic-sidebar { top: 82px; }
 .community-about-card p { margin: 0; color: #596b82; font-size: 13px; line-height: 1.55; }
 .community-side-card__eyebrow { display: block; margin-bottom: 5px; color: #174cac; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }

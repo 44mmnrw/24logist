@@ -46,6 +46,8 @@
         </div>
         <div class="community-topic__actions">
             @include('community.shared._vote', ['type' => 'post', 'target' => $post, 'currentVote' => $postVote, 'variant' => 'inline'])
+            @include('community.shared._awards', ['type' => 'post', 'target' => $post, 'social' => $postSocial])
+            @include('community.shared._reactions', ['type' => 'post', 'target' => $post, 'social' => $postSocial])
             <a class="community-action-chip community-action-chip--comments" href="#comments"><x-community.icon name="message-circle" size="16" />{{ $post->comments_count }} {{ \App\Support\CommunityText::comments($post->comments_count) }}</a>
             <button class="community-action-chip community-action-chip--share" type="button" data-share-url="{{ $post->getUrl() }}"><x-community.icon name="share-3" size="16" /><span data-share-label>Поделиться</span></button>
             @auth('community')
@@ -89,7 +91,7 @@
 
         <div class="community-comment-list">
             @forelse ($roots as $comment)
-                @include('community.comments._comment', ['comment' => $comment, 'post' => $post, 'children' => $children, 'commentVotes' => $commentVotes])
+                @include('community.comments._comment', ['comment' => $comment, 'post' => $post, 'children' => $children, 'commentVotes' => $commentVotes, 'commentSocial' => $commentSocial])
             @empty
                 <div class="community-empty">Пока нет комментариев. Начните обсуждение.</div>
             @endforelse
@@ -121,6 +123,7 @@
 
     @auth('community')
         @include('community.shared._report_dialog')
+        @include('community.shared._award_dialog')
     @endauth
 </div>
 @endsection

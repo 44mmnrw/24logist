@@ -156,6 +156,36 @@ document.addEventListener('click', async (event) => {
 });
 
 document.addEventListener('click', async (event) => {
+    const button = event.target.closest('[data-community-reactions] button[data-code]');
+    if (!button) return;
+
+    const widget = button.closest('[data-community-reactions]');
+    const buttons = widget.querySelectorAll('button[data-code]');
+    buttons.forEach((item) => { item.disabled = true; });
+
+    try {
+        const response = await fetch(widget.dataset.endpoint, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken},
+            body: JSON.stringify({target_type: widget.dataset.type, target_id: Number(widget.dataset.id), code: button.dataset.code}),
+        });
+        if (!response.ok) throw new Error('reaction_failed');
+        const result = await response.json();
+        buttons.forEach((item) => {
+            const active = result.selected === item.dataset.code;
+            item.classList.toggle('is-active', active);
+            item.setAttribute('aria-pressed', String(active));
+            item.querySelector('[data-reaction-count]').textContent = result.reactions[item.dataset.code] || 0;
+        });
+    } catch (_) {
+        window.alert('Не удалось сохранить реакцию. Обновите страницу и попробуйте ещё раз.');
+    } finally {
+        buttons.forEach((item) => { item.disabled = false; });
+    }
+});
+
+document.addEventListener('click', async (event) => {
     const button = event.target.closest('[data-share-url]');
     if (!button) return;
 
@@ -178,6 +208,37 @@ document.addEventListener('click', async (event) => {
 });
 
 const reportDialog = document.querySelector('[data-report-dialog]');
+
+const awardDialog = document.querySelector('[data-award-dialog]');
+
+if (awardDialog) {
+    document.addEventListener('click', (event) => {
+        const openButton = event.target.closest('[data-award-open]');
+        if (openButton) {
+            const form = awardDialog.querySelector('form');
+            form.reset();
+            form.querySelector('[data-award-type]').value = openButton.dataset.awardType;
+            form.querySelector('[data-award-id]').value = openButton.dataset.awardId;
+            awardDialog.querySelector('#community-award-title').textContent = openButton.dataset.awardType === 'comment'
+                ? 'Наградить этот комментарий' : 'Наградить эту публикацию';
+            awardDialog.querySelector('[data-award-target]').textContent = openButton.dataset.awardTitle;
+            awardDialog.querySelector('[data-award-length]').textContent = '0';
+            if (typeof awardDialog.showModal === 'function') awardDialog.showModal();
+            else awardDialog.setAttribute('open', '');
+        } else if (event.target.closest('[data-award-close]')) {
+            if (typeof awardDialog.close === 'function') awardDialog.close();
+            else awardDialog.removeAttribute('open');
+        }
+    });
+
+    awardDialog.addEventListener('click', (event) => {
+        if (event.target === awardDialog) awardDialog.close();
+    });
+
+    awardDialog.querySelector('[data-award-message]').addEventListener('input', (event) => {
+        awardDialog.querySelector('[data-award-length]').textContent = String(Array.from(event.target.value).length);
+    });
+}
 
 if (reportDialog) {
     document.addEventListener('click', (event) => {
