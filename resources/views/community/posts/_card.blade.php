@@ -9,13 +9,13 @@
             @if ($post->author)<a class="community-avatar-link" href="{{ route('community.profile', $post->author) }}"><x-community.avatar :user="$post->author" size="sm" /></a>@endif
             <div class="community-meta">
                 <a class="community-category-pill" href="{{ route('community.categories.show', $post->category) }}">{{ $post->category->name }}</a>
-                <span>•</span>
+                <span class="community-meta__separator">•</span>
                 @if ($post->author)<a href="{{ route('community.profile', $post->author) }}" title="{{ '@'.$post->author->username }}">{{ $post->author->displayName() }}</a>@else<span>[удалён]</span>@endif
-                <span>•</span><time datetime="{{ $post->published_at?->toIso8601String() }}">{{ \App\Support\CommunityDate::relative($post->published_at) }}</time>
-                @if ($post->is_pinned)<span class="community-post-card__status">Закреплено</span>@endif
+                <span class="community-meta__separator">•</span><time datetime="{{ $post->published_at?->toIso8601String() }}">{{ \App\Support\CommunityDate::relative($post->published_at) }}</time>
                 @if ($post->locked_at)<span class="community-post-card__status">Закрыто</span>@endif
                 @if ($post->accepted_comment_id)<span class="community-post-card__status community-post-card__status--resolved">Есть решение</span>@endif
             </div>
+            @if ($post->is_pinned)<span class="community-post-card__pinned" aria-label="Закреплено"><x-community.icon name="pin" size="14" /><span>Закреплено</span></span>@endif
         </div>
         <h2 id="community-post-title-{{ $post->id }}">{{ $post->title }}</h2>
         @if ($post->external_url)
