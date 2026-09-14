@@ -3,6 +3,8 @@
 namespace App\Services\Community;
 
 use App\Services\SiteSettingsService;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\ValidationException;
@@ -62,10 +64,23 @@ final class TelegramIdTokenVerifier
     private function jwks(): array
     {
         return Cache::remember('community.telegram.jwks', now()->addHours(6), function (): array {
-            return Http::timeout(5)
-                ->get('https://oauth.telegram.org/.well-known/jwks.json')
-                ->throw()
-                ->json();
+            try {
+                $keys = Http::timeout(12)
+                    ->retry(2, 300)
+                    ->get('https://oauth.telegram.org/.well-known/jwks.json')
+                    ->throw()
+                    ->json();
+            } catch (ConnectionException|RequestException) {
+                throw ValidationException::withMessages([
+                    'telegram' => 'Telegram сейчас недоступен. Повторите вход позже.',
+                ]);
+            }
+
+            if (! is_array($keys) || ! is_array($keys['keys'] ?? null)) {
+                throw $this->invalid();
+            }
+
+            return $keys;
         });
     }
 

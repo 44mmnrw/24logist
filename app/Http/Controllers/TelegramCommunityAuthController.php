@@ -81,7 +81,11 @@ class TelegramCommunityAuthController extends Controller
             throw ValidationException::withMessages(['telegram' => 'Telegram не подтвердил вход. Попробуйте ещё раз.']);
         }
 
-        $claims = $verifier->verify((string) $response->json('id_token'), (string) $flow['nonce']);
+        try {
+            $claims = $verifier->verify((string) $response->json('id_token'), (string) $flow['nonce']);
+        } catch (ValidationException $e) {
+            return redirect()->route('community.login')->withErrors($e->errors());
+        }
         $linkTo = ($flow['link'] ?? false) ? auth('community')->user() : null;
         $user = $identities->resolve('telegram', (string) $claims['sub'], $linkTo, (bool) ($flow['notify'] ?? false));
         $avatars->syncFromProvider($user, 'telegram', is_string($claims['picture'] ?? null) ? $claims['picture'] : null);

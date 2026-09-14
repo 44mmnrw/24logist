@@ -7,6 +7,8 @@ use App\Models\SiteSetting;
 use App\Services\Community\TelegramIdTokenVerifier;
 use App\Services\SiteSettingsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
@@ -45,6 +47,27 @@ class TelegramIdTokenVerifierTest extends TestCase
         app(TelegramIdTokenVerifier::class)->verify($token, 'nonce');
     }
 
+    public function test_telegram_key_timeout_returns_a_login_error_instead_of_http_500(): void
+    {
+        [$privateKey] = $this->keyPair();
+        SiteSetting::instance()->update(['community_telegram_client_id' => '12345']);
+        app(SiteSettingsService::class)->clearCache();
+        Cache::forget('community.telegram.jwks');
+        Http::fake(fn () => throw new ConnectionException('simulated timeout'));
+
+        $token = $this->token($privateKey, [
+            'iss' => 'https://oauth.telegram.org', 'aud' => '12345', 'sub' => 'telegram-user',
+            'iat' => time() - 5, 'exp' => time() + 300, 'nonce' => 'nonce-value',
+        ]);
+
+        try {
+            app(TelegramIdTokenVerifier::class)->verify($token, 'nonce-value');
+            $this->fail('Expected a validation error for a Telegram key timeout.');
+        } catch (ValidationException $e) {
+            $this->assertSame('Telegram сейчас недоступен. Повторите вход позже.', $e->errors()['telegram'][0]);
+        }
+    }
+
     public function test_telegram_login_uses_pkce_and_creates_community_session(): void
     {
         [$privateKey, $jwk] = $this->keyPair();
@@ -79,6 +102,34 @@ class TelegramIdTokenVerifierTest extends TestCase
         Http::assertSent(fn ($request) => $request->url() === 'https://oauth.telegram.org/token'
             && $request['code_verifier'] !== null
             && $request['redirect_uri'] === route('community.auth.telegram.callback'));
+    }
+
+    public function test_telegram_callback_redirects_to_login_when_keys_time_out(): void
+    {
+        [$privateKey] = $this->keyPair();
+        SiteSetting::instance()->update([
+            'community_enabled' => true,
+            'community_telegram_client_id' => '12345',
+            'community_telegram_client_secret' => 'test-secret',
+        ]);
+        app(SiteSettingsService::class)->clearCache();
+        Cache::forget('community.telegram.jwks');
+        $this->withoutVite();
+
+        $redirect = $this->get(route('community.auth.telegram.redirect'))->assertRedirect();
+        parse_str((string) parse_url((string) $redirect->headers->get('Location'), PHP_URL_QUERY), $params);
+        $token = $this->token($privateKey, [
+            'iss' => 'https://oauth.telegram.org', 'aud' => '12345', 'sub' => 'telegram-user',
+            'iat' => time() - 5, 'exp' => time() + 300, 'nonce' => $params['nonce'],
+        ]);
+        Http::fake([
+            'https://oauth.telegram.org/token' => Http::response(['id_token' => $token]),
+            'https://oauth.telegram.org/.well-known/jwks.json' => fn () => throw new ConnectionException('simulated timeout'),
+        ]);
+
+        $this->get(route('community.auth.telegram.callback', ['state' => $params['state'], 'code' => 'test-code']))
+            ->assertRedirect(route('community.login'))
+            ->assertSessionHasErrors('telegram');
     }
 
     public function test_unconfigured_telegram_login_is_not_offered(): void
