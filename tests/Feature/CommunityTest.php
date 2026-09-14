@@ -27,21 +27,18 @@ class CommunityTest extends TestCase
         $this->withoutVite();
     }
 
-    public function test_comment_preview_renders_formatting_and_removes_unsafe_html(): void
+    public function test_comment_composer_has_rich_editor_and_media_button(): void
     {
-        $user = CommunityUser::factory()->create();
-        $response = $this->actingAs($user, 'community')
-            ->postJson(route('community.markdown.preview'), [
-                'body_markdown' => '**Готово** <script>alert(1)</script> [опасно](javascript:alert(1))',
-            ])
-            ->assertOk();
+        $post = new CommunityPost;
+        $post->id = 1;
+        $html = view('community.comments._form', ['post' => $post, 'parent' => null])->render();
 
-        $html = $response->json('html');
-        $this->assertStringContainsString('<strong>Готово</strong>', $html);
-        $this->assertStringNotContainsString('<script>', $html);
-        $this->assertStringNotContainsString('href="javascript:', $html);
-        $this->postJson(route('community.markdown.preview'), ['body_markdown' => str_repeat('x', 5001)])
-            ->assertUnprocessable();
+        $this->assertStringContainsString('data-rich-editor', $html);
+        $this->assertStringContainsString('data-rich-editor-surface', $html);
+        $this->assertStringContainsString('data-rich-format="bold"', $html);
+        $this->assertStringContainsString('data-composer-photo-trigger', $html);
+        $this->assertStringContainsString('#tabler-photo-up', $html);
+        $this->assertStringNotContainsString('data-markdown-preview-toggle', $html);
     }
 
     public function test_guests_can_read_feed_but_cannot_publish(): void

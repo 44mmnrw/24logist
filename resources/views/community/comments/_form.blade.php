@@ -1,11 +1,11 @@
 <form method="POST" action="{{ route('community.comments.store', $post) }}" enctype="multipart/form-data" @class(['community-comment-form', 'community-comment-form--root' => ! $parent]) data-community-composer>
     @csrf
     @if ($parent)<input type="hidden" name="parent_id" value="{{ $parent->id }}">@endif
-    <div class="community-comment-composer" data-community-dropzone data-markdown-editor data-markdown-preview-url="{{ route('community.markdown.preview') }}">
+    <div class="community-comment-composer" data-community-dropzone data-rich-editor>
         @include('community.comments._format_toolbar')
         <label class="community-composer-sr-only" for="community-comment-body-{{ $parent?->id ?? 'root' }}">{{ $parent ? 'Ваш ответ' : 'Вступить в беседу' }}</label>
         <textarea id="community-comment-body-{{ $parent?->id ?? 'root' }}" name="body_markdown" maxlength="5000" rows="1" placeholder="{{ $parent ? 'Ваш ответ…' : 'Вступить в беседу' }}" data-composer-textarea></textarea>
-        <div class="community-markdown-preview community-markdown" data-markdown-preview aria-live="polite" hidden></div>
+        <div class="community-rich-editor__surface" data-rich-editor-surface hidden></div>
         @include('community.photos._editor', ['compact' => true])
         <div class="community-comment-composer__toolbar">
             <div class="community-comment-composer__tools">
