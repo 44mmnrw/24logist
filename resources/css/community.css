@@ -12,18 +12,22 @@
     font-weight: 400;
 }
 
+.community-page .btn {
+    font-weight: 450;
+}
+
 .community-page h1 {
-    font-weight: 550;
+    font-weight: 500;
 }
 
 .community-page h2,
 .community-page h3 {
-    font-weight: 550;
+    font-weight: 500;
 }
 
 .community-page strong,
 .community-page b {
-    font-weight: 550;
+    font-weight: 500;
 }
 
 .community-toolbar {
@@ -75,7 +79,7 @@
     border-left: 1px solid #dce4f0;
     color: #132d6b;
     font-size: 17px;
-    font-weight: 600;
+    font-weight: 550;
     white-space: nowrap;
 }
 
@@ -164,7 +168,7 @@
     background: #1d4ed8;
     color: #fff;
     font-size: 10px;
-    font-weight: 600;
+    font-weight: 550;
 }
 
 .community-toolbar__menu nav {
@@ -223,7 +227,6 @@
     margin: 0 0 14px;
     color: #11284c;
     font-size: clamp(18px, 2vw, 22px);
-    font-weight: 600;
     line-height: 1.25;
 }
 
@@ -331,7 +334,7 @@
     border-radius: 999px;
     background: #edf2f7;
     color: #435970;
-    font-weight: 500;
+    font-weight: 450;
     font-size: 13px;
     cursor: pointer;
     list-style: none;
@@ -477,7 +480,7 @@
 
 .community-meta a {
     color: #315c9d;
-    font-weight: 550;
+    font-weight: 500;
 }
 
 .community-author-line {
@@ -501,7 +504,7 @@
     border-radius: 50%;
     background: #174cac;
     color: #fff;
-    font-weight: 600;
+    font-weight: 550;
     line-height: 1;
 }
 
@@ -532,7 +535,7 @@
 
 .community-category-pill {
     color: #174cac !important;
-    font-weight: 550 !important;
+    font-weight: 500 !important;
 }
 
 .community-post-card h2 {
@@ -594,7 +597,7 @@
     background: #f0f2f5 !important;
     color: #4e5d70 !important;
     font: inherit;
-    font-weight: 500;
+    font-weight: 450;
     line-height: 1;
     text-decoration: none;
     cursor: pointer;
@@ -648,7 +651,7 @@
 .community-side-card > a.is-active {
     background: #edf3ff;
     color: #174cac;
-    font-weight: 600;
+    font-weight: 550;
 }
 
 .community-side-card small {
@@ -769,7 +772,7 @@
     padding: 14px 20px;
     border-radius: 12px;
     color: #fff;
-    font-weight: 600;
+    font-weight: 550;
     text-align: center;
 }
 
@@ -810,7 +813,7 @@
     display: grid;
     gap: 7px;
     color: #32455f;
-    font-weight: 550;
+    font-weight: 500;
 }
 
 .community-form input,
@@ -853,7 +856,7 @@
 .community-form legend {
     padding: 0 6px;
     color: #32455f;
-    font-weight: 600;
+    font-weight: 550;
 }
 
 .community-form__or {
@@ -982,7 +985,7 @@
     background: #dce9ff;
     color: #174cac !important;
     font-size: 11px;
-    font-weight: 550 !important;
+    font-weight: 500 !important;
     line-height: 1.25;
 }
 
@@ -1160,7 +1163,7 @@
     border-radius: 10px;
     background: #f8fbff;
     color: #32455f;
-    font-weight: 550;
+    font-weight: 500;
 }
 
 .community-photo-editor__picker > span {
@@ -1201,7 +1204,7 @@
     min-width: 0;
     color: #52657c;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 550;
 }
 
 .community-photo-editor__existing-item img,
@@ -1254,7 +1257,7 @@
     border-radius: 12px;
     background: #edf4ff;
     color: #205ab1;
-    font-weight: 550;
+    font-weight: 500;
 }
 
 .community-link-topic span {
@@ -1302,7 +1305,7 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    font-weight: 550 !important;
+    font-weight: 500 !important;
 }
 
 .community-report-dialog {
@@ -1368,7 +1371,7 @@
     display: grid;
     gap: 7px;
     color: #32455f;
-    font-weight: 550;
+    font-weight: 500;
 }
 
 .community-report-dialog .community-report-form label small {
@@ -1425,7 +1428,7 @@
 .community-comments__toolbar nav a.is-active {
     background: #e8effc;
     color: #174cac;
-    font-weight: 600;
+    font-weight: 550;
 }
 
 .community-comment-form {
@@ -1882,13 +1885,13 @@
 .community-comment__actions summary {
     padding: 5px 2px;
     cursor: pointer;
-    font-weight: 550;
+    font-weight: 500;
 }
 
 .community-comment__actions > button,
 .community-comment__actions > form button {
     padding: 5px 2px;
-    font-weight: 550;
+    font-weight: 500;
 }
 
 .community-comment__actions details[open] {
@@ -1970,7 +1973,7 @@
 .community-reaction__count {
     color: #667890;
     font-size: 11px;
-    font-weight: 550;
+    font-weight: 500;
 }
 
 @media (max-width: 640px) {
@@ -2000,7 +2003,7 @@
     color: #5c4a22;
     font: inherit;
     font-size: 12px;
-    font-weight: 550;
+    font-weight: 500;
     white-space: nowrap;
 }
 
@@ -2083,7 +2086,7 @@
     margin-bottom: 10px;
     color: #34465f;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 550;
 }
 
 .community-award-choice {
@@ -2133,7 +2136,7 @@
 .community-award-choice__name {
     color: #283b56;
     font-size: 11px;
-    font-weight: 550;
+    font-weight: 500;
     line-height: 1.2;
 }
 
@@ -2157,7 +2160,7 @@
     gap: 8px;
     margin-bottom: 7px;
     font-size: 14px;
-    font-weight: 550;
+    font-weight: 500;
 }
 
 .community-award-dialog__message span {
@@ -2224,7 +2227,7 @@
     margin-bottom: 5px;
     color: #174cac;
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 550;
     letter-spacing: .08em;
     text-transform: uppercase;
 }
@@ -2243,7 +2246,7 @@
 .community-about-card__stats dt {
     color: #17243b;
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 550;
 }
 
 .community-about-card__stats dd {
@@ -2260,7 +2263,7 @@
     background: #174cac;
     color: #fff;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 550;
 }
 
 .community-side-card > a.community-side-card__link:hover {
@@ -2295,7 +2298,7 @@
     margin: 0 0 7px;
     color: #315c9d !important;
     font-size: 14px;
-    font-weight: 550;
+    font-weight: 500;
 }
 
 .community-profile-bio {
@@ -2448,7 +2451,7 @@
     padding: 11px 16px;
     background: #b52e2e;
     color: #fff;
-    font-weight: 600;
+    font-weight: 550;
     cursor: pointer;
 }
 
