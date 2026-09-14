@@ -73,7 +73,6 @@
         @endif
         @yield('content')
     </main>
-    <x-landing.footer />
 </div>
 </body>
 </html>
