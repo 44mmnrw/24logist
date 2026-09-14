@@ -102,16 +102,19 @@ document.addEventListener('change', (event) => {
 
     const existing = input.form?.querySelectorAll('input[name="remove_photos[]"]:not(:checked)').length || 0;
     const files = Array.from(input.files || []);
+    const composer = input.closest('[data-community-composer]');
+    const fileCount = composer?.querySelector('[data-composer-file-count]');
     const maxPhotos = Number(input.dataset.maxPhotos || 3);
     const maxBytes = Number(input.dataset.maxBytes || 2 * 1024 * 1024);
     if (existing + files.length > maxPhotos || files.some((file) => !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size < 1 || file.size > maxBytes)) {
         input.value = '';
         preview.textContent = `Можно добавить не больше ${maxPhotos} фото JPG, PNG или WebP, каждое до ${maxBytes / 1024 / 1024} МБ.`;
+        if (fileCount) fileCount.hidden = true;
         return;
     }
 
     const urls = [];
-    files.forEach((file) => {
+    files.forEach((file, index) => {
         const url = URL.createObjectURL(file);
         urls.push(url);
         const figure = document.createElement('figure');
@@ -121,9 +124,83 @@ document.addEventListener('change', (event) => {
         const caption = document.createElement('figcaption');
         caption.textContent = file.name;
         figure.append(image, caption);
+        if (composer) {
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'community-comment-composer__remove-photo';
+            remove.dataset.composerRemovePhoto = String(index);
+            remove.setAttribute('aria-label', `Убрать фото ${file.name}`);
+            remove.textContent = '×';
+            figure.append(remove);
+        }
         preview.append(figure);
     });
     photoPreviewUrls.set(input, urls);
+    if (fileCount) {
+        fileCount.textContent = `${files.length} фото`;
+        fileCount.hidden = files.length === 0;
+    }
+});
+
+document.addEventListener('click', (event) => {
+    const trigger = event.target.closest('[data-composer-photo-trigger]');
+    if (trigger) {
+        trigger.closest('[data-community-composer]')?.querySelector('[data-community-photo-input]')?.click();
+        return;
+    }
+
+    const remove = event.target.closest('[data-composer-remove-photo]');
+    if (!remove) return;
+    const input = remove.closest('[data-community-composer]')?.querySelector('[data-community-photo-input]');
+    if (!input) return;
+    try {
+        const transfer = new DataTransfer();
+        Array.from(input.files || []).filter((_, index) => index !== Number(remove.dataset.composerRemovePhoto))
+            .forEach((file) => transfer.items.add(file));
+        input.files = transfer.files;
+    } catch (_) {
+        input.value = '';
+    }
+    input.dispatchEvent(new Event('change', {bubbles: true}));
+});
+
+document.addEventListener('input', (event) => {
+    const textarea = event.target.closest?.('[data-composer-textarea]');
+    if (!textarea) return;
+    textarea.style.height = 'auto';
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 220)}px`;
+    textarea.style.overflowY = textarea.scrollHeight > 220 ? 'auto' : 'hidden';
+});
+
+document.addEventListener('reset', (event) => {
+    const form = event.target.closest?.('[data-community-composer]');
+    if (!form) return;
+    window.setTimeout(() => {
+        form.querySelector('[data-community-photo-input]')?.dispatchEvent(new Event('change', {bubbles: true}));
+        const textarea = form.querySelector('[data-composer-textarea]');
+        textarea.style.height = '';
+        textarea.style.overflowY = '';
+        const details = form.closest('.community-comment__actions details');
+        if (details) details.open = false;
+    }, 0);
+});
+
+document.addEventListener('paste', (event) => {
+    const form = event.target.closest?.('[data-community-composer]');
+    if (!form) return;
+    const pasted = Array.from(event.clipboardData?.files || []).filter((file) => ['image/jpeg', 'image/png', 'image/webp'].includes(file.type));
+    if (!pasted.length) return;
+    const input = form.querySelector('[data-community-photo-input]');
+    if (!input) return;
+    try {
+        const transfer = new DataTransfer();
+        [...Array.from(input.files || []), ...pasted].forEach((file) => transfer.items.add(file));
+        input.files = transfer.files;
+        event.preventDefault();
+        input.dispatchEvent(new Event('change', {bubbles: true}));
+    } catch (_) {
+        // File selection remains available if the browser cannot transfer clipboard files.
+    }
 });
 
 document.addEventListener('click', async (event) => {
