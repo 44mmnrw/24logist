@@ -33,78 +33,101 @@
         ])
         ->all();
     $customers = $customerViews['count'];
+    $routeConfigured = app(\App\Services\SiteSettingsService::class)->routeApiConfigured();
 @endphp
 
 @if ($section)
-<section class="growth-section" @if($section->anchorId()) id="{{ $section->anchorId() }}" @endif>
-    <div class="landing-shell growth-section__shell">
-        <div class="growth-section__copy">
-            @if ($section->title)
-                <h2>{{ $section->title }}</h2>
+<section class="growth-section" data-growth-carousel @if($section->anchorId()) id="{{ $section->anchorId() }}" @endif>
+    <div class="landing-shell">
+        <div class="growth-carousel__stage" data-growth-stage>
+            <div class="growth-carousel__track" data-growth-track>
+            @if ($routeConfigured)
+                <div class="growth-slide growth-slide--route" data-growth-slide="route" aria-hidden="false">
+                    @include('components.landing.route-calculator-tool', ['embedded' => true])
+                </div>
             @endif
 
-            <div class="growth-section__text">
-                @foreach ($descriptionParagraphs as $paragraph)
-                    <p>{{ $paragraph }}</p>
-                @endforeach
+            <div class="growth-slide growth-slide--efficiency" data-growth-slide="efficiency" aria-hidden="{{ $routeConfigured ? 'true' : 'false' }}" @if($routeConfigured) inert @endif>
+                <div class="growth-section__shell">
+                    <div class="growth-section__copy">
+                        @if ($section->title)
+                            <h2>{{ $section->title }}</h2>
+                        @endif
+
+                        <div class="growth-section__text">
+                            @foreach ($descriptionParagraphs as $paragraph)
+                                <p>{{ $paragraph }}</p>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <div class="growth-dashboard" data-growth-dashboard aria-label="{{ $extra['dashboard_aria_label'] ?? '' }}">
+                        <article class="growth-card growth-card--margins">
+                            <header class="growth-card__header">
+                                <div>
+                                    <h3>{{ $extra['chart_title'] ?? '' }}</h3>
+                                    <p>{{ $extra['chart_subtitle'] ?? '' }}</p>
+                                </div>
+                                <div class="growth-switch" role="group" aria-label="{{ $extra['unit_aria_label'] ?? '' }}">
+                                    <button class="is-active" type="button" data-growth-unit="percent" aria-pressed="true">{{ $extra['unit_percent_label'] ?? '' }}</button>
+                                    <button type="button" data-growth-unit="count" aria-pressed="false">{{ $extra['unit_count_label'] ?? '' }}</button>
+                                </div>
+                            </header>
+
+                            <div class="growth-donut" role="img" aria-label="{{ $extra['chart_aria_label'] ?? '' }}" style="background: conic-gradient({{ $gradientStops }})">
+                                <div class="growth-donut__center">
+                                    <strong data-growth-total data-percent-value="{{ $extra['total_percent_value'] ?? '' }}" data-count-value="{{ $extra['total_count_value'] ?? '' }}">{{ $extra['total_percent_value'] ?? '' }}</strong>
+                                    <span data-growth-total-label data-percent-label="{{ $extra['total_percent_label'] ?? '' }}" data-count-label="{{ $extra['total_count_label'] ?? '' }}">{{ $extra['total_percent_label'] ?? '' }}</span>
+                                </div>
+                            </div>
+
+                            <div class="growth-legend">
+                                @foreach ($marginSegments as $segment)
+                                    <div class="growth-legend__row">
+                                        <span class="growth-dot" style="background: {{ $segment['color'] }}" aria-hidden="true"></span>
+                                        <span>{{ $segment['label'] }}</span>
+                                        <strong data-growth-percent="{{ $segment['value'] }}" data-growth-count="{{ $segment['count'] }}">{{ $segment['value'] }}</strong>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </article>
+
+                        <article class="growth-card growth-card--customers">
+                            <header class="growth-card__header growth-card__header--customers">
+                                <h3>{{ $extra['customers_title'] ?? '' }}</h3>
+                                <div class="growth-tabs" role="tablist" aria-label="{{ $extra['tabs_aria_label'] ?? '' }}">
+                                    <button class="is-active" type="button" role="tab" data-growth-view="count" aria-selected="true">{{ $extra['tab_count_label'] ?? '' }}</button>
+                                    <button type="button" role="tab" data-growth-view="revenue" aria-selected="false" tabindex="-1">{{ $extra['tab_revenue_label'] ?? '' }}</button>
+                                    <button type="button" role="tab" data-growth-view="margin" aria-selected="false" tabindex="-1">{{ $extra['tab_margin_label'] ?? '' }}</button>
+                                </div>
+                            </header>
+
+                            <div class="growth-customer-list" data-growth-customer-list aria-live="polite">
+                                @foreach ($customers as $customer)
+                                    <div class="growth-customer">
+                                        <span class="growth-customer__name">{{ $customer['name'] }}</span>
+                                        <span class="growth-customer__track" aria-hidden="true">
+                                            <span style="width: {{ $customer['width'] }}%"></span>
+                                        </span>
+                                        <strong>{{ $customer['value'] }}</strong>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <script type="application/json" data-growth-customer-data>@json($customerViews)</script>
+                        </article>
+                    </div>
+                </div>
+            </div>
+
             </div>
         </div>
 
-        <div class="growth-dashboard" data-growth-dashboard aria-label="{{ $extra['dashboard_aria_label'] ?? '' }}">
-            <article class="growth-card growth-card--margins">
-                <header class="growth-card__header">
-                    <div>
-                        <h3>{{ $extra['chart_title'] ?? '' }}</h3>
-                        <p>{{ $extra['chart_subtitle'] ?? '' }}</p>
-                    </div>
-                    <div class="growth-switch" role="group" aria-label="{{ $extra['unit_aria_label'] ?? '' }}">
-                        <button class="is-active" type="button" data-growth-unit="percent" aria-pressed="true">{{ $extra['unit_percent_label'] ?? '' }}</button>
-                        <button type="button" data-growth-unit="count" aria-pressed="false">{{ $extra['unit_count_label'] ?? '' }}</button>
-                    </div>
-                </header>
-
-                <div class="growth-donut" role="img" aria-label="{{ $extra['chart_aria_label'] ?? '' }}" style="background: conic-gradient({{ $gradientStops }})">
-                    <div class="growth-donut__center">
-                        <strong data-growth-total data-percent-value="{{ $extra['total_percent_value'] ?? '' }}" data-count-value="{{ $extra['total_count_value'] ?? '' }}">{{ $extra['total_percent_value'] ?? '' }}</strong>
-                        <span data-growth-total-label data-percent-label="{{ $extra['total_percent_label'] ?? '' }}" data-count-label="{{ $extra['total_count_label'] ?? '' }}">{{ $extra['total_percent_label'] ?? '' }}</span>
-                    </div>
-                </div>
-
-                <div class="growth-legend">
-                    @foreach ($marginSegments as $segment)
-                        <div class="growth-legend__row">
-                            <span class="growth-dot" style="background: {{ $segment['color'] }}" aria-hidden="true"></span>
-                            <span>{{ $segment['label'] }}</span>
-                            <strong data-growth-percent="{{ $segment['value'] }}" data-growth-count="{{ $segment['count'] }}">{{ $segment['value'] }}</strong>
-                        </div>
-                    @endforeach
-                </div>
-            </article>
-
-            <article class="growth-card growth-card--customers">
-                <header class="growth-card__header growth-card__header--customers">
-                    <h3>{{ $extra['customers_title'] ?? '' }}</h3>
-                    <div class="growth-tabs" role="tablist" aria-label="{{ $extra['tabs_aria_label'] ?? '' }}">
-                        <button class="is-active" type="button" role="tab" data-growth-view="count" aria-selected="true">{{ $extra['tab_count_label'] ?? '' }}</button>
-                        <button type="button" role="tab" data-growth-view="revenue" aria-selected="false" tabindex="-1">{{ $extra['tab_revenue_label'] ?? '' }}</button>
-                        <button type="button" role="tab" data-growth-view="margin" aria-selected="false" tabindex="-1">{{ $extra['tab_margin_label'] ?? '' }}</button>
-                    </div>
-                </header>
-
-                <div class="growth-customer-list" data-growth-customer-list aria-live="polite">
-                    @foreach ($customers as $customer)
-                        <div class="growth-customer">
-                            <span class="growth-customer__name">{{ $customer['name'] }}</span>
-                            <span class="growth-customer__track" aria-hidden="true">
-                                <span style="width: {{ $customer['width'] }}%"></span>
-                            </span>
-                            <strong>{{ $customer['value'] }}</strong>
-                        </div>
-                    @endforeach
-                </div>
-                <script type="application/json" data-growth-customer-data>@json($customerViews)</script>
-            </article>
-        </div>
+        @if ($routeConfigured)
+            <div class="growth-carousel__controls" role="group" aria-label="Переключение слайдов секции">
+                <button class="growth-carousel__dot is-active" type="button" data-growth-select="route" aria-label="Показать калькулятор маршрута" aria-pressed="true"></button>
+                <button class="growth-carousel__dot" type="button" data-growth-select="efficiency" aria-label="Показать эффективность" aria-pressed="false"></button>
+            </div>
+        @endif
     </div>
 </section>
 @endif

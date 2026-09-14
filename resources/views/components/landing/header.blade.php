@@ -34,9 +34,6 @@
             @foreach ($navLinks as $link)
                 <a href="{{ \App\Support\LandingLinks::resolve($link->link) }}">{{ $link->title }}</a>
             @endforeach
-            @if (app(\App\Services\SiteSettingsService::class)->routeApiConfigured())
-                <a href="{{ route('route-calculator.index') }}">Калькулятор маршрута</a>
-            @endif
             {{--
             @if (app(\App\Services\SiteSettingsService::class)->communityEnabled())
                 <a href="{{ route('community.index') }}">Сообщество</a>
@@ -82,9 +79,6 @@
                         @endif
                         @if ($cabinetLoginEnabled)
                             <button type="button" data-cabinet-login-open>{{ $siteSettings->cabinet_login_button_text ?: 'Войти в личный кабинет' }}</button>
-                        @endif
-                        @if (app(\App\Services\SiteSettingsService::class)->routeApiConfigured())
-                            <a href="{{ route('route-calculator.index') }}">Калькулятор маршрута</a>
                         @endif
                         {{--
                         @if (app(\App\Services\SiteSettingsService::class)->communityEnabled())

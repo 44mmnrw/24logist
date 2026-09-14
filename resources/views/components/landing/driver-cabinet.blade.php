@@ -3,7 +3,7 @@
 @endphp
 
 @if ($section)
-<section class="mobile-section mobile-section--driver-cabinet" @if($section->anchorId()) id="{{ $section->anchorId() }}" @endif>
+<div class="mobile-section mobile-section--driver-cabinet" @if($section->anchorId()) id="{{ $section->anchorId() }}" @endif>
     @php
         $extra = $section?->extra ?? [];
         $bullets = $landing->blocks('driver_cabinet', 'bullet');
@@ -73,5 +73,5 @@
             </ul>
         </div>
     </div>
-</section>
+</div>
 @endif

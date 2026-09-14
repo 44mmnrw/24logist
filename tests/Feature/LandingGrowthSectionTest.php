@@ -3,7 +3,9 @@
 namespace Tests\Feature;
 
 use App\Models\LandingSection;
+use App\Models\SiteSetting;
 use App\Services\LandingPageService;
+use App\Services\SiteSettingsService;
 use App\Support\LandingGrowthForm;
 use Database\Seeders\GrowthSectionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -22,6 +24,8 @@ class LandingGrowthSectionTest extends TestCase
 
     public function test_growth_section_renders_copy_and_dashboard_cards(): void
     {
+        $this->assertSame('growth', LandingSection::query()->where('slug', 'growth')->firstOrFail()->anchorId());
+
         $html = view('components.landing.growth', [
             'landing' => app(LandingPageService::class),
         ])->render();
@@ -36,6 +40,34 @@ class LandingGrowthSectionTest extends TestCase
         $this->assertStringContainsString('data-growth-customer-data', $html);
         $this->assertStringContainsString('ООО &quot;ГК «ЛОГОС»&quot;', $html);
         $this->assertSame(5, substr_count($html, 'class="growth-customer"'));
+    }
+
+    public function test_configured_route_calculator_is_the_first_growth_panel(): void
+    {
+        $secret = 'shared-route-api-secret-at-least-32-characters';
+        SiteSetting::instance()->update([
+            'route_calculator_enabled' => true,
+            'route_api_base_url' => 'https://platform.example.test/api/internal/site/routes',
+            'route_api_secret' => $secret,
+        ]);
+        app(SiteSettingsService::class)->clearCache();
+
+        $html = view('components.landing.growth', [
+            'landing' => app(LandingPageService::class),
+        ])->render();
+
+        $this->assertStringContainsString('data-growth-slide="route"', $html);
+        $this->assertStringContainsString('data-growth-track', $html);
+        $this->assertStringContainsString('data-route-calculator-calculator', $html);
+        $this->assertMatchesRegularExpression('/data-growth-slide="efficiency"[^>]*aria-hidden="true"[^>]*\binert\b/', $html);
+        $this->assertStringContainsString('data-growth-select="efficiency"', $html);
+        $this->assertSame(2, substr_count($html, 'class="growth-carousel__dot'));
+        $this->assertStringNotContainsString('growth-carousel__arrow', $html);
+        $this->assertLessThan(
+            strpos($html, 'data-growth-slide="efficiency"'),
+            strpos($html, 'data-growth-slide="route"'),
+        );
+        $this->assertStringNotContainsString($secret, $html);
     }
 
     public function test_all_visible_dashboard_content_is_loaded_from_the_database(): void

@@ -97,3 +97,56 @@ const initializeGrowthDashboard = (dashboard) => {
 };
 
 document.querySelectorAll('[data-growth-dashboard]').forEach(initializeGrowthDashboard);
+
+document.querySelectorAll('[data-growth-carousel]').forEach((carousel) => {
+    const track = carousel.querySelector('[data-growth-track]');
+    const slides = [...carousel.querySelectorAll('[data-growth-slide]')];
+    const dots = [...carousel.querySelectorAll('[data-growth-select]')];
+    if (!(track instanceof HTMLElement) || slides.length < 2 || dots.length !== slides.length) return;
+
+    let currentIndex = Math.max(0, slides.findIndex((slide) => slide.getAttribute('aria-hidden') !== 'true'));
+    let transitioning = false;
+
+    const showSlide = (index) => {
+        if (index === currentIndex || transitioning) return;
+
+        const outgoing = slides[currentIndex];
+        const incoming = slides[index];
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        dots.forEach((dot) => {
+            const active = dot.dataset.growthSelect === incoming.dataset.growthSlide;
+            dot.classList.toggle('is-active', active);
+            dot.setAttribute('aria-pressed', String(active));
+        });
+
+        const finish = () => {
+            if (!transitioning) return;
+            transitioning = false;
+            track.removeEventListener('transitionend', onTransitionEnd);
+            window.clearTimeout(fallbackTimer);
+            outgoing.setAttribute('aria-hidden', 'true');
+            incoming.inert = false;
+            currentIndex = index;
+        };
+        const onTransitionEnd = (event) => {
+            if (event.target === track && event.propertyName === 'transform') finish();
+        };
+        let fallbackTimer;
+
+        incoming.setAttribute('aria-hidden', 'false');
+        outgoing.inert = true;
+        transitioning = true;
+
+        if (reducedMotion) {
+            track.style.transform = `translate3d(${-index * 100}%, 0, 0)`;
+            finish();
+            return;
+        }
+
+        track.addEventListener('transitionend', onTransitionEnd);
+        track.style.transform = `translate3d(${-index * 100}%, 0, 0)`;
+        fallbackTimer = window.setTimeout(finish, 850);
+    };
+
+    dots.forEach((dot, index) => dot.addEventListener('click', () => showSlide(index)));
+});

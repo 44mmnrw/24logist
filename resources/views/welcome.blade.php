@@ -30,17 +30,24 @@
                     'additional_options' => 'components.landing.additional-options',
                     'epd_platform' => 'components.landing.epd-platform',
                     'growth' => 'components.landing.growth',
-                    'mobile' => 'components.landing.mobile',
-                    'driver_cabinet' => 'components.landing.driver-cabinet',
+                    'mobile' => 'components.landing.mobile-story',
+                    'driver_cabinet' => 'components.landing.mobile-story',
                     'quiz' => 'components.landing.quiz',
                     'faq' => 'components.landing.faq',
                     'final_cta' => 'components.landing.final-cta',
                 ];
                 $specialBackgroundSections = ['hero', 'final_cta'];
                 $alternatingIndex = 0;
+                $mobileStoryRendered = false;
             @endphp
             @foreach ($landing->sections() as $landingSection)
                 @if (isset($sectionViews[$landingSection->slug]))
+                    @if (in_array($landingSection->slug, ['mobile', 'driver_cabinet'], true))
+                        @if ($mobileStoryRendered)
+                            @continue
+                        @endif
+                        @php($mobileStoryRendered = true)
+                    @endif
                     @if (! in_array($landingSection->slug, $specialBackgroundSections, true))
                         <div class="landing-section-slot landing-section-slot--{{ $alternatingIndex % 2 === 0 ? 'white' : 'light' }}">
                             @include($sectionViews[$landingSection->slug])

@@ -552,6 +552,28 @@ body {
     padding-block: 80px;
     background: #ffffff;
 }
+.landing-section-slot > .mobile-story { background: #ffffff; }
+.mobile-story.is-ready .mobile-story__sticky {
+    position: sticky;
+    top: var(--mobile-story-sticky-top, 64px);
+    overflow: hidden;
+}
+.mobile-story.is-ready .mobile-story__stage {
+    display: grid;
+    max-width: 1280px;
+    margin-inline: auto;
+    overflow: hidden;
+}
+.mobile-story.is-ready .mobile-story__slide {
+    grid-area: 1 / 1;
+    align-self: center;
+    min-width: 0;
+    transition: transform .12s ease-out;
+    will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+    .mobile-story.is-ready .mobile-story__slide { transition: none; }
+}
 
 .quiz-section {
     padding-block: 80px;
@@ -1107,8 +1129,9 @@ body {
 .epd-package .btn { min-height: 40px; padding-inline: 8px; color: #1d4ed8; border-color: #1d4ed8; }
 
 .growth-section {
-    padding-block: 80px;
+    padding-block: 64px;
     background: #f8fafc;
+    scroll-margin-top: 64px;
 }
 .growth-section__shell {
     display: grid;
@@ -1136,7 +1159,29 @@ body {
     line-height: 1.7;
 }
 .growth-section__text strong { color: #1f2a3d; font-weight: 700; }
+.growth-carousel__stage { min-width: 0; overflow: hidden; isolation: isolate; }
+.growth-carousel__track {
+    display: flex;
+    min-width: 0;
+    transform: translate3d(0, 0, 0);
+    transition: transform .72s cubic-bezier(.4, 0, .2, 1);
+    will-change: transform;
+}
+.growth-slide { display: flex; flex: 0 0 100%; align-items: center; min-width: 0; }
+.growth-slide > * { width: 100%; }
+.growth-slide[aria-hidden="true"] { visibility: hidden; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) {
+    .growth-carousel__track { transition: none; }
+}
+.growth-slide--route .route-calculator-tool { gap: 12px; }
+.growth-slide--route .route-calculator-tool__workspace { height: auto; min-height: 560px; }
+.growth-slide--route .route-calculator-panel { max-height: none; overflow-y: visible; }
+.growth-slide--route .route-calculator-map-wrap { min-height: 560px; }
 .growth-dashboard { display: grid; grid-column: 1; grid-row: 1; gap: 16px; min-width: 0; }
+.growth-carousel__controls { display: flex; align-items: center; justify-content: center; gap: 11px; margin-top: 20px; }
+.growth-carousel__dot { width: 10px; height: 10px; padding: 0; border: 0; border-radius: 50%; background: #a6b5ca; cursor: pointer; }
+.growth-carousel__dot.is-active { background: #1d4ed8; box-shadow: 0 0 0 3px rgba(29, 78, 216, .16); }
+.growth-carousel__controls button:focus-visible { outline: 3px solid rgba(29, 78, 216, .3); outline-offset: 3px; }
 .growth-card {
     min-width: 0;
     padding: 16px;
@@ -1619,6 +1664,20 @@ body {
 
 @media (max-width: 760px) {
     .landing-shell { padding-inline: 16px; }
+    .mobile-story .mobile-section { padding-block: 12px; }
+    .mobile-story .mobile-section__shell { gap: 12px; }
+    .mobile-story .mobile-copy h2 { margin-top: 12px; font-size: 30px; }
+    .mobile-story .mobile-copy p { margin-top: 12px; font-size: 15px; line-height: 1.4; }
+    .mobile-story .mobile-copy .hero-list { margin-top: 18px; gap: 6px; font-size: 13px; line-height: 19px; }
+    .mobile-story .mobile-showcase { min-height: 0; height: clamp(170px, calc(100svh - 450px), 300px); }
+    .mobile-story .mobile-phone {
+        width: auto;
+        height: 100%;
+        aspect-ratio: 1 / 2;
+        padding: 6px;
+        border-radius: 24px;
+    }
+    .mobile-story .mobile-phone__screen { border-radius: 18px; }
     .landing-header__shell { gap: 10px; }
     .landing-header__actions { gap: 8px; }
     .landing-header__actions .landing-header__login { display: none; }
@@ -1692,12 +1751,22 @@ body {
     .additional-option strong { grid-column: 2; }
 }
 
+@media (max-width: 360px) and (max-height: 620px) {
+    .mobile-story .mobile-section { padding-block: 8px; }
+    .mobile-story .mobile-section__shell { gap: 8px; }
+    .mobile-story .mobile-copy h2 { margin-top: 8px; font-size: 27px; }
+    .mobile-story .mobile-copy p { margin-top: 8px; font-size: 14px; line-height: 1.35; }
+    .mobile-story .mobile-copy .hero-list { margin-top: 12px; gap: 4px; font-size: 12px; line-height: 17px; }
+    .mobile-story .mobile-showcase { height: clamp(100px, 20svh, 140px); }
+}
+
 /* Community */
 .community-page { background: #f1f3f6; color: #182235; min-height: 100vh; }
 
 .route-calculator-tool { display: grid; gap: 16px; }
 .route-calculator-tool__header { display: flex; justify-content: space-between; gap: 20px; padding: 18px 20px; border: 1px solid #dbe3ef; border-radius: 14px; background: #fff; }
 .route-calculator-tool__header h1 { margin: 7px 0 3px; color: #11284c; font-size: clamp(24px, 3vw, 36px); }
+.route-calculator-tool__header h3 { margin: 0 0 3px; color: #11284c; font-size: clamp(20px, 2.5vw, 28px); }
 .route-calculator-tool__header p { margin: 0; color: #617087; }
 .route-calculator-tool__workspace { display: grid; grid-template-columns: minmax(290px, 370px) minmax(0, 1fr); min-height: 660px; overflow: hidden; border: 1px solid #dbe3ef; border-radius: 16px; background: #fff; box-shadow: 0 10px 30px rgba(25, 52, 96, .08); }
 .route-calculator-panel { position: relative; z-index: 2; overflow-y: auto; max-height: 760px; padding: 18px; border-right: 1px solid #e2e7ef; background: #fff; }
@@ -1710,6 +1779,7 @@ body {
 .route-calculator-suggest button { display: block; width: 100%; border: 0; border-radius: 7px; padding: 8px 9px; background: transparent; color: #172841; text-align: left; cursor: pointer; }
 .route-calculator-suggest button:hover { background: #edf3ff; color: #184fb8; }
 .route-calculator-truck { display: grid; gap: 9px; margin: 0; padding: 12px; border: 1px solid #dbe3ef; border-radius: 11px; }
+.route-calculator-truck[hidden] { display: none; }
 .route-calculator-truck legend { padding: 0 5px; color: #183f91; font-size: 13px; font-weight: 800; }
 .route-calculator-check { display: flex; align-items: center; gap: 8px; color: #344b69; font-size: 13px; }
 .route-calculator-details { border-top: 1px solid #e5eaf1; border-bottom: 1px solid #e5eaf1; padding: 9px 0; }
@@ -1745,6 +1815,7 @@ body {
     .route-calculator-tool__workspace { grid-template-columns: 1fr; min-height: 0; }
     .route-calculator-panel { max-height: none; border-right: 0; border-bottom: 1px solid #e2e7ef; }
     .route-calculator-map-wrap { min-height: 440px; }
+    .growth-slide--route .route-calculator-map-wrap { min-height: 440px; }
 }
 
 @media (max-width: 540px) {
@@ -1752,6 +1823,7 @@ body {
     .route-calculator-panel { padding: 14px; }
     .route-calculator-fields-row { grid-template-columns: 1fr; }
     .route-calculator-map-wrap { min-height: 360px; }
+    .growth-slide--route .route-calculator-map-wrap { min-height: 360px; }
 }
 .community-toolbar { background: #fff; border-bottom: 1px solid #e4e9f2; }
 .community-toolbar__inner { min-height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
@@ -4961,12 +5033,13 @@ html.cabinet-login-open {
 .cabinet-login-modal__suggestion-inn { color: #64748b; font-size: 12px; font-weight: 500; }
 
 .cabinet-login-modal__lookup-status {
-    min-height: 34px;
     margin: 0;
     color: #64748b;
     font-size: 12px;
     line-height: 1.4;
 }
+
+.cabinet-login-modal__lookup-status:empty { display: none; }
 
 .cabinet-login-modal__lookup-status.is-success { color: #15803d; }
 .cabinet-login-modal__lookup-status.is-error { color: #be123c; }

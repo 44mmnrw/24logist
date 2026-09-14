@@ -13,6 +13,7 @@ final class LandingSectionAnchor
         'features' => 'features',
         'why' => 'why',
         'pricing' => 'pricing',
+        'growth' => 'growth',
         'quiz' => 'quiz',
         'faq' => 'faq',
         'final_cta' => 'final-cta',

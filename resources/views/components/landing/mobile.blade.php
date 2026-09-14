@@ -3,7 +3,7 @@
 @endphp
 
 @if ($section)
-<section class="mobile-section" @if($section->anchorId()) id="{{ $section->anchorId() }}" @endif>
+<div class="mobile-section" @if($section->anchorId()) id="{{ $section->anchorId() }}" @endif>
     @php
         $extra = $section?->extra ?? [];
         $bullets = $landing->blocks('mobile', 'bullet');
@@ -73,5 +73,5 @@
             </div>
         </div>
     </div>
-</section>
+</div>
 @endif
