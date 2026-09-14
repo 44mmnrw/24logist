@@ -105,7 +105,7 @@ class EditGeneralSiteSetting extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        foreach (['favicon_path', 'apple_touch_icon_path', 'og_image_path', 'org_logo_path'] as $field) {
+        foreach (['site_logo_path', 'favicon_path', 'apple_touch_icon_path', 'og_image_path', 'org_logo_path'] as $field) {
             if (filled($data[$field] ?? null)) {
                 $data[$field] = [(string) $data[$field]];
             }
@@ -125,6 +125,7 @@ class EditGeneralSiteSetting extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
+        $data['site_logo_path'] = $this->persistUpload($data['site_logo_path'] ?? null, 'site/logo');
         $data['favicon_path'] = $this->persistUpload($data['favicon_path'] ?? null, 'site/favicon');
         $data['apple_touch_icon_path'] = $this->persistUpload($data['apple_touch_icon_path'] ?? null, 'site/apple-touch-icon');
         $data['og_image_path'] = $this->persistUpload($data['og_image_path'] ?? null, 'site/og');

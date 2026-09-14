@@ -191,7 +191,7 @@ final class StructuredData
             $data['telephone'] = (string) $settings->org_phone;
         }
 
-        $logo = OpenGraph::absolutePublicUrl($settings->org_logo_path ?? $settings->og_image_path);
+        $logo = OpenGraph::absolutePublicUrl($settings->org_logo_path ?? $settings->site_logo_path ?? $settings->og_image_path);
 
         if ($logo !== null) {
             $data['logo'] = [

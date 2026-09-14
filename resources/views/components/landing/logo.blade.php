@@ -3,7 +3,7 @@
 ])
 
 <img
-    src="{{ asset('images/logo.svg') }}"
+    src="{{ app(\App\Services\SiteSettingsService::class)->logoUrl() }}"
     alt="ЛогистРу"
     width="132"
     height="32"

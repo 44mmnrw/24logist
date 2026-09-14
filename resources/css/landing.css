@@ -167,7 +167,9 @@ body {
 .brand-logo {
     display: block;
     width: auto;
+    max-width: 180px;
     height: 32px;
+    object-fit: contain;
 }
 .brand-logo--footer {
     height: 28px;
@@ -591,25 +593,28 @@ body {
     background: #ffffff;
 }
 .landing-section-slot > .mobile-story { background: #ffffff; }
-.mobile-story.is-ready .mobile-story__sticky {
-    position: sticky;
-    top: var(--scroll-story-sticky-top, 64px);
-    overflow: hidden;
-}
-.mobile-story.is-ready .mobile-story__stage {
+.mobile-story__stage {
     display: grid;
     max-width: 1280px;
     margin-inline: auto;
     overflow: hidden;
 }
-.mobile-story.is-ready .mobile-story__slide {
+.mobile-story__slide {
     grid-area: 1 / 1;
     align-self: center;
     min-width: 0;
-    will-change: transform;
+    transform: translate3d(100%, 0, 0);
+    transition: transform .65s cubic-bezier(.4, 0, .2, 1);
 }
+.mobile-story__slide:first-child { transform: translate3d(0, 0, 0); }
+.mobile-story__slide[aria-hidden="true"] { pointer-events: none; }
+.mobile-story__dots { display: flex; justify-content: center; gap: 0; padding-bottom: 20px; }
+.mobile-story__dot { display: grid; width: 30px; height: 30px; place-items: center; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.mobile-story__dot::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: #a6b5ca; }
+.mobile-story__dot.is-active::before { background: #1d4ed8; box-shadow: 0 0 0 3px rgba(29, 78, 216, .16); }
+.mobile-story__dot:focus-visible { outline: 3px solid rgba(29, 78, 216, .3); outline-offset: 1px; border-radius: 50%; }
 @media (prefers-reduced-motion: reduce) {
-    .mobile-story.is-ready .mobile-story__slide { transition: none; }
+    .mobile-story__slide { transition: none; }
 }
 
 .quiz-section {

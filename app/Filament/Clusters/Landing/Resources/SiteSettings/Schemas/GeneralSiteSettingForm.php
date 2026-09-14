@@ -18,6 +18,7 @@ use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
 
 final class GeneralSiteSettingForm
 {
@@ -30,7 +31,7 @@ final class GeneralSiteSettingForm
             Tabs::make('site_settings_tabs')
                 ->tabs([
                     Tab::make('icons')
-                        ->label('Иконки')
+                        ->label('Логотип и иконки')
                         ->icon('heroicon-o-photo')
                         ->schema(self::iconsTab()),
                     Tab::make('seo')
@@ -85,9 +86,25 @@ final class GeneralSiteSettingForm
     private static function iconsTab(): array
     {
         return [
-            Section::make('Иконки сайта')
-                ->description('Favicon, Apple Touch Icon и PWA-иконки.')
+            Section::make('Логотип и иконки сайта')
+                ->description('Основной логотип в шапке, подвале и окне входа, а также иконки сайта.')
                 ->schema([
+                    FileUpload::make('site_logo_path')
+                        ->label('Основной логотип сайта')
+                        ->disk('public')
+                        ->directory('site/logo')
+                        ->visibility('public')
+                        ->image()
+                        ->imagePreviewHeight('96')
+                        ->maxFiles(1)
+                        ->maxSize(2048)
+                        ->acceptedFileTypes(['image/svg+xml', 'image/png', 'image/jpeg', 'image/webp'])
+                        ->fetchFileInformation(false)
+                        ->openable()
+                        ->downloadable()
+                        ->getUploadedFileUsing(self::uploadPreview(...))
+                        ->helperText('SVG, PNG, JPG или WebP до 2 МБ. Файл хранится отдельно от кода и сохраняется при деплое. Если поле пустое, используется исходный логотип.')
+                        ->columnSpanFull(),
                     FileUpload::make('favicon_path')
                         ->label('Favicon')
                         ->disk('public')
@@ -257,6 +274,7 @@ final class GeneralSiteSettingForm
                         ->openable()
                         ->downloadable()
                         ->getUploadedFileUsing(self::uploadPreview(...))
+                        ->helperText('Необязательно. Если поле пустое, для поисковиков используется основной логотип сайта.')
                         ->columnSpanFull(),
                     TextInput::make('org_street_address')
                         ->label('Улица, дом')
@@ -602,7 +620,7 @@ final class GeneralSiteSettingForm
                         ->helperText('Должен в точности совпадать с разрешённым origin в настройках API ЛогистРу.'),
                     TextInput::make('cabinet_login_connect_ip')
                         ->label('Внутренний IP платформы')
-                        ->required()
+                        ->required(fn (Get $get): bool => (bool) ($get('cabinet_login_enabled') || $get('cabinet_registration_enabled')))
                         ->rule('ip')
                         ->maxLength(45)
                         ->placeholder('147.45.236.73')
@@ -854,7 +872,9 @@ final class GeneralSiteSettingForm
                         ->label('Шифрование')
                         ->options([
                             'ssl' => 'SSL (порт 465)',
+                            'smtps' => 'SSL (порт 465, ранее сохранённое значение)',
                             'tls' => 'TLS / STARTTLS (порт 587)',
+                            'smtp' => 'TLS / STARTTLS (ранее сохранённое значение)',
                             'none' => 'Без шифрования',
                         ])
                         ->default('ssl')

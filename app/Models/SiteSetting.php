@@ -9,6 +9,7 @@ class SiteSetting extends Model
 {
     protected $fillable = [
         'favicon_path',
+        'site_logo_path',
         'apple_touch_icon_path',
         'og_title',
         'og_description',
@@ -351,6 +352,7 @@ TEXT;
     {
         static::saving(function (self $settings): void {
             $settings->favicon_path = LandingMedia::normalizePath($settings->favicon_path);
+            $settings->site_logo_path = LandingMedia::normalizePath($settings->site_logo_path);
             $settings->apple_touch_icon_path = LandingMedia::normalizePath($settings->apple_touch_icon_path);
             $settings->og_image_path = LandingMedia::normalizePath($settings->og_image_path);
             $settings->org_logo_path = LandingMedia::normalizePath($settings->org_logo_path);

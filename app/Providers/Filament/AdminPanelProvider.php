@@ -17,6 +17,7 @@ use App\Filament\Clusters\Landing\Resources\SeoMonitoringSettings\SeoMonitoringS
 use App\Filament\Clusters\Landing\Resources\SeoResearchRuns\SeoResearchRunResource;
 use App\Filament\Clusters\Landing\Resources\SiteSettings\GeneralSiteSettingResource;
 use App\Filament\Clusters\Landing\Resources\SiteSettings\SiteSettingResource;
+use App\Services\SiteSettingsService;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -46,7 +47,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login(Login::class)
             ->brandName('ЛогистРу')
-            ->brandLogo(asset('images/logo.svg'))
+            ->brandLogo(fn (): string => app(SiteSettingsService::class)->logoUrl())
             ->brandLogoHeight('2rem')
             ->colors([
                 'primary' => Color::hex('#1d4ed8'),

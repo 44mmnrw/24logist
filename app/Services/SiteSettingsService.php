@@ -280,6 +280,11 @@ class SiteSettingsService
         Cache::forget('site.settings.v1');
     }
 
+    public function logoUrl(): string
+    {
+        return LandingMedia::url($this->get()->site_logo_path) ?? asset('images/logo.svg');
+    }
+
     /**
      * @return array{url: string, root_url: string, type: string}
      */

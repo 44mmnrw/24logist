@@ -26,7 +26,7 @@
             'url' => url('/'),
             'logo' => [
                 '@type' => 'ImageObject',
-                'url' => asset('images/logo.svg'),
+                'url' => app(\App\Services\SiteSettingsService::class)->logoUrl(),
             ],
         ],
     ];
@@ -102,7 +102,7 @@
         <header class="epd-game__topbar">
             <a class="epd-game__brand" href="{{ url('/') }}" aria-label="ЛогистРу — перейти на главную">
                 <span class="epd-game__logo-wrap">
-                    <img src="{{ asset('images/logo.svg') }}" alt="ЛогистРу" width="154" height="38">
+                    <img src="{{ app(\App\Services\SiteSettingsService::class)->logoUrl() }}" alt="ЛогистРу" width="154" height="38">
                 </span>
                 <span class="epd-game__brand-meta">Игровой стенд ЭПД</span>
             </a>
