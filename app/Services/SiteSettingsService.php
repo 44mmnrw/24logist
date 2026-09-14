@@ -116,6 +116,13 @@ class SiteSettingsService
         return (string) $this->get()->getAttribute('community_telegram_client_id');
     }
 
+    public function communityTelegramEnabled(): bool
+    {
+        return $this->communityEnabled()
+            && filled($this->telegramClientId())
+            && filled($this->telegramClientSecret());
+    }
+
     public function telegramClientSecret(): string
     {
         return (string) $this->get()->getAttribute('community_telegram_client_secret');

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AppleTouchIconController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CabinetLoginController;
+use App\Http\Controllers\CommunityAcceptedAnswerController;
 use App\Http\Controllers\CommunityAccountController;
 use App\Http\Controllers\CommunityActionController;
 use App\Http\Controllers\CommunityCommentController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\CommunityLegalController;
 use App\Http\Controllers\CommunityModerationController;
 use App\Http\Controllers\CommunityNotificationController;
 use App\Http\Controllers\CommunityPostController;
+use App\Http\Controllers\CommunityPostSubscriptionController;
 use App\Http\Controllers\CsrfTokenController;
 use App\Http\Controllers\FaviconController;
 use App\Http\Controllers\LandingController;
@@ -178,6 +180,10 @@ Route::middleware(['community.locale', 'community.enabled'])->prefix('community'
             Route::get('/posts/{post}/edit', [CommunityPostController::class, 'edit'])->name('posts.edit');
             Route::put('/posts/{post}', [CommunityPostController::class, 'update'])->name('posts.update');
             Route::delete('/posts/{post}', [CommunityPostController::class, 'destroy'])->name('posts.destroy');
+            Route::post('/posts/{post}/subscription', [CommunityPostSubscriptionController::class, 'store'])->name('posts.subscribe');
+            Route::delete('/posts/{post}/subscription', [CommunityPostSubscriptionController::class, 'destroy'])->name('posts.unsubscribe');
+            Route::post('/posts/{post}/accepted-answer/{comment}', [CommunityAcceptedAnswerController::class, 'store'])->name('posts.accept_answer');
+            Route::delete('/posts/{post}/accepted-answer', [CommunityAcceptedAnswerController::class, 'destroy'])->name('posts.clear_answer');
             Route::post('/posts/{post}/comments', [CommunityCommentController::class, 'store'])->middleware('throttle:community-comments')->name('comments.store');
             Route::put('/comments/{comment}', [CommunityCommentController::class, 'update'])->name('comments.update');
             Route::delete('/comments/{comment}', [CommunityCommentController::class, 'destroy'])->name('comments.destroy');

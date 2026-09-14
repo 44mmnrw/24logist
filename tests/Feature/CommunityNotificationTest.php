@@ -60,4 +60,26 @@ class CommunityNotificationTest extends TestCase
         $this->assertFalse($identity->fresh()->notifications_enabled);
         $this->assertFalse($identity->fresh()->bot_access);
     }
+
+    public function test_exhausted_delivery_is_marked_failed(): void
+    {
+        Queue::fake();
+        $recipient = CommunityUser::factory()->create();
+        $actor = CommunityUser::factory()->create();
+        $recipient->identities()->create([
+            'provider' => 'telegram', 'provider_user_id' => '202',
+            'bot_access' => true, 'notifications_enabled' => true, 'bot_status' => 'active',
+        ]);
+        $notification = app(CommunityNotificationService::class)->create(
+            $recipient, $actor, 'post_reply', 'comment', 57,
+            ['message' => 'Ответ', 'url' => 'https://example.test/community'],
+        );
+        $delivery = $notification->deliveries()->firstOrFail();
+        $delivery->update(['status' => 'retrying']);
+
+        (new DeliverCommunityNotification($delivery->id))->failed(new \RuntimeException('Provider error 500'));
+
+        $this->assertSame('failed', $delivery->fresh()->status);
+        $this->assertSame('Provider error 500', $delivery->fresh()->last_error);
+    }
 }

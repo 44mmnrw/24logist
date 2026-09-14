@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\CommunityComment;
 use App\Models\CommunityCommentVote;
 use App\Models\CommunityPost;
+use App\Models\CommunityPostSubscription;
 use App\Models\CommunityUser;
+use App\Services\Community\CommunityCommentCounter;
 use App\Services\Community\CommunityContentRenderer;
 use App\Services\Community\CommunityNotificationService;
 use Illuminate\Http\RedirectResponse;
@@ -19,6 +21,7 @@ class CommunityCommentController extends Controller
         Request $request,
         CommunityPost $post,
         CommunityContentRenderer $renderer,
+        CommunityCommentCounter $counter,
         CommunityNotificationService $notifications,
     ): RedirectResponse {
         $user = auth('community')->user();
@@ -33,7 +36,7 @@ class CommunityCommentController extends Controller
         $depth = 0;
 
         if (filled($data['parent_id'] ?? null)) {
-            $parent = CommunityComment::query()->where('community_post_id', $post->id)->findOrFail($data['parent_id']);
+            $parent = CommunityComment::query()->where('community_post_id', $post->id)->where('status', 'published')->findOrFail($data['parent_id']);
             $depth = $parent->depth + 1;
 
             if ($depth >= (int) config('community.limits.comment_depth', 6)) {
@@ -41,7 +44,8 @@ class CommunityCommentController extends Controller
             }
         }
 
-        $comment = DB::transaction(function () use ($post, $user, $parent, $depth, $data, $renderer): CommunityComment {
+        $comment = DB::transaction(function () use ($post, $user, $parent, $depth, $data, $renderer, $counter): CommunityComment {
+            $lockedPost = CommunityPost::query()->whereKey($post->id)->lockForUpdate()->firstOrFail();
             $comment = CommunityComment::query()->create([
                 'community_post_id' => $post->id,
                 'community_user_id' => $user->id,
@@ -61,7 +65,7 @@ class CommunityCommentController extends Controller
                 'community_comment_id' => $comment->id,
                 'value' => 1,
             ]);
-            CommunityPost::query()->whereKey($post->id)->increment('comments_count');
+            $counter->sync($lockedPost);
 
             return $comment;
         });
@@ -82,6 +86,24 @@ class CommunityCommentController extends Controller
             );
         }
 
+        CommunityPostSubscription::query()
+            ->where('community_post_id', $post->id)
+            ->whereNotIn('community_user_id', array_filter([$user->id, $recipient?->id]))
+            ->with('subscriber')
+            ->each(function (CommunityPostSubscription $subscription) use ($notifications, $user, $post, $comment): void {
+                $notifications->create(
+                    $subscription->subscriber,
+                    $user,
+                    'post_reply',
+                    'comment',
+                    $comment->id,
+                    [
+                        'message' => $user->displayName().' ответил в теме «'.$post->title.'»',
+                        'url' => $post->getUrl().'#comment-'.$comment->id,
+                    ],
+                );
+            });
+
         return redirect($post->getUrl().'#comment-'.$comment->id)->with('status', 'Комментарий опубликован.');
     }
 
@@ -101,17 +123,25 @@ class CommunityCommentController extends Controller
         return redirect($comment->post->getUrl().'#comment-'.$comment->id)->with('status', 'Комментарий обновлён.');
     }
 
-    public function destroy(CommunityComment $comment): RedirectResponse
+    public function destroy(CommunityComment $comment, CommunityCommentCounter $counter): RedirectResponse
     {
         $this->assertOwner($comment);
         $post = $comment->post;
-        $comment->update([
-            'community_user_id' => null,
-            'body_markdown' => null,
-            'body_html' => null,
-            'status' => 'deleted',
-        ]);
-        CommunityPost::query()->whereKey($post->id)->where('comments_count', '>', 0)->decrement('comments_count');
+        DB::transaction(function () use ($post, $comment, $counter): void {
+            $lockedPost = CommunityPost::query()->whereKey($post->id)->lockForUpdate()->firstOrFail();
+            $lockedComment = CommunityComment::query()->whereKey($comment->id)->lockForUpdate()->firstOrFail();
+            abort_if($lockedComment->status === 'deleted', 404);
+            $lockedComment->update([
+                'community_user_id' => null,
+                'body_markdown' => null,
+                'body_html' => null,
+                'status' => 'deleted',
+            ]);
+            if ($lockedPost->accepted_comment_id === $lockedComment->id) {
+                $lockedPost->update(['accepted_comment_id' => null, 'resolved_at' => null]);
+            }
+            $counter->sync($lockedPost);
+        });
 
         return redirect($post->getUrl().'#comment-'.$comment->id)->with('status', 'Комментарий удалён.');
     }

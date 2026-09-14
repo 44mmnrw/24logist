@@ -86,6 +86,7 @@ php artisan images:optimize --directory=blog
 log "clear caches"
 php artisan optimize:clear
 php artisan view:cache
+php artisan queue:restart
 
 log "nginx static-cache profile: script_ai/nginx-performance.conf"
 log "include it once inside the 24logist.ru server block, then run nginx -t && reload nginx"

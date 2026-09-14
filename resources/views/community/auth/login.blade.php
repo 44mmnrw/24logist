@@ -9,7 +9,11 @@
         <h1>Войти в сообщество</h1>
         <p>Выберите удобный способ входа. Публично будет виден только псевдоним, который вы зададите после входа.</p>
         <div class="community-auth-buttons">
-            <a class="community-provider community-provider--telegram" href="{{ route('community.auth.telegram.redirect') }}">Войти через Telegram</a>
+            @if (app(\App\Services\SiteSettingsService::class)->communityTelegramEnabled())
+                <a class="community-provider community-provider--telegram" href="{{ route('community.auth.telegram.redirect') }}">Войти через Telegram</a>
+            @else
+                <span class="community-provider is-disabled">Telegram — скоро</span>
+            @endif
             @if (app(\App\Services\SiteSettingsService::class)->communityVkEnabled())
                 <a class="community-provider community-provider--vk" href="{{ route('community.auth.vk.redirect') }}">Войти через VK ID</a>
             @else

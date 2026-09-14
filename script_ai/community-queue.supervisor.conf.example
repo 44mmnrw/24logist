@@ -1,0 +1,13 @@
+[program:24logist-community-queue]
+command=/usr/bin/php /var/www/logist_sys/data/www/24logist.ru/.app/artisan queue:work database --queue=default --sleep=3 --tries=3 --timeout=60 --max-time=3600
+directory=/var/www/logist_sys/data/www/24logist.ru/.app
+user=logist_sys
+numprocs=1
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+redirect_stderr=true
+stdout_logfile=/var/www/logist_sys/data/www/24logist.ru/.app/storage/logs/community-queue.log
+stdout_logfile_maxbytes=10MB
+stdout_logfile_backups=3

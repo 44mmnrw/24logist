@@ -12,7 +12,7 @@
                 <p class="community-profile-handle">{{ '@'.$user->username }}</p>
                 <p>
                     @if ($user->transportRoleLabel())<span>{{ $user->transportRoleLabel() }}</span> · @endif
-                    {{ $user->karma }} рейтинга · в сообществе с {{ \App\Support\CommunityDate::monthYear($user->onboarded_at) }}
+                    {{ $user->karma }} рейтинга · зарегистрирован {{ $user->created_at->locale('ru')->translatedFormat('j F Y') }}
                 </p>
                 @if ($user->bio)<p class="community-profile-bio">{{ $user->bio }}</p>@endif
             </div>

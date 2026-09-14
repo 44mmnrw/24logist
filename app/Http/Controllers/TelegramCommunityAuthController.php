@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\Community\CommunityIdentityManager;
 use App\Services\Community\CommunityAvatarService;
+use App\Services\Community\CommunityIdentityManager;
 use App\Services\Community\TelegramIdTokenVerifier;
 use App\Services\SiteSettingsService;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -18,7 +19,7 @@ class TelegramCommunityAuthController extends Controller
 
     public function redirect(Request $request): RedirectResponse
     {
-        abort_if(blank($this->settings->telegramClientId()) || blank($this->settings->telegramClientSecret()), 503, 'Telegram-вход ещё не настроен.');
+        abort_unless($this->settings->communityTelegramEnabled(), 404);
         $state = Str::random(64);
         $nonce = Str::random(64);
         $verifier = Str::random(96);
@@ -53,23 +54,28 @@ class TelegramCommunityAuthController extends Controller
         CommunityAvatarService $avatars,
     ): RedirectResponse {
         $flow = $request->session()->pull('community.telegram');
+        $state = $request->query('state');
 
-        if (! is_array($flow) || ! hash_equals((string) ($flow['state'] ?? ''), (string) $request->query('state'))) {
+        if (! is_array($flow) || ! is_string($state) || ! hash_equals((string) ($flow['state'] ?? ''), $state)) {
             throw ValidationException::withMessages(['telegram' => 'Сессия входа Telegram недействительна.']);
         }
 
         $request->validate(['code' => ['required', 'string', 'max:4096']]);
         $redirectUri = $this->settings->telegramRedirectUri() ?: route('community.auth.telegram.callback');
-        $response = Http::asForm()
-            ->withBasicAuth($this->settings->telegramClientId(), $this->settings->telegramClientSecret())
-            ->timeout(8)
-            ->post('https://oauth.telegram.org/token', [
-                'grant_type' => 'authorization_code',
-                'code' => $request->query('code'),
-                'redirect_uri' => $redirectUri,
-                'client_id' => $this->settings->telegramClientId(),
-                'code_verifier' => $flow['verifier'],
-            ]);
+        try {
+            $response = Http::asForm()
+                ->withBasicAuth($this->settings->telegramClientId(), $this->settings->telegramClientSecret())
+                ->timeout(8)
+                ->post('https://oauth.telegram.org/token', [
+                    'grant_type' => 'authorization_code',
+                    'code' => $request->query('code'),
+                    'redirect_uri' => $redirectUri,
+                    'client_id' => $this->settings->telegramClientId(),
+                    'code_verifier' => $flow['verifier'],
+                ]);
+        } catch (ConnectionException) {
+            throw ValidationException::withMessages(['telegram' => 'Telegram сейчас недоступен. Повторите вход позже.']);
+        }
 
         if (! $response->successful() || blank($response->json('id_token'))) {
             throw ValidationException::withMessages(['telegram' => 'Telegram не подтвердил вход. Попробуйте ещё раз.']);

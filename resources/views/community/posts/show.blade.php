@@ -28,6 +28,7 @@
                 </div>
             </div>
             <h1>{{ $post->title }}</h1>
+            @if ($post->accepted_comment_id)<span class="community-badge community-badge--resolved">Есть решение</span>@endif
             <div class="community-topic__labels">
                 <a class="community-category-pill" href="{{ route('community.categories.show', $post->category) }}">{{ $post->category->name }}</a>
                 @if ($post->author?->transportRoleLabel())
@@ -44,9 +45,19 @@
         </div>
         <div class="community-topic__actions">
             @include('community.shared._vote', ['type' => 'post', 'target' => $post, 'currentVote' => $postVote, 'variant' => 'inline'])
-            <a class="community-action-chip community-action-chip--comments" href="#comments"><span aria-hidden="true">◯</span>{{ $post->comments_count }} {{ trans_choice('комментарий|комментария|комментариев', $post->comments_count) }}</a>
+            <a class="community-action-chip community-action-chip--comments" href="#comments"><span aria-hidden="true">◯</span>{{ $post->comments_count }} {{ \App\Support\CommunityText::comments($post->comments_count) }}</a>
             <button class="community-action-chip community-action-chip--share" type="button" data-share-url="{{ $post->getUrl() }}"><span aria-hidden="true">↗</span><span data-share-label>Поделиться</span></button>
             @auth('community')
+                @if ($post->accepted_comment_id && ($post->community_user_id === auth('community')->id() || auth('community')->user()->isModerator()))
+                    <form method="POST" action="{{ route('community.posts.clear_answer', $post) }}">@csrf @method('DELETE')<button class="community-action-chip" type="submit">Снять решение</button></form>
+                @endif
+                @if (auth('community')->user()->isOnboarded())
+                    <form method="POST" action="{{ $subscribed ? route('community.posts.unsubscribe', $post) : route('community.posts.subscribe', $post) }}">
+                        @csrf
+                        @if ($subscribed)@method('DELETE')@endif
+                        <button class="community-action-chip" type="submit">{{ $subscribed ? 'Отписаться от темы' : 'Следить за ответами' }}</button>
+                    </form>
+                @endif
                 @if ($post->community_user_id === auth('community')->id() || auth('community')->user()->isModerator())
                     <a class="community-action-chip" href="{{ route('community.posts.edit', $post) }}">Изменить</a>
                     <form method="POST" action="{{ route('community.posts.destroy', $post) }}" onsubmit="return confirm('Удалить тему?')">@csrf @method('DELETE')<button class="community-action-chip">Удалить</button></form>

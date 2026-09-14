@@ -27,7 +27,7 @@ class DeliverCommunityNotification implements ShouldQueue
             ->with(['notification', 'identity'])
             ->find($this->deliveryId);
 
-        if ($delivery === null || $delivery->status === 'sent') {
+        if ($delivery === null || in_array($delivery->status, ['sent', 'failed', 'cancelled'], true)) {
             return;
         }
 
@@ -85,5 +85,16 @@ class DeliverCommunityNotification implements ShouldQueue
             $delivery->update(['status' => 'retrying', 'last_error' => mb_substr($exception->getMessage(), 0, 1000)]);
             throw $exception;
         }
+    }
+
+    public function failed(?Throwable $exception): void
+    {
+        CommunityNotificationDelivery::query()
+            ->whereKey($this->deliveryId)
+            ->whereIn('status', ['pending', 'retrying'])
+            ->update([
+                'status' => 'failed',
+                'last_error' => $exception ? mb_substr($exception->getMessage(), 0, 1000) : 'Delivery job failed',
+            ]);
     }
 }

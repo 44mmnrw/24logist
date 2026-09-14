@@ -15,16 +15,18 @@ class CommunityPost extends Model
     protected $fillable = [
         'community_user_id', 'community_category_id', 'slug', 'title', 'body_markdown',
         'body_html', 'external_url', 'status', 'score', 'comments_count', 'hot_score',
-        'is_pinned', 'locked_at', 'edited_at', 'published_at',
+        'is_pinned', 'locked_at', 'edited_at', 'published_at', 'accepted_comment_id', 'resolved_at',
     ];
 
     protected function casts(): array
     {
         return [
             'is_pinned' => 'boolean',
+            'accepted_comment_id' => 'integer',
             'locked_at' => 'datetime',
             'edited_at' => 'datetime',
             'published_at' => 'datetime',
+            'resolved_at' => 'datetime',
             'hot_score' => 'float',
         ];
     }

@@ -9,13 +9,13 @@ use BackedEnum;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
@@ -44,6 +44,7 @@ class CommunityUserResource extends Resource
             TextInput::make('karma')->label('Рейтинг')->numeric()->disabled(),
             DateTimePicker::make('suspended_until')->label('Ограничен до'),
             DateTimePicker::make('banned_at')->label('Заблокирован с'),
+            DateTimePicker::make('created_at')->label('Дата регистрации')->disabled(),
         ])->columns(2);
     }
 
@@ -53,6 +54,7 @@ class CommunityUserResource extends Resource
             ImageColumn::make('avatar_path')->label('Аватар')->disk('public')->circular()->defaultImageUrl(null),
             TextColumn::make('display_name')->label('Никнейм')->searchable()->sortable(),
             TextColumn::make('username')->label('ID')->searchable()->sortable(),
+            TextColumn::make('created_at')->label('Дата регистрации')->dateTime('d.m.Y H:i')->sortable(),
             TextColumn::make('transport_role')->label('В перевозках')->formatStateUsing(fn (?string $state): string => CommunityUser::TRANSPORT_ROLES[$state] ?? 'Не указана'),
             TextColumn::make('role')->label('Права')->badge(),
             TextColumn::make('karma')->label('Рейтинг')->sortable(),

@@ -21,7 +21,8 @@
             <a class="community-toolbar__brand" href="{{ route('community.index') }}">Сообщество 24Logist</a>
             <nav aria-label="Профиль сообщества">
                 @auth('community')
-                    <a href="{{ route('community.notifications') }}">Уведомления</a>
+                    @php($unreadNotifications = auth('community')->user()->communityNotifications()->whereNull('read_at')->count())
+                    <a href="{{ route('community.notifications') }}">Уведомления@if ($unreadNotifications > 0) ({{ $unreadNotifications }})@endif</a>
                     <a class="community-toolbar__profile" href="{{ route('community.profile', auth('community')->user()) }}"><x-community.avatar :user="auth('community')->user()" size="sm" /><span>{{ auth('community')->user()->displayName() }}</span></a>
                     <a href="{{ route('community.settings') }}">Настройки</a>
                     @if (auth('community')->user()->isModerator())

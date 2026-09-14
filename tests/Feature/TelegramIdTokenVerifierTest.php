@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\CommunityIdentity;
 use App\Models\SiteSetting;
 use App\Services\Community\TelegramIdTokenVerifier;
 use App\Services\SiteSettingsService;
@@ -42,6 +43,52 @@ class TelegramIdTokenVerifierTest extends TestCase
 
         $this->expectException(ValidationException::class);
         app(TelegramIdTokenVerifier::class)->verify($token, 'nonce');
+    }
+
+    public function test_telegram_login_uses_pkce_and_creates_community_session(): void
+    {
+        [$privateKey, $jwk] = $this->keyPair();
+        SiteSetting::instance()->update([
+            'community_enabled' => true,
+            'community_telegram_client_id' => '12345',
+            'community_telegram_client_secret' => 'test-secret',
+        ]);
+        app(SiteSettingsService::class)->clearCache();
+        $this->withoutVite();
+
+        $this->get(route('community.login'))->assertOk()->assertSee('Войти через Telegram');
+        $redirect = $this->get(route('community.auth.telegram.redirect'))->assertRedirect();
+        parse_str((string) parse_url((string) $redirect->headers->get('Location'), PHP_URL_QUERY), $params);
+        $this->assertSame('S256', $params['code_challenge_method']);
+        $this->assertSame('openid profile', $params['scope']);
+
+        $token = $this->token($privateKey, [
+            'iss' => 'https://oauth.telegram.org', 'aud' => '12345', 'sub' => 'telegram-user-42',
+            'iat' => time() - 5, 'exp' => time() + 300, 'nonce' => $params['nonce'],
+        ]);
+        Http::fake([
+            'https://oauth.telegram.org/token' => Http::response(['id_token' => $token]),
+            'https://oauth.telegram.org/.well-known/jwks.json' => Http::response(['keys' => [$jwk]]),
+        ]);
+
+        $this->get(route('community.auth.telegram.callback', ['state' => $params['state'], 'code' => 'test-code']))
+            ->assertRedirect(route('community.onboarding'));
+        $this->assertAuthenticated('community');
+        $this->assertDatabaseHas('community_identities', ['provider' => 'telegram', 'provider_user_id' => 'telegram-user-42']);
+        $this->assertSame(1, CommunityIdentity::query()->count());
+        Http::assertSent(fn ($request) => $request->url() === 'https://oauth.telegram.org/token'
+            && $request['code_verifier'] !== null
+            && $request['redirect_uri'] === route('community.auth.telegram.callback'));
+    }
+
+    public function test_unconfigured_telegram_login_is_not_offered(): void
+    {
+        SiteSetting::instance()->update(['community_enabled' => true]);
+        app(SiteSettingsService::class)->clearCache();
+        $this->withoutVite();
+
+        $this->get(route('community.login'))->assertOk()->assertDontSee('Войти через Telegram');
+        $this->get(route('community.auth.telegram.redirect'))->assertNotFound();
     }
 
     /** @return array{0: \OpenSSLAsymmetricKey, 1: array<string, string>} */

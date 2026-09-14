@@ -47,7 +47,7 @@
             <h2>Связанные аккаунты</h2>
             @php
                 $providers = [
-                    'telegram' => ['label' => 'Telegram', 'notifications' => true, 'enabled' => true, 'url' => route('community.auth.telegram.redirect', ['notify' => 1])],
+                    'telegram' => ['label' => 'Telegram', 'notifications' => true, 'enabled' => app(\App\Services\SiteSettingsService::class)->communityTelegramEnabled(), 'url' => route('community.auth.telegram.redirect', ['notify' => 1])],
                     'max' => ['label' => 'MAX', 'notifications' => true, 'enabled' => app(\App\Services\SiteSettingsService::class)->communityMaxEnabled(), 'url' => route('community.auth.max.start')],
                     'vk' => ['label' => 'VK ID', 'notifications' => false, 'enabled' => app(\App\Services\SiteSettingsService::class)->communityVkEnabled(), 'url' => route('community.auth.vk.redirect')],
                 ];
@@ -63,7 +63,7 @@
                         @endif
                         @if ($providerData['notifications'] && !$identity->bot_access)
                             <small>Чтобы включить сообщения, повторно подтвердите доступ бота.</small>
-                            @if ($provider === 'telegram')<a href="{{ route('community.auth.telegram.redirect', ['notify' => 1]) }}">Разрешить уведомления</a>@endif
+                            @if ($provider === 'telegram' && $providerData['enabled'])<a href="{{ route('community.auth.telegram.redirect', ['notify' => 1]) }}">Разрешить уведомления</a>@endif
                         @endif
                     @else
                         @if ($providerData['enabled'])<a href="{{ $providerData['url'] }}">Привязать</a>@endif

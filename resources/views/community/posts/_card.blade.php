@@ -21,10 +21,11 @@
             <p>{{ \Illuminate\Support\Str::limit(strip_tags($post->body_html), 240) }}</p>
         @endif
         <div class="community-post-card__footer">
-            <a class="community-action-chip community-action-chip--comments" href="{{ $post->getUrl() }}#comments"><span aria-hidden="true">◯</span>{{ $post->comments_count }} {{ trans_choice('комментарий|комментария|комментариев', $post->comments_count) }}</a>
+            <a class="community-action-chip community-action-chip--comments" href="{{ $post->getUrl() }}#comments"><span aria-hidden="true">◯</span>{{ $post->comments_count }} {{ \App\Support\CommunityText::comments($post->comments_count) }}</a>
             <button class="community-action-chip community-action-chip--share" type="button" data-share-url="{{ $post->getUrl() }}"><span aria-hidden="true">↗</span><span data-share-label>Поделиться</span></button>
             @if ($post->is_pinned)<span class="community-badge">Закреплено</span>@endif
             @if ($post->locked_at)<span class="community-badge">Закрыто</span>@endif
+            @if ($post->accepted_comment_id)<span class="community-badge community-badge--resolved">Есть решение</span>@endif
         </div>
     </div>
 </article>

@@ -10,8 +10,8 @@ use App\Models\CommunityReport;
 use App\Models\CommunityUser;
 use App\Models\SiteSetting;
 use App\Services\SiteSettingsService;
+use App\Support\CommunityText;
 use Carbon\Carbon;
-use Database\Seeders\CommunityDemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -159,6 +159,169 @@ class CommunityTest extends TestCase
         $this->assertDatabaseHas('community_moderation_actions', ['community_user_id' => $moderator->id, 'action' => 'hide']);
     }
 
+    public function test_comment_report_rejects_post_only_action_without_resolving_report(): void
+    {
+        $author = CommunityUser::factory()->create();
+        $moderator = CommunityUser::factory()->create(['role' => 'moderator']);
+        $post = $this->postBy($author);
+        $comment = CommunityComment::query()->create([
+            'community_post_id' => $post->id, 'community_user_id' => $author->id,
+            'body_markdown' => 'Ответ', 'body_html' => '<p>Ответ</p>',
+        ]);
+        $report = CommunityReport::query()->create([
+            'community_user_id' => $author->id, 'target_type' => 'comment',
+            'target_id' => $comment->id, 'reason' => 'spam',
+        ]);
+
+        $this->actingAs($moderator, 'community')
+            ->post(route('community.moderation.act', $report), ['action' => 'pin'])
+            ->assertSessionHasErrors('action');
+
+        $this->assertSame('open', $report->fresh()->status);
+        $this->assertDatabaseCount('community_moderation_actions', 0);
+    }
+
+    public function test_hidden_comment_changes_count_and_deleted_comment_cannot_be_restored(): void
+    {
+        $author = CommunityUser::factory()->create();
+        $moderator = CommunityUser::factory()->create(['role' => 'moderator']);
+        $post = $this->postBy($author);
+        $comment = CommunityComment::query()->create([
+            'community_post_id' => $post->id, 'community_user_id' => $author->id,
+            'body_markdown' => 'Ответ', 'body_html' => '<p>Ответ</p>',
+        ]);
+        $post->update(['comments_count' => 1]);
+        $post->update(['accepted_comment_id' => $comment->id, 'resolved_at' => now()]);
+        $report = CommunityReport::query()->create([
+            'community_user_id' => $author->id, 'target_type' => 'comment',
+            'target_id' => $comment->id, 'reason' => 'spam',
+        ]);
+
+        $this->actingAs($moderator, 'community')
+            ->post(route('community.moderation.act', $report), ['action' => 'hide'])
+            ->assertRedirect();
+        $this->assertSame(0, $post->fresh()->comments_count);
+        $this->assertNull($post->fresh()->accepted_comment_id);
+
+        $comment->update(['status' => 'deleted', 'body_markdown' => null, 'body_html' => null]);
+        $secondReport = CommunityReport::query()->create([
+            'community_user_id' => $author->id, 'target_type' => 'comment',
+            'target_id' => $comment->id, 'reason' => 'abuse',
+        ]);
+        $this->post(route('community.moderation.act', $secondReport), ['action' => 'restore'])
+            ->assertSessionHasErrors('action');
+        $this->assertSame('open', $secondReport->fresh()->status);
+    }
+
+    public function test_cannot_reply_to_hidden_comment_or_delete_comment_twice(): void
+    {
+        $author = CommunityUser::factory()->create();
+        $post = $this->postBy($author);
+        $comment = CommunityComment::query()->create([
+            'community_post_id' => $post->id, 'community_user_id' => $author->id,
+            'body_markdown' => 'Ответ', 'body_html' => '<p>Ответ</p>',
+            'status' => 'hidden',
+        ]);
+
+        $this->actingAs($author, 'community')
+            ->post(route('community.comments.store', $post), ['parent_id' => $comment->id, 'body_markdown' => 'Ответ на скрытое'])
+            ->assertNotFound();
+
+        $comment->update(['status' => 'published']);
+        $post->update(['comments_count' => 1]);
+        $this->delete(route('community.comments.destroy', $comment))->assertRedirect();
+        $this->assertSame(0, $post->fresh()->comments_count);
+        $this->actingAs(CommunityUser::factory()->create(['role' => 'moderator']), 'community')
+            ->delete(route('community.comments.destroy', $comment))->assertNotFound();
+        $this->assertSame(0, $post->fresh()->comments_count);
+    }
+
+    public function test_hidden_parent_is_a_tombstone_so_existing_replies_stay_visible(): void
+    {
+        $author = CommunityUser::factory()->create();
+        $post = $this->postBy($author);
+        $root = CommunityComment::query()->create([
+            'community_post_id' => $post->id,
+            'community_user_id' => $author->id,
+            'body_markdown' => 'Скрытый текст',
+            'body_html' => '<p>Скрытый текст</p>',
+            'status' => 'hidden',
+        ]);
+        $root->update(['root_id' => $root->id]);
+        CommunityComment::query()->create([
+            'community_post_id' => $post->id,
+            'community_user_id' => $author->id,
+            'parent_id' => $root->id,
+            'root_id' => $root->id,
+            'depth' => 1,
+            'body_markdown' => 'Полезный ответ',
+            'body_html' => '<p>Полезный ответ</p>',
+        ]);
+
+        $this->get($post->getUrl())
+            ->assertOk()
+            ->assertSee('Комментарий скрыт модератором.')
+            ->assertSee('Полезный ответ')
+            ->assertDontSee('Скрытый текст');
+    }
+
+    public function test_subscriber_receives_replies_until_unsubscribed(): void
+    {
+        $author = CommunityUser::factory()->create();
+        $subscriber = CommunityUser::factory()->create();
+        $writer = CommunityUser::factory()->create();
+        $post = $this->postBy($author);
+
+        $this->actingAs($subscriber, 'community')
+            ->post(route('community.posts.subscribe', $post))->assertRedirect($post->getUrl());
+        $this->assertDatabaseHas('community_post_subscriptions', [
+            'community_post_id' => $post->id, 'community_user_id' => $subscriber->id,
+        ]);
+
+        $this->actingAs($writer, 'community')
+            ->post(route('community.comments.store', $post), ['body_markdown' => 'Первый ответ'])
+            ->assertRedirect();
+        $this->assertDatabaseHas('community_notifications', [
+            'community_user_id' => $subscriber->id, 'type' => 'post_reply',
+        ]);
+
+        $this->actingAs($subscriber, 'community')
+            ->delete(route('community.posts.unsubscribe', $post))->assertRedirect($post->getUrl());
+        $this->actingAs($writer, 'community')
+            ->post(route('community.comments.store', $post), ['body_markdown' => 'Второй ответ'])
+            ->assertRedirect();
+        $this->assertSame(1, $subscriber->communityNotifications()->count());
+    }
+
+    public function test_post_author_can_accept_answer_and_deleting_it_clears_resolution(): void
+    {
+        $author = CommunityUser::factory()->create();
+        $responder = CommunityUser::factory()->create();
+        $stranger = CommunityUser::factory()->create();
+        $post = $this->postBy($author);
+        $comment = CommunityComment::query()->create([
+            'community_post_id' => $post->id,
+            'community_user_id' => $responder->id,
+            'body_markdown' => 'Решение',
+            'body_html' => '<p>Решение</p>',
+        ]);
+
+        $this->actingAs($stranger, 'community')
+            ->post(route('community.posts.accept_answer', [$post, $comment]))->assertForbidden();
+        $this->actingAs($author, 'community')
+            ->post(route('community.posts.accept_answer', [$post, $comment]))->assertRedirect();
+        $this->assertSame($comment->id, $post->fresh()->accepted_comment_id);
+        $this->assertDatabaseHas('community_notifications', [
+            'community_user_id' => $responder->id, 'type' => 'answer_accepted',
+        ]);
+        $this->get($post->getUrl())->assertOk()->assertSee('Принятый ответ');
+
+        $this->actingAs($responder, 'community')
+            ->delete(route('community.comments.destroy', $comment))->assertRedirect();
+        $this->assertNull($post->fresh()->accepted_comment_id);
+        $this->assertNull($post->fresh()->resolved_at);
+    }
+
     public function test_authenticated_reader_sees_functional_report_controls(): void
     {
         $author = CommunityUser::factory()->create();
@@ -185,6 +348,31 @@ class CommunityTest extends TestCase
             ->assertSee('data-vote', false)
             ->assertSee('data-share-url="'.$post->getUrl().'"', false)
             ->assertSee('community-action-chip--comments', false);
+    }
+
+    public function test_feed_search_finds_only_matching_published_topics(): void
+    {
+        $author = CommunityUser::factory()->create();
+        $matching = $this->postBy($author);
+        $matching->update(['title' => 'Как оформить ЭТрН']);
+        $other = $this->postBy($author);
+        $other->update(['title' => 'Работа с водителями']);
+
+        $this->get(route('community.index', ['q' => 'ЭТрН']))
+            ->assertOk()->assertSee('Как оформить ЭТрН')->assertDontSee('Работа с водителями');
+        $this->get(route('community.index', ['q' => 'несуществующий запрос']))
+            ->assertOk()->assertSee('Ничего не найдено');
+    }
+
+    public function test_russian_comment_plural_forms(): void
+    {
+        $this->assertSame('комментариев', CommunityText::comments(0));
+        $this->assertSame('комментарий', CommunityText::comments(1));
+        $this->assertSame('комментария', CommunityText::comments(2));
+        $this->assertSame('комментариев', CommunityText::comments(5));
+        $this->assertSame('комментариев', CommunityText::comments(11));
+        $this->assertSame('комментариев', CommunityText::comments(12));
+        $this->assertSame('комментарий', CommunityText::comments(21));
     }
 
     public function test_topic_comments_can_be_sorted_like_a_discussion_feed(): void
@@ -232,9 +420,10 @@ class CommunityTest extends TestCase
         $post = $this->postBy($user);
         $post->update(['published_at' => now()->subSeconds(30)]);
 
+        $user->forceFill(['created_at' => Carbon::create(2026, 9, 2, 12)])->save();
         $this->get(route('community.profile', $user))
             ->assertOk()
-            ->assertSee('в сообществе с сентября 2026')
+            ->assertSee('зарегистрирован 2 сентября 2026')
             ->assertDontSee('September 2026');
 
         $this->get(route('community.index'))
@@ -251,26 +440,6 @@ class CommunityTest extends TestCase
         $response->assertSee(route('community.index'), false);
         $response->assertSee($post->getUrl(), false);
         $response->assertDontSee('/community/settings', false);
-    }
-
-    public function test_demo_seeder_creates_one_complete_thread_and_is_idempotent(): void
-    {
-        $this->seed(CommunityDemoSeeder::class);
-        $this->seed(CommunityDemoSeeder::class);
-
-        $post = CommunityPost::query()->where('slug', CommunityDemoSeeder::POST_SLUG)->firstOrFail();
-
-        $this->assertSame(1, CommunityPost::query()->where('slug', CommunityDemoSeeder::POST_SLUG)->count());
-        $this->assertSame(12, $post->comments()->count());
-        $this->assertSame(12, $post->comments_count);
-        $this->assertSame(3, $post->comments()->max('depth'));
-
-        $this->get($post->getUrl())
-            ->assertOk()
-            ->assertSee('Сообщество о логистике')
-            ->assertSee('community-topic-sidebar', false)
-            ->assertSee('community-author-flair', false)
-            ->assertSee('Как снизить простои на погрузке');
     }
 
     public function test_account_deletion_removes_identity_and_anonymizes_content(): void

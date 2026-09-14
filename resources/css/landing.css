@@ -1714,6 +1714,10 @@ body {
     .growth-dashboard { width: 100%; max-width: 584px; }
 }
 
+@media (max-width: 760px) and (orientation: portrait) {
+    .product-showcase__image { transform: scale(1.65); transform-origin: center; }
+}
+
 @media (max-width: 760px) {
     .landing-shell { padding-inline: 16px; }
     .product-showcase__slide::before { background: linear-gradient(90deg, rgba(5, 19, 44, .88), rgba(5, 19, 44, .5)); }
@@ -1897,6 +1901,10 @@ body {
 .community-hero .section-kicker { display: none; }
 .community-hero .btn--primary { flex: 0 0 auto; border-color: #1d4ed8; background: #1d4ed8; color: #fff; font-weight: 700; box-shadow: none; }
 .community-hero .btn--primary:hover { border-color: #1744b5; background: #1744b5; color: #fff; }
+.community-search { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; padding: 8px; border: 1px solid #dfe4eb; border-radius: 12px; background: #fff; }
+.community-search input { flex: 1 1 auto; min-width: 0; padding: 9px 11px; border: 1px solid #d9e0eb; border-radius: 9px; background: #fff; color: #11284c; }
+.community-search button { padding: 9px 16px; border: 0; border-radius: 9px; background: #1d4ed8; color: #fff; font-weight: 700; cursor: pointer; }
+.community-search a { padding: 9px; color: #53657a; font-size: 13px; }
 .community-sort { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; padding: 8px 10px; border: 1px solid #dfe4eb; border-radius: 12px; background: #fff; }
 .community-sort__label { margin-right: 2px; color: #7a8797; font-size: 12px; }
 .community-sort a { padding: 8px 12px; border-radius: 999px; color: #53657a; font-weight: 750; font-size: 13px; }
@@ -1906,6 +1914,7 @@ body {
 .community-posts { display: grid; gap: 9px; }
 .community-post-card { position: relative; display: grid; grid-template-columns: 54px minmax(0, 1fr); overflow: hidden; border: 1px solid #d9dee6; border-radius: 12px; background: #fff; cursor: pointer; transition: border-color .16s, box-shadow .16s; }
 .community-post-card:hover { border-color: #aeb8c5; box-shadow: 0 5px 18px rgba(42, 65, 100, .07); }
+.community-badge--resolved { border-color: #b4e3c8; background: #e6f7eb; color: #17673e; }
 .community-post-card__overlay { position: absolute; z-index: 1; inset: 0; border-radius: inherit; }
 .community-post-card__overlay:focus-visible { outline: 3px solid #2f65d9; outline-offset: -3px; }
 .community-post-card a:not(.community-post-card__overlay), .community-post-card button, .community-post-card .community-vote { position: relative; z-index: 2; }

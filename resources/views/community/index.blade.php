@@ -21,6 +21,13 @@
             @endauth
         </header>
 
+        <form class="community-search" method="GET" action="{{ $activeCategory ? route('community.categories.show', $activeCategory) : route('community.index') }}" role="search">
+            <label for="community-search-input" class="sr-only">Поиск по темам</label>
+            <input id="community-search-input" type="search" name="q" value="{{ $search }}" maxlength="100" placeholder="Найти тему или ответ" autocomplete="off">
+            <button type="submit">Найти</button>
+            @if ($search !== '')<a href="{{ $activeCategory ? route('community.categories.show', $activeCategory) : route('community.index') }}">Сбросить</a>@endif
+        </form>
+
         <nav class="community-sort" aria-label="Сортировка тем">
             <span class="community-sort__label">Сортировка:</span>
             <a @class(['is-active' => $sort === 'hot']) href="{{ request()->fullUrlWithQuery(['sort' => 'hot', 'period' => null, 'page' => null]) }}">🔥 Актуальное</a>
@@ -39,7 +46,7 @@
             @forelse ($posts as $post)
                 @include('community.posts._card', ['post' => $post])
             @empty
-                <div class="community-empty"><h2>Здесь пока тихо</h2><p>Станьте автором первой темы в этой рубрике.</p></div>
+                <div class="community-empty"><h2>{{ $search !== '' ? 'Ничего не найдено' : 'Здесь пока тихо' }}</h2><p>{{ $search !== '' ? 'Попробуйте другой запрос.' : 'Станьте автором первой темы в этой рубрике.' }}</p></div>
             @endforelse
         </div>
         <div class="community-pagination">{{ $posts->links() }}</div>

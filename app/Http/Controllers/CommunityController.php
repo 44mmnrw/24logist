@@ -31,11 +31,18 @@ class CommunityController extends Controller
         $period = in_array($request->query('period'), ['day', 'week', 'month', 'all'], true)
             ? (string) $request->query('period')
             : 'week';
+        $search = is_string($request->query('q'))
+            ? mb_substr(trim($request->query('q')), 0, 100)
+            : '';
+        $like = '%'.addcslashes($search, '%_\\').'%';
 
         $posts = CommunityPost::query()
             ->with(['author', 'category'])
             ->published()
-            ->when($category, fn (Builder $query) => $query->where('community_category_id', $category->id));
+            ->when($category, fn (Builder $query) => $query->where('community_category_id', $category->id))
+            ->when($search !== '', fn (Builder $query) => $query->where(function (Builder $query) use ($like): void {
+                $query->where('title', 'like', $like)->orWhere('body_markdown', 'like', $like);
+            }));
 
         if ($sort === 'new') {
             $posts->orderByDesc('is_pinned')->orderByDesc('published_at')->orderByDesc('id');
@@ -74,6 +81,7 @@ class CommunityController extends Controller
             'activeCategory' => $category,
             'sort' => $sort,
             'period' => $period,
+            'search' => $search,
         ]);
     }
 }

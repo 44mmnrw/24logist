@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CommunityCategory;
 use App\Models\CommunityComment;
 use App\Models\CommunityPost;
+use App\Models\CommunityPostSubscription;
 use App\Models\CommunityPostVote;
 use App\Models\CommunityUser;
 use App\Services\Community\CommunityContentRenderer;
@@ -90,7 +91,7 @@ class CommunityPostController extends Controller
             ->with('author')
             ->where('community_post_id', $post->id)
             ->whereNull('parent_id')
-            ->whereIn('status', ['published', 'deleted']);
+            ->whereIn('status', ['published', 'deleted', 'hidden']);
 
         match ($commentSort) {
             'new' => $rootsQuery->orderByDesc('created_at'),
@@ -107,24 +108,26 @@ class CommunityPostController extends Controller
                 ->where('community_post_id', $post->id)
                 ->whereIn('root_id', $rootIds)
                 ->whereNotIn('id', $rootIds)
-                ->whereIn('status', ['published', 'deleted'])
+                ->whereIn('status', ['published', 'deleted', 'hidden'])
                 ->orderByDesc('score')
                 ->orderBy('created_at')
                 ->get();
         $children = $descendants->groupBy(fn (CommunityComment $comment): int => (int) $comment->parent_id);
 
         $postVote = null;
+        $subscribed = false;
         $commentVotes = collect();
 
         if ($userId = auth('community')->id()) {
             $postVote = CommunityPostVote::query()->where('community_user_id', $userId)->where('community_post_id', $post->id)->value('value');
+            $subscribed = CommunityPostSubscription::query()->where('community_user_id', $userId)->where('community_post_id', $post->id)->exists();
             $commentVotes = DB::table('community_comment_votes')
                 ->where('community_user_id', $userId)
                 ->whereIn('community_comment_id', $rootIds->merge($descendants->pluck('id')))
                 ->pluck('value', 'community_comment_id');
         }
 
-        return view('community.posts.show', compact('post', 'roots', 'children', 'postVote', 'commentVotes', 'commentSort', 'communityStats'));
+        return view('community.posts.show', compact('post', 'roots', 'children', 'postVote', 'subscribed', 'commentVotes', 'commentSort', 'communityStats'));
     }
 
     public function edit(CommunityPost $post): View
