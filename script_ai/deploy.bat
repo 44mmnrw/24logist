@@ -306,7 +306,7 @@ echo.
 echo [5.5] Sync public assets to web root...
 call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_APP% && sed -i 's/\r$//' script_ai/sync-public-to-webroot.sh && chmod +x script_ai/sync-public-to-webroot.sh && bash script_ai/sync-public-to-webroot.sh"
 if errorlevel 1 exit /b 1
-echo [OK] build/css/js synced to %SERVER_WEB%
+echo [OK] public assets including icons synced to %SERVER_WEB%
 
 echo.
 echo [6] Laravel cache on server...

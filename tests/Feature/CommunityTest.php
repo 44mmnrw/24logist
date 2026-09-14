@@ -411,7 +411,10 @@ class CommunityTest extends TestCase
             ->assertSee('action="'.route('community.index').'"', false)
             ->assertSee('value="ЭТрН"', false)
             ->assertSee('enterkeyhint="search"', false)
+            ->assertSee('data-community-search-clear', false)
+            ->assertSee('tabler-sprite.svg#tabler-x', false)
             ->assertDontSee('<button type="submit">Найти</button>', false)
+            ->assertDontSee('>Сбросить</a>', false)
             ->assertSee('Как оформить ЭТрН')->assertDontSee('Работа с водителями');
         $this->get(route('community.categories.show', ['category' => $matching->category, 'q' => 'ЭТрН']))
             ->assertOk()

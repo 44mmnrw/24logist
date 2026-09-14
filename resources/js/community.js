@@ -3,6 +3,27 @@ const photoPreviewUrls = new WeakMap();
 let avatarPreviewUrl = null;
 let richEditorModule = null;
 
+const communitySearch = document.querySelector('[data-community-search]');
+
+if (communitySearch) {
+    const input = communitySearch.querySelector('input[name="q"]');
+    const clear = communitySearch.querySelector('[data-community-search-clear]');
+    const hasActiveSearch = input.defaultValue.trim() !== '';
+    const updateClearVisibility = () => { clear.hidden = input.value === '' && !hasActiveSearch; };
+
+    input.addEventListener('input', updateClearVisibility);
+    clear.addEventListener('click', () => {
+        input.value = '';
+        updateClearVisibility();
+        if (hasActiveSearch) {
+            window.location.assign(clear.dataset.resetUrl);
+        } else {
+            input.focus();
+        }
+    });
+    updateClearVisibility();
+}
+
 const sortDropdowns = [...document.querySelectorAll('[data-community-sort] details')];
 
 if (sortDropdowns.length) {

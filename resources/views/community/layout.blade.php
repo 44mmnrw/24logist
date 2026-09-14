@@ -23,10 +23,10 @@
             </div>
             @php($searchAction = request()->routeIs('community.categories.show') ? route('community.categories.show', request()->route('category')) : route('community.index'))
             @php($headerSearch = is_string(request()->query('q')) ? mb_substr(trim(request()->query('q')), 0, 100) : '')
-            <form class="community-search community-toolbar__search" method="GET" action="{{ $searchAction }}" role="search">
+            <form class="community-search community-toolbar__search" method="GET" action="{{ $searchAction }}" role="search" data-community-search>
                 <label for="community-search-input" class="sr-only">Поиск по темам</label>
                 <input id="community-search-input" type="search" name="q" value="{{ $headerSearch }}" maxlength="100" placeholder="Найти тему или ответ" autocomplete="off" enterkeyhint="search">
-                @if ($headerSearch !== '')<a href="{{ $searchAction }}" aria-label="Сбросить поиск">Сбросить</a>@endif
+                <button class="community-toolbar__search-clear" type="button" aria-label="Очистить поиск" data-community-search-clear data-reset-url="{{ $searchAction }}" @if ($headerSearch === '') hidden @endif><x-community.icon name="x" size="18" /></button>
             </form>
             @auth('community')
                 @php($unreadNotifications = auth('community')->user()->communityNotifications()->whereNull('read_at')->count())
