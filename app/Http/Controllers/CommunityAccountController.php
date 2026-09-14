@@ -7,8 +7,8 @@ use App\Models\CommunityCommentVote;
 use App\Models\CommunityPost;
 use App\Models\CommunityPostVote;
 use App\Models\CommunityUser;
-use App\Services\Community\CommunityRanking;
 use App\Services\Community\CommunityAvatarService;
+use App\Services\Community\CommunityRanking;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -109,16 +109,16 @@ class CommunityAccountController extends Controller
             'bio' => ['nullable', 'string', 'max:1000'],
             'telegram_notifications' => ['nullable', 'boolean'],
             'max_notifications' => ['nullable', 'boolean'],
-            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072', 'dimensions:max_width=4096,max_height=4096'],
+            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192', 'dimensions:max_width=4096,max_height=4096'],
             'remove_avatar' => ['nullable', 'boolean'],
         ], [
             'display_name.regex' => 'Никнейм может содержать буквы, цифры, пробелы, точку, дефис и подчёркивание.',
         ]);
 
-        if ((bool) ($data['remove_avatar'] ?? false)) {
-            $avatars->remove($user);
-        } elseif ($request->hasFile('avatar') && ! $avatars->storeUpload($user, $request->file('avatar'))) {
+        if ($request->hasFile('avatar') && ! $avatars->storeUpload($user, $request->file('avatar'))) {
             throw ValidationException::withMessages(['avatar' => 'Не удалось обработать изображение. Выберите другой файл.']);
+        } elseif (! $request->hasFile('avatar') && (bool) ($data['remove_avatar'] ?? false)) {
+            $avatars->remove($user);
         }
 
         $user->update([

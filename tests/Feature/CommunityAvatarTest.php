@@ -65,11 +65,38 @@ class CommunityAvatarTest extends TestCase
 
         $oldPath = $user->avatar_path;
         $this->actingAs($user, 'community')->put(route('community.settings.update'), [
+            'avatar' => UploadedFile::fake()->createWithContent('replacement.png', $png),
+            'remove_avatar' => '1',
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $user->refresh();
+        $this->assertSame('custom', $user->avatar_source);
+        $this->assertNotSame($oldPath, $user->avatar_path);
+        Storage::disk('public')->assertMissing($oldPath);
+        Storage::disk('public')->assertExists($user->avatar_path);
+
+        $oldPath = $user->avatar_path;
+        $this->actingAs($user, 'community')->put(route('community.settings.update'), [
             'remove_avatar' => '1',
         ])->assertRedirect()->assertSessionHasNoErrors();
 
         $this->assertNull($user->fresh()->avatar_path);
         Storage::disk('public')->assertMissing($oldPath);
+    }
+
+    public function test_profile_accepts_an_image_larger_than_the_old_two_megabyte_server_limit(): void
+    {
+        $user = CommunityUser::factory()->create();
+        $png = base64_decode(self::PNG, true);
+        $upload = UploadedFile::fake()->createWithContent('avatar.png', $png.str_repeat(' ', 2 * 1024 * 1024));
+
+        $this->actingAs($user, 'community')->put(route('community.settings.update'), [
+            'avatar' => $upload,
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $user->refresh();
+        $this->assertSame('custom', $user->avatar_source);
+        Storage::disk('public')->assertExists($user->avatar_path);
     }
 
     public function test_user_can_update_public_profile_without_changing_id(): void

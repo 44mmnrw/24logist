@@ -12,7 +12,7 @@ use Throwable;
 
 final class CommunityAvatarService
 {
-    private const MAX_BYTES = 3 * 1024 * 1024;
+    private const MAX_BYTES = 8 * 1024 * 1024;
 
     private const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 

@@ -48,6 +48,11 @@ fi
 
 ln -sfn "${APP_DIR}/storage/app/public" "${WEB_DIR}/storage"
 
+# PHP-FPM reads per-directory settings from the web root, not the Laravel app root.
+if [[ -f "${APP_DIR}/.user.ini" ]]; then
+  cp -f "${APP_DIR}/.user.ini" "${WEB_DIR}/.user.ini"
+fi
+
 if [[ -f "${APP_DIR}/script_ai/production-web-index.php" ]]; then
   cp -f "${APP_DIR}/script_ai/production-web-index.php" "${WEB_DIR}/index.php"
   echo "[sync] index.php OK"

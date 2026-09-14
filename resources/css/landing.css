@@ -2022,8 +2022,10 @@ body {
 .community-photo-gallery--compact { max-width: 430px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 95px), 1fr)); gap: 6px; margin-top: 8px; }
 .community-photo-gallery--feed { max-width: 430px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 110px), 1fr)); margin-top: 10px; }
 .community-photo-editor { display: grid; gap: 9px; min-width: 0; }
-.community-photo-editor__picker { display: grid; gap: 6px; color: #32455f; font-weight: 700; }
-.community-photo-editor__picker input { max-width: 100%; padding: 9px; border: 1px dashed #b8c8df; border-radius: 10px; background: #f8fbff; font: inherit; }
+.community-photo-editor__picker { display: grid; gap: 6px; padding: 10px; border: 2px dashed #b8c8df; border-radius: 10px; background: #f8fbff; color: #32455f; font-weight: 700; }
+.community-photo-editor__picker > span { display: inline-flex; align-items: center; gap: 7px; }
+.community-photo-editor__picker input { max-width: 100%; padding: 6px; border: 0; background: transparent; font: inherit; }
+.community-photo-editor__picker.is-dragover { border-color: #1d4ed8; background: #e8efff; }
 .community-photo-editor > small { color: #667991; font-size: 12px; font-weight: 500; }
 .community-photo-editor__existing, .community-photo-editor__preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; }
 .community-photo-editor__existing-item { display: grid; gap: 5px; min-width: 0; color: #52657c; font-size: 12px; font-weight: 600; }
@@ -2093,8 +2095,17 @@ body {
 .community-profile-handle { margin: 0 0 7px; color: #315c9d !important; font-size: 14px; font-weight: 700; }
 .community-profile-bio { max-width: 720px; margin-top: 12px; color: #344861 !important; line-height: 1.6; white-space: pre-line; }
 .community-avatar-setting { display: flex; align-items: flex-start; gap: 20px; padding: 18px; border: 1px solid #e1e6ee; border-radius: 13px; background: #f8faff; }
-.community-avatar-setting > div { display: grid; flex: 1; gap: 9px; min-width: 0; }
+.community-avatar-setting__preview { position: relative; flex: 0 0 72px; width: 72px; height: 72px; }
+.community-avatar-setting__preview img:not([hidden]) { position: absolute; inset: 0; display: block; width: 72px; height: 72px; border-radius: 50%; object-fit: cover; }
+.community-avatar-setting__fields { display: grid; flex: 1; gap: 9px; min-width: 0; }
+.community-form .community-avatar-dropzone { position: relative; display: flex; align-items: center; gap: 10px; min-height: 82px; padding: 12px; border: 2px dashed #b8c8df; border-radius: 11px; background: #fff; cursor: pointer; }
+.community-avatar-dropzone strong { color: #1d4ed8; }
+.community-avatar-dropzone.is-dragover { border-color: #1d4ed8; background: #e8efff; }
+.community-avatar-dropzone:focus-within { outline: 3px solid rgba(29, 78, 216, .2); outline-offset: 2px; }
+.community-avatar-dropzone input { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; padding: 0; border: 0; opacity: 0; cursor: pointer; }
 .community-avatar-setting small { color: #667991; font-weight: 500; line-height: 1.45; }
+.community-avatar-setting [data-community-avatar-feedback]:empty { display: none; }
+.community-avatar-setting .community-avatar-setting__error { color: #a32828; }
 .community-page-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 18px; }
 .community-notification-list { display: grid; gap: 8px; }
 .community-notification { display: flex; justify-content: space-between; gap: 20px; padding: 17px 20px; border: 1px solid #e0e6ef; border-radius: 12px; background: #fff; color: #31445d; }

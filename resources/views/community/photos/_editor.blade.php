@@ -10,8 +10,8 @@
             @endforeach
         </div>
     @endif
-    <label class="community-photo-editor__picker">
-        <span>Добавить фото</span>
+    <label class="community-photo-editor__picker" data-community-dropzone>
+        <span><x-community.icon name="photo-up" size="18" /> Перетащите фото сюда или выберите файлы</span>
         <input type="file" name="photos[]" accept="image/jpeg,image/png,image/webp" multiple data-community-photo-input data-max-photos="{{ \App\Services\Community\CommunityPhotoService::MAX_COUNT }}" data-max-bytes="{{ \App\Services\Community\CommunityPhotoService::MAX_FILE_KB * 1024 }}">
     </label>
     <small>До 3 фото, каждое до 2 МБ. JPEG, PNG или WebP.</small>

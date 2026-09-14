@@ -34,13 +34,21 @@
             </label>
             <h2>Фото профиля</h2>
             <div class="community-avatar-setting">
-                <x-community.avatar :user="$user" size="lg" />
-                <div>
-                    <label for="community-avatar-upload">Заменить фото</label>
-                    <input id="community-avatar-upload" type="file" name="avatar" accept="image/jpeg,image/png,image/webp">
-                    <small>JPG, PNG или WebP, до 3 МБ. После входа берём фото из социальной сети, но загруженный вами аватар больше не перезаписываем.</small>
+                <div class="community-avatar-setting__preview">
+                    <x-community.avatar :user="$user" size="lg" />
+                    <img data-community-avatar-preview alt="" hidden>
+                </div>
+                <div class="community-avatar-setting__fields">
+                    <label class="community-avatar-dropzone" data-community-dropzone>
+                        <x-community.icon name="photo-up" size="24" />
+                        <span>Перетащите фото сюда или <strong>выберите файл</strong></span>
+                        <input id="community-avatar-upload" type="file" name="avatar" accept="image/jpeg,image/png,image/webp" data-community-avatar-input aria-describedby="community-avatar-hint community-avatar-feedback">
+                    </label>
+                    <small id="community-avatar-hint">JPG, PNG или WebP, до 8 МБ. После выбора нажмите «Сохранить». Загруженное вами фото не перезаписывается при входе через соцсеть.</small>
+                    <small id="community-avatar-feedback" data-community-avatar-feedback role="status" aria-live="polite"></small>
+                    @error('avatar')<small class="community-avatar-setting__error" role="alert">{{ $message }}</small>@enderror
                     @if ($user->avatar_path)
-                        <label class="community-check"><input type="checkbox" name="remove_avatar" value="1"><span>Удалить текущее фото</span></label>
+                        <label class="community-check"><input type="checkbox" name="remove_avatar" value="1" data-community-avatar-remove><span>Удалить текущее фото</span></label>
                     @endif
                 </div>
             </div>

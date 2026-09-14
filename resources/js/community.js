@@ -1,6 +1,90 @@
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
 const photoPreviewUrls = new WeakMap();
+let avatarPreviewUrl = null;
+
+document.addEventListener('change', (event) => {
+    const input = event.target.closest?.('[data-community-avatar-input]');
+    if (!input) return;
+
+    const preview = input.closest('.community-avatar-setting')?.querySelector('[data-community-avatar-preview]');
+    const feedback = input.closest('.community-avatar-setting')?.querySelector('[data-community-avatar-feedback]');
+    const file = input.files?.[0];
+    if (!preview || !feedback) return;
+
+    if (avatarPreviewUrl) URL.revokeObjectURL(avatarPreviewUrl);
+    avatarPreviewUrl = null;
+    preview.hidden = true;
+    preview.removeAttribute('src');
+    feedback.textContent = '';
+    if (!file) return;
+
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size < 1 || file.size > 8 * 1024 * 1024) {
+        input.value = '';
+        feedback.textContent = 'Выберите JPG, PNG или WebP размером до 8 МБ.';
+        return;
+    }
+
+    avatarPreviewUrl = URL.createObjectURL(file);
+    preview.src = avatarPreviewUrl;
+    preview.hidden = false;
+    feedback.textContent = `Выбрано: ${file.name}. Нажмите «Сохранить».`;
+    const remove = input.form?.querySelector('[data-community-avatar-remove]');
+    if (remove) remove.checked = false;
+});
+
+document.addEventListener('change', (event) => {
+    if (!event.target.matches?.('[data-community-avatar-remove]') || !event.target.checked) return;
+    const input = event.target.form?.querySelector('[data-community-avatar-input]');
+    if (!input) return;
+    input.value = '';
+    input.dispatchEvent(new Event('change', {bubbles: true}));
+});
+
+document.addEventListener('dragenter', (event) => {
+    const zone = event.target.closest?.('[data-community-dropzone]');
+    if (!zone || !Array.from(event.dataTransfer?.types || []).includes('Files')) return;
+    event.preventDefault();
+    zone.classList.add('is-dragover');
+});
+
+document.addEventListener('dragover', (event) => {
+    const zone = event.target.closest?.('[data-community-dropzone]');
+    if (!zone || !Array.from(event.dataTransfer?.types || []).includes('Files')) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+    zone.classList.add('is-dragover');
+});
+
+document.addEventListener('dragleave', (event) => {
+    const zone = event.target.closest?.('[data-community-dropzone]');
+    if (zone && (!event.relatedTarget || !zone.contains(event.relatedTarget))) zone.classList.remove('is-dragover');
+});
+
+document.addEventListener('drop', (event) => {
+    const zone = event.target.closest?.('[data-community-dropzone]');
+    if (!zone) return;
+    event.preventDefault();
+    zone.classList.remove('is-dragover');
+
+    const input = zone.querySelector('input[type="file"]');
+    const files = Array.from(event.dataTransfer?.files || []);
+    if (!input || !files.length) return;
+
+    try {
+        const transfer = new DataTransfer();
+        (input.multiple ? files : files.slice(0, 1)).forEach((file) => transfer.items.add(file));
+        input.files = transfer.files;
+        input.dispatchEvent(new Event('change', {bubbles: true}));
+    } catch (_) {
+        try {
+            input.files = event.dataTransfer.files;
+            input.dispatchEvent(new Event('change', {bubbles: true}));
+        } catch (_) {
+            // The file picker remains available in browsers without file-drop support.
+        }
+    }
+});
 
 document.addEventListener('change', (event) => {
     const input = event.target.closest?.('[data-community-photo-input]')
@@ -20,9 +104,9 @@ document.addEventListener('change', (event) => {
     const files = Array.from(input.files || []);
     const maxPhotos = Number(input.dataset.maxPhotos || 3);
     const maxBytes = Number(input.dataset.maxBytes || 2 * 1024 * 1024);
-    if (existing + files.length > maxPhotos || files.some((file) => file.size > maxBytes)) {
+    if (existing + files.length > maxPhotos || files.some((file) => !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size < 1 || file.size > maxBytes)) {
         input.value = '';
-        preview.textContent = `Можно добавить не больше ${maxPhotos} фото, каждое до ${maxBytes / 1024 / 1024} МБ.`;
+        preview.textContent = `Можно добавить не больше ${maxPhotos} фото JPG, PNG или WebP, каждое до ${maxBytes / 1024 / 1024} МБ.`;
         return;
     }
 
