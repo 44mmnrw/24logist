@@ -29,6 +29,7 @@ final class SitemapService
         '/bootstrap/',
         '/community/auth/',
         '/community/login',
+        '/community/register',
         '/community/moderation/',
         '/community/notifications',
         '/community/onboarding',

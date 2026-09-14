@@ -160,6 +160,7 @@ Route::middleware(['community.locale', 'community.enabled'])->prefix('community'
     Route::get('/privacy', [CommunityLegalController::class, 'privacy'])->name('privacy');
 
     Route::get('/login', [CommunityAccountController::class, 'login'])->name('login');
+    Route::get('/register', [CommunityAccountController::class, 'login'])->name('register');
     Route::get('/auth/telegram', [TelegramCommunityAuthController::class, 'redirect'])->name('auth.telegram.redirect');
     Route::get('/auth/telegram/callback', [TelegramCommunityAuthController::class, 'callback'])->name('auth.telegram.callback');
     Route::get('/auth/vk', [VkCommunityAuthController::class, 'redirect'])->name('auth.vk.redirect');

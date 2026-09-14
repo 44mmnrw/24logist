@@ -30,35 +30,37 @@
             </form>
             @auth('community')
                 @php($unreadNotifications = auth('community')->user()->communityNotifications()->whereNull('read_at')->count())
-                <nav class="community-toolbar__desktop" aria-label="Профиль сообщества">
-                    <a href="{{ route('community.notifications') }}">Уведомления@if ($unreadNotifications > 0) ({{ $unreadNotifications }})@endif</a>
-                    <a class="community-toolbar__profile" href="{{ route('community.profile', auth('community')->user()) }}"><x-community.avatar :user="auth('community')->user()" size="sm" /><span>{{ auth('community')->user()->displayName() }}</span></a>
-                    <a href="{{ route('community.settings') }}">Настройки</a>
-                    @if (auth('community')->user()->isModerator())
-                        <a href="{{ route('community.moderation.index') }}">Модерация</a>
-                    @endif
-                    <form method="POST" action="{{ route('community.logout') }}">@csrf<button type="submit">Выйти</button></form>
-                </nav>
-                <details class="community-toolbar__menu">
-                    <summary aria-label="Открыть меню сообщества">
-                        <x-community.avatar :user="auth('community')->user()" size="sm" />
-                        @if ($unreadNotifications > 0)<span class="community-toolbar__unread" aria-label="{{ $unreadNotifications }} новых уведомлений">{{ $unreadNotifications }}</span>@endif
-                        <x-community.icon name="menu-2" size="18" />
-                    </summary>
-                    <nav aria-label="Мобильное меню сообщества">
-                        <a href="{{ route('community.index') }}">Все обсуждения</a>
-                        <a href="{{ route('community.notifications') }}">Уведомления@if ($unreadNotifications > 0) ({{ $unreadNotifications }})@endif</a>
-                        <a href="{{ route('community.profile', auth('community')->user()) }}">Мой профиль</a>
-                        <a href="{{ route('community.settings') }}">Настройки</a>
-                        @if (auth('community')->user()->isModerator())
-                            <a href="{{ route('community.moderation.index') }}">Модерация</a>
-                        @endif
-                        <a href="{{ url('/') }}">На главную сайта</a>
-                        <form method="POST" action="{{ route('community.logout') }}">@csrf<button type="submit">Выйти</button></form>
-                    </nav>
-                </details>
+                <div class="community-toolbar__actions">
+                    <a class="community-toolbar__notifications" href="{{ route('community.notifications') }}" aria-label="Уведомления{{ $unreadNotifications > 0 ? ', новых: '.$unreadNotifications : '' }}">
+                        <x-community.icon name="bell" size="19" />
+                        <span class="community-toolbar__notifications-label">Уведомления</span>
+                        @if ($unreadNotifications > 0)<span class="community-toolbar__unread" aria-hidden="true">{{ $unreadNotifications }}</span>@endif
+                    </a>
+                    <details class="community-toolbar__menu">
+                        <summary aria-label="Открыть меню профиля">
+                            <x-community.avatar :user="auth('community')->user()" size="sm" />
+                            <x-community.icon name="chevron-down" size="16" />
+                        </summary>
+                        <nav aria-label="Меню профиля">
+                            @if (auth('community')->user()->isOnboarded())
+                                <a href="{{ route('community.profile', auth('community')->user()) }}">Мой профиль</a>
+                                <a href="{{ route('community.settings') }}">Настройки</a>
+                                @if (auth('community')->user()->isModerator())
+                                    <a href="{{ route('community.moderation.index') }}">Модерация</a>
+                                @endif
+                            @else
+                                <a href="{{ route('community.onboarding') }}">Завершить регистрацию</a>
+                            @endif
+                            <form method="POST" action="{{ route('community.logout') }}">@csrf<button type="submit">Выйти</button></form>
+                        </nav>
+                    </details>
+                    <a class="btn btn--primary btn--sm community-toolbar__post" href="{{ route('community.posts.create') }}"><x-community.icon name="plus" size="18" /><span class="community-toolbar__post-label">Создать пост</span><span class="community-toolbar__post-short">Пост</span></a>
+                </div>
             @else
-                <a class="btn btn--primary btn--sm community-toolbar__login" href="{{ route('community.login') }}">Войти</a>
+                <div class="community-toolbar__actions community-toolbar__guest">
+                    <a class="btn btn--ghost btn--sm" href="{{ route('community.login') }}">Войти</a>
+                    <a class="btn btn--primary btn--sm" href="{{ route('community.register') }}">Зарегистрироваться</a>
+                </div>
             @endauth
         </div>
     </header>

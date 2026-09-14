@@ -79,21 +79,30 @@
     white-space: nowrap;
 }
 
-.community-toolbar__desktop {
+.community-toolbar__actions {
     display: flex;
     align-items: center;
-    gap: 18px;
+    justify-self: end;
+    gap: 10px;
     white-space: nowrap;
     font-size: 14px;
 }
 
-.community-toolbar__desktop > a:hover,
-.community-toolbar__desktop button:hover {
+.community-toolbar__notifications {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    color: #34506f;
+}
+
+.community-toolbar__notifications:hover {
     color: #1d4ed8;
 }
 
-.community-toolbar__desktop form {
-    display: inline;
+.community-toolbar__post-short {
+    display: none;
 }
 
 .community-toolbar nav button,
@@ -108,28 +117,8 @@
     cursor: pointer;
 }
 
-.community-toolbar__profile {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-}
-
-.community-toolbar__profile .community-user-avatar {
-    width: 26px;
-    height: 26px;
-    font-size: 11px;
-}
-
-.community-toolbar__profile > span:last-child {
-    max-width: 160px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
 .community-toolbar__menu {
     position: relative;
-    display: none;
 }
 
 .community-toolbar__menu summary {
@@ -162,9 +151,6 @@
 }
 
 .community-toolbar__unread {
-    position: absolute;
-    top: -5px;
-    right: -5px;
     display: grid;
     min-width: 18px;
     height: 18px;
@@ -229,53 +215,12 @@
     min-width: 0;
 }
 
-.community-hero {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-    overflow: hidden;
-    padding: 14px 16px;
-    margin-bottom: 12px;
-    border: 1px solid #dbe3ef;
-    border-radius: 12px;
-    background: #fff;
-    box-shadow: 0 3px 12px rgba(25, 52, 96, .05);
-}
-
-.community-hero h1 {
-    margin: 0 0 2px;
-    max-width: 680px;
+.community-feed__heading {
+    margin: 0 0 14px;
     color: #11284c;
-    font-size: clamp(19px, 2vw, 23px);
-    line-height: 1.2;
-}
-
-.community-hero p {
-    max-width: 680px;
-    color: #617087;
-    font-size: 13px;
-    line-height: 1.4;
-}
-
-.community-hero .section-kicker {
-    display: none;
-}
-
-.community-hero .btn--primary {
-    flex: 0 0 auto;
-    border-color: #1d4ed8;
-    background: #1d4ed8;
-    color: #fff;
+    font-size: clamp(18px, 2vw, 22px);
     font-weight: 600;
-    box-shadow: none;
-}
-
-.community-hero .btn--primary:hover {
-    border-color: #1744b5;
-    background: #1744b5;
-    color: #fff;
+    line-height: 1.25;
 }
 
 .community-search {
@@ -2503,21 +2448,7 @@
     }
 }
 
-@media (max-width: 1200px) {
-    .community-toolbar__desktop {
-        display: none;
-    }
-
-    .community-toolbar__menu {
-        display: block;
-    }
-}
-
-@media (max-width: 680px) {
-    .community-main {
-        padding-top: 18px;
-    }
-
+@media (max-width: 1100px) {
     .community-toolbar__inner {
         grid-template-columns: minmax(0, 1fr) auto;
         gap: 8px 12px;
@@ -2527,32 +2458,41 @@
         grid-column: 1 / -1;
         grid-row: 2;
     }
+}
+
+@media (max-width: 900px) {
+    .community-toolbar__notifications-label {
+        display: none;
+    }
+
+    .community-toolbar__notifications {
+        justify-content: center;
+        width: 40px;
+    }
+
+    .community-toolbar__unread {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+    }
+}
+
+@media (max-width: 680px) {
+    .community-main {
+        padding-top: 18px;
+    }
 
     .community-toolbar__identity {
         gap: 9px;
     }
 
+    .community-toolbar__brand {
+        display: none;
+    }
+
     .community-toolbar__logo .brand-logo {
         max-width: 105px;
         height: 25px;
-    }
-
-    .community-toolbar__brand {
-        padding-left: 9px;
-        font-size: 14px;
-    }
-
-    .community-hero {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 10px;
-        padding: 13px 14px;
-        border-radius: 11px;
-    }
-
-    .community-hero .btn--primary {
-        width: 100%;
-        height: 38px;
     }
 
     .community-sort {
@@ -2639,7 +2579,39 @@
 }
 
 @media (max-width: 420px) {
-    .community-toolbar__brand span {
+    .community-toolbar__actions {
+        gap: 6px;
+    }
+
+    .community-toolbar__logo .brand-logo {
+        max-width: 82px;
+    }
+
+    .community-toolbar__menu summary {
+        gap: 0;
+        width: 40px;
+        justify-content: center;
+        padding: 5px;
+    }
+
+    .community-toolbar__menu summary > .community-icon {
         display: none;
+    }
+
+    .community-toolbar__post {
+        padding-inline: 9px;
+    }
+
+    .community-toolbar__post-label {
+        display: none;
+    }
+
+    .community-toolbar__post-short {
+        display: inline;
+    }
+
+    .community-toolbar__guest .btn {
+        padding-inline: 7px;
+        font-size: 11px;
     }
 }

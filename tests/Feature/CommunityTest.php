@@ -61,6 +61,36 @@ class CommunityTest extends TestCase
         $this->assertDatabaseCount('community_categories', 5);
     }
 
+    public function test_community_header_shows_guest_and_member_actions(): void
+    {
+        $this->get(route('community.index'))
+            ->assertOk()
+            ->assertSee('class="community-toolbar__actions community-toolbar__guest"', false)
+            ->assertSee('href="'.route('community.login').'"', false)
+            ->assertSee('href="'.route('community.register').'"', false)
+            ->assertDontSee('class="community-hero"', false);
+
+        $this->get(route('community.register'))
+            ->assertOk()
+            ->assertSee('Зарегистрироваться в сообществе')
+            ->assertSee('name="robots" content="noindex, nofollow"', false);
+        $this->get(route('seo.robots'))->assertSee('Disallow: /community/register');
+
+        $user = CommunityUser::factory()->create();
+        $this->actingAs($user, 'community')->get(route('community.index'))
+            ->assertOk()
+            ->assertSeeInOrder([
+                'href="'.route('community.notifications').'"',
+                'aria-label="Открыть меню профиля"',
+                'href="'.route('community.posts.create').'"',
+            ], false)
+            ->assertDontSee('class="community-toolbar__actions community-toolbar__guest"', false)
+            ->assertDontSee('href="'.route('community.register').'"', false)
+            ->assertDontSee('class="community-hero"', false);
+
+        $this->get(route('community.register'))->assertRedirect(route('community.index'));
+    }
+
     public function test_feature_flag_hides_all_public_community_pages(): void
     {
         SiteSetting::instance()->update(['community_enabled' => false]);
@@ -68,6 +98,7 @@ class CommunityTest extends TestCase
 
         $this->get('/community')->assertNotFound();
         $this->get('/community/login')->assertNotFound();
+        $this->get('/community/register')->assertNotFound();
     }
 
     public function test_onboarding_normalizes_username_and_requires_terms(): void

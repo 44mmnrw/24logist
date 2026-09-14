@@ -6,20 +6,7 @@
 @section('content')
 <div class="landing-shell community-layout">
     <section class="community-feed">
-        <header class="community-hero">
-            <div>
-                <span class="section-kicker">Сообщество 24Logist</span>
-                <h1>{{ $activeCategory?->name ?: 'Обсуждаем логистику вместе' }}</h1>
-                <p>{{ $activeCategory?->description ?: 'Задавайте вопросы, делитесь опытом и находите практические решения.' }}</p>
-            </div>
-            @auth('community')
-                @if (auth('community')->user()->isOnboarded())
-                    <a class="btn btn--primary" href="{{ route('community.posts.create') }}">Создать тему</a>
-                @endif
-            @else
-                <a class="btn btn--primary" href="{{ route('community.login') }}">Присоединиться</a>
-            @endauth
-        </header>
+        <h1 class="community-feed__heading">{{ $activeCategory?->name ?: 'Обсуждения сообщества' }}</h1>
 
         <nav class="community-sort" aria-label="Сортировка тем">
             <span class="community-sort__label">Сортировка:</span>
