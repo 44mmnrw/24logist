@@ -33,7 +33,11 @@
                             <details><summary>Изменить</summary>
                                 <form method="POST" action="{{ route('community.comments.update', $comment) }}" class="community-comment-form" enctype="multipart/form-data">
                                     @csrf @method('PUT')
-                                    <textarea name="body_markdown" maxlength="5000" rows="3">{{ $comment->body_markdown }}</textarea>
+                                    <div class="community-markdown-editor" data-markdown-editor data-markdown-preview-url="{{ route('community.markdown.preview') }}">
+                                        @include('community.comments._format_toolbar')
+                                        <textarea name="body_markdown" maxlength="5000" rows="3">{{ $comment->body_markdown }}</textarea>
+                                        <div class="community-markdown-preview community-markdown" data-markdown-preview aria-live="polite" hidden></div>
+                                    </div>
                                     @include('community.photos._editor', ['existingPhotos' => $comment->photos])
                                     <button class="btn btn--sm">Сохранить</button>
                                 </form>

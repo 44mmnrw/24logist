@@ -9,6 +9,7 @@ use App\Http\Controllers\CommunityActionController;
 use App\Http\Controllers\CommunityCommentController;
 use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\CommunityLegalController;
+use App\Http\Controllers\CommunityMarkdownPreviewController;
 use App\Http\Controllers\CommunityModerationController;
 use App\Http\Controllers\CommunityNotificationController;
 use App\Http\Controllers\CommunityPhotoController;
@@ -178,6 +179,8 @@ Route::middleware(['community.locale', 'community.enabled'])->prefix('community'
         Route::post('/logout', [CommunityAccountController::class, 'logout'])->name('logout');
 
         Route::middleware('community.onboarded')->group(function (): void {
+            Route::post('/comments/preview', CommunityMarkdownPreviewController::class)
+                ->middleware('throttle:60,1')->name('markdown.preview');
             Route::get('/submit', [CommunityPostController::class, 'create'])->name('posts.create');
             Route::post('/posts', [CommunityPostController::class, 'store'])->middleware('throttle:community-posts')->name('posts.store');
             Route::get('/posts/{post}/edit', [CommunityPostController::class, 'edit'])->name('posts.edit');

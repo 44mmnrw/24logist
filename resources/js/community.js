@@ -1,7 +1,101 @@
+import {formatMarkdownSelection} from './community-markdown-format.js';
+
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
 const photoPreviewUrls = new WeakMap();
 let avatarPreviewUrl = null;
+
+function setMarkdownPreview(editor, visible) {
+    if (!editor) return;
+    const textarea = editor.querySelector('textarea[name="body_markdown"]');
+    const preview = editor.querySelector('[data-markdown-preview]');
+    const toggle = editor.querySelector('[data-markdown-preview-toggle]');
+    if (!textarea || !preview || !toggle) return;
+    textarea.hidden = visible;
+    preview.hidden = !visible;
+    toggle.setAttribute('aria-pressed', String(visible));
+    toggle.textContent = visible ? 'Редактировать Markdown' : 'Предпросмотр';
+}
+
+function applyMarkdownFormat(editor, command) {
+    const textarea = editor.querySelector('textarea[name="body_markdown"]');
+    if (!textarea) return;
+    const result = formatMarkdownSelection(
+        textarea.value, textarea.selectionStart, textarea.selectionEnd, command,
+        Number(textarea.maxLength) > 0 ? textarea.maxLength : Infinity,
+    );
+    if (!result) {
+        textarea.focus();
+        textarea.setCustomValidity('Достигнут лимит символов комментария.');
+        textarea.reportValidity();
+        textarea.setCustomValidity('');
+        return;
+    }
+    setMarkdownPreview(editor, false);
+    textarea.value = result.value;
+    textarea.focus();
+    textarea.setSelectionRange(result.selectionStart, result.selectionEnd);
+    textarea.dispatchEvent(new Event('input', {bubbles: true}));
+}
+
+document.addEventListener('click', async (event) => {
+    const formatButton = event.target.closest?.('[data-markdown-format]');
+    if (formatButton) {
+        const editor = formatButton.closest('[data-markdown-editor]');
+        if (editor) applyMarkdownFormat(editor, formatButton.dataset.markdownFormat);
+        return;
+    }
+
+    const toggle = event.target.closest?.('[data-markdown-preview-toggle]');
+    if (!toggle) return;
+    const editor = toggle.closest('[data-markdown-editor]');
+    if (!editor) return;
+    if (toggle.getAttribute('aria-pressed') === 'true') {
+        setMarkdownPreview(editor, false);
+        editor.querySelector('textarea[name="body_markdown"]')?.focus();
+        return;
+    }
+
+    const textarea = editor.querySelector('textarea[name="body_markdown"]');
+    const preview = editor.querySelector('[data-markdown-preview]');
+    if (!textarea || !preview) return;
+    if (!textarea.value.trim()) {
+        preview.textContent = 'Добавьте текст для предпросмотра.';
+        setMarkdownPreview(editor, true);
+        return;
+    }
+
+    toggle.disabled = true;
+    const requestedText = textarea.value;
+    try {
+        const response = await fetch(editor.dataset.markdownPreviewUrl, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken},
+            body: JSON.stringify({body_markdown: requestedText}),
+        });
+        if (!response.ok) throw new Error('preview_failed');
+        const {html} = await response.json();
+        if (textarea.value !== requestedText || !editor.isConnected) return;
+        preview.innerHTML = html || '';
+        setMarkdownPreview(editor, true);
+    } catch (_) {
+        if (textarea.value !== requestedText || !editor.isConnected) return;
+        preview.textContent = 'Не удалось показать предпросмотр. Попробуйте ещё раз.';
+        setMarkdownPreview(editor, true);
+    } finally {
+        toggle.disabled = false;
+    }
+});
+
+document.addEventListener('keydown', (event) => {
+    const textarea = event.target.closest?.('[data-markdown-editor] textarea[name="body_markdown"]');
+    if (!textarea || !(event.ctrlKey || event.metaKey) || event.altKey) return;
+    const command = {b: 'bold', i: 'italic', k: 'link'}[event.key.toLowerCase()];
+    if (!command) return;
+    event.preventDefault();
+    applyMarkdownFormat(textarea.closest('[data-markdown-editor]'), command);
+});
 
 document.addEventListener('change', (event) => {
     const input = event.target.closest?.('[data-community-avatar-input]');
@@ -176,6 +270,7 @@ document.addEventListener('reset', (event) => {
     const form = event.target.closest?.('[data-community-composer]');
     if (!form) return;
     window.setTimeout(() => {
+        setMarkdownPreview(form.querySelector('[data-markdown-editor]'), false);
         form.querySelector('[data-community-photo-input]')?.dispatchEvent(new Event('change', {bubbles: true}));
         const textarea = form.querySelector('[data-composer-textarea]');
         textarea.style.height = '';

@@ -27,6 +27,23 @@ class CommunityTest extends TestCase
         $this->withoutVite();
     }
 
+    public function test_comment_preview_renders_formatting_and_removes_unsafe_html(): void
+    {
+        $user = CommunityUser::factory()->create();
+        $response = $this->actingAs($user, 'community')
+            ->postJson(route('community.markdown.preview'), [
+                'body_markdown' => '**Готово** <script>alert(1)</script> [опасно](javascript:alert(1))',
+            ])
+            ->assertOk();
+
+        $html = $response->json('html');
+        $this->assertStringContainsString('<strong>Готово</strong>', $html);
+        $this->assertStringNotContainsString('<script>', $html);
+        $this->assertStringNotContainsString('href="javascript:', $html);
+        $this->postJson(route('community.markdown.preview'), ['body_markdown' => str_repeat('x', 5001)])
+            ->assertUnprocessable();
+    }
+
     public function test_guests_can_read_feed_but_cannot_publish(): void
     {
         $category = CommunityCategory::query()->firstOrFail();
