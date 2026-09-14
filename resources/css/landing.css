@@ -550,7 +550,7 @@ body {
     background: #eef2f6;
 }
 
-.landing-section-slot > .product-showcase { background: #0a1d3b; }
+.landing-section-slot > .product-showcase { background: #eef2f6; }
 .product-showcase__slide {
     position: relative;
     height: clamp(360px, 75svh, 820px);
