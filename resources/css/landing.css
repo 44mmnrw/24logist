@@ -1884,15 +1884,30 @@ body {
     .route-calculator-map-wrap { min-height: 360px; }
     .growth-slide--route .route-calculator-map-wrap { min-height: 360px; }
 }
-.community-toolbar { background: #fff; border-bottom: 1px solid #e4e9f2; }
+.community-toolbar { position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #e4e9f2; background: rgba(255, 255, 255, .96); backdrop-filter: blur(8px); }
 .community-icon { display: inline-block; flex: 0 0 auto; vertical-align: middle; }
-.community-toolbar__inner { min-height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
-.community-toolbar__brand { color: #132d6b; font-size: 18px; font-weight: 800; }
-.community-toolbar nav { display: flex; align-items: center; gap: 18px; font-size: 14px; }
-.community-toolbar nav form { display: inline; }
+.community-toolbar__inner { min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.community-toolbar__identity { display: flex; align-items: center; gap: 15px; min-width: 0; }
+.community-toolbar__logo { display: inline-flex; flex: 0 0 auto; align-items: center; }
+.community-toolbar__logo .brand-logo { max-width: 130px; height: 29px; }
+.community-toolbar__brand { padding-left: 15px; border-left: 1px solid #dce4f0; color: #132d6b; font-size: 17px; font-weight: 800; white-space: nowrap; }
+.community-toolbar__desktop { display: flex; align-items: center; gap: 18px; font-size: 14px; }
+.community-toolbar__desktop > a:hover, .community-toolbar__desktop button:hover { color: #1d4ed8; }
+.community-toolbar__desktop form { display: inline; }
 .community-toolbar nav button, .community-page-heading button, .community-topic__actions button, .community-comment__actions button { border: 0; padding: 0; background: transparent; color: #47617f; font: inherit; cursor: pointer; }
 .community-toolbar__profile { display: inline-flex; align-items: center; gap: 7px; }
 .community-toolbar__profile .community-user-avatar { width: 26px; height: 26px; font-size: 11px; }
+.community-toolbar__profile > span:last-child { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.community-toolbar__menu { position: relative; display: none; }
+.community-toolbar__menu summary { display: flex; align-items: center; gap: 7px; min-height: 40px; padding: 5px 8px; border: 1px solid #dbe3ef; border-radius: 10px; background: #fff; color: #34506f; cursor: pointer; list-style: none; }
+.community-toolbar__menu summary::-webkit-details-marker { display: none; }
+.community-toolbar__menu summary:focus-visible { outline: 3px solid rgba(37, 99, 235, .25); outline-offset: 2px; }
+.community-toolbar__menu .community-user-avatar { width: 26px; height: 26px; font-size: 11px; }
+.community-toolbar__unread { position: absolute; top: -5px; right: -5px; display: grid; min-width: 18px; height: 18px; place-items: center; padding: 0 4px; border-radius: 99px; background: #1d4ed8; color: #fff; font-size: 10px; font-weight: 800; }
+.community-toolbar__menu nav { position: absolute; top: calc(100% + 8px); right: 0; display: grid; gap: 2px; width: min(260px, calc(100vw - 32px)); padding: 8px; border: 1px solid #dbe3ef; border-radius: 12px; background: #fff; box-shadow: 0 18px 40px rgba(20, 35, 60, .18); }
+.community-toolbar__menu nav a, .community-toolbar__menu nav button { display: block; width: 100%; padding: 10px 12px; border-radius: 8px; color: #34506f; font-size: 14px; text-align: left; }
+.community-toolbar__menu nav a:hover, .community-toolbar__menu nav button:hover { background: #edf3ff; color: #174cac; }
+.community-toolbar__menu nav form { margin: 0; }
 .community-main { min-height: 60vh; padding: 24px 0 72px; }
 .community-layout { display: grid; grid-template-columns: minmax(0, 1fr) 296px; gap: 20px; align-items: start; }
 .community-feed { min-width: 0; }
@@ -2121,14 +2136,19 @@ body {
     .community-sidebar.community-topic-sidebar { display: none; }
     .community-report-card { grid-template-columns: 1fr; }
 }
+@media (max-width: 1080px) {
+    .community-toolbar__desktop { display: none; }
+    .community-toolbar__menu { display: block; }
+}
 @media (max-width: 680px) {
-    .community-main { padding-top: 18px; }.community-toolbar__inner { align-items: flex-start; padding-block: 12px; }.community-toolbar nav { flex-wrap: wrap; justify-content: flex-end; gap: 9px; }.community-toolbar nav a:not(.btn) { font-size: 12px; }
+    .community-main { padding-top: 18px; }.community-toolbar__inner { min-height: 58px; gap: 12px; }.community-toolbar__identity { gap: 9px; }.community-toolbar__logo .brand-logo { max-width: 105px; height: 25px; }.community-toolbar__brand { padding-left: 9px; font-size: 14px; }
     .community-hero { align-items: flex-start; flex-direction: column; gap: 10px; padding: 13px 14px; border-radius: 11px; }.community-hero .btn--primary { width: 100%; height: 38px; }.community-sort { overflow-x: auto; }.community-sort__label { display: none; }.community-sort a { flex: 0 0 auto; }.community-post-card { grid-template-columns: 44px minmax(0, 1fr); }.community-post-card__vote { padding-top: 9px; }.community-post-card__body { padding: 11px 12px; }.community-post-card h2 { font-size: 17px; }
     .community-topic, .community-comments { padding: 15px; border-radius: 9px; }.community-topic__row { gap: 10px; }.community-comments__toolbar { align-items: flex-start; flex-direction: column; gap: 10px; }.community-comments__toolbar nav { max-width: 100%; overflow-x: auto; }.community-comment { padding-left: 7px; }.community-comment .community-comment { margin-left: 18px; }
     .community-form-card, .community-auth-card { padding: 22px; }.community-identity { grid-template-columns: 1fr; }.community-page-heading, .community-notification { align-items: flex-start; flex-direction: column; }.community-avatar-setting { align-items: center; flex-direction: column; }.community-profile-header { align-items: flex-start; padding: 20px; }
 }
 
 @media (max-width: 420px) {
+    .community-toolbar__brand span { display: none; }
     .landing-header .brand-logo { height: 28px; }
     .landing-header__actions .btn--sm { padding-inline: 12px; font-size: 13px; }
     .growth-tabs button {

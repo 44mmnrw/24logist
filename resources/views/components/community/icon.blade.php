@@ -55,5 +55,10 @@
             <path d="M19 22v-6" />
             <path d="M22 19l-3 -3l-3 3" />
             @break
+        @case('menu-2')
+            <path d="M4 6l16 0" />
+            <path d="M4 12l16 0" />
+            <path d="M4 18l16 0" />
+            @break
     @endswitch
 </svg>
