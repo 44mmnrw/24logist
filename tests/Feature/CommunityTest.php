@@ -375,7 +375,15 @@ class CommunityTest extends TestCase
         $other->update(['title' => 'Работа с водителями']);
 
         $this->get(route('community.index', ['q' => 'ЭТрН']))
-            ->assertOk()->assertSee('Как оформить ЭТрН')->assertDontSee('Работа с водителями');
+            ->assertOk()
+            ->assertSeeInOrder(['<header class="community-toolbar">', '<form class="community-search community-toolbar__search"', '</header>', '<main class="community-main">'], false)
+            ->assertSee('action="'.route('community.index').'"', false)
+            ->assertSee('value="ЭТрН"', false)
+            ->assertSee('Как оформить ЭТрН')->assertDontSee('Работа с водителями');
+        $this->get(route('community.categories.show', ['category' => $matching->category, 'q' => 'ЭТрН']))
+            ->assertOk()
+            ->assertSee('action="'.route('community.categories.show', $matching->category).'"', false)
+            ->assertSee('Как оформить ЭТрН');
         $this->get(route('community.index', ['q' => 'несуществующий запрос']))
             ->assertOk()->assertSee('Ничего не найдено');
     }

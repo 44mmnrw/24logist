@@ -21,6 +21,14 @@
                 <a class="community-toolbar__logo" href="{{ url('/') }}" aria-label="На главную страницу 24Logist"><x-landing.logo /></a>
                 <a class="community-toolbar__brand" href="{{ route('community.index') }}">Сообщество <span>24Logist</span></a>
             </div>
+            @php($searchAction = request()->routeIs('community.categories.show') ? route('community.categories.show', request()->route('category')) : route('community.index'))
+            @php($headerSearch = is_string(request()->query('q')) ? mb_substr(trim(request()->query('q')), 0, 100) : '')
+            <form class="community-search community-toolbar__search" method="GET" action="{{ $searchAction }}" role="search">
+                <label for="community-search-input" class="sr-only">Поиск по темам</label>
+                <input id="community-search-input" type="search" name="q" value="{{ $headerSearch }}" maxlength="100" placeholder="Найти тему или ответ" autocomplete="off">
+                <button type="submit">Найти</button>
+                @if ($headerSearch !== '')<a href="{{ $searchAction }}" aria-label="Сбросить поиск">Сбросить</a>@endif
+            </form>
             @auth('community')
                 @php($unreadNotifications = auth('community')->user()->communityNotifications()->whereNull('read_at')->count())
                 <nav class="community-toolbar__desktop" aria-label="Профиль сообщества">
