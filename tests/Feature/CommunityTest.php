@@ -363,6 +363,8 @@ class CommunityTest extends TestCase
             ->assertSee('href="'.$post->getUrl().'"', false)
             ->assertSee('aria-labelledby="community-post-title-'.$post->id.'"', false)
             ->assertSee('data-vote', false)
+            ->assertSee('tabler-sprite.svg#tabler-arrow-big-up-lines', false)
+            ->assertSee('tabler-sprite.svg#tabler-arrow-big-down-lines', false)
             ->assertSee('data-share-url="'.$post->getUrl().'"', false)
             ->assertSee('community-action-chip--comments', false);
     }
