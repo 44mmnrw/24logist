@@ -25,7 +25,7 @@
         @endif
         @include('community.photos._gallery', ['photos' => $post->photos, 'feed' => true])
         <div class="community-post-card__footer">
-            @include('community.shared._awards', ['type' => 'post', 'target' => $post, 'social' => $social[$post->id] ?? []])
+            @include('community.shared._awards', ['type' => 'post', 'target' => $post, 'social' => $social[$post->id] ?? [], 'feed' => true])
             @include('community.shared._reactions', ['type' => 'post', 'target' => $post, 'social' => $social[$post->id] ?? []])
             <a class="community-action-chip community-action-chip--comments" href="{{ $post->getUrl() }}#comments" aria-label="{{ $post->comments_count }} {{ \App\Support\CommunityText::comments($post->comments_count) }}"><x-community.icon name="message-circle" size="16" /><span>{{ $post->comments_count }}</span><span class="community-action-chip__label">{{ \App\Support\CommunityText::comments($post->comments_count) }}</span></a>
             <button class="community-action-chip community-action-chip--share" type="button" data-share-url="{{ $post->getUrl() }}" aria-label="Поделиться"><x-community.icon name="share-3" size="16" /><span data-share-label>Поделиться</span></button>

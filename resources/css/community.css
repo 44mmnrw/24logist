@@ -640,16 +640,13 @@
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     min-width: 0;
     margin-top: 10px;
-    overflow-x: auto;
-    overflow-y: hidden;
     color: #65778e;
     font-size: 12px;
     font-weight: 500;
     white-space: nowrap;
-    scrollbar-width: thin;
 }
 
 .community-post-card__footer > * {
@@ -661,16 +658,91 @@
     flex-wrap: nowrap;
 }
 
-@container (max-width: 790px) {
-    .community-post-card__footer .community-reaction__label,
+@container (max-width: 850px) {
     .community-post-card__footer .community-action-chip--share [data-share-label] {
         display: none;
     }
 }
 
-@container (max-width: 450px) {
-    .community-post-card__footer .community-award-open > span,
+@container (max-width: 780px) {
+    .community-post-card__footer .community-reaction__label {
+        display: none;
+    }
+}
+
+@container (max-width: 550px) {
+    .community-post-card__footer .community-award-open > span {
+        display: none;
+    }
+}
+
+@container (max-width: 480px) {
     .community-post-card__footer .community-action-chip__label {
+        display: none;
+    }
+}
+
+@container (max-width: 380px) {
+    .community-post-card__footer {
+        gap: 3px;
+    }
+
+    .community-post-card__footer .community-awards,
+    .community-post-card__footer .community-reactions {
+        gap: 2px;
+    }
+
+    .community-page .community-post-card__footer .community-reaction,
+    .community-page .community-post-card__footer .community-award-open,
+    .community-post-card__footer .community-award-badge {
+        justify-content: center;
+        min-width: 32px;
+        min-height: 32px;
+        padding: 0 2px;
+        gap: 1px;
+    }
+
+    .community-post-card__footer .community-action-chip--comments {
+        gap: 2px;
+        padding: 0 4px !important;
+    }
+
+    .community-post-card__footer .community-action-chip--share {
+        min-width: 32px;
+        justify-content: center;
+        padding: 0 !important;
+    }
+}
+
+@container (max-width: 270px) {
+    .community-post-card__footer {
+        gap: 1px;
+    }
+
+    .community-post-card__footer .community-reactions {
+        gap: 1px;
+    }
+
+    .community-post-card__footer .community-award-badge {
+        display: none;
+    }
+
+    .community-post-card__footer .community-reaction__emoji {
+        font-size: 15px;
+    }
+
+    .community-post-card__footer .community-reaction__count {
+        font-size: 10px;
+    }
+
+    .community-post-card__footer .community-action-chip--comments {
+        gap: 1px;
+        padding: 0 2px !important;
+    }
+}
+
+@container (max-width: 210px) {
+    .community-post-card__footer .community-action-chip--share {
         display: none;
     }
 }
