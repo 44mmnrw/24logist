@@ -576,14 +576,30 @@
 }
 
 .community-post-card__footer {
+    position: relative;
+    z-index: 2;
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     gap: 6px;
+    min-width: 0;
     margin-top: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
     color: #65778e;
     font-size: 12px;
     font-weight: 500;
+    white-space: nowrap;
+    scrollbar-width: thin;
+}
+
+.community-post-card__footer > * {
+    flex: 0 0 auto;
+}
+
+.community-post-card__footer .community-awards,
+.community-post-card__footer .community-reactions {
+    flex-wrap: nowrap;
 }
 
 .community-action-chip {
