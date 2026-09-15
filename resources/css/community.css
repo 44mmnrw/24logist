@@ -2277,7 +2277,6 @@ html {
     gap: 15px;
     margin-left: var(--community-thread-avatar-radius);
     padding-top: 15px;
-    border-left: 1px solid #cfd6df;
 }
 
 .community-thread-toggle {
@@ -2323,7 +2322,6 @@ html {
 
 .community-comment__children.is-collapsed {
     padding-top: 0;
-    border-left-color: transparent;
 }
 
 .community-comment__children > .community-comment {
@@ -2344,15 +2342,14 @@ html {
     pointer-events: none;
 }
 
-.community-comment__children > .community-comment:last-child::after {
+.community-comment__children > .community-comment:not(:last-child)::after {
     content: "";
     position: absolute;
-    z-index: 1;
-    top: calc(var(--community-thread-avatar-radius) + 1px);
-    bottom: -1px;
-    left: calc(-2px - var(--community-thread-branch));
-    width: 3px;
-    background: #fff;
+    z-index: 0;
+    top: var(--community-thread-avatar-radius);
+    bottom: -15px;
+    left: calc(0px - var(--community-thread-branch));
+    border-left: 1px solid #cfd6df;
     pointer-events: none;
 }
 
