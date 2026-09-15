@@ -2138,19 +2138,36 @@ html {
 
 .community-reaction-picker {
     position: absolute;
-    z-index: 30;
-    bottom: calc(100% + 8px);
-    left: 0;
+    z-index: 100;
+    bottom: calc(100% + 7px);
+    left: 50%;
     display: grid;
-    grid-template-columns: repeat(3, 42px);
-    gap: 4px;
+    grid-template-columns: repeat(3, 34px);
+    gap: 2px;
     width: max-content;
-    padding: 6px;
+    padding: 4px;
     border: 1px solid #dce3ec;
-    border-radius: 999px;
+    border-radius: 10px;
     background: #fff;
-    box-shadow: 0 10px 30px rgba(27, 45, 75, .18);
+    box-shadow: 0 6px 18px rgba(27, 45, 75, .2);
+    transform: translateX(-50%);
     white-space: nowrap;
+}
+
+.community-reaction-picker::before,
+.community-reaction-picker::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    border: 5px solid transparent;
+    border-top-color: #dce3ec;
+    transform: translateX(-50%);
+}
+
+.community-reaction-picker::after {
+    margin-top: -1px;
+    border-top-color: #fff;
 }
 
 .community-reactions:not([open]) .community-reaction-picker {
@@ -2162,8 +2179,8 @@ html {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 42px;
-    height: 42px;
+    width: 34px;
+    height: 34px;
     padding: 0;
     border: 1px solid transparent;
     border-radius: 50%;
@@ -2178,7 +2195,7 @@ html {
 
 .community-page button.community-reaction-option:hover {
     background: #f1f5fb;
-    transform: translateY(-2px) scale(1.08);
+    transform: translateY(-1px) scale(1.06);
 }
 
 .community-page .community-reaction-option.is-active {
@@ -2194,38 +2211,18 @@ html {
     bottom: -1px;
     display: grid;
     place-items: center;
-    width: 15px;
-    height: 15px;
+    width: 13px;
+    height: 13px;
     border: 2px solid #fff;
     border-radius: 50%;
     background: #2764bd;
     color: #fff;
-    font-size: 0.6058rem;
+    font-size: 0.5625rem;
     line-height: 1;
 }
 
 .community-reaction-option.is-readonly {
     cursor: default;
-}
-
-.community-reaction-picker__hint {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 8px;
-    padding: 3px 7px;
-    border-radius: 5px;
-    background: #34465e;
-    color: #fff;
-    font-size: 0.6058rem;
-    line-height: 1.2;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .15s;
-}
-
-.community-reaction-picker:hover .community-reaction-picker__hint,
-.community-reaction-picker:focus-within .community-reaction-picker__hint {
-    opacity: .92;
 }
 
 .community-reaction-option__label,
@@ -2239,7 +2236,7 @@ html {
 }
 
 .community-reaction-picker .community-reaction__emoji {
-    font-size: 1.6154rem;
+    font-size: 1.25rem;
 }
 
 .community-reaction__emoji {

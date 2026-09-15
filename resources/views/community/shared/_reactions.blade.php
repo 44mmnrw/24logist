@@ -58,9 +58,6 @@
                 </span>
             @endif
         @endforeach
-            @if ($canReact)
-                <span class="community-reaction-picker__hint">Можно выбрать до {{ \App\Services\Community\CommunitySocialService::MAX_REACTIONS_PER_TARGET }}</span>
-            @endif
         </div>
     </details>
 @endif
