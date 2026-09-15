@@ -2631,11 +2631,13 @@ html {
 @media (max-width: 900px) {
     .community-layout {
         grid-template-columns: 1fr;
+        min-width: 0;
     }
 
     .community-sidebar {
         position: static;
         grid-row: 1;
+        min-width: 0;
     }
 
     .community-side-card:not(:first-child) {
@@ -2645,8 +2647,16 @@ html {
     .community-side-card:first-child {
         display: flex;
         gap: 5px;
+        max-width: 100%;
         overflow-x: auto;
         padding: 9px;
+        overscroll-behavior-inline: contain;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .community-side-card:first-child::-webkit-scrollbar {
+        display: none;
     }
 
     .community-side-card:first-child h2 {
@@ -2656,6 +2666,7 @@ html {
     .community-side-card:first-child > a {
         flex: 0 0 auto;
         margin: 0;
+        white-space: nowrap;
     }
 
     .community-sidebar.community-topic-sidebar {
@@ -2680,21 +2691,74 @@ html {
 }
 
 @media (max-width: 680px) {
+    .community-page {
+        overflow-x: clip;
+    }
+
     .community-main {
-        padding-top: 18px;
+        padding: 14px 0 48px;
+    }
+
+    .community-toolbar__inner {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
+        padding: 8px 16px;
     }
 
     .community-toolbar__identity {
-        gap: 9px;
+        min-width: 0;
+        gap: 0;
     }
 
     .community-toolbar__brand {
-        display: none;
+        display: none !important;
     }
 
     .community-toolbar__logo .brand-logo {
         max-width: 105px;
         height: 25px;
+    }
+
+    .community-toolbar__actions {
+        min-width: 0;
+        gap: 5px;
+    }
+
+    .community-toolbar__notifications {
+        width: 34px;
+        height: 36px;
+    }
+
+    .community-toolbar__menu nav {
+        right: 0;
+        width: min(230px, calc(100vw - 32px));
+    }
+
+    .community-toolbar__search {
+        min-width: 0;
+    }
+
+    .community-toolbar__search input {
+        min-height: 42px;
+        font-size: 16px;
+    }
+
+    .community-sidebar,
+    .community-feed,
+    .community-posts,
+    .community-post-card,
+    .community-post-card__body {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .community-feed__heading {
+        margin-bottom: 9px;
+    }
+
+    .community-sort {
+        margin-bottom: 9px;
+        padding-inline: 0;
     }
 
     .community-post-card {
@@ -2711,6 +2775,23 @@ html {
 
     .community-post-card h2 {
         font-size: 17px;
+        overflow-wrap: anywhere;
+    }
+
+    .community-post-card p {
+        overflow-wrap: anywhere;
+    }
+
+    .community-post-card__footer {
+        max-width: 100%;
+        overflow-x: auto;
+        overscroll-behavior-inline: contain;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .community-post-card__footer::-webkit-scrollbar {
+        display: none;
     }
 
     .community-topic,
@@ -2770,11 +2851,11 @@ html {
 
 @media (max-width: 420px) {
     .community-toolbar__actions {
-        gap: 6px;
+        gap: 3px;
     }
 
     .community-toolbar__logo .brand-logo {
-        max-width: 82px;
+        max-width: 88px;
     }
 
     .community-toolbar__menu summary {
@@ -2789,6 +2870,7 @@ html {
     }
 
     .community-toolbar__post {
+        min-width: 40px;
         padding-inline: 9px;
     }
 
@@ -2803,5 +2885,40 @@ html {
     .community-toolbar__guest .btn {
         padding-inline: 7px;
         font-size: 11px;
+    }
+
+    .community-main .landing-shell,
+    .community-toolbar__inner {
+        padding-inline: 12px;
+    }
+
+    .community-toolbar__menu nav {
+        position: fixed;
+        top: 53px;
+        right: 12px;
+        width: min(230px, calc(100vw - 24px));
+        max-height: calc(100dvh - 65px);
+        overflow-y: auto;
+    }
+
+    .community-post-card {
+        grid-template-columns: 40px minmax(0, 1fr);
+    }
+
+    .community-post-card__body {
+        padding: 10px;
+    }
+
+    .community-post-card__vote {
+        padding-top: 8px;
+    }
+
+    .community-author-line {
+        gap: 7px;
+    }
+
+    .community-post-card h2 {
+        margin-top: 6px;
+        font-size: 16px;
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CommunityReport extends Model
 {
@@ -14,6 +15,11 @@ class CommunityReport extends Model
     protected function casts(): array
     {
         return ['resolved_at' => 'datetime'];
+    }
+
+    public function reporter(): BelongsTo
+    {
+        return $this->belongsTo(CommunityUser::class, 'community_user_id')->withTrashed();
     }
 
     public function targetLabel(): string

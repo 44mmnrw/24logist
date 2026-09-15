@@ -114,15 +114,30 @@ class CommunityTest extends TestCase
         $this->get('/community/register')->assertNotFound();
     }
 
-    public function test_onboarding_normalizes_username_and_requires_terms(): void
+    public function test_onboarding_normalizes_username_and_requires_terms_and_transport_role(): void
     {
         $user = CommunityUser::query()->create(['username' => 'telegram-placeholder']);
 
-        $this->actingAs($user, 'community')->get(route('community.onboarding'))->assertOk();
-        $this->post(route('community.onboarding.store'), ['username' => 'New_Logist'])->assertSessionHasErrors('accept_terms');
-        $this->post(route('community.onboarding.store'), ['username' => 'New_Logist', 'accept_terms' => 1])->assertRedirect();
+        $this->actingAs($user, 'community')->get(route('community.onboarding'))
+            ->assertOk()
+            ->assertSee('name="transport_role"', false)
+            ->assertSee('required', false)
+            ->assertDontSee('Другое');
+        $this->post(route('community.onboarding.store'), ['username' => 'New_Logist'])
+            ->assertSessionHasErrors(['accept_terms', 'transport_role']);
+        $this->post(route('community.onboarding.store'), [
+            'username' => 'New_Logist',
+            'transport_role' => 'other',
+            'accept_terms' => 1,
+        ])->assertSessionHasErrors('transport_role');
+        $this->post(route('community.onboarding.store'), [
+            'username' => 'New_Logist',
+            'transport_role' => 'logistician',
+            'accept_terms' => 1,
+        ])->assertRedirect();
 
         $this->assertSame('new_logist', $user->fresh()->username);
+        $this->assertSame('logistician', $user->fresh()->transport_role);
         $this->assertTrue($user->fresh()->isOnboarded());
     }
 

@@ -27,7 +27,6 @@ class CommunityUser extends Authenticatable
         'driver' => 'Водитель',
         'logistician' => 'Логист',
         'dispatcher' => 'Диспетчер',
-        'other' => 'Другое',
     ];
 
     protected $hidden = ['remember_token'];

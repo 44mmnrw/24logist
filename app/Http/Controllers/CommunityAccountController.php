@@ -56,17 +56,21 @@ class CommunityAccountController extends Controller
                 'required', 'string', 'min:3', 'max:30', 'regex:/^[\pL\pN_-]+$/u',
                 Rule::unique('community_users', 'username')->ignore($user->id),
             ],
+            'transport_role' => ['required', Rule::in(array_keys(CommunityUser::TRANSPORT_ROLES))],
             'accept_terms' => ['accepted'],
             'telegram_notifications' => ['nullable', 'boolean'],
             'max_notifications' => ['nullable', 'boolean'],
         ], [
             'username.regex' => 'Используйте буквы, цифры, дефис или подчёркивание.',
+            'transport_role.required' => 'Выберите роль в перевозках.',
+            'transport_role.in' => 'Выберите роль в перевозках из списка.',
             'accept_terms.accepted' => 'Необходимо принять правила сообщества и политику конфиденциальности.',
         ]);
 
         $user->update([
             'username' => $data['username'],
             'display_name' => $data['username'],
+            'transport_role' => $data['transport_role'],
             'onboarded_at' => now(),
             'terms_accepted_at' => now(),
         ]);

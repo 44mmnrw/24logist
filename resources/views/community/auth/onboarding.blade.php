@@ -18,6 +18,15 @@
                 <input id="community-username" name="username" value="{{ old('username') }}" minlength="3" maxlength="30" pattern="[A-Za-zА-Яа-яЁё0-9_-]+" required autocomplete="nickname">
                 <small>3–30 символов: буквы, цифры, дефис или подчёркивание.</small>
             </label>
+            <label for="community-transport-role">
+                <span>Роль в перевозках</span>
+                <select id="community-transport-role" name="transport_role" required>
+                    <option value="" disabled @selected(old('transport_role') === null)>Выберите роль</option>
+                    @foreach (\App\Models\CommunityUser::TRANSPORT_ROLES as $value => $label)
+                        <option value="{{ $value }}" @selected(old('transport_role') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </label>
             @foreach ($user->identities as $identity)
                 @if ($identity->bot_access)
                     <label class="community-check">

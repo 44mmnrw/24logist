@@ -12,6 +12,18 @@ class CommunityPost extends Model
 {
     use SoftDeletes;
 
+    public const STATUS_PUBLISHED = 'published';
+
+    public const STATUS_HIDDEN = 'hidden';
+
+    public const STATUS_DELETED = 'deleted';
+
+    public const STATUS_LABELS = [
+        self::STATUS_PUBLISHED => 'Опубликована',
+        self::STATUS_HIDDEN => 'Скрыта',
+        self::STATUS_DELETED => 'Удалена',
+    ];
+
     protected $fillable = [
         'community_user_id', 'community_category_id', 'slug', 'title', 'body_markdown',
         'body_html', 'external_url', 'status', 'score', 'comments_count', 'hot_score',
@@ -56,9 +68,26 @@ class CommunityPost extends Model
         return $this->hasMany(CommunityPostVote::class);
     }
 
+    public function reports(): HasMany
+    {
+        return $this->hasMany(CommunityReport::class, 'target_id')
+            ->where('target_type', 'post');
+    }
+
+    public function openReports(): HasMany
+    {
+        return $this->reports()->where('status', 'open');
+    }
+
+    public function moderationActions(): HasMany
+    {
+        return $this->hasMany(CommunityModerationAction::class, 'target_id')
+            ->where('target_type', 'post');
+    }
+
     public function scopePublished(Builder $query): Builder
     {
-        return $query->where('status', 'published')->whereNull('deleted_at');
+        return $query->where('status', self::STATUS_PUBLISHED)->whereNull('deleted_at');
     }
 
     public function getUrl(): string
