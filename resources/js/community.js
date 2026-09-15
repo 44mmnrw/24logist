@@ -520,6 +520,46 @@ const reportDialog = document.querySelector('[data-report-dialog]');
 
 const awardDialog = document.querySelector('[data-award-dialog]');
 
+const commentDeleteDialog = document.querySelector('[data-comment-delete-dialog]');
+let pendingCommentDeleteForm = null;
+
+const closeCommentDeleteDialog = () => {
+    pendingCommentDeleteForm = null;
+    if (!commentDeleteDialog) return;
+    if (typeof commentDeleteDialog.close === 'function') commentDeleteDialog.close();
+    else commentDeleteDialog.removeAttribute('open');
+};
+
+document.addEventListener('submit', (event) => {
+    const form = event.target.closest?.('[data-comment-delete-form]');
+    if (!form || form.dataset.commentDeleteConfirmed) return;
+    event.preventDefault();
+    pendingCommentDeleteForm = form;
+    if (!commentDeleteDialog?.open) {
+        if (typeof commentDeleteDialog?.showModal === 'function') commentDeleteDialog.showModal();
+        else commentDeleteDialog?.setAttribute('open', '');
+    }
+});
+
+if (commentDeleteDialog) {
+    commentDeleteDialog.addEventListener('click', (event) => {
+        if (event.target === commentDeleteDialog || event.target.closest('[data-comment-delete-cancel]')) {
+            closeCommentDeleteDialog();
+            return;
+        }
+
+        if (!event.target.closest('[data-comment-delete-confirm]') || !pendingCommentDeleteForm) return;
+        const form = pendingCommentDeleteForm;
+        form.dataset.commentDeleteConfirmed = 'true';
+        if (typeof commentDeleteDialog.close === 'function') commentDeleteDialog.close();
+        else commentDeleteDialog.removeAttribute('open');
+        form.requestSubmit();
+    });
+    commentDeleteDialog.addEventListener('cancel', () => {
+        pendingCommentDeleteForm = null;
+    });
+}
+
 if (awardDialog) {
     document.addEventListener('click', (event) => {
         const openButton = event.target.closest('[data-award-open]');

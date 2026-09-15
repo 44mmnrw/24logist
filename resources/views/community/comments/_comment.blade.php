@@ -43,7 +43,7 @@
                                 </form>
                             </details>
                         @endif
-                        <form method="POST" action="{{ route('community.comments.destroy', $comment) }}">@csrf @method('DELETE')<button>Удалить</button></form>
+                        <form method="POST" action="{{ route('community.comments.destroy', $comment) }}" data-comment-delete-form>@csrf @method('DELETE')<button type="submit">Удалить</button></form>
                     @endif
                     @if ($comment->status === 'published')<button class="community-action-button" type="button" data-report-open data-report-type="comment" data-report-id="{{ $comment->id }}">Пожаловаться</button>@endif
                 @endauth

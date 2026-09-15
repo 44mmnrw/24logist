@@ -124,6 +124,18 @@
     @auth('community')
         @include('community.shared._report_dialog')
         @include('community.shared._award_dialog')
+        <dialog class="community-confirm-dialog" data-comment-delete-dialog aria-labelledby="community-comment-delete-title">
+            <div class="community-confirm-dialog__icon" aria-hidden="true"><x-community.icon name="trash" size="22" /></div>
+            <div class="community-confirm-dialog__content">
+                <h2 id="community-comment-delete-title">Удалить комментарий?</h2>
+                <p>Комментарий будет удалён. Отменить это действие не получится.</p>
+            </div>
+            <button class="community-confirm-dialog__close" type="button" data-comment-delete-cancel aria-label="Закрыть"><x-community.icon name="x" size="18" /></button>
+            <div class="community-confirm-dialog__actions">
+                <button class="btn btn--ghost btn--sm" type="button" data-comment-delete-cancel>Отмена</button>
+                <button class="btn btn--sm community-confirm-dialog__danger" type="button" data-comment-delete-confirm>Удалить</button>
+            </div>
+        </dialog>
     @endauth
 </div>
 @endsection
