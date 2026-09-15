@@ -4,9 +4,9 @@ use App\Http\Controllers\AppleTouchIconController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CabinetLoginController;
 use App\Http\Controllers\CommunityAcceptedAnswerController;
-use App\Http\Controllers\CommunityAiBrowserCollectorController;
 use App\Http\Controllers\CommunityAccountController;
 use App\Http\Controllers\CommunityActionController;
+use App\Http\Controllers\CommunityAiBrowserCollectorController;
 use App\Http\Controllers\CommunityCommentController;
 use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\CommunityLegalController;
@@ -195,6 +195,7 @@ Route::middleware(['community.locale', 'community.enabled', 'community.activity'
             Route::post('/actions/vote', [CommunityActionController::class, 'vote'])->middleware('throttle:120,1')->name('vote');
             Route::post('/actions/react', [CommunityActionController::class, 'react'])->middleware('throttle:60,1')->name('react');
             Route::post('/actions/award', [CommunityActionController::class, 'award'])->middleware('throttle:10,1')->name('award');
+            Route::delete('/actions/award', [CommunityActionController::class, 'removeAward'])->middleware('throttle:20,1')->name('award.destroy');
             Route::post('/actions/report', [CommunityActionController::class, 'report'])->middleware('throttle:10,1')->name('report');
             Route::get('/notifications', [CommunityNotificationController::class, 'index'])->name('notifications');
             Route::get('/notifications/{notification}', [CommunityNotificationController::class, 'read'])->name('notifications.read');

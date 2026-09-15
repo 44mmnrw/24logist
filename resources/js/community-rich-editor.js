@@ -106,7 +106,7 @@ document.addEventListener('click', (event) => {
             if (href === null) break;
             if (!href.trim()) chain.unsetLink().run();
             else if (/^https?:\/\//i.test(href.trim())) chain.setLink({ href: href.trim() }).run();
-            else window.alert('Укажите ссылку, начинающуюся с https:// или http://');
+            else window.communityNotify?.('Укажите ссылку, начинающуюся с https:// или http://', 'danger');
             break;
         }
         default: break;

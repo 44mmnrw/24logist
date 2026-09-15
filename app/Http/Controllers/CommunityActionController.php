@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\CommunityComment;
+use App\Models\CommunityNotification;
 use App\Models\CommunityPost;
 use App\Models\CommunityReport;
-use App\Models\CommunityNotification;
-use App\Services\Community\CommunityVotingService;
 use App\Services\Community\CommunitySocialService;
+use App\Services\Community\CommunityVotingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -77,6 +77,23 @@ class CommunityActionController extends Controller
         ]);
 
         return redirect($url)->with('status', 'Награда вручена. Спасибо за поддержку участника!');
+    }
+
+    public function removeAward(Request $request, CommunitySocialService $social): RedirectResponse
+    {
+        $user = auth('community')->user();
+        $data = $request->validate([
+            'target_type' => ['required', 'in:post,comment'],
+            'target_id' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $type = $data['target_type'];
+        $id = (int) $data['target_id'];
+        $target = $social->target($type, $id);
+        $removed = $social->removeAward($user, $type, $id);
+        $url = $type === 'post' ? $target->getUrl() : $target->post->getUrl().'#comment-'.$id;
+
+        return redirect($url)->with('status', $removed ? 'Награда удалена.' : 'Награда уже удалена.');
     }
 
     public function report(Request $request): RedirectResponse

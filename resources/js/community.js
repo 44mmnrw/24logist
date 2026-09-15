@@ -3,6 +3,131 @@ const photoPreviewUrls = new WeakMap();
 let avatarPreviewUrl = null;
 let richEditorModule = null;
 
+const toastContainer = document.querySelector('[data-community-toasts]');
+const toastTimers = new WeakMap();
+
+const removeCommunityToast = (toast) => {
+    if (!toast?.isConnected || toast.classList.contains('is-leaving')) return;
+    window.clearTimeout(toastTimers.get(toast));
+    toast.classList.add('is-leaving');
+    window.setTimeout(() => toast.remove(), 180);
+};
+
+const scheduleCommunityToast = (toast) => {
+    window.clearTimeout(toastTimers.get(toast));
+    const timeout = Number(toast.dataset.timeout || 6000);
+    if (timeout > 0) toastTimers.set(toast, window.setTimeout(() => removeCommunityToast(toast), timeout));
+};
+
+const mountCommunityToast = (toast) => {
+    if (toast.dataset.mounted) return;
+    toast.dataset.mounted = 'true';
+    toast.querySelector('[data-community-toast-close]')?.addEventListener('click', () => removeCommunityToast(toast));
+    toast.addEventListener('mouseenter', () => window.clearTimeout(toastTimers.get(toast)));
+    toast.addEventListener('mouseleave', () => scheduleCommunityToast(toast));
+    toast.addEventListener('focusin', () => window.clearTimeout(toastTimers.get(toast)));
+    toast.addEventListener('focusout', () => scheduleCommunityToast(toast));
+    scheduleCommunityToast(toast);
+};
+
+const showCommunityToast = (message, type = 'success', title = null) => {
+    if (!toastContainer) return;
+    const toast = document.createElement('div');
+    toast.className = `community-toast community-toast--${type}`;
+    toast.dataset.communityToast = '';
+    toast.dataset.timeout = type === 'danger' ? '8000' : '5000';
+    toast.setAttribute('role', type === 'danger' ? 'alert' : 'status');
+
+    const icon = document.createElement('span');
+    icon.className = 'community-toast__icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = type === 'danger' ? '!' : '✓';
+    const content = document.createElement('div');
+    content.className = 'community-toast__content';
+    const heading = document.createElement('strong');
+    heading.textContent = title || (type === 'danger' ? 'Ошибка' : 'Готово');
+    const body = document.createElement('p');
+    body.textContent = message;
+    content.append(heading, body);
+    const close = document.createElement('button');
+    close.className = 'community-toast__close';
+    close.type = 'button';
+    close.dataset.communityToastClose = '';
+    close.setAttribute('aria-label', 'Закрыть');
+    close.textContent = '×';
+    toast.append(icon, content, close);
+
+    const visibleToasts = toastContainer.querySelectorAll('[data-community-toast]:not(.is-leaving)');
+    if (visibleToasts.length >= 4) removeCommunityToast(visibleToasts[0]);
+    toastContainer.append(toast);
+    mountCommunityToast(toast);
+};
+
+window.communityNotify = showCommunityToast;
+toastContainer?.querySelectorAll('[data-community-toast]').forEach(mountCommunityToast);
+
+const communityTooltip = document.querySelector('[data-community-tooltip]');
+let communityTooltipTarget = null;
+
+const prepareCommunityTooltips = (root = document) => {
+    root.querySelectorAll?.('.community-page [title]').forEach((element) => {
+        element.dataset.communityTooltipText = element.getAttribute('title');
+        element.removeAttribute('title');
+    });
+};
+
+const hideCommunityTooltip = () => {
+    if (!communityTooltip || communityTooltip.hidden) return;
+    communityTooltip.hidden = true;
+    communityTooltipTarget?.removeAttribute('aria-describedby');
+    communityTooltipTarget = null;
+};
+
+const showCommunityTooltip = (target) => {
+    if (!communityTooltip || !target?.dataset.communityTooltipText) return;
+    communityTooltipTarget?.removeAttribute('aria-describedby');
+    communityTooltipTarget = target;
+    communityTooltip.textContent = target.dataset.communityTooltipText;
+    communityTooltip.hidden = false;
+    target.setAttribute('aria-describedby', communityTooltip.id);
+
+    const targetRect = target.getBoundingClientRect();
+    const tooltipRect = communityTooltip.getBoundingClientRect();
+    const left = Math.min(
+        window.innerWidth - tooltipRect.width - 8,
+        Math.max(8, targetRect.left + (targetRect.width - tooltipRect.width) / 2),
+    );
+    const preferredTop = targetRect.top - tooltipRect.height - 8;
+    const top = preferredTop >= 8 ? preferredTop : targetRect.bottom + 8;
+    communityTooltip.style.left = `${left}px`;
+    communityTooltip.style.top = `${top}px`;
+};
+
+prepareCommunityTooltips();
+
+document.addEventListener('pointerover', (event) => {
+    const target = event.target.closest?.('[data-community-tooltip-text]');
+    if (target) showCommunityTooltip(target);
+});
+
+document.addEventListener('pointerout', (event) => {
+    if (!communityTooltipTarget || communityTooltipTarget.contains(event.relatedTarget)) return;
+    hideCommunityTooltip();
+});
+
+document.addEventListener('focusin', (event) => {
+    const target = event.target.closest?.('[data-community-tooltip-text]');
+    if (target) showCommunityTooltip(target);
+});
+
+document.addEventListener('focusout', (event) => {
+    if (communityTooltipTarget?.contains(event.relatedTarget)) return;
+    hideCommunityTooltip();
+});
+
+window.addEventListener('scroll', hideCommunityTooltip, true);
+window.addEventListener('resize', hideCommunityTooltip);
+
 const communitySearch = document.querySelector('[data-community-search]');
 
 if (communitySearch) {
@@ -277,7 +402,7 @@ document.addEventListener('click', async (event) => {
             item.classList.toggle('is-active', Number(item.dataset.value) === result.user_vote);
         });
     } catch (_) {
-        window.alert('Не удалось сохранить голос. Обновите страницу и попробуйте ещё раз.');
+        showCommunityToast('Не удалось сохранить голос. Обновите страницу и попробуйте ещё раз.', 'danger');
     } finally {
         button.disabled = false;
     }
@@ -361,7 +486,9 @@ document.addEventListener('click', async (event) => {
             triggerIcons.replaceChildren(...reactionChips);
         }
     } catch (error) {
-        window.alert(error.message || 'Не удалось сохранить реакцию. Обновите страницу и попробуйте ещё раз.');
+        const message = error.message || 'Не удалось сохранить реакцию. Обновите страницу и попробуйте ещё раз.';
+        closeReactionPickers();
+        showCommunityToast(message, 'danger', message.includes('не более трёх') ? 'Лимит реакций' : null);
     } finally {
         buttons.forEach((item) => { item.disabled = false; });
     }

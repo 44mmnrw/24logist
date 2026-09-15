@@ -98,7 +98,17 @@ class CommunitySocialTest extends TestCase
             'target_type' => 'post', 'target_id' => $post->id, 'code' => 'fire',
         ])->assertRedirect();
         $this->assertDatabaseCount('community_awards', 1);
-        $this->get($post->getUrl())->assertOk()->assertSee('Золотой ответ');
+        $this->get($post->getUrl())->assertOk()->assertSee('Золотой ответ')->assertSee('Удалить награду');
+        $this->actingAs($author, 'community')->delete(route('community.award.destroy'), [
+            'target_type' => 'post', 'target_id' => $post->id,
+        ])->assertRedirect($post->getUrl());
+        $this->assertDatabaseCount('community_awards', 1);
+        $this->assertDatabaseCount('community_notifications', 1);
+        $this->actingAs($reader, 'community')->delete(route('community.award.destroy'), [
+            'target_type' => 'post', 'target_id' => $post->id,
+        ])->assertRedirect($post->getUrl());
+        $this->assertDatabaseCount('community_awards', 0);
+        $this->assertDatabaseCount('community_notifications', 0);
         $this->actingAs($author, 'community')->post(route('community.award'), [
             'target_type' => 'post', 'target_id' => $post->id, 'code' => 'gold',
         ])->assertForbidden();

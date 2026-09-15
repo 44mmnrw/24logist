@@ -43,13 +43,13 @@ final class CommunitySocialService
         return $target;
     }
 
-    /** @return array<int, array{reactions: array<string, int>, awards: array<string, int>, selected: array<int, string>}> */
+    /** @return array<int, array{reactions: array<string, int>, awards: array<string, int>, selected: array<int, string>, awarded: ?string}> */
     public function summaries(string $type, array $ids, ?int $viewerId): array
     {
         $ids = array_values(array_unique(array_map('intval', $ids)));
         $summaries = [];
         foreach ($ids as $id) {
-            $summaries[$id] = ['reactions' => [], 'awards' => [], 'selected' => []];
+            $summaries[$id] = ['reactions' => [], 'awards' => [], 'selected' => [], 'awarded' => null];
         }
         if ($ids === []) {
             return $summaries;
@@ -70,12 +70,18 @@ final class CommunitySocialService
                 ->orderBy('id')->get(['target_id', 'code'])->each(function ($reaction) use (&$summaries): void {
                     $summaries[$reaction->target_id]['selected'][] = $reaction->code;
                 });
+
+            DB::table('community_awards')->where('community_user_id', $viewerId)
+                ->where('target_type', $type)->whereIn('target_id', $ids)
+                ->pluck('code', 'target_id')->each(function ($code, $id) use (&$summaries): void {
+                    $summaries[$id]['awarded'] = $code;
+                });
         }
 
         return $summaries;
     }
 
-    /** @return array{reactions: array<string, int>, awards: array<string, int>, selected: array<int, string>} */
+    /** @return array{reactions: array<string, int>, awards: array<string, int>, selected: array<int, string>, awarded: ?string} */
     public function summary(string $type, int $id, ?int $viewerId): array
     {
         return $this->summaries($type, [$id], $viewerId)[$id];
@@ -134,6 +140,32 @@ final class CommunitySocialService
                 'code' => $code, 'message' => $message, 'is_anonymous' => $anonymous,
                 'created_at' => now(), 'updated_at' => now(),
             ]);
+        });
+    }
+
+    public function removeAward(CommunityUser $user, string $type, int $id): bool
+    {
+        $this->target($type, $id);
+
+        return DB::transaction(function () use ($user, $type, $id): bool {
+            $award = DB::table('community_awards')
+                ->where('community_user_id', $user->id)
+                ->where('target_type', $type)
+                ->where('target_id', $id)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $award) {
+                return false;
+            }
+
+            DB::table('community_notifications')
+                ->where('target_type', 'award')
+                ->where('target_id', $award->id)
+                ->delete();
+            DB::table('community_awards')->where('id', $award->id)->delete();
+
+            return true;
         });
     }
 }

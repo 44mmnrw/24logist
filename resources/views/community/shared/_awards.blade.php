@@ -1,5 +1,6 @@
 @php
     $awardCounts = $social['awards'] ?? [];
+    $ownAward = $social['awarded'] ?? null;
     $awardTotal = array_sum($awardCounts);
     $awardedCodes = array_keys(array_filter($awardCounts));
     $feedAwardEmoji = count($awardedCodes) === 1
@@ -23,7 +24,15 @@
                 @endif
             @endforeach
         @endif
-        @if ($canAward)
+        @if ($canAward && $ownAward !== null)
+            <form method="POST" action="{{ route('community.award.destroy') }}">
+                @csrf
+                @method('DELETE')
+                <input type="hidden" name="target_type" value="{{ $type }}">
+                <input type="hidden" name="target_id" value="{{ $target->id }}">
+                <button class="community-award-remove" type="submit" title="Удалить награду"><x-community.icon name="x" size="15" /><span>Удалить награду</span></button>
+            </form>
+        @elseif ($canAward)
             <button class="community-award-open" type="button" data-award-open data-award-type="{{ $type }}" data-award-id="{{ $target->id }}" data-award-title="{{ $type === 'post' ? $target->title : 'Автор: '.($target->author?->displayName() ?? 'участник') }}" aria-label="Наградить {{ $type === 'post' ? 'автора темы' : 'автора комментария' }}"><x-community.icon name="trophy" size="16" /><span>Наградить</span></button>
         @endif
     </div>

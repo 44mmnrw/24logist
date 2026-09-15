@@ -65,14 +65,26 @@
     </header>
 
     <main class="community-main">
-        @if (session('status'))
-            <div class="landing-shell"><div class="community-flash" role="status">{{ session('status') }}</div></div>
-        @endif
-        @if ($errors->any())
-            <div class="landing-shell"><div class="community-errors" role="alert"><strong>Проверьте данные:</strong><ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div></div>
-        @endif
         @yield('content')
     </main>
+
+    <div class="community-toasts" data-community-toasts aria-live="polite" aria-atomic="false">
+        @if (session('status'))
+            <div class="community-toast community-toast--success" data-community-toast data-timeout="5000" role="status">
+                <span class="community-toast__icon" aria-hidden="true">✓</span>
+                <div class="community-toast__content"><strong>Готово</strong><p>{{ session('status') }}</p></div>
+                <button class="community-toast__close" type="button" data-community-toast-close aria-label="Закрыть"><x-community.icon name="x" size="17" /></button>
+            </div>
+        @endif
+        @if ($errors->any())
+            <div class="community-toast community-toast--danger" data-community-toast data-timeout="8000" role="alert">
+                <span class="community-toast__icon" aria-hidden="true">!</span>
+                <div class="community-toast__content"><strong>Проверьте данные</strong><ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
+                <button class="community-toast__close" type="button" data-community-toast-close aria-label="Закрыть"><x-community.icon name="x" size="17" /></button>
+            </div>
+        @endif
+    </div>
+    <div class="community-tooltip" id="community-tooltip" data-community-tooltip role="tooltip" hidden></div>
 </div>
 </body>
 </html>
