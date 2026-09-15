@@ -16,6 +16,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
 
 class StepsRelationManager extends RelationManager
 {
@@ -33,6 +34,26 @@ class StepsRelationManager extends RelationManager
                 )->all())
                 ->required(),
             Select::make('type')->label('Тип')->options(['topic' => 'Тема', 'comment' => 'Комментарий'])->disabled()->dehydrated(),
+            Select::make('parent_step_id')
+                ->label('Ответ на комментарий')
+                ->options(function (?CommunityAiScenarioStep $record): array {
+                    if ($record === null || $record->type !== 'comment') {
+                        return [];
+                    }
+
+                    return $record->scenario->steps()
+                        ->with('persona.communityUser')
+                        ->where('type', 'comment')
+                        ->where('sequence', '<', $record->sequence)
+                        ->whereNull('parent_step_id')
+                        ->get()
+                        ->mapWithKeys(fn (CommunityAiScenarioStep $step): array => [
+                            $step->id => '#'.$step->sequence.' '.$step->persona->communityUser->displayName().': '.Str::limit((string) $step->draft_body, 80),
+                        ])
+                        ->all();
+                })
+                ->placeholder('Основная тема')
+                ->visible(fn (?CommunityAiScenarioStep $record): bool => $record?->type === 'comment'),
             TextInput::make('planned_delay_minutes')
                 ->label('Задержка, минут')
                 ->numeric()
@@ -58,6 +79,13 @@ class StepsRelationManager extends RelationManager
                 TextColumn::make('sequence')->label('#')->sortable(),
                 TextColumn::make('persona.communityUser.display_name')->label('Персона')->description(fn (CommunityAiScenarioStep $record): string => '@'.$record->persona->communityUser->username),
                 TextColumn::make('type')->label('Тип')->badge()->formatStateUsing(fn (string $state): string => $state === 'topic' ? 'Тема' : 'Комментарий'),
+                TextColumn::make('parentStep.persona.communityUser.display_name')
+                    ->label('Ответ на')
+                    ->placeholder('Основная тема')
+                    ->description(fn (CommunityAiScenarioStep $record): ?string => $record->parentStep
+                        ? Str::limit((string) $record->parentStep->draft_body, 80)
+                        : null)
+                    ->wrap(),
                 TextColumn::make('draft_title')->label('Заголовок')->wrap()->placeholder('—'),
                 TextColumn::make('draft_body')
                     ->label('Текст')

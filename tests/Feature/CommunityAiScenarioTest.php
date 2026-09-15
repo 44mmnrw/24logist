@@ -75,12 +75,20 @@ class CommunityAiScenarioTest extends TestCase
                         ['persona_slug' => 'sergey-fleet-owner', 'purpose' => 'Starts the practical topic', 'delay_minutes' => 0],
                         ['persona_slug' => 'anna-logistician', 'purpose' => 'Suggests an operating process', 'delay_minutes' => 20],
                         ['persona_slug' => 'elena-transport-lawyer', 'purpose' => 'Explains document evidence', 'delay_minutes' => 55],
+                        ['persona_slug' => 'mikhail-driver', 'purpose' => 'Asks about evidence from the loading point', 'delay_minutes' => 80],
+                        ['persona_slug' => 'igor-forwarder', 'purpose' => 'Replies to Anna about the responsible party', 'delay_minutes' => 110, 'reply_to' => 'anna-logistician'],
                     ],
                 ];
             } elseif ($aiCall === 2) {
                 $content = ['action' => 'topic', 'title' => 'How to document loading downtime', 'body' => 'A truck spent six hours waiting. How do you record and charge this time?', 'needs_review' => true, 'reason' => 'practical question'];
             } else {
-                $content = ['action' => 'comment', 'title' => null, 'body' => 'Record arrival and departure times and have the responsible party confirm them.', 'needs_review' => true, 'reason' => 'adds a concrete step'];
+                $bodies = [
+                    3 => 'Record arrival and departure times and have the responsible party confirm them.',
+                    4 => 'Check which timestamp the warehouse accepts before the truck leaves.',
+                    5 => 'Can the driver photograph the signed waiting note at the loading point?',
+                    6 => 'That works only if the named warehouse employee confirms the record.',
+                ];
+                $content = ['action' => 'comment', 'title' => null, 'body' => $bodies[$aiCall], 'needs_review' => true, 'reason' => 'adds one conversational move'];
             }
 
             return Http::response([
@@ -106,11 +114,13 @@ class CommunityAiScenarioTest extends TestCase
         $this->assertSame('carriers', $scenario->category->slug);
         $this->assertSame(['Truck', 'loading'], $scenario->scan_keywords);
         $this->assertSame(1, $scenario->settings['keyword_match_count']);
-        $this->assertCount(3, $scenario->steps);
+        $this->assertCount(5, $scenario->steps);
         $this->assertSame('topic', $scenario->steps->first()->type);
         $this->assertTrue($scenario->steps->every(fn ($step): bool => $step->status === 'pending_review'));
+        $this->assertSame(3, $scenario->steps()->where('type', 'comment')->whereNull('parent_step_id')->count());
+        $this->assertSame(1, $scenario->steps()->where('type', 'comment')->whereNotNull('parent_step_id')->count());
         $this->assertDatabaseCount('community_ai_source_messages', 1);
-        $this->assertDatabaseCount('community_ai_generations', 4);
+        $this->assertDatabaseCount('community_ai_generations', 6);
         $encryptedText = (string) DB::table('community_ai_source_messages')->value('text');
         $this->assertStringNotContainsString('test@example.com', $encryptedText);
 
@@ -158,7 +168,7 @@ class CommunityAiScenarioTest extends TestCase
         $this->assertSame(CommunityAiScenario::STATUS_SCHEDULED, $scenario->fresh()->status);
         $this->assertSame($topicDate->toDateTimeString(), $scenario->steps()->first()->scheduled_at->toDateTimeString());
         $this->assertSame($historicalDate->copy()->addMinutes(20)->toDateTimeString(), $scenario->steps()->skip(1)->first()->scheduled_at->toDateTimeString());
-        Queue::assertPushed(PublishCommunityAiScenarioStep::class, 3);
+        Queue::assertPushed(PublishCommunityAiScenarioStep::class, 5);
     }
 
     public function test_admin_can_create_a_manual_topic_scenario(): void
@@ -190,7 +200,7 @@ class CommunityAiScenarioTest extends TestCase
 
     public function test_manual_topic_is_kept_verbatim_while_comment_drafts_are_generated(): void
     {
-        $personas = CommunityAiPersona::query()->with('communityUser')->take(3)->get();
+        $personas = CommunityAiPersona::query()->with('communityUser')->take(5)->get();
         $topicPersona = $personas->first();
         $commenters = $personas->skip(1)->values();
         $aiCall = 0;
@@ -205,13 +215,21 @@ class CommunityAiScenarioTest extends TestCase
                     'participants' => [
                         ['persona_slug' => $commenters[0]->slug, 'purpose' => 'Даёт практическую оценку', 'delay_minutes' => 11],
                         ['persona_slug' => $commenters[1]->slug, 'purpose' => 'Проверяет документы', 'delay_minutes' => 27],
+                        ['persona_slug' => $commenters[2]->slug, 'purpose' => 'Задаёт вопрос о статусе', 'delay_minutes' => 43],
+                        ['persona_slug' => $commenters[3]->slug, 'purpose' => 'Отвечает на первый комментарий', 'delay_minutes' => 61, 'reply_to' => $commenters[0]->slug],
                     ],
                 ];
             } else {
+                $bodies = [
+                    2 => 'Уточните у получателя, в каком разделе находится документ.',
+                    3 => 'Если документ уже оформлен, отправителю проще отозвать его и прислать заново.',
+                    4 => 'Какой статус документа сейчас видит вторая сторона?',
+                    5 => 'Да, но сначала стоит получить от получателя снимок экрана со статусом.',
+                ];
                 $content = [
                     'action' => 'comment',
                     'title' => null,
-                    'body' => 'Отдельный содержательный комментарий №'.$aiCall.'.',
+                    'body' => $bodies[$aiCall],
                     'needs_review' => true,
                     'reason' => 'Добавляет новый взгляд',
                 ];
@@ -243,7 +261,7 @@ class CommunityAiScenarioTest extends TestCase
         $scenario->refresh();
         $steps = $scenario->steps()->orderBy('sequence')->get();
         $this->assertSame(CommunityAiScenario::STATUS_REVIEW, $scenario->status);
-        $this->assertCount(3, $steps);
+        $this->assertCount(5, $steps);
         $this->assertSame('topic', $steps[0]->type);
         $this->assertSame($topicPersona->id, $steps[0]->community_ai_persona_id);
         $this->assertSame('Ручная тема без изменений', $steps[0]->draft_title);
@@ -251,8 +269,112 @@ class CommunityAiScenarioTest extends TestCase
         $this->assertSame('pending_review', $steps[0]->status);
         $this->assertSame('comment', $steps[1]->type);
         $this->assertSame('comment', $steps[2]->type);
-        $this->assertSame(3, $aiCall);
+        $this->assertSame('comment', $steps[3]->type);
+        $this->assertSame('comment', $steps[4]->type);
+        $this->assertNull($steps[1]->parent_step_id);
+        $this->assertSame($steps[1]->id, $steps[4]->parent_step_id);
+        $this->assertSame(5, $aiCall);
         Http::assertNotSent(fn (HttpRequest $request): bool => str_starts_with($request->url(), 'https://platform-api2.max.ru'));
+    }
+
+    public function test_overformal_comment_is_retried_with_conversational_style_feedback(): void
+    {
+        $personas = CommunityAiPersona::query()->with('communityUser')->take(5)->get();
+        $topicPersona = $personas->first();
+        $commenters = $personas->skip(1)->values();
+        $aiCall = 0;
+        $retryPrompt = '';
+
+        Http::fake(function (HttpRequest $request) use ($commenters, &$aiCall, &$retryPrompt) {
+            $aiCall++;
+            $messages = $request->data()['messages'] ?? [];
+            $prompt = collect($messages)->pluck('content')->implode("\n");
+
+            if (str_contains($prompt, 'Доступные комментаторы:')) {
+                $content = [
+                    'participants' => [
+                        ['persona_slug' => $commenters[0]->slug, 'purpose' => 'Задаёт один вопрос о статусе документа', 'delay_minutes' => 10],
+                        ['persona_slug' => $commenters[1]->slug, 'purpose' => 'Коротко предлагает вернуть документ отправителю', 'delay_minutes' => 25],
+                        ['persona_slug' => $commenters[2]->slug, 'purpose' => 'Уточняет, что видит получатель', 'delay_minutes' => 40],
+                        ['persona_slug' => $commenters[3]->slug, 'purpose' => 'Отвечает на первый комментарий', 'delay_minutes' => 60, 'reply_to' => $commenters[0]->slug],
+                    ],
+                ];
+            } elseif ($aiCall === 2) {
+                $content = [
+                    'action' => 'comment',
+                    'title' => null,
+                    'body' => 'Я бы сначала разделила технический маршрут и юридическое содержание. В данном случае необходимо определить полномочия всех участников процесса.',
+                    'needs_review' => true,
+                    'reason' => 'Даёт полный анализ',
+                ];
+            } elseif ($aiCall === 3) {
+                $retryPrompt = $prompt;
+                $content = [
+                    'action' => 'comment',
+                    'title' => null,
+                    'body' => 'А документ у получателя сейчас во входящих или уже в архиве? От этого и зависит, даст ли система его поправить.',
+                    'needs_review' => true,
+                    'reason' => 'Задаёт один уточняющий вопрос',
+                ];
+            } elseif ($aiCall === 4) {
+                $content = [
+                    'action' => 'comment',
+                    'title' => null,
+                    'body' => 'Если он уже оформлен, проще вернуть отправителю на исправление.',
+                    'needs_review' => true,
+                    'reason' => 'Предлагает один шаг',
+                ];
+            } elseif ($aiCall === 5) {
+                $content = [
+                    'action' => 'comment',
+                    'title' => null,
+                    'body' => 'А какой статус сейчас написан у получателя рядом с документом?',
+                    'needs_review' => true,
+                    'reason' => 'Уточняет одну деталь',
+                ];
+            } else {
+                $content = [
+                    'action' => 'comment',
+                    'title' => null,
+                    'body' => 'Вот статус как раз и покажет, можно ли ещё править этот вариант.',
+                    'needs_review' => true,
+                    'reason' => 'Отвечает на предыдущую реплику',
+                ];
+            }
+
+            return Http::response([
+                'id' => 'style-generation-'.$aiCall,
+                'model' => 'GPT-5.4 Mini',
+                'choices' => [['message' => ['content' => json_encode($content, JSON_UNESCAPED_UNICODE)]]],
+                'usage' => ['prompt_tokens' => 30, 'completion_tokens' => 15],
+            ]);
+        });
+
+        $scenario = CommunityAiScenario::query()->create([
+            'mode' => CommunityAiScenario::MODE_MANUAL,
+            'topic_persona_id' => $topicPersona->id,
+            'community_category_id' => CommunityCategory::query()->firstOrFail()->id,
+            'source_ids' => [],
+            'source_from' => now()->subDay(),
+            'source_to' => now(),
+            'title' => 'Документ нельзя отредактировать',
+            'manual_topic_body' => 'У получателя заблокировано поле заказчика. Что проверить?',
+            'status' => CommunityAiScenario::STATUS_DRAFT,
+        ]);
+
+        app(CommunityAiScenarioPreparer::class)->prepare($scenario);
+
+        $comments = $scenario->steps()->where('type', 'comment')->orderBy('sequence')->pluck('draft_body')->all();
+        $this->assertSame(6, $aiCall);
+        $this->assertSame('А документ у получателя сейчас во входящих или уже в архиве? От этого и зависит, даст ли система его поправить.', $comments[0]);
+        $this->assertStringContainsString('шаблонное вступление', $retryPrompt);
+        $this->assertStringContainsString('канцелярит', $retryPrompt);
+        $this->assertDatabaseHas('community_ai_generations', [
+            'community_ai_scenario_id' => $scenario->id,
+            'community_ai_scenario_step_id' => $scenario->steps()->where('type', 'comment')->orderBy('sequence')->value('id'),
+            'purpose' => 'comment_retry',
+            'status' => 'succeeded',
+        ]);
     }
 
     public function test_admin_can_open_scenario_workflow_page(): void
@@ -422,9 +544,10 @@ class CommunityAiScenarioTest extends TestCase
 
     public function test_publisher_creates_topic_then_comments_idempotently(): void
     {
-        $personas = CommunityAiPersona::query()->take(2)->get();
+        $personas = CommunityAiPersona::query()->take(3)->get();
         $topicDate = now()->subMonths(2)->setTime(9, 15)->setMicrosecond(0);
         $commentDate = $topicDate->copy()->addMinutes(17);
+        $replyDate = $commentDate->copy()->addMinutes(9);
         $scenario = CommunityAiScenario::query()->create([
             'community_category_id' => CommunityCategory::query()->where('slug', 'general')->value('id'),
             'source_ids' => [CommunityAiSource::query()->value('id')],
@@ -453,21 +576,39 @@ class CommunityAiScenarioTest extends TestCase
             'status' => 'scheduled',
             'idempotency_key' => 'scenario-test-comment',
         ]);
+        $reply = $scenario->steps()->create([
+            'community_ai_persona_id' => $personas[2]->id,
+            'parent_step_id' => $comment->id,
+            'type' => 'comment',
+            'sequence' => 3,
+            'planned_delay_minutes' => 19,
+            'draft_body' => 'Scenario nested reply body',
+            'scheduled_at' => $replyDate,
+            'status' => 'scheduled',
+            'idempotency_key' => 'scenario-test-nested-reply',
+        ]);
 
         app()->call([new PublishCommunityAiScenarioStep($topic->id), 'handle']);
         app()->call([new PublishCommunityAiScenarioStep($topic->id), 'handle']);
         app()->call([new PublishCommunityAiScenarioStep($comment->id), 'handle']);
+        app()->call([new PublishCommunityAiScenarioStep($reply->id), 'handle']);
 
         $this->assertDatabaseCount('community_posts', 1);
-        $this->assertDatabaseCount('community_comments', 1);
+        $this->assertDatabaseCount('community_comments', 2);
         $publishedPost = CommunityPost::query()->firstOrFail();
-        $publishedComment = CommunityComment::query()->firstOrFail();
-        $this->assertSame(1, $publishedPost->comments_count);
+        $publishedComment = CommunityComment::query()->where('body_markdown', 'Scenario comment body')->firstOrFail();
+        $publishedReply = CommunityComment::query()->where('body_markdown', 'Scenario nested reply body')->firstOrFail();
+        $this->assertSame(2, $publishedPost->comments_count);
         $this->assertSame($topicDate->toDateTimeString(), $publishedPost->published_at->toDateTimeString());
         $this->assertSame($topicDate->toDateTimeString(), $publishedPost->created_at->toDateTimeString());
         $this->assertSame($commentDate->toDateTimeString(), $publishedComment->created_at->toDateTimeString());
+        $this->assertSame($replyDate->toDateTimeString(), $publishedReply->created_at->toDateTimeString());
+        $this->assertSame($publishedComment->id, $publishedReply->parent_id);
+        $this->assertSame($publishedComment->id, $publishedReply->root_id);
+        $this->assertSame(1, $publishedReply->depth);
         $this->assertSame($topicDate->toDateTimeString(), $topic->fresh()->published_at->toDateTimeString());
         $this->assertSame($commentDate->toDateTimeString(), $comment->fresh()->published_at->toDateTimeString());
+        $this->assertSame($replyDate->toDateTimeString(), $reply->fresh()->published_at->toDateTimeString());
         $this->assertSame(CommunityAiScenario::STATUS_COMPLETED, $scenario->fresh()->status);
     }
 }
