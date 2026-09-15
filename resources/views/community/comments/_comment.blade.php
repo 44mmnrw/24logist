@@ -1,4 +1,5 @@
-<article id="comment-{{ $comment->id }}" class="community-comment" style="--comment-depth: {{ $comment->depth }}">
+@php($commentChildren = $children->get($comment->id, collect()))
+<article id="comment-{{ $comment->id }}" @class(['community-comment', 'community-comment--has-children' => $commentChildren->isNotEmpty()]) style="--comment-depth: {{ $comment->depth }}">
     <div class="community-comment__body">
         @if ($comment->author)<a class="community-avatar-link" href="{{ route('community.profile', $comment->author) }}"><x-community.avatar :user="$comment->author" size="sm" /></a>@else<span class="community-user-avatar community-user-avatar--sm">?</span>@endif
         <div class="community-comment__content">
@@ -50,7 +51,15 @@
             </div>
         </div>
     </div>
-    @foreach ($children->get($comment->id, collect()) as $child)
-        @include('community.comments._comment', ['comment' => $child, 'post' => $post, 'children' => $children, 'commentVotes' => $commentVotes])
-    @endforeach
+    @if ($commentChildren->isNotEmpty())
+        <div class="community-comment__children" id="comment-children-{{ $comment->id }}" data-comment-children>
+            <button class="community-thread-toggle" type="button" data-thread-toggle aria-expanded="true" aria-controls="comment-children-{{ $comment->id }}" aria-label="Свернуть ветку">
+                <x-community.icon class="community-thread-toggle__minus" name="minus" size="14" />
+                <x-community.icon class="community-thread-toggle__plus" name="plus" size="14" />
+            </button>
+            @foreach ($commentChildren as $child)
+                @include('community.comments._comment', ['comment' => $child, 'post' => $post, 'children' => $children, 'commentVotes' => $commentVotes])
+            @endforeach
+        </div>
+    @endif
 </article>

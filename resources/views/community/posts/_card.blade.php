@@ -8,10 +8,11 @@
         <div class="community-author-line">
             @if ($post->author)<a class="community-avatar-link" href="{{ route('community.profile', $post->author) }}"><x-community.avatar :user="$post->author" size="sm" /></a>@endif
             <div class="community-meta">
-                <a class="community-category-pill" href="{{ route('community.categories.show', $post->category) }}">{{ $post->category->name }}</a>
-                <span class="community-meta__separator">•</span>
                 @if ($post->author)<a href="{{ route('community.profile', $post->author) }}" title="{{ '@'.$post->author->username }}">{{ $post->author->displayName() }}</a>@else<span>[удалён]</span>@endif
+                @if ($post->author?->transportRoleLabel())<span class="community-author-flair">{{ $post->author->transportRoleLabel() }}</span>@endif
                 <span class="community-meta__separator">•</span><time datetime="{{ $post->published_at?->toIso8601String() }}">{{ \App\Support\CommunityDate::relative($post->published_at) }}</time>
+                <span class="community-meta__separator">•</span>
+                <a class="community-category-pill" href="{{ route('community.categories.show', $post->category) }}">{{ $post->category->name }}</a>
                 @if ($post->locked_at)<span class="community-post-card__status">Закрыто</span>@endif
                 @if ($post->accepted_comment_id)<span class="community-post-card__status community-post-card__status--resolved">Есть решение</span>@endif
             </div>

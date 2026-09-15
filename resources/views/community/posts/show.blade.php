@@ -23,6 +23,7 @@
                 @if ($post->author)<a class="community-avatar-link" href="{{ route('community.profile', $post->author) }}"><x-community.avatar :user="$post->author" size="md" /></a>@endif
                 <div class="community-meta">
                     @if ($post->author)<a href="{{ route('community.profile', $post->author) }}" title="{{ '@'.$post->author->username }}">{{ $post->author->displayName() }}</a>@else<span>[удалён]</span>@endif
+                    @if ($post->author?->transportRoleLabel())<span class="community-author-flair">{{ $post->author->transportRoleLabel() }}</span>@endif
                     <span>•</span><time>{{ \App\Support\CommunityDate::relative($post->published_at) }}</time>
                     @if ($post->edited_at)<span>• изменено</span>@endif
                 </div>
@@ -31,9 +32,6 @@
             @if ($post->accepted_comment_id)<span class="community-badge community-badge--resolved">Есть решение</span>@endif
             <div class="community-topic__labels">
                 <a class="community-category-pill" href="{{ route('community.categories.show', $post->category) }}">{{ $post->category->name }}</a>
-                @if ($post->author?->transportRoleLabel())
-                    <span class="community-author-flair">{{ $post->author->transportRoleLabel() }}</span>
-                @endif
             </div>
         </header>
         <div class="community-topic__content">

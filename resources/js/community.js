@@ -178,6 +178,22 @@ if (document.querySelector('[data-rich-editor]')) {
     }, true);
 }
 
+document.addEventListener('click', (event) => {
+    const button = event.target.closest?.('[data-thread-toggle]');
+    if (!button) return;
+
+    const children = document.getElementById(button.getAttribute('aria-controls'));
+    if (!children || !button.closest('.community-comment')?.contains(children)) return;
+
+    const collapsed = button.getAttribute('aria-expanded') === 'true';
+    button.setAttribute('aria-expanded', String(!collapsed));
+    button.setAttribute('aria-label', collapsed ? 'Развернуть ветку' : 'Свернуть ветку');
+    children.classList.toggle('is-collapsed', collapsed);
+    Array.from(children.children).forEach((child) => {
+        if (child.matches('.community-comment')) child.hidden = collapsed;
+    });
+});
+
 document.addEventListener('change', (event) => {
     const input = event.target.closest?.('[data-community-avatar-input]');
     if (!input) return;

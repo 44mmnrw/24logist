@@ -1158,31 +1158,6 @@ html {
     border-top: 1px solid #e1e6ed;
 }
 
-.community-submit-extra summary {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 13px 0;
-    color: #52657b;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    list-style: none;
-}
-
-.community-submit-extra summary::-webkit-details-marker {
-    display: none;
-}
-
-.community-submit-extra[open] summary {
-    color: #1d4ed8;
-}
-
-.community-submit-extra label {
-    width: min(460px, calc(100vw - 80px));
-    margin-bottom: 14px;
-}
-
 .community-submit-photos {
     display: flex;
     flex-wrap: wrap;
@@ -2284,18 +2259,122 @@ html {
     display: grid;
     gap: 18px;
     margin-top: 18px;
-}
-
-.community-comment {
-    position: relative;
-    margin-left: 0;
-    border-left: 1px solid #d9dee6;
     padding-left: 12px;
 }
 
-.community-comment .community-comment {
-    margin-top: 15px;
-    margin-left: 37px;
+.community-comment {
+    --community-thread-avatar-radius: 15px;
+    --community-thread-branch: 22px;
+    --community-thread-indent: 37px;
+    position: relative;
+    margin-left: 0;
+    min-width: 0;
+}
+
+.community-comment__children {
+    position: relative;
+    display: grid;
+    gap: 15px;
+    margin-left: var(--community-thread-avatar-radius);
+    padding-top: 15px;
+    border-left: 1px solid #cfd6df;
+}
+
+.community-thread-toggle {
+    position: absolute;
+    z-index: 4;
+    top: -10px;
+    left: -10px;
+    display: inline-grid;
+    width: 20px;
+    height: 20px;
+    place-items: center;
+    padding: 0;
+    border: 1px solid #aeb8c5;
+    border-radius: 50%;
+    background: #fff;
+    color: #34475e;
+    cursor: pointer;
+}
+
+.community-thread-toggle:hover,
+.community-thread-toggle:focus-visible {
+    border-color: #6f86a5;
+    background: #f1f5f9;
+    color: #174cac;
+}
+
+.community-thread-toggle:focus-visible {
+    outline: 2px solid #8eb0e8;
+    outline-offset: 2px;
+}
+
+.community-thread-toggle__plus {
+    display: none;
+}
+
+.community-thread-toggle[aria-expanded="false"] .community-thread-toggle__minus {
+    display: none;
+}
+
+.community-thread-toggle[aria-expanded="false"] .community-thread-toggle__plus {
+    display: block;
+}
+
+.community-comment__children.is-collapsed {
+    padding-top: 0;
+    border-left-color: transparent;
+}
+
+.community-comment__children > .community-comment {
+    margin-left: var(--community-thread-branch);
+}
+
+.community-comment__children > .community-comment::before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    top: -15px;
+    left: calc(0px - var(--community-thread-branch));
+    width: var(--community-thread-indent);
+    height: 30px;
+    border-bottom: 1px solid #cfd6df;
+    border-left: 1px solid #cfd6df;
+    border-bottom-left-radius: 15px;
+    pointer-events: none;
+}
+
+.community-comment__children > .community-comment:last-child::after {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    top: calc(var(--community-thread-avatar-radius) + 1px);
+    bottom: -1px;
+    left: calc(-2px - var(--community-thread-branch));
+    width: 3px;
+    background: #fff;
+    pointer-events: none;
+}
+
+.community-comment--has-children > .community-comment__body {
+    position: relative;
+}
+
+.community-comment--has-children > .community-comment__body::before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    top: 30px;
+    bottom: -1px;
+    left: var(--community-thread-avatar-radius);
+    border-left: 1px solid #cfd6df;
+    pointer-events: none;
+}
+
+.community-comment__body > .community-avatar-link,
+.community-comment__body > .community-user-avatar {
+    position: relative;
+    z-index: 2;
 }
 
 .community-comment__body {
@@ -3471,11 +3550,12 @@ html {
     }
 
     .community-comment {
-        padding-left: 7px;
+        --community-thread-branch: 15px;
+        --community-thread-indent: 30px;
     }
 
-    .community-comment .community-comment {
-        margin-left: 18px;
+    .community-comment-list {
+        padding-left: 7px;
     }
 
     .community-form-card,
@@ -3504,10 +3584,6 @@ html {
 
     .community-submit-attachments {
         margin-inline: 14px;
-    }
-
-    .community-submit-extra label {
-        width: calc(100vw - 56px);
     }
 
     .community-submit-actions {

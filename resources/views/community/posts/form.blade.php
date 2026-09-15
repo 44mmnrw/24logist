@@ -36,13 +36,9 @@
             </div>
 
             <div class="community-submit-attachments">
-                <details class="community-submit-extra" @if(old('external_url', $post->external_url)) open @endif>
-                    <summary><x-community.icon name="link" size="17" />Добавить ссылку</summary>
-                    <label>
-                        <span class="community-composer-sr-only">Ссылка</span>
-                        <input type="url" name="external_url" value="{{ old('external_url', $post->external_url) }}" maxlength="2048" placeholder="https://example.ru/article">
-                    </label>
-                </details>
+                @if($post->exists && $post->external_url)
+                    <input type="hidden" name="external_url" value="{{ $post->external_url }}">
+                @endif
                 <div class="community-submit-photos">
                     <button type="button" data-composer-photo-trigger title="Добавить фото — до 3 файлов JPEG, PNG или WebP"><x-community.icon name="photo-up" size="17" />Добавить фото</button>
                     <span class="community-comment-composer__file-count" data-composer-file-count hidden></span>
