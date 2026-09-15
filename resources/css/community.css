@@ -2111,6 +2111,16 @@ html {
     list-style: none;
 }
 
+.community-reaction-trigger__icons {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.community-reaction-trigger__label.is-empty {
+    display: none;
+}
+
 .community-page .community-reaction-trigger::-webkit-details-marker {
     display: none;
 }
@@ -2142,7 +2152,7 @@ html {
     bottom: calc(100% + 7px);
     left: 50%;
     display: grid;
-    grid-template-columns: repeat(3, 34px);
+    grid-template-columns: repeat(4, 34px);
     gap: 2px;
     width: max-content;
     padding: 4px;

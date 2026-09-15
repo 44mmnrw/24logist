@@ -54,9 +54,15 @@ class CommunitySocialTest extends TestCase
         $this->postJson(route('community.react'), ['target_type' => 'post', 'target_id' => $post->id, 'code' => 'same'])
             ->assertOk()->assertJsonPath('reactions.same', 1)->assertJsonCount(3, 'selected');
         $this->assertDatabaseCount('community_reactions', 3);
+        $this->postJson(route('community.react'), ['target_type' => 'post', 'target_id' => $post->id, 'code' => 'frustrated'])
+            ->assertUnprocessable()->assertJsonPath('message', 'Можно выбрать не более трёх реакций.');
+        $this->assertDatabaseMissing('community_reactions', ['code' => 'frustrated']);
         $this->postJson(route('community.react'), ['target_type' => 'post', 'target_id' => $post->id, 'code' => 'thanks'])
             ->assertOk()->assertJsonPath('selected.0', 'useful')->assertJsonPath('selected.1', 'same')->assertJsonCount(2, 'selected');
         $this->assertDatabaseCount('community_reactions', 2);
+        $this->postJson(route('community.react'), ['target_type' => 'post', 'target_id' => $post->id, 'code' => 'frustrated'])
+            ->assertOk()->assertJsonPath('reactions.frustrated', 1)->assertJsonCount(3, 'selected');
+        $this->assertDatabaseCount('community_reactions', 3);
         $this->assertSame(1, $post->fresh()->score);
         $this->assertSame(0, $author->fresh()->karma);
 

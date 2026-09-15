@@ -334,20 +334,29 @@ document.addEventListener('click', async (event) => {
             item.querySelector('[data-reaction-count]').textContent = result.reactions[item.dataset.code] || 0;
         });
 
-        const activeButtons = [...buttons].filter((item) => selected.includes(item.dataset.code));
+        const selectedButtons = selected
+            .map((code) => [...buttons].find((item) => item.dataset.code === code))
+            .filter(Boolean);
         const trigger = widget.querySelector('[data-reaction-toggle]');
-        const triggerEmoji = trigger?.querySelector('[data-reaction-trigger-emoji]');
+        const triggerIcons = trigger?.querySelector('[data-reaction-trigger-icons]');
         const triggerLabel = trigger?.querySelector('[data-reaction-trigger-label]');
-        const total = Object.values(result.reactions).reduce((sum, count) => sum + Number(count || 0), 0);
-        const totalElement = trigger?.querySelector('[data-reaction-total]');
-        const primaryButton = activeButtons[0] || buttons[0];
+        const primaryButton = selectedButtons[0];
 
-        trigger?.classList.toggle('is-active', activeButtons.length > 0);
-        if (triggerEmoji) triggerEmoji.textContent = primaryButton?.dataset.emoji || '👍';
-        if (triggerLabel) triggerLabel.textContent = primaryButton?.dataset.label || 'Полезно';
-        if (totalElement) {
-            totalElement.textContent = total;
-            totalElement.classList.toggle('is-empty', total === 0);
+        trigger?.classList.toggle('is-active', selectedButtons.length > 0);
+        if (triggerIcons) {
+            const emojis = selectedButtons.length
+                ? selectedButtons.map((item) => item.dataset.emoji)
+                : ['👍'];
+            triggerIcons.replaceChildren(...emojis.map((emoji) => {
+                const icon = document.createElement('span');
+                icon.className = 'community-reaction__emoji';
+                icon.textContent = emoji;
+                return icon;
+            }));
+        }
+        if (triggerLabel) {
+            triggerLabel.textContent = primaryButton?.dataset.label || '';
+            triggerLabel.classList.toggle('is-empty', !primaryButton);
         }
     } catch (error) {
         window.alert(error.message || 'Не удалось сохранить реакцию. Обновите страницу и попробуйте ещё раз.');

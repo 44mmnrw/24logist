@@ -16,6 +16,7 @@ final class CommunitySocialService
         'useful' => ['emoji' => '👍', 'label' => 'Полезно'],
         'thanks' => ['emoji' => '🙏', 'label' => 'Спасибо'],
         'same' => ['emoji' => '🤝', 'label' => 'Тоже сталкивался'],
+        'frustrated' => ['emoji' => '😣', 'label' => 'Досадно'],
     ];
 
     public const AWARDS = [

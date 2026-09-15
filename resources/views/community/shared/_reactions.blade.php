@@ -5,14 +5,13 @@
         && (int) $target->community_user_id !== (int) auth('community')->id();
     $reactionCounts = $social['reactions'] ?? [];
     $selectedReactions = array_values((array) ($social['selected'] ?? []));
-    $reactionTotal = array_sum($reactionCounts);
     $firstSelected = $selectedReactions[0] ?? null;
     $triggerReaction = $firstSelected !== null
         ? \App\Services\Community\CommunitySocialService::REACTIONS[$firstSelected]
         : array_values(\App\Services\Community\CommunitySocialService::REACTIONS)[0];
     $pickerId = 'community-reactions-'.$type.'-'.$target->id;
 @endphp
-@if ($canReact || $reactionTotal > 0)
+@if ($canReact || array_sum($reactionCounts) > 0)
     <details
         class="community-reactions"
         @if ($canReact)
@@ -26,10 +25,17 @@
         <summary
             class="community-reaction-trigger @if ($selectedReactions !== []) is-active @endif"
             data-reaction-toggle
+            aria-label="Выбрать реакцию"
+            title="Выбрать реакцию"
         >
-            <span class="community-reaction__emoji" data-reaction-trigger-emoji aria-hidden="true">{{ $triggerReaction['emoji'] }}</span>
-            <span class="community-reaction-trigger__label" data-reaction-trigger-label>{{ $triggerReaction['label'] }}</span>
-            <span class="community-reaction__count @if ($reactionTotal === 0) is-empty @endif" data-reaction-total>{{ $reactionTotal }}</span>
+            <span class="community-reaction-trigger__icons" data-reaction-trigger-icons aria-hidden="true">
+                @forelse ($selectedReactions as $selectedCode)
+                    <span class="community-reaction__emoji">{{ \App\Services\Community\CommunitySocialService::REACTIONS[$selectedCode]['emoji'] }}</span>
+                @empty
+                    <span class="community-reaction__emoji">👍</span>
+                @endforelse
+            </span>
+            <span class="community-reaction-trigger__label @if ($selectedReactions === []) is-empty @endif" data-reaction-trigger-label>{{ $triggerReaction['label'] }}</span>
         </summary>
 
         <div class="community-reaction-picker" id="{{ $pickerId }}" data-reaction-picker role="menu">
