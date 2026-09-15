@@ -9,13 +9,28 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('community_reactions', function (Blueprint $table): void {
-            $table->dropUnique('community_reaction_one_per_target');
-            $table->unique(
-                ['community_user_id', 'target_type', 'target_id', 'code'],
-                'community_reaction_one_per_code'
-            );
-        });
+        // MySQL may use the old composite unique index to support this foreign key.
+        // Give the foreign key its own index before replacing that unique index.
+        if (! Schema::hasIndex('community_reactions', 'community_reaction_user_fk_index')) {
+            Schema::table('community_reactions', function (Blueprint $table): void {
+                $table->index('community_user_id', 'community_reaction_user_fk_index');
+            });
+        }
+
+        if (Schema::hasIndex('community_reactions', 'community_reaction_one_per_target')) {
+            Schema::table('community_reactions', function (Blueprint $table): void {
+                $table->dropUnique('community_reaction_one_per_target');
+            });
+        }
+
+        if (! Schema::hasIndex('community_reactions', 'community_reaction_one_per_code')) {
+            Schema::table('community_reactions', function (Blueprint $table): void {
+                $table->unique(
+                    ['community_user_id', 'target_type', 'target_id', 'code'],
+                    'community_reaction_one_per_code'
+                );
+            });
+        }
     }
 
     public function down(): void
@@ -34,12 +49,25 @@ return new class extends Migration
             DB::table('community_reactions')->whereIn('id', $duplicateIds)->delete();
         }
 
-        Schema::table('community_reactions', function (Blueprint $table): void {
-            $table->dropUnique('community_reaction_one_per_code');
-            $table->unique(
-                ['community_user_id', 'target_type', 'target_id'],
-                'community_reaction_one_per_target'
-            );
-        });
+        if (! Schema::hasIndex('community_reactions', 'community_reaction_one_per_target')) {
+            Schema::table('community_reactions', function (Blueprint $table): void {
+                $table->unique(
+                    ['community_user_id', 'target_type', 'target_id'],
+                    'community_reaction_one_per_target'
+                );
+            });
+        }
+
+        if (Schema::hasIndex('community_reactions', 'community_reaction_one_per_code')) {
+            Schema::table('community_reactions', function (Blueprint $table): void {
+                $table->dropUnique('community_reaction_one_per_code');
+            });
+        }
+
+        if (Schema::hasIndex('community_reactions', 'community_reaction_user_fk_index')) {
+            Schema::table('community_reactions', function (Blueprint $table): void {
+                $table->dropIndex('community_reaction_user_fk_index');
+            });
+        }
     }
 };

@@ -82,7 +82,7 @@ html {
     padding-left: 15px;
     border-left: 1px solid #dce4f0;
     color: #132d6b;
-    font-size: 17px;
+    font-size: 1.1442rem;
     font-weight: 550;
     white-space: nowrap;
 }
@@ -93,7 +93,7 @@ html {
     justify-self: end;
     gap: 10px;
     white-space: nowrap;
-    font-size: 14px;
+    font-size: 0.9423rem;
 }
 
 .community-toolbar__notifications {
@@ -156,7 +156,7 @@ html {
 .community-toolbar__menu .community-user-avatar {
     width: 26px;
     height: 26px;
-    font-size: 11px;
+    font-size: 0.7404rem;
 }
 
 .community-toolbar__unread {
@@ -171,7 +171,7 @@ html {
     border-radius: 99px;
     background: #1d4ed8;
     color: #fff;
-    font-size: 10px;
+    font-size: 0.6731rem;
     font-weight: 550;
 }
 
@@ -196,7 +196,7 @@ html {
     padding: 10px 12px;
     border-radius: 8px;
     color: #34506f;
-    font-size: 14px;
+    font-size: 0.9423rem;
     text-align: left;
 }
 
@@ -230,7 +230,7 @@ html {
 .community-feed__heading {
     margin: 0 0 14px;
     color: #11284c;
-    font-size: clamp(18px, 2vw, 22px);
+    font-size: clamp(1.2115rem, 2.1538vw, 1.4808rem);
     line-height: 1.25;
 }
 
@@ -339,7 +339,7 @@ html {
     background: #edf2f7;
     color: #435970;
     font-weight: 450;
-    font-size: 13px;
+    font-size: 0.875rem;
     cursor: pointer;
     list-style: none;
     white-space: nowrap;
@@ -377,7 +377,7 @@ html {
     display: block;
     padding: 7px 10px;
     color: #7a8797;
-    font-size: 12px;
+    font-size: 0.8077rem;
 }
 
 .community-sort__menu a {
@@ -385,7 +385,7 @@ html {
     padding: 10px;
     border-radius: 6px;
     color: #435970;
-    font-size: 13px;
+    font-size: 0.875rem;
 }
 
 .community-sort__menu a:hover,
@@ -467,11 +467,11 @@ html {
 
 .community-score strong {
     color: #183f91;
-    font-size: 21px;
+    font-size: 1.4135rem;
 }
 
 .community-score span {
-    font-size: 11px;
+    font-size: 0.7404rem;
 }
 
 .community-post-card__body {
@@ -486,7 +486,7 @@ html {
     align-items: center;
     gap: 6px;
     color: #75859a;
-    font-size: 12px;
+    font-size: 0.8077rem;
 }
 
 .community-meta a {
@@ -496,7 +496,7 @@ html {
 
 .community-post-card__status {
     color: #45699e;
-    font-size: 11px;
+    font-size: 0.7404rem;
     white-space: nowrap;
 }
 
@@ -533,7 +533,7 @@ html {
     border-radius: 999px;
     background: #edf3ff;
     color: #45699e;
-    font-size: 11px;
+    font-size: 0.7404rem;
     line-height: 1;
     white-space: nowrap;
 }
@@ -551,7 +551,7 @@ html {
 @container (max-width: 350px) {
     .community-author-line .community-meta {
         gap: 4px;
-        font-size: 11px;
+        font-size: 0.7404rem;
     }
 
     .community-meta__separator {
@@ -587,19 +587,19 @@ html {
 .community-user-avatar--sm {
     width: 30px;
     height: 30px;
-    font-size: 13px;
+    font-size: 0.875rem;
 }
 
 .community-user-avatar--md {
     width: 40px;
     height: 40px;
-    font-size: 17px;
+    font-size: 1.1442rem;
 }
 
 .community-user-avatar--lg {
     width: 72px;
     height: 72px;
-    font-size: 28px;
+    font-size: 1.8846rem;
 }
 
 .community-category-pill {
@@ -609,7 +609,7 @@ html {
 
 .community-post-card h2 {
     margin: 7px 0 5px;
-    font-size: 19px;
+    font-size: 1.2788rem;
     line-height: 1.32;
 }
 
@@ -623,7 +623,7 @@ html {
     margin: 5px 0 0;
     overflow: hidden;
     color: #53657a;
-    font-size: 14px;
+    font-size: 0.9423rem;
     line-height: 1.55;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
@@ -635,7 +635,7 @@ html {
     gap: 4px;
     max-width: 100%;
     color: #2764bd;
-    font-size: 13px;
+    font-size: 0.875rem;
 }
 
 .community-external span {
@@ -654,7 +654,7 @@ html {
     min-width: 0;
     margin-top: 10px;
     color: #65778e;
-    font-size: 12px;
+    font-size: 0.8077rem;
     font-weight: 500;
     white-space: nowrap;
 }
@@ -738,11 +738,11 @@ html {
     }
 
     .community-post-card__footer .community-reaction-trigger > .community-reaction__emoji {
-        font-size: 15px;
+        font-size: 1.0096rem;
     }
 
     .community-post-card__footer .community-reaction-trigger > .community-reaction__count {
-        font-size: 10px;
+        font-size: 0.6731rem;
     }
 
     .community-post-card__footer .community-action-chip--comments {
@@ -785,7 +785,7 @@ html {
     border-radius: 999px;
     background: #edf3ff;
     color: #2856a3;
-    font-size: 11px;
+    font-size: 0.7404rem;
 }
 
 .community-sidebar {
@@ -805,7 +805,7 @@ html {
 
 .community-side-card h2 {
     margin: 0 0 13px;
-    font-size: 17px;
+    font-size: 1.1442rem;
 }
 
 .community-side-card > a {
@@ -816,7 +816,7 @@ html {
     padding: 9px 8px;
     border-radius: 9px;
     color: #4c5f77;
-    font-size: 14px;
+    font-size: 0.9423rem;
 }
 
 .community-side-card > a.is-active {
@@ -833,7 +833,7 @@ html {
     margin: 0;
     padding-left: 20px;
     color: #596b82;
-    font-size: 13px;
+    font-size: 0.875rem;
     line-height: 1.55;
 }
 
@@ -924,7 +924,7 @@ html {
 .community-form-card h1,
 .community-auth-card h1 {
     margin: 8px 0 12px;
-    font-size: 34px;
+    font-size: 2.2885rem;
 }
 
 .community-auth-card > p {
@@ -972,7 +972,7 @@ html {
 
 .community-auth-status {
     margin-top: 16px;
-    font-size: 13px;
+    font-size: 0.875rem;
 }
 
 .community-form {
@@ -1080,7 +1080,7 @@ html {
     background: #f3f6fb;
     color: #52657c;
     text-align: left;
-    font-size: 13px;
+    font-size: 0.875rem;
     line-height: 1.5;
 }
 
@@ -1090,7 +1090,7 @@ html {
 
 .community-onboarding-card .community-form small {
     color: #667991;
-    font-size: 13px;
+    font-size: 0.875rem;
     font-weight: 500;
     line-height: 1.45;
 }
@@ -1119,13 +1119,13 @@ html {
 .community-topic header .community-user-avatar--md {
     width: 30px;
     height: 30px;
-    font-size: 13px;
+    font-size: 0.875rem;
 }
 
 .community-topic header h1 {
     margin: 8px 0 9px;
     color: #101828;
-    font-size: clamp(22px, 2.3vw, 27px);
+    font-size: clamp(1.4808rem, 2.4769vw, 1.8173rem);
     line-height: 1.24;
     letter-spacing: -.015em;
 }
@@ -1147,7 +1147,7 @@ html {
     border-radius: 999px;
     background: #dce9ff;
     color: #174cac !important;
-    font-size: 11px;
+    font-size: 0.7404rem;
     font-weight: 500 !important;
     line-height: 1.25;
 }
@@ -1196,7 +1196,7 @@ html {
 
 .community-vote strong {
     color: #33465e;
-    font-size: 12px;
+    font-size: 0.8077rem;
 }
 
 .community-vote button.is-active:first-child {
@@ -1235,7 +1235,7 @@ html {
 
 .community-markdown {
     color: #29394f;
-    font-size: 14px;
+    font-size: 0.9423rem;
     line-height: 1.6;
     overflow-wrap: anywhere;
 }
@@ -1350,7 +1350,7 @@ html {
 
 .community-photo-editor > small {
     color: #667991;
-    font-size: 12px;
+    font-size: 0.8077rem;
     font-weight: 500;
 }
 
@@ -1366,7 +1366,7 @@ html {
     gap: 5px;
     min-width: 0;
     color: #52657c;
-    font-size: 12px;
+    font-size: 0.8077rem;
     font-weight: 550;
 }
 
@@ -1402,7 +1402,7 @@ html {
 .community-photo-editor__preview figcaption {
     overflow: hidden;
     color: #617087;
-    font-size: 11px;
+    font-size: 0.7404rem;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -1436,7 +1436,7 @@ html {
     gap: 7px;
     margin-top: 14px;
     color: #5a6c83;
-    font-size: 12px;
+    font-size: 0.8077rem;
 }
 
 .community-topic__actions form,
@@ -1494,7 +1494,7 @@ html {
 
 .community-report-dialog__header h2 {
     margin: 8px 0 0;
-    font-size: 26px;
+    font-size: 1.75rem;
 }
 
 .community-report-dialog__close {
@@ -1565,12 +1565,12 @@ html {
 
 .community-comments__toolbar h2 {
     margin: 0;
-    font-size: 16px;
+    font-size: 1.0769rem;
 }
 
 .community-comments__toolbar h2 span {
     color: #718198;
-    font-size: 12px;
+    font-size: 0.8077rem;
 }
 
 .community-comments__toolbar nav {
@@ -1578,7 +1578,7 @@ html {
     align-items: center;
     gap: 8px;
     color: #77869a;
-    font-size: 12px;
+    font-size: 0.8077rem;
 }
 
 .community-comments__toolbar nav a {
@@ -1722,7 +1722,7 @@ html {
     max-height: 220px;
     overflow-y: auto;
     color: #17243b;
-    font-size: 14px;
+    font-size: 0.9423rem;
     line-height: 1.5;
 }
 
@@ -1802,7 +1802,7 @@ html {
 
 .community-rich-editor__error {
     color: #b42318;
-    font-size: 12px;
+    font-size: 0.8077rem;
 }
 
 .community-rich-editor__error[hidden] {
@@ -1844,7 +1844,7 @@ html {
     outline: 0;
     background: transparent;
     color: #17243b;
-    font-size: 14px;
+    font-size: 0.9423rem;
     line-height: 1.5;
     resize: none;
     overflow-y: hidden;
@@ -1905,7 +1905,7 @@ html {
     border-radius: 50%;
     background: rgba(18, 32, 50, .85);
     color: #fff;
-    font-size: 18px;
+    font-size: 1.2115rem;
     line-height: 1;
     cursor: pointer;
 }
@@ -1929,7 +1929,7 @@ html {
 
 .community-comment-composer__file-count {
     color: #65758a;
-    font-size: 12px;
+    font-size: 0.8077rem;
     white-space: nowrap;
 }
 
@@ -1964,7 +1964,7 @@ html {
     border-radius: 999px;
     background: #eef2f6;
     color: #43546b;
-    font-size: 12px;
+    font-size: 0.8077rem;
     cursor: pointer;
 }
 
@@ -1976,7 +1976,7 @@ html {
     min-height: 32px;
     padding: 6px 12px !important;
     border-radius: 999px;
-    font-size: 12px;
+    font-size: 0.8077rem;
     white-space: nowrap;
 }
 
@@ -2028,7 +2028,7 @@ html {
 
 .community-comment__content > .community-markdown {
     margin-top: 5px;
-    font-size: 13px;
+    font-size: 0.875rem;
     line-height: 1.55;
 }
 
@@ -2075,12 +2075,12 @@ html {
 .community-comment__actions .community-vote--inline button {
     width: 24px;
     height: 24px;
-    font-size: 16px;
+    font-size: 1.0769rem;
 }
 
 .community-comment__actions .community-vote--inline strong {
     min-width: 18px;
-    font-size: 11px;
+    font-size: 0.7404rem;
 }
 
 /* Реакции и награды */
@@ -2105,7 +2105,7 @@ html {
     background: #f7f9fc;
     color: #41536b;
     font: inherit;
-    font-size: 12px;
+    font-size: 0.8077rem;
     line-height: 1;
     white-space: nowrap;
     list-style: none;
@@ -2200,7 +2200,7 @@ html {
     border-radius: 50%;
     background: #2764bd;
     color: #fff;
-    font-size: 9px;
+    font-size: 0.6058rem;
     line-height: 1;
 }
 
@@ -2216,7 +2216,7 @@ html {
     border-radius: 5px;
     background: #34465e;
     color: #fff;
-    font-size: 9px;
+    font-size: 0.6058rem;
     line-height: 1.2;
     opacity: 0;
     pointer-events: none;
@@ -2239,18 +2239,18 @@ html {
 }
 
 .community-reaction-picker .community-reaction__emoji {
-    font-size: 24px;
+    font-size: 1.6154rem;
 }
 
 .community-reaction__emoji {
     font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
-    font-size: 17px;
+    font-size: 1.1442rem;
     line-height: 1;
 }
 
 .community-reaction__count {
     color: #667890;
-    font-size: 11px;
+    font-size: 0.7404rem;
     font-weight: 500;
 }
 
@@ -2277,14 +2277,14 @@ html {
     background: #fffbec;
     color: #5c4a22;
     font: inherit;
-    font-size: 12px;
+    font-size: 0.8077rem;
     font-weight: 500;
     white-space: nowrap;
 }
 
 .community-award-badge > span:first-child {
     font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
-    font-size: 17px;
+    font-size: 1.1442rem;
 }
 
 .community-page .community-award-open {
@@ -2325,7 +2325,7 @@ html {
 
 .community-award-dialog__top h2 {
     margin: 0;
-    font-size: clamp(20px, 4vw, 26px);
+    font-size: clamp(1.3462rem, 4.3077vw, 1.75rem);
 }
 
 .community-award-dialog__close {
@@ -2344,7 +2344,7 @@ html {
 .community-award-dialog__target {
     margin: 4px 0 22px;
     color: #65758a;
-    font-size: 14px;
+    font-size: 0.9423rem;
 }
 
 .community-award-grid {
@@ -2360,7 +2360,7 @@ html {
 .community-award-grid legend {
     margin-bottom: 10px;
     color: #34465f;
-    font-size: 14px;
+    font-size: 0.9423rem;
     font-weight: 550;
 }
 
@@ -2404,20 +2404,20 @@ html {
 
 .community-award-choice__emoji {
     font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
-    font-size: 32px;
+    font-size: 2.1538rem;
     line-height: 1.2;
 }
 
 .community-award-choice__name {
     color: #283b56;
-    font-size: 11px;
+    font-size: 0.7404rem;
     font-weight: 500;
     line-height: 1.2;
 }
 
 .community-award-choice__free {
     color: #1d8348;
-    font-size: 10px;
+    font-size: 0.6731rem;
 }
 
 .community-award-dialog__anonymous {
@@ -2425,7 +2425,7 @@ html {
     align-items: center;
     gap: 8px;
     margin: 22px 0 16px;
-    font-size: 14px;
+    font-size: 0.9423rem;
     cursor: pointer;
 }
 
@@ -2434,13 +2434,13 @@ html {
     justify-content: space-between;
     gap: 8px;
     margin-bottom: 7px;
-    font-size: 14px;
+    font-size: 0.9423rem;
     font-weight: 500;
 }
 
 .community-award-dialog__message span {
     color: #74839a;
-    font-size: 12px;
+    font-size: 0.8077rem;
     font-weight: 400;
 }
 
@@ -2493,7 +2493,7 @@ html {
 .community-about-card p {
     margin: 0;
     color: #596b82;
-    font-size: 13px;
+    font-size: 0.875rem;
     line-height: 1.55;
 }
 
@@ -2501,7 +2501,7 @@ html {
     display: block;
     margin-bottom: 5px;
     color: #174cac;
-    font-size: 11px;
+    font-size: 0.7404rem;
     font-weight: 550;
     letter-spacing: .08em;
     text-transform: uppercase;
@@ -2520,14 +2520,14 @@ html {
 
 .community-about-card__stats dt {
     color: #17243b;
-    font-size: 16px;
+    font-size: 1.0769rem;
     font-weight: 550;
 }
 
 .community-about-card__stats dd {
     margin: 1px 0 0;
     color: #7b899b;
-    font-size: 10px;
+    font-size: 0.6731rem;
 }
 
 .community-side-card > a.community-side-card__link {
@@ -2537,7 +2537,7 @@ html {
     padding: 8px 12px;
     background: #174cac;
     color: #fff;
-    font-size: 12px;
+    font-size: 0.8077rem;
     font-weight: 550;
 }
 
@@ -2572,7 +2572,7 @@ html {
 .community-profile-handle {
     margin: 0 0 7px;
     color: #315c9d !important;
-    font-size: 14px;
+    font-size: 0.9423rem;
     font-weight: 500;
 }
 
@@ -2702,7 +2702,7 @@ html {
 
 .community-notification time {
     color: #7d8b9e;
-    font-size: 12px;
+    font-size: 0.8077rem;
 }
 
 .community-identity {
@@ -2858,7 +2858,7 @@ html {
 
     .community-toolbar__search input {
         min-height: 42px;
-        font-size: 16px;
+        font-size: 1.0769rem;
     }
 
     .community-sidebar,
@@ -2892,7 +2892,7 @@ html {
     }
 
     .community-post-card h2 {
-        font-size: 17px;
+        font-size: 1.1442rem;
         overflow-wrap: anywhere;
     }
 
@@ -3002,7 +3002,7 @@ html {
 
     .community-toolbar__guest .btn {
         padding-inline: 7px;
-        font-size: 11px;
+        font-size: 0.7404rem;
     }
 
     .community-main .landing-shell,
@@ -3037,6 +3037,6 @@ html {
 
     .community-post-card h2 {
         margin-top: 6px;
-        font-size: 16px;
+        font-size: 1.0769rem;
     }
 }
