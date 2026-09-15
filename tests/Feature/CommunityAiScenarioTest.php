@@ -2,7 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\CommunityAiScenarios\CommunityAiScenarioResource;
+use App\Filament\Resources\CommunityAiScenarios\Pages\EditCommunityAiScenario;
 use App\Jobs\PublishCommunityAiScenarioStep;
+use App\Models\CommunityAiGeneration;
 use App\Models\CommunityAiPersona;
 use App\Models\CommunityAiScenario;
 use App\Models\CommunityAiSource;
@@ -21,6 +24,7 @@ use Illuminate\Http\Client\Request as HttpRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
+use Livewire\Livewire;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -168,7 +172,119 @@ class CommunityAiScenarioTest extends TestCase
         $this->actingAs(User::factory()->create())
             ->get(route('filament.admin.resources.community-ai-scenarios.edit', $scenario))
             ->assertOk()
-            ->assertSeeText('Сканировать и создать черновики');
+            ->assertSeeText('Сканировать и создать черновики')
+            ->assertSeeText('Очистить результаты')
+            ->assertSeeText('Удалить сценарий');
+    }
+
+    public function test_admin_can_clear_scenario_results_without_removing_inputs_or_source_messages(): void
+    {
+        $source = CommunityAiSource::query()->firstOrFail();
+        $persona = CommunityAiPersona::query()->firstOrFail();
+        $scenario = CommunityAiScenario::query()->create([
+            'source_ids' => [$source->id],
+            'source_from' => now()->subDay(),
+            'source_to' => now(),
+            'scan_keywords' => ['ЭТрН'],
+            'title' => 'Рабочее название',
+            'editor_brief' => 'Редакторский бриф',
+            'planned_at' => now()->addDay(),
+            'status' => CommunityAiScenario::STATUS_REVIEW,
+            'started_at' => now()->subHour(),
+            'completed_at' => now(),
+            'last_error' => 'Старая ошибка',
+            'settings' => [
+                'custom_setting' => 'keep',
+                'editor_persona_id' => $persona->id,
+                'source_message_count' => 12,
+                'keyword_match_count' => 4,
+            ],
+        ]);
+        $message = $source->messages()->create([
+            'external_message_id' => 'clear-scenario-source-message',
+            'sender_key' => hash('sha256', 'sender'),
+            'text' => 'Сообщение источника должно сохраниться.',
+            'content_hash' => hash('sha256', 'source message'),
+            'sent_at' => now()->subHour(),
+        ]);
+        $step = $scenario->steps()->create([
+            'community_ai_persona_id' => $persona->id,
+            'type' => 'topic',
+            'sequence' => 1,
+            'planned_delay_minutes' => 0,
+            'draft_title' => 'Черновик темы',
+            'draft_body' => 'Текст черновика',
+            'status' => 'pending_review',
+            'idempotency_key' => 'scenario-clear-topic',
+        ]);
+        CommunityAiGeneration::query()->create([
+            'community_ai_scenario_id' => $scenario->id,
+            'community_ai_scenario_step_id' => $step->id,
+            'community_ai_persona_id' => $persona->id,
+            'purpose' => 'topic',
+            'status' => 'succeeded',
+        ]);
+
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(EditCommunityAiScenario::class, ['record' => $scenario->getRouteKey()])
+            ->callAction('clearResults')
+            ->assertHasNoActionErrors()
+            ->assertNotified();
+
+        $scenario->refresh();
+        $this->assertSame(CommunityAiScenario::STATUS_DRAFT, $scenario->status);
+        $this->assertSame('Рабочее название', $scenario->title);
+        $this->assertSame('Редакторский бриф', $scenario->editor_brief);
+        $this->assertSame(['ЭТрН'], $scenario->scan_keywords);
+        $this->assertSame('keep', $scenario->settings['custom_setting']);
+        $this->assertArrayNotHasKey('editor_persona_id', $scenario->settings);
+        $this->assertNull($scenario->started_at);
+        $this->assertNull($scenario->completed_at);
+        $this->assertNull($scenario->last_error);
+        $this->assertDatabaseMissing('community_ai_scenario_steps', ['id' => $step->id]);
+        $this->assertDatabaseCount('community_ai_generations', 0);
+        $this->assertDatabaseHas('community_ai_source_messages', ['id' => $message->id]);
+    }
+
+    public function test_admin_can_delete_scenario_and_its_generated_data(): void
+    {
+        $source = CommunityAiSource::query()->firstOrFail();
+        $persona = CommunityAiPersona::query()->firstOrFail();
+        $scenario = CommunityAiScenario::query()->create([
+            'source_ids' => [$source->id],
+            'source_from' => now()->subDay(),
+            'source_to' => now(),
+            'status' => CommunityAiScenario::STATUS_REVIEW,
+        ]);
+        $step = $scenario->steps()->create([
+            'community_ai_persona_id' => $persona->id,
+            'type' => 'topic',
+            'sequence' => 1,
+            'planned_delay_minutes' => 0,
+            'draft_title' => 'Черновик темы',
+            'draft_body' => 'Текст черновика',
+            'status' => 'pending_review',
+            'idempotency_key' => 'scenario-delete-topic',
+        ]);
+        $generation = CommunityAiGeneration::query()->create([
+            'community_ai_scenario_id' => $scenario->id,
+            'community_ai_scenario_step_id' => $step->id,
+            'community_ai_persona_id' => $persona->id,
+            'purpose' => 'topic',
+            'status' => 'succeeded',
+        ]);
+
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(EditCommunityAiScenario::class, ['record' => $scenario->getRouteKey()])
+            ->callAction('delete')
+            ->assertHasNoActionErrors()
+            ->assertRedirect(CommunityAiScenarioResource::getUrl('index'));
+
+        $this->assertDatabaseMissing('community_ai_scenarios', ['id' => $scenario->id]);
+        $this->assertDatabaseMissing('community_ai_scenario_steps', ['id' => $step->id]);
+        $this->assertDatabaseMissing('community_ai_generations', ['id' => $generation->id]);
     }
 
     public function test_it_stops_before_generation_when_keywords_do_not_match_messages(): void

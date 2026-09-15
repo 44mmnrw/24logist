@@ -9,10 +9,12 @@ use App\Filament\Resources\CommunityAiScenarios\RelationManagers\StepsRelationMa
 use App\Jobs\PrepareCommunityAiScenario;
 use App\Models\CommunityAiScenario;
 use App\Models\CommunityAiSource;
+use App\Services\Community\CommunityAiScenarioCleaner;
 use App\Services\Community\CommunityAiScenarioPublisher;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
@@ -181,6 +183,48 @@ class CommunityAiScenarioResource extends Resource
                     $record->steps()->whereIn('status', ['draft', 'pending_review', 'approved', 'scheduled'])->update(['status' => 'cancelled']);
                     $record->update(['status' => CommunityAiScenario::STATUS_CANCELLED]);
                 }),
+            Action::make('clearResults')
+                ->label('Очистить результаты')
+                ->icon(Heroicon::OutlinedArrowPath)
+                ->color('warning')
+                ->requiresConfirmation()
+                ->modalHeading('Очистить результаты сценария?')
+                ->modalDescription('Будут удалены черновики, шаги и журнал генерации этого сценария. Выбранные чаты, период, ключевые слова и дата публикации сохранятся. Импортированные сообщения MAX не удаляются.')
+                ->modalSubmitActionLabel('Очистить')
+                ->disabled(fn (CommunityAiScenario $record): bool => in_array($record->status, [
+                    CommunityAiScenario::STATUS_QUEUED,
+                    CommunityAiScenario::STATUS_PREPARING,
+                    CommunityAiScenario::STATUS_RUNNING,
+                ], true) || $record->steps()->where(function ($query): void {
+                    $query
+                        ->whereNotNull('published_at')
+                        ->orWhereNotNull('community_post_id')
+                        ->orWhereNotNull('community_comment_id');
+                })->exists())
+                ->action(function (CommunityAiScenario $record, $livewire): void {
+                    try {
+                        app(CommunityAiScenarioCleaner::class)->clear($record);
+                    } catch (\RuntimeException $exception) {
+                        Notification::make()
+                            ->title('Сценарий не очищен')
+                            ->body($exception->getMessage())
+                            ->danger()
+                            ->send();
+
+                        return;
+                    }
+
+                    if (method_exists($livewire, 'refreshFormData')) {
+                        $livewire->refreshFormData(['status', 'last_error']);
+                    }
+
+                    Notification::make()->title('Результаты сценария очищены')->success()->send();
+                }),
+            DeleteAction::make()
+                ->label('Удалить сценарий')
+                ->modalHeading('Удалить сценарий?')
+                ->modalDescription('Сценарий, его черновики, шаги и журнал генерации будут удалены без возможности восстановления. Уже опубликованные темы и комментарии останутся в ленте.')
+                ->modalSubmitActionLabel('Удалить'),
         ];
     }
 
