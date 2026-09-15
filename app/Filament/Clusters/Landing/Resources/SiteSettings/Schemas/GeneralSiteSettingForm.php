@@ -409,6 +409,25 @@ final class GeneralSiteSettingForm
                 ])
                 ->columns(2)
                 ->columnSpanFull(),
+            Section::make('Браузерный сборщик MAX')
+                ->description('Отдельный секрет для расширения браузера. Бот авторизации и его токен здесь не используются.')
+                ->schema([
+                    Placeholder::make('community_ai_collector_token_status')
+                        ->label('Токен сборщика')
+                        ->content(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_ai_collector_token') ? '***' : 'Не настроен'),
+                    TextInput::make('community_ai_collector_token')
+                        ->label('Новый токен сборщика')
+                        ->password()
+                        ->revealable()
+                        ->autocomplete('new-password')
+                        ->minLength(32)
+                        ->maxLength(255)
+                        ->dehydrated()
+                        ->placeholder(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_ai_collector_token') ? '***' : '')
+                        ->helperText('Используйте случайную строку не короче 32 символов. Вставьте тот же токен в расширение Chrome. Пустое поле сохраняет действующее значение.'),
+                ])
+                ->columns(2)
+                ->columnSpanFull(),
             Section::make('Авторизация через Telegram')
                 ->description('В @BotFather откройте Login Widget, добавьте https://24logist.ru и https://24logist.ru/community/auth/telegram/callback в Allowed URLs и скопируйте Client ID и Client Secret. После сохранения кнопка входа появится автоматически. Значения хранятся в базе в зашифрованном виде.')
                 ->schema([

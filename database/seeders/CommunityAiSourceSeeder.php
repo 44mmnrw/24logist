@@ -20,6 +20,7 @@ class CommunityAiSourceSeeder extends Seeder
                     'name' => $source['name'],
                     'public_url' => 'https://web.max.ru/'.$source['chat_id'],
                     'is_active' => true,
+                    'settings' => ['collection_mode' => 'browser'],
                 ],
             );
         }

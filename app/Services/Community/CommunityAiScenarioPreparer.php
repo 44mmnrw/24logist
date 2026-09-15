@@ -19,6 +19,7 @@ final class CommunityAiScenarioPreparer
     public function __construct(
         private readonly MaxChatImportService $importer,
         private readonly TimewebAiClient $ai,
+        private readonly CommunitySourceTextSanitizer $sanitizer,
     ) {}
 
     public function prepare(CommunityAiScenario $scenario): void
@@ -36,7 +37,9 @@ final class CommunityAiScenarioPreparer
         try {
             $sources = $this->sources($scenario);
             foreach ($sources as $source) {
-                $this->importer->import($source, $scenario->source_from, $scenario->source_to);
+                if (data_get($source->settings, 'collection_mode') === 'bot_api') {
+                    $this->importer->import($source, $scenario->source_from, $scenario->source_to);
+                }
             }
 
             $contextData = $this->sourceContext($scenario, $sources);
@@ -406,7 +409,7 @@ PROMPT],
         foreach ($messages as $message) {
             $senderKey = $message->sender_key ?: 'unknown';
             $aliases[$senderKey] ??= 'Участник '.($nextAlias++);
-            $text = $this->anonymize($message->text);
+            $text = $this->sanitizer->sanitize($message->text);
             if ($text === '') {
                 continue;
             }
@@ -433,19 +436,6 @@ PROMPT],
             ->filter()
             ->unique()
             ->values();
-    }
-
-    private function anonymize(string $text): string
-    {
-        $text = html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $patterns = [
-            '/\b[\w.%+\-]+@[\w.\-]+\.[A-Z]{2,}\b/iu' => '[email]',
-            '/(?<!\d)(?:\+?7|8)[\s()\-]*\d{3}[\s()\-]*\d{3}[\s\-]*\d{2}[\s\-]*\d{2}(?!\d)/u' => '[телефон]',
-            '#https?://\S+#iu' => '[ссылка]',
-            '/\b[АВЕКМНОРСТУХABEKMHOPCTYX]\d{3}[АВЕКМНОРСТУХABEKMHOPCTYX]{2}\s?\d{2,3}\b/iu' => '[госномер]',
-        ];
-
-        return trim((string) preg_replace(array_keys($patterns), array_values($patterns), $text));
     }
 
     private function resolveCategory(CommunityAiScenario $scenario, string $slug): CommunityCategory

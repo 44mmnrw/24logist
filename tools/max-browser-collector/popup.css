@@ -1,0 +1,16 @@
+:root { color-scheme: light; font-family: Inter, system-ui, sans-serif; }
+body { margin: 0; width: 390px; background: #f4f7fb; color: #12233f; }
+main { display: grid; gap: 12px; padding: 18px; }
+h1 { margin: 0 0 4px; font-size: 20px; }
+label { display: grid; gap: 5px; font-size: 12px; font-weight: 700; }
+input, select, button { box-sizing: border-box; width: 100%; min-height: 40px; border-radius: 10px; font: inherit; }
+input, select { border: 1px solid #ccd6e5; background: white; padding: 9px 11px; color: #12233f; }
+button { border: 0; padding: 10px 14px; background: #155bd7; color: white; font-weight: 750; cursor: pointer; }
+button.secondary { background: #e6eefb; color: #16478f; }
+button.success { background: #18864b; }
+button:disabled { cursor: default; opacity: .5; }
+#details { border: 1px solid #d8e1ee; border-radius: 10px; background: white; padding: 10px 12px; font-size: 12px; line-height: 1.5; }
+#details ul { margin: 6px 0 0; padding-left: 18px; }
+#status { min-height: 34px; margin: 0; border-radius: 9px; background: #eaf1fc; padding: 9px 11px; font-size: 12px; line-height: 1.4; }
+#status.error { background: #fdebec; color: #981b27; }
+#status.success { background: #e8f7ee; color: #126737; }

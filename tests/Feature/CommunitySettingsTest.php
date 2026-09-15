@@ -72,6 +72,7 @@ class CommunitySettingsTest extends TestCase
             'community_vk_client_secret' => 'vk-client-secret',
             'community_vk_service_token' => 'vk-service-token',
             'community_ai_timeweb_token' => 'timeweb-ai-token',
+            'community_ai_collector_token' => 'collector-token-that-is-long-enough-123',
         ]);
         app(SiteSettingsService::class)->clearCache();
 
@@ -83,12 +84,14 @@ class CommunitySettingsTest extends TestCase
         $this->assertNotSame('vk-client-secret', $raw->community_vk_client_secret);
         $this->assertNotSame('vk-service-token', $raw->community_vk_service_token);
         $this->assertNotSame('timeweb-ai-token', $raw->community_ai_timeweb_token);
+        $this->assertNotSame('collector-token-that-is-long-enough-123', $raw->community_ai_collector_token);
         $this->assertSame('telegram-secret', app(SiteSettingsService::class)->telegramClientSecret());
         $this->assertSame('webhook-secret', app(SiteSettingsService::class)->maxWebhookSecret());
         $this->assertSame('vk-client-id', app(SiteSettingsService::class)->vkClientId());
         $this->assertSame('vk-client-secret', app(SiteSettingsService::class)->vkClientSecret());
         $this->assertSame('vk-service-token', app(SiteSettingsService::class)->vkServiceToken());
         $this->assertSame('timeweb-ai-token', app(SiteSettingsService::class)->timewebAiToken());
+        $this->assertSame('collector-token-that-is-long-enough-123', app(SiteSettingsService::class)->communityAiCollectorToken());
         $this->assertTrue(app(SiteSettingsService::class)->timewebAiConfigured());
     }
 }

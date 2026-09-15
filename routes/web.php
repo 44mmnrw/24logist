@@ -4,6 +4,7 @@ use App\Http\Controllers\AppleTouchIconController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CabinetLoginController;
 use App\Http\Controllers\CommunityAcceptedAnswerController;
+use App\Http\Controllers\CommunityAiBrowserCollectorController;
 use App\Http\Controllers\CommunityAccountController;
 use App\Http\Controllers\CommunityActionController;
 use App\Http\Controllers\CommunityCommentController;
@@ -213,3 +214,12 @@ Route::middleware(['community.locale', 'community.enabled', 'community.activity'
 Route::post('/community/webhooks/max', MaxCommunityWebhookController::class)
     ->middleware('throttle:120,1')
     ->name('community.webhooks.max');
+
+Route::prefix('community/ai/collector')->middleware('throttle:120,1')->group(function (): void {
+    Route::get('/scenarios', [CommunityAiBrowserCollectorController::class, 'scenarios'])
+        ->name('community.ai.collector.scenarios');
+    Route::post('/messages', [CommunityAiBrowserCollectorController::class, 'storeMessages'])
+        ->name('community.ai.collector.messages');
+    Route::post('/scenarios/{scenario}/prepare', [CommunityAiBrowserCollectorController::class, 'prepare'])
+        ->name('community.ai.collector.prepare');
+});

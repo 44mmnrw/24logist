@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Сборщик MAX</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main>
+    <h1>Сборщик MAX</h1>
+    <label>
+      Сервер
+      <input id="server" type="url" value="https://24logist.ru" autocomplete="url">
+    </label>
+    <label>
+      Токен сборщика
+      <input id="token" type="password" autocomplete="new-password" minlength="32">
+    </label>
+    <button id="connect" class="secondary">Сохранить и обновить</button>
+
+    <label>
+      Сценарий
+      <select id="scenario" disabled></select>
+    </label>
+    <section id="details" hidden></section>
+
+    <button id="collect" disabled>Собрать открытый чат</button>
+    <button id="prepare" class="success" disabled>Сформировать черновики</button>
+    <p id="status" role="status">Укажите токен и подключитесь.</p>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>

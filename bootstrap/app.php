@@ -38,6 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'lw-*/upload',
             'community/webhooks/max',
+            'community/ai/collector/*',
         ]);
         $middleware->alias([
             'community.locale' => UseRussianCommunityLocale::class,

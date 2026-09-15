@@ -42,6 +42,7 @@ class CommunityAiScenarioTest extends TestCase
     public function test_it_imports_chat_builds_reviewable_drafts_and_schedules_approved_steps(): void
     {
         $source = CommunityAiSource::query()->firstOrFail();
+        $source->update(['settings' => ['collection_mode' => 'bot_api']]);
         $from = now()->subDay()->startOfDay()->setMicrosecond(0);
         $to = now()->subDay()->endOfDay()->setMicrosecond(0);
         $aiCall = 0;
@@ -167,6 +168,7 @@ class CommunityAiScenarioTest extends TestCase
     public function test_it_stops_before_generation_when_keywords_do_not_match_messages(): void
     {
         $source = CommunityAiSource::query()->firstOrFail();
+        $source->update(['settings' => ['collection_mode' => 'bot_api']]);
         $from = now()->subDay()->startOfDay()->setMicrosecond(0);
         $to = now()->subDay()->endOfDay()->setMicrosecond(0);
 

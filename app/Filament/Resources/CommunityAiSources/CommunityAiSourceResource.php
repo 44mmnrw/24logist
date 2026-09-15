@@ -42,7 +42,7 @@ class CommunityAiSourceResource extends Resource
             Select::make('platform')->label('Платформа')->options(['max' => 'MAX'])->default('max')->required(),
             TextInput::make('external_chat_id')
                 ->label('Chat ID MAX')
-                ->helperText('Бот должен быть администратором этого чата.')
+                ->helperText('ID берётся из адреса web.max.ru/-123…. Сообщения загружает расширение из авторизованного браузера.')
                 ->required()
                 ->maxLength(100)
                 ->unique(ignoreRecord: true),
