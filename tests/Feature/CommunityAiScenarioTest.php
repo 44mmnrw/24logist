@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Resources\CommunityAiScenarios\CommunityAiScenarioResource;
+use App\Filament\Resources\CommunityAiScenarios\Pages\CreateCommunityAiScenario;
 use App\Filament\Resources\CommunityAiScenarios\Pages\EditCommunityAiScenario;
 use App\Jobs\PublishCommunityAiScenarioStep;
 use App\Models\CommunityAiGeneration;
@@ -158,6 +159,100 @@ class CommunityAiScenarioTest extends TestCase
         $this->assertSame($topicDate->toDateTimeString(), $scenario->steps()->first()->scheduled_at->toDateTimeString());
         $this->assertSame($historicalDate->copy()->addMinutes(20)->toDateTimeString(), $scenario->steps()->skip(1)->first()->scheduled_at->toDateTimeString());
         Queue::assertPushed(PublishCommunityAiScenarioStep::class, 3);
+    }
+
+    public function test_admin_can_create_a_manual_topic_scenario(): void
+    {
+        $persona = CommunityAiPersona::query()->where('can_create_posts', true)->firstOrFail();
+        $category = CommunityCategory::query()->firstOrFail();
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(CreateCommunityAiScenario::class)
+            ->fillForm([
+                'mode' => CommunityAiScenario::MODE_MANUAL,
+                'topic_persona_id' => $persona->id,
+                'community_category_id' => $category->id,
+                'title' => 'Тема редактора',
+                'manual_topic_body' => 'Точный текст темы, который нельзя переписывать.',
+                'editor_brief' => 'Обсудить риски для разных сторон.',
+                'planned_at' => now()->addHour(),
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $scenario = CommunityAiScenario::query()->latest('id')->firstOrFail();
+        $this->assertSame(CommunityAiScenario::MODE_MANUAL, $scenario->mode);
+        $this->assertSame($persona->id, $scenario->topic_persona_id);
+        $this->assertSame('Тема редактора', $scenario->title);
+        $this->assertSame('Точный текст темы, который нельзя переписывать.', $scenario->manual_topic_body);
+        $this->assertSame([], $scenario->source_ids);
+    }
+
+    public function test_manual_topic_is_kept_verbatim_while_comment_drafts_are_generated(): void
+    {
+        $personas = CommunityAiPersona::query()->with('communityUser')->take(3)->get();
+        $topicPersona = $personas->first();
+        $commenters = $personas->skip(1)->values();
+        $aiCall = 0;
+
+        Http::fake(function (HttpRequest $request) use ($commenters, &$aiCall) {
+            $this->assertStringContainsString('agent.timeweb.cloud', $request->url());
+            $aiCall++;
+            $prompt = collect($request->data()['messages'] ?? [])->pluck('content')->implode("\n");
+
+            if (str_contains($prompt, 'Доступные комментаторы:')) {
+                $content = [
+                    'participants' => [
+                        ['persona_slug' => $commenters[0]->slug, 'purpose' => 'Даёт практическую оценку', 'delay_minutes' => 11],
+                        ['persona_slug' => $commenters[1]->slug, 'purpose' => 'Проверяет документы', 'delay_minutes' => 27],
+                    ],
+                ];
+            } else {
+                $content = [
+                    'action' => 'comment',
+                    'title' => null,
+                    'body' => 'Отдельный содержательный комментарий №'.$aiCall.'.',
+                    'needs_review' => true,
+                    'reason' => 'Добавляет новый взгляд',
+                ];
+            }
+
+            return Http::response([
+                'id' => 'manual-generation-'.$aiCall,
+                'model' => 'GPT-5.4 Mini',
+                'choices' => [['message' => ['content' => json_encode($content, JSON_UNESCAPED_UNICODE)]]],
+                'usage' => ['prompt_tokens' => 30, 'completion_tokens' => 15],
+            ]);
+        });
+
+        $scenario = CommunityAiScenario::query()->create([
+            'mode' => CommunityAiScenario::MODE_MANUAL,
+            'topic_persona_id' => $topicPersona->id,
+            'community_category_id' => CommunityCategory::query()->firstOrFail()->id,
+            'source_ids' => [],
+            'source_from' => now()->subDay(),
+            'source_to' => now(),
+            'title' => 'Ручная тема без изменений',
+            'manual_topic_body' => "Первый абзац.\n\nВторой абзац и вопрос?",
+            'editor_brief' => 'Нужны разные позиции.',
+            'status' => CommunityAiScenario::STATUS_DRAFT,
+        ]);
+
+        app(CommunityAiScenarioPreparer::class)->prepare($scenario);
+
+        $scenario->refresh();
+        $steps = $scenario->steps()->orderBy('sequence')->get();
+        $this->assertSame(CommunityAiScenario::STATUS_REVIEW, $scenario->status);
+        $this->assertCount(3, $steps);
+        $this->assertSame('topic', $steps[0]->type);
+        $this->assertSame($topicPersona->id, $steps[0]->community_ai_persona_id);
+        $this->assertSame('Ручная тема без изменений', $steps[0]->draft_title);
+        $this->assertSame("Первый абзац.\n\nВторой абзац и вопрос?", $steps[0]->draft_body);
+        $this->assertSame('pending_review', $steps[0]->status);
+        $this->assertSame('comment', $steps[1]->type);
+        $this->assertSame('comment', $steps[2]->type);
+        $this->assertSame(3, $aiCall);
+        Http::assertNotSent(fn (HttpRequest $request): bool => str_starts_with($request->url(), 'https://platform-api2.max.ru'));
     }
 
     public function test_admin_can_open_scenario_workflow_page(): void

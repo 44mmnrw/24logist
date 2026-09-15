@@ -3,9 +3,11 @@
 namespace Tests\Feature;
 
 use App\Filament\Resources\CommunityPosts\CommunityPostResource;
+use App\Filament\Resources\CommunityPosts\Pages\CreateCommunityPost;
 use App\Filament\Resources\CommunityPosts\Pages\EditCommunityPost;
 use App\Filament\Resources\CommunityPosts\Pages\ListCommunityPosts;
 use App\Filament\Resources\CommunityPosts\Pages\ViewCommunityPost;
+use App\Models\CommunityAiPersona;
 use App\Models\CommunityCategory;
 use App\Models\CommunityModerationAction;
 use App\Models\CommunityPost;
@@ -13,6 +15,7 @@ use App\Models\CommunityReport;
 use App\Models\CommunityUser;
 use App\Models\User;
 use App\Services\Community\CommunityPostModerationService;
+use Database\Seeders\CommunityAiPersonaSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use InvalidArgumentException;
 use Livewire\Livewire;
@@ -162,6 +165,41 @@ class CommunityPostModerationTest extends TestCase
         $this->get(CommunityPostResource::getUrl('edit', ['record' => $post]))
             ->assertOk()
             ->assertSee('Содержание темы');
+    }
+
+    public function test_admin_can_publish_a_manual_topic_as_any_active_persona(): void
+    {
+        $this->seed(CommunityAiPersonaSeeder::class);
+        $admin = User::factory()->create();
+        $persona = CommunityAiPersona::query()->with('communityUser')->where('can_create_posts', true)->firstOrFail();
+        $category = CommunityCategory::query()->firstOrFail();
+        $publishedAt = now()->subDays(5)->setTime(14, 30)->setMicrosecond(0);
+        $this->actingAs($admin);
+
+        Livewire::test(CreateCommunityPost::class)
+            ->fillForm([
+                'community_user_id' => $persona->community_user_id,
+                'community_category_id' => $category->id,
+                'title' => 'Ручная публикация от персоны',
+                'body_markdown' => "Первый абзац.\n\n**Второй абзац.**",
+                'external_url' => null,
+                'published_at' => $publishedAt,
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors()
+            ->assertNotified();
+
+        $post = CommunityPost::query()->where('title', 'Ручная публикация от персоны')->firstOrFail();
+        $this->assertSame($persona->community_user_id, $post->community_user_id);
+        $this->assertSame(CommunityPost::STATUS_PUBLISHED, $post->status);
+        $this->assertSame($publishedAt->toDateTimeString(), $post->published_at->toDateTimeString());
+        $this->assertSame($publishedAt->toDateTimeString(), $post->created_at->toDateTimeString());
+        $this->assertSame('<p>Первый абзац.</p>'."\n".'<p><strong>Второй абзац.</strong></p>', $post->body_html);
+        $this->assertDatabaseHas('community_post_votes', [
+            'community_user_id' => $persona->community_user_id,
+            'community_post_id' => $post->id,
+            'value' => 1,
+        ]);
     }
 
     public function test_admin_edit_rerenders_markdown_and_is_audited(): void

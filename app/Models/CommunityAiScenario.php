@@ -8,6 +8,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CommunityAiScenario extends Model
 {
+    public const MODE_SOURCE = 'source';
+
+    public const MODE_MANUAL = 'manual';
+
+    public const MODE_LABELS = [
+        self::MODE_SOURCE => 'По сообщениям MAX',
+        self::MODE_MANUAL => 'Своя тема',
+    ];
+
     public const STATUS_DRAFT = 'draft';
 
     public const STATUS_QUEUED = 'queued';
@@ -45,8 +54,8 @@ class CommunityAiScenario extends Model
     ];
 
     protected $fillable = [
-        'community_category_id', 'source_ids', 'source_from', 'source_to', 'scan_keywords', 'title',
-        'editor_brief', 'status', 'planned_at', 'started_at', 'completed_at',
+        'mode', 'community_category_id', 'topic_persona_id', 'source_ids', 'source_from', 'source_to',
+        'scan_keywords', 'title', 'editor_brief', 'manual_topic_body', 'status', 'planned_at', 'started_at', 'completed_at',
         'last_error', 'settings',
     ];
 
@@ -67,6 +76,11 @@ class CommunityAiScenario extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(CommunityCategory::class, 'community_category_id');
+    }
+
+    public function topicPersona(): BelongsTo
+    {
+        return $this->belongsTo(CommunityAiPersona::class, 'topic_persona_id');
     }
 
     public function steps(): HasMany

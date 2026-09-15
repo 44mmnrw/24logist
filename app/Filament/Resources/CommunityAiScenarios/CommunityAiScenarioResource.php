@@ -7,6 +7,7 @@ use App\Filament\Resources\CommunityAiScenarios\Pages\EditCommunityAiScenario;
 use App\Filament\Resources\CommunityAiScenarios\Pages\ListCommunityAiScenarios;
 use App\Filament\Resources\CommunityAiScenarios\RelationManagers\StepsRelationManager;
 use App\Jobs\PrepareCommunityAiScenario;
+use App\Models\CommunityAiPersona;
 use App\Models\CommunityAiScenario;
 use App\Models\CommunityAiSource;
 use App\Services\Community\CommunityAiScenarioCleaner;
@@ -24,6 +25,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
@@ -49,6 +51,16 @@ class CommunityAiScenarioResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
+            Section::make('Тип сценария')
+                ->schema([
+                    Select::make('mode')
+                        ->label('Откуда взять тему')
+                        ->options(CommunityAiScenario::MODE_LABELS)
+                        ->default(CommunityAiScenario::MODE_SOURCE)
+                        ->required()
+                        ->live(),
+                ])
+                ->columnSpanFull(),
             Section::make('Исходные данные')
                 ->schema([
                     Select::make('source_ids')
@@ -56,7 +68,8 @@ class CommunityAiScenarioResource extends Resource
                         ->multiple()
                         ->options(fn (): array => CommunityAiSource::query()->where('is_active', true)->orderBy('name')->pluck('name', 'id')->all())
                         ->preload()
-                        ->required()
+                        ->default([])
+                        ->required(fn (Get $get): bool => $get('mode') !== CommunityAiScenario::MODE_MANUAL)
                         ->columnSpanFull(),
                     DateTimePicker::make('source_from')
                         ->label('Начало периода')
@@ -72,23 +85,62 @@ class CommunityAiScenarioResource extends Resource
                         ->placeholder('Например: ЭТрН, простой на погрузке')
                         ->helperText('Сообщения будут отобраны по любому из указанных слов или фраз. Для сохранения контекста добавятся соседние реплики. Оставьте пустым, чтобы анализировать весь период.')
                         ->columnSpanFull(),
+                ])
+                ->columns(2)
+                ->visible(fn (Get $get): bool => $get('mode') !== CommunityAiScenario::MODE_MANUAL)
+                ->columnSpanFull(),
+            Section::make('Тема и публикация')
+                ->schema([
+                    Select::make('topic_persona_id')
+                        ->label('Автор темы')
+                        ->options(fn (): array => CommunityAiPersona::query()
+                            ->with('communityUser')
+                            ->where('is_active', true)
+                            ->where('can_create_posts', true)
+                            ->whereHas('communityUser', fn ($query) => $query
+                                ->whereNull('deleted_at')
+                                ->whereNull('banned_at')
+                                ->where(fn ($query) => $query
+                                    ->whereNull('suspended_until')
+                                    ->orWhere('suspended_until', '<=', now())))
+                            ->get()
+                            ->mapWithKeys(fn (CommunityAiPersona $persona): array => [
+                                $persona->id => $persona->communityUser->displayName().' (@'.$persona->communityUser->username.')',
+                            ])
+                            ->all())
+                        ->searchable()
+                        ->preload()
+                        ->required(fn (Get $get): bool => $get('mode') === CommunityAiScenario::MODE_MANUAL)
+                        ->visible(fn (Get $get): bool => $get('mode') === CommunityAiScenario::MODE_MANUAL),
                     Select::make('community_category_id')
                         ->relationship('category', 'name', modifyQueryUsing: fn ($query) => $query->where('is_active', true)->where('posting_enabled', true))
                         ->label('Рубрика')
-                        ->placeholder('Выберет редактор'),
+                        ->placeholder(fn (Get $get): string => $get('mode') === CommunityAiScenario::MODE_MANUAL ? 'Выберите рубрику' : 'Выберет редактор')
+                        ->required(fn (Get $get): bool => $get('mode') === CommunityAiScenario::MODE_MANUAL),
                     DateTimePicker::make('planned_at')
                         ->label('Дата публикации темы')
                         ->seconds(false)
                         ->native(false)
                         ->helperText('Можно указать дату в прошлом. Тема получит эту дату, а комментарии — её плюс заданные задержки. Пусто — публикация начинается сейчас.'),
+                    TextInput::make('title')
+                        ->label(fn (Get $get): string => $get('mode') === CommunityAiScenario::MODE_MANUAL ? 'Заголовок темы' : 'Рабочее название')
+                        ->maxLength(180)
+                        ->required(fn (Get $get): bool => $get('mode') === CommunityAiScenario::MODE_MANUAL)
+                        ->columnSpanFull(),
+                    Textarea::make('manual_topic_body')
+                        ->label('Текст темы')
+                        ->rows(12)
+                        ->maxLength((int) config('community.limits.post_body', 20000))
+                        ->required(fn (Get $get): bool => $get('mode') === CommunityAiScenario::MODE_MANUAL)
+                        ->visible(fn (Get $get): bool => $get('mode') === CommunityAiScenario::MODE_MANUAL)
+                        ->columnSpanFull(),
+                    Textarea::make('editor_brief')
+                        ->label(fn (Get $get): string => $get('mode') === CommunityAiScenario::MODE_MANUAL ? 'Пожелания к обсуждению' : 'Редакторский бриф')
+                        ->helperText(fn (Get $get): ?string => $get('mode') === CommunityAiScenario::MODE_MANUAL ? 'Необязательно: укажите, какие стороны вопроса должны обсудить персонажи.' : null)
+                        ->rows(8)
+                        ->columnSpanFull(),
                 ])
                 ->columns(2)
-                ->columnSpanFull(),
-            Section::make('Редакторский бриф')
-                ->schema([
-                    TextInput::make('title')->label('Рабочее название')->maxLength(180)->columnSpanFull(),
-                    Textarea::make('editor_brief')->label('Бриф')->rows(8)->columnSpanFull(),
-                ])
                 ->columnSpanFull(),
             Section::make('Состояние')
                 ->schema([
@@ -104,10 +156,16 @@ class CommunityAiScenarioResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('title')->label('Сценарий')->placeholder('Без названия')->searchable()->wrap(),
+                TextColumn::make('mode')->label('Тип')->badge()->formatStateUsing(fn (string $state): string => CommunityAiScenario::MODE_LABELS[$state] ?? $state),
                 TextColumn::make('status')->label('Статус')->badge()->formatStateUsing(fn (string $state): string => CommunityAiScenario::STATUS_LABELS[$state] ?? $state)->color(fn (string $state): string => self::statusColor($state)),
                 TextColumn::make('category.name')->label('Рубрика')->placeholder('—'),
                 TextColumn::make('steps_count')->label('Шагов')->counts('steps'),
-                TextColumn::make('source_from')->label('Период чатов')->dateTime('d.m.Y H:i')->description(fn (CommunityAiScenario $record): string => 'до '.$record->source_to->format('d.m.Y H:i')),
+                TextColumn::make('source_from')
+                    ->label('Период чатов')
+                    ->state(fn (CommunityAiScenario $record) => $record->mode === CommunityAiScenario::MODE_MANUAL ? null : $record->source_from)
+                    ->dateTime('d.m.Y H:i')
+                    ->description(fn (CommunityAiScenario $record): ?string => $record->mode === CommunityAiScenario::MODE_MANUAL ? null : 'до '.$record->source_to->format('d.m.Y H:i'))
+                    ->placeholder('—'),
                 TextColumn::make('scan_keywords')
                     ->label('Ключевые слова')
                     ->badge()
@@ -132,11 +190,15 @@ class CommunityAiScenarioResource extends Resource
     {
         return [
             Action::make('prepare')
-                ->label('Сканировать и создать черновики')
+                ->label(fn (CommunityAiScenario $record): string => $record->mode === CommunityAiScenario::MODE_MANUAL
+                    ? 'Создать черновики обсуждения'
+                    : 'Сканировать и создать черновики')
                 ->icon(Heroicon::OutlinedCpuChip)
                 ->color('primary')
                 ->requiresConfirmation()
-                ->modalDescription('Сообщения будут импортированы из MAX, а затем Timeweb AI создаст бриф и черновики. Ничего не будет опубликовано.')
+                ->modalDescription(fn (CommunityAiScenario $record): string => $record->mode === CommunityAiScenario::MODE_MANUAL
+                    ? 'Введённая тема останется без изменений. Timeweb AI выберет подходящих персонажей и подготовит черновики комментариев. Ничего не будет опубликовано.'
+                    : 'Сообщения будут импортированы из MAX, а затем Timeweb AI создаст бриф и черновики. Ничего не будет опубликовано.')
                 ->visible(fn (CommunityAiScenario $record): bool => in_array($record->status, [CommunityAiScenario::STATUS_DRAFT, CommunityAiScenario::STATUS_REVIEW, CommunityAiScenario::STATUS_FAILED], true))
                 ->action(function (CommunityAiScenario $record): void {
                     $record->update(['status' => CommunityAiScenario::STATUS_QUEUED, 'last_error' => null]);

@@ -10,6 +10,7 @@ use App\Models\CommunityAiSource;
 use App\Models\CommunityAiSourceMessage;
 use App\Models\CommunityCategory;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use RuntimeException;
 use Throwable;
@@ -35,27 +36,15 @@ final class CommunityAiScenarioPreparer
         ]);
 
         try {
-            $sources = $this->sources($scenario);
-            foreach ($sources as $source) {
-                if (data_get($source->settings, 'collection_mode') === 'bot_api') {
-                    $this->importer->import($source, $scenario->source_from, $scenario->source_to);
-                }
-            }
-
-            $contextData = $this->sourceContext($scenario, $sources);
-            $context = $contextData['text'];
-            if ($context === '') {
-                throw new RuntimeException($this->normalizedKeywords($scenario)->isNotEmpty()
-                    ? 'За выбранный период не найдено сообщений по заданным ключевым словам.'
-                    : 'За выбранный период не найдено текстовых сообщений.');
-            }
-
             $personas = CommunityAiPersona::query()
                 ->with('communityUser')
                 ->where('is_active', true)
                 ->whereHas('communityUser', fn ($query) => $query
                     ->whereNull('deleted_at')
-                    ->whereNull('banned_at'))
+                    ->whereNull('banned_at')
+                    ->where(fn ($query) => $query
+                        ->whereNull('suspended_until')
+                        ->orWhere('suspended_until', '<=', now())))
                 ->orderBy('id')
                 ->get();
 
@@ -63,35 +52,11 @@ final class CommunityAiScenarioPreparer
                 throw new RuntimeException('Для сценария нужно минимум три активных AI-персоны.');
             }
 
-            $editor = $personas->firstOrFail();
-            $plan = $this->generatePlan($scenario, $editor, $personas, $context);
-            $category = $this->resolveCategory($scenario, (string) ($plan['category_slug'] ?? ''));
-            $cast = $this->resolveCast($plan, $personas);
-
-            $scenario->generations()->whereNotNull('community_ai_scenario_step_id')->delete();
-            $scenario->steps()->delete();
-
-            $brief = [
-                'summary' => trim((string) ($plan['summary'] ?? '')),
-                'question' => trim((string) ($plan['question'] ?? '')),
-                'source_message_count' => $contextData['count'],
-                'keyword_match_count' => $contextData['matched_count'],
-                'scan_keywords' => $this->normalizedKeywords($scenario)->values()->all(),
-            ];
-
-            $scenario->update([
-                'community_category_id' => $category->id,
-                'title' => Str::limit(trim((string) ($plan['title'] ?? 'Обсуждение из отраслевых чатов')), 180, ''),
-                'editor_brief' => json_encode($brief, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
-                'settings' => array_merge($scenario->settings ?? [], [
-                    'editor_persona_id' => $editor->id,
-                    'source_message_count' => $brief['source_message_count'],
-                    'keyword_match_count' => $brief['keyword_match_count'],
-                ]),
-            ]);
-
-            $steps = $this->createSteps($scenario, $cast);
-            $this->generateDrafts($scenario->fresh(), $steps);
+            if ($scenario->mode === CommunityAiScenario::MODE_MANUAL) {
+                $this->prepareManualTopic($scenario, $personas);
+            } else {
+                $this->prepareFromSources($scenario, $personas);
+            }
 
             $scenario->update([
                 'status' => CommunityAiScenario::STATUS_REVIEW,
@@ -105,6 +70,108 @@ final class CommunityAiScenarioPreparer
 
             throw $exception;
         }
+    }
+
+    /** @param EloquentCollection<int, CommunityAiPersona> $personas */
+    private function prepareFromSources(CommunityAiScenario $scenario, EloquentCollection $personas): void
+    {
+        $sources = $this->sources($scenario);
+        foreach ($sources as $source) {
+            if (data_get($source->settings, 'collection_mode') === 'bot_api') {
+                $this->importer->import($source, $scenario->source_from, $scenario->source_to);
+            }
+        }
+
+        $contextData = $this->sourceContext($scenario, $sources);
+        $context = $contextData['text'];
+        if ($context === '') {
+            throw new RuntimeException($this->normalizedKeywords($scenario)->isNotEmpty()
+                ? 'За выбранный период не найдено сообщений по заданным ключевым словам.'
+                : 'За выбранный период не найдено текстовых сообщений.');
+        }
+
+        $editor = $personas->firstOrFail();
+        $plan = $this->generatePlan($scenario, $editor, $personas, $context);
+        $category = $this->resolveCategory($scenario, (string) ($plan['category_slug'] ?? ''));
+        $cast = $this->resolveCast($plan, $personas);
+
+        $scenario->generations()->whereNotNull('community_ai_scenario_step_id')->delete();
+        $scenario->steps()->delete();
+
+        $brief = [
+            'summary' => trim((string) ($plan['summary'] ?? '')),
+            'question' => trim((string) ($plan['question'] ?? '')),
+            'source_message_count' => $contextData['count'],
+            'keyword_match_count' => $contextData['matched_count'],
+            'scan_keywords' => $this->normalizedKeywords($scenario)->values()->all(),
+        ];
+
+        $scenario->update([
+            'community_category_id' => $category->id,
+            'title' => Str::limit(trim((string) ($plan['title'] ?? 'Обсуждение из отраслевых чатов')), 180, ''),
+            'editor_brief' => json_encode($brief, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
+            'settings' => array_merge($scenario->settings ?? [], [
+                'editor_persona_id' => $editor->id,
+                'source_message_count' => $brief['source_message_count'],
+                'keyword_match_count' => $brief['keyword_match_count'],
+            ]),
+        ]);
+
+        $steps = $this->createSteps($scenario, $cast);
+        $this->generateDrafts($scenario->fresh(), $steps);
+    }
+
+    /** @param EloquentCollection<int, CommunityAiPersona> $personas */
+    private function prepareManualTopic(CommunityAiScenario $scenario, EloquentCollection $personas): void
+    {
+        $title = trim((string) $scenario->title);
+        $body = trim((string) $scenario->manual_topic_body);
+        if ($title === '' || $body === '') {
+            throw new RuntimeException('Для ручного сценария заполните заголовок и текст темы.');
+        }
+
+        $category = CommunityCategory::query()
+            ->active()
+            ->where('posting_enabled', true)
+            ->find($scenario->community_category_id);
+        if ($category === null) {
+            throw new RuntimeException('Для ручного сценария выберите доступную рубрику.');
+        }
+
+        $topicPersona = $personas->firstWhere('id', (int) $scenario->topic_persona_id);
+        if (! $topicPersona instanceof CommunityAiPersona || ! $topicPersona->can_create_posts) {
+            throw new RuntimeException('Выбранный автор темы недоступен для публикации.');
+        }
+
+        $editor = $personas->firstOrFail();
+        $plan = $this->generateManualDiscussionPlan($scenario, $editor, $personas, $topicPersona, $title, $body);
+        $cast = $this->resolveManualCast($plan, $personas, $topicPersona);
+
+        $scenario->generations()->whereNotNull('community_ai_scenario_step_id')->delete();
+        $scenario->steps()->delete();
+        $scenario->update([
+            'community_category_id' => $category->id,
+            'title' => Str::limit($title, 180, ''),
+            'manual_topic_body' => Str::limit($body, (int) config('community.limits.post_body', 20000), ''),
+            'settings' => array_merge($scenario->settings ?? [], [
+                'editor_persona_id' => $editor->id,
+                'source_message_count' => 0,
+                'keyword_match_count' => 0,
+                'manual_topic' => true,
+            ]),
+        ]);
+
+        $steps = $this->createSteps($scenario, $cast);
+        $topicStep = $steps->firstOrFail();
+        $topicStep->update([
+            'draft_title' => $scenario->title,
+            'draft_body' => $scenario->manual_topic_body,
+            'status' => 'pending_review',
+            'generated_at' => now(),
+            'last_error' => null,
+        ]);
+
+        $this->generateDrafts($scenario->fresh(), $steps, manualTopic: true);
     }
 
     /** @return EloquentCollection<int, CommunityAiSource> */
@@ -171,6 +238,53 @@ PROMPT,
         return $this->call($scenario, null, $editor, 'brief', $messages, 1400)['json'];
     }
 
+    /** @param EloquentCollection<int, CommunityAiPersona> $personas */
+    private function generateManualDiscussionPlan(
+        CommunityAiScenario $scenario,
+        CommunityAiPersona $editor,
+        EloquentCollection $personas,
+        CommunityAiPersona $topicPersona,
+        string $title,
+        string $body,
+    ): array {
+        $directory = $personas
+            ->reject(fn (CommunityAiPersona $persona): bool => $persona->is($topicPersona) || ! $persona->can_create_comments)
+            ->map(fn (CommunityAiPersona $persona): array => [
+                'slug' => $persona->slug,
+                'name' => $persona->communityUser->displayName(),
+                'role' => $persona->role_description,
+                'character' => Str::limit($persona->personality_description, 350),
+            ])
+            ->values()
+            ->all();
+
+        $messages = [
+            [
+                'role' => 'system',
+                'content' => <<<'PROMPT'
+Ты — внутренний редактор логистического сообщества. Пользователь уже написал тему, её текст менять нельзя. Выбери от 2 до 4 подходящих персонажей для содержательного обсуждения. У каждого должна быть собственная задача и новый угол зрения. Не выбирай автора темы и не планируй повторяющиеся комментарии.
+
+Верни только JSON:
+{
+  "participants": [
+    {"persona_slug": "slug", "purpose": "какой новый вклад он внесёт", "delay_minutes": 15}
+  ]
+}
+Задержки — абсолютные минуты после публикации темы: от 5 до 1440, без совпадений.
+PROMPT,
+            ],
+            [
+                'role' => 'user',
+                'content' => "Автор темы: {$topicPersona->communityUser->displayName()}\n"
+                    ."Заголовок: {$title}\nТекст:\n{$body}\n\n"
+                    ."Пожелания редактора:\n".trim((string) $scenario->editor_brief)."\n\n"
+                    .'Доступные комментаторы:'."\n".json_encode($directory, JSON_UNESCAPED_UNICODE),
+            ],
+        ];
+
+        return $this->call($scenario, null, $editor, 'brief', $messages, 1000)['json'];
+    }
+
     /**
      * @param  array<string, mixed>  $plan
      * @param  EloquentCollection<int, CommunityAiPersona>  $personas
@@ -231,6 +345,69 @@ PROMPT,
         return $result;
     }
 
+    /**
+     * @param  array<string, mixed>  $plan
+     * @param  EloquentCollection<int, CommunityAiPersona>  $personas
+     * @return list<array{persona: CommunityAiPersona, purpose: string, delay: int}>
+     */
+    private function resolveManualCast(
+        array $plan,
+        EloquentCollection $personas,
+        CommunityAiPersona $topicPersona,
+    ): array {
+        $bySlug = $personas->keyBy('slug');
+        $comments = collect(is_array($plan['participants'] ?? null) ? $plan['participants'] : [])
+            ->filter(fn ($item): bool => is_array($item) && isset($item['persona_slug']))
+            ->map(fn (array $item): array => [
+                'persona' => $bySlug->get((string) $item['persona_slug']),
+                'purpose' => Str::limit(trim((string) ($item['purpose'] ?? '')), 255, ''),
+                'delay' => (int) ($item['delay_minutes'] ?? 0),
+            ])
+            ->filter(fn (array $item): bool => $item['persona'] instanceof CommunityAiPersona
+                && ! $item['persona']->is($topicPersona)
+                && $item['persona']->can_create_comments)
+            ->unique(fn (array $item): int => $item['persona']->id)
+            ->take(4)
+            ->values();
+
+        foreach ($personas as $persona) {
+            if ($comments->count() >= 2 || $persona->is($topicPersona) || ! $persona->can_create_comments
+                || $comments->contains(fn (array $item): bool => $item['persona']->is($persona))) {
+                continue;
+            }
+
+            $comments->push([
+                'persona' => $persona,
+                'purpose' => 'Добавляет отдельный практический взгляд на тему',
+                'delay' => 0,
+            ]);
+        }
+
+        if ($comments->count() < 2) {
+            throw new RuntimeException('Для обсуждения нужны минимум две активные персоны с правом комментировать.');
+        }
+
+        $result = [[
+            'persona' => $topicPersona,
+            'purpose' => 'Публикует заданную редактором тему без изменений',
+            'delay' => 0,
+        ]];
+        $minimumDelay = 5;
+        $fallbackDelays = [12, 35, 80, 180];
+
+        foreach ($comments->values() as $index => $item) {
+            $delay = max($minimumDelay, min(1440, (int) $item['delay'] ?: $fallbackDelays[$index]));
+            $result[] = [
+                'persona' => $item['persona'],
+                'purpose' => $item['purpose'] ?: 'Добавляет отдельный практический взгляд',
+                'delay' => $delay,
+            ];
+            $minimumDelay = $delay + 5;
+        }
+
+        return $result;
+    }
+
     /** @param list<array{persona: CommunityAiPersona, purpose: string, delay: int}> $cast
      * @return EloquentCollection<int, CommunityAiScenarioStep>
      */
@@ -252,12 +429,22 @@ PROMPT,
     }
 
     /** @param EloquentCollection<int, CommunityAiScenarioStep> $steps */
-    private function generateDrafts(CommunityAiScenario $scenario, EloquentCollection $steps): void
-    {
+    private function generateDrafts(
+        CommunityAiScenario $scenario,
+        EloquentCollection $steps,
+        bool $manualTopic = false,
+    ): void {
         $publishedContext = '';
         foreach ($steps as $step) {
             $persona = $step->persona;
             $isTopic = $step->type === 'topic';
+
+            if ($isTopic && $manualTopic) {
+                $publishedContext = "Тема: {$step->draft_title}\n{$step->draft_body}\n\n";
+
+                continue;
+            }
+
             $messages = [
                 ['role' => 'system', 'content' => $persona->system_prompt],
                 ['role' => 'system', 'content' => <<<'PROMPT'
@@ -354,7 +541,7 @@ PROMPT],
     }
 
     /**
-     * @param EloquentCollection<int, CommunityAiSource> $sources
+     * @param  EloquentCollection<int, CommunityAiSource>  $sources
      * @return array{text: string, count: int, matched_count: int}
      */
     private function sourceContext(CommunityAiScenario $scenario, EloquentCollection $sources): array
@@ -428,7 +615,7 @@ PROMPT],
         ];
     }
 
-    private function normalizedKeywords(CommunityAiScenario $scenario): \Illuminate\Support\Collection
+    private function normalizedKeywords(CommunityAiScenario $scenario): Collection
     {
         return collect($scenario->scan_keywords ?? [])
             ->filter(fn ($keyword): bool => is_string($keyword))

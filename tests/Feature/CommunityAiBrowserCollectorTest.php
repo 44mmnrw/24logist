@@ -114,4 +114,27 @@ class CommunityAiBrowserCollectorTest extends TestCase
         $this->assertSame(CommunityAiScenario::STATUS_QUEUED, $scenario->fresh()->status);
         Queue::assertPushed(PrepareCommunityAiScenario::class, fn ($job): bool => $job->scenarioId === $scenario->id);
     }
+
+    public function test_manual_scenarios_are_not_exposed_to_the_browser_collector(): void
+    {
+        $manualScenario = CommunityAiScenario::query()->create([
+            'mode' => CommunityAiScenario::MODE_MANUAL,
+            'source_ids' => [],
+            'source_from' => now(),
+            'source_to' => now(),
+            'title' => 'Ручная тема',
+            'manual_topic_body' => 'Текст ручной темы.',
+            'status' => CommunityAiScenario::STATUS_DRAFT,
+        ]);
+
+        $this->withToken(self::TOKEN)
+            ->getJson(route('community.ai.collector.scenarios'))
+            ->assertOk()
+            ->assertJsonMissing(['id' => $manualScenario->id]);
+
+        $this->withToken(self::TOKEN)
+            ->postJson(route('community.ai.collector.prepare', $manualScenario))
+            ->assertUnprocessable()
+            ->assertJsonPath('message', 'Ручной сценарий запускается из админки.');
+    }
 }

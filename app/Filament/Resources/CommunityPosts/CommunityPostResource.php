@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources\CommunityPosts;
 
+use App\Filament\Resources\CommunityPosts\Pages\CreateCommunityPost;
 use App\Filament\Resources\CommunityPosts\Pages\EditCommunityPost;
 use App\Filament\Resources\CommunityPosts\Pages\ListCommunityPosts;
 use App\Filament\Resources\CommunityPosts\Pages\ViewCommunityPost;
 use App\Filament\Resources\CommunityPosts\RelationManagers\ModerationActionsRelationManager;
 use App\Filament\Resources\CommunityPosts\RelationManagers\ReportsRelationManager;
+use App\Models\CommunityAiPersona;
 use App\Models\CommunityPost;
 use App\Services\Community\CommunityPostModerationService;
 use BackedEnum;
@@ -17,6 +19,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -61,13 +64,35 @@ class CommunityPostResource extends Resource
         return $schema->components([
             Section::make('Содержание темы')
                 ->schema([
+                    Select::make('community_user_id')
+                        ->label('Персона-автор')
+                        ->options(fn (): array => CommunityAiPersona::query()
+                            ->with('communityUser')
+                            ->where('is_active', true)
+                            ->where('can_create_posts', true)
+                            ->whereHas('communityUser', fn ($query) => $query
+                                ->whereNull('deleted_at')
+                                ->whereNull('banned_at')
+                                ->where(fn ($query) => $query
+                                    ->whereNull('suspended_until')
+                                    ->orWhere('suspended_until', '<=', now())))
+                            ->get()
+                            ->mapWithKeys(fn (CommunityAiPersona $persona): array => [
+                                $persona->community_user_id => $persona->communityUser->displayName().' (@'.$persona->communityUser->username.')',
+                            ])
+                            ->all())
+                        ->searchable()
+                        ->preload()
+                        ->required()
+                        ->visibleOn('create')
+                        ->dehydrated(fn (string $operation): bool => $operation === 'create'),
                     TextInput::make('title')
                         ->label('Заголовок')
                         ->required()
                         ->maxLength(180)
                         ->columnSpanFull(),
                     Select::make('community_category_id')
-                        ->relationship('category', 'name')
+                        ->relationship('category', 'name', modifyQueryUsing: fn ($query) => $query->where('is_active', true)->where('posting_enabled', true))
                         ->label('Рубрика')
                         ->required(),
                     Textarea::make('body_markdown')
@@ -94,7 +119,15 @@ class CommunityPostResource extends Resource
                         ->dehydrated(false),
                     TextInput::make('score')->label('Рейтинг')->numeric()->disabled()->dehydrated(false),
                     TextInput::make('comments_count')->label('Комментариев')->numeric()->disabled()->dehydrated(false),
-                    TextInput::make('published_at')->label('Опубликована')->disabled()->dehydrated(false),
+                    DateTimePicker::make('published_at')
+                        ->label('Дата публикации')
+                        ->seconds(false)
+                        ->native(false)
+                        ->default(now())
+                        ->maxDate(now())
+                        ->helperText('Можно опубликовать текущей датой или задним числом.')
+                        ->disabledOn('edit')
+                        ->dehydrated(fn (string $operation): bool => $operation === 'create'),
                     TextInput::make('locked_at')->label('Обсуждение закрыто')->disabled()->dehydrated(false),
                 ])
                 ->columns(2)
@@ -380,6 +413,7 @@ class CommunityPostResource extends Resource
     {
         return [
             'index' => ListCommunityPosts::route('/'),
+            'create' => CreateCommunityPost::route('/create'),
             'view' => ViewCommunityPost::route('/{record}'),
             'edit' => EditCommunityPost::route('/{record}/edit'),
         ];
@@ -405,6 +439,6 @@ class CommunityPostResource extends Resource
 
     public static function canCreate(): bool
     {
-        return false;
+        return true;
     }
 }
