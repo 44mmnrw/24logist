@@ -434,6 +434,30 @@ document.addEventListener('keydown', (event) => {
     toggle?.focus();
 });
 
+const closeAwardMenus = (except = null) => {
+    document.querySelectorAll('details.community-award-menu[open]').forEach((details) => {
+        if (details !== except) details.open = false;
+    });
+};
+
+document.addEventListener('click', (event) => {
+    if (!event.target.closest('.community-award-menu')) closeAwardMenus();
+});
+
+document.addEventListener('toggle', (event) => {
+    const details = event.target;
+    if (!details.matches?.('details.community-award-menu') || !details.open) return;
+    closeAwardMenus(details);
+}, true);
+
+document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    const details = document.querySelector('details.community-award-menu[open]');
+    if (!details) return;
+    details.open = false;
+    details.querySelector('summary')?.focus();
+});
+
 document.addEventListener('click', async (event) => {
     const button = event.target.closest('[data-community-reactions] button[data-code]');
     if (!button) return;

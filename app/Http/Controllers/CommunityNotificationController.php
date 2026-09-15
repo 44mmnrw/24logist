@@ -24,7 +24,8 @@ class CommunityNotificationController extends Controller
         abort_unless($notification->community_user_id === auth('community')->id(), 403);
         $notification->update(['read_at' => now()]);
 
-        return redirect()->away((string) ($notification->data['url'] ?? route('community.notifications')));
+        return redirect((string) ($notification->data['url'] ?? route('community.notifications')))
+            ->with('status', (string) ($notification->data['message'] ?? 'Уведомление прочитано.'));
     }
 
     public function readAll(): RedirectResponse

@@ -64,6 +64,9 @@ class CommunityActionController extends Controller
 
         $url = $type === 'post' ? $target->getUrl() : $target->post->getUrl().'#comment-'.$id;
         $label = CommunitySocialService::AWARDS[$data['code']]['label'];
+        $notificationTitle = ($request->boolean('is_anonymous')
+            ? 'Вам анонимно вручили награду'
+            : $user->displayName().' вручил вам награду').' «'.$label.'»';
         CommunityNotification::query()->create([
             'community_user_id' => $target->community_user_id,
             'actor_id' => $request->boolean('is_anonymous') ? null : $user->id,
@@ -71,12 +74,16 @@ class CommunityActionController extends Controller
             'target_type' => 'award',
             'target_id' => $awardId,
             'data' => [
-                'message' => ($request->boolean('is_anonymous') ? 'Вам анонимно вручили награду' : $user->displayName().' вручил вам награду').' «'.$label.'»'.($message !== '' ? ': '.$message : ''),
+                'title' => $notificationTitle,
+                'body' => $message !== '' ? $message : null,
+                'message' => $notificationTitle.($message !== '' ? ': '.$message : ''),
                 'url' => $url,
             ],
         ]);
 
-        return redirect($url)->with('status', 'Награда вручена. Спасибо за поддержку участника!');
+        return redirect($url)->with('status', $message !== ''
+            ? 'Награда вручена. Сообщение отправлено автору в уведомления.'
+            : 'Награда вручена.');
     }
 
     public function removeAward(Request $request, CommunitySocialService $social): RedirectResponse

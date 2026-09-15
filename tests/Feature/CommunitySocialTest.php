@@ -93,6 +93,8 @@ class CommunitySocialTest extends TestCase
         $notification = $author->communityNotifications()->firstOrFail();
         $this->assertNull($notification->actor_id);
         $this->assertStringNotContainsString('thankful_reader', $notification->data['message']);
+        $this->assertSame('Очень помогло', $notification->data['body']);
+        $this->assertSame('Вам анонимно вручили награду «Золотой ответ»', $notification->data['title']);
 
         $this->post(route('community.award'), [
             'target_type' => 'post', 'target_id' => $post->id, 'code' => 'fire',

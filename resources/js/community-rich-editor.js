@@ -12,7 +12,7 @@ function syncBody(container) {
     if (!editor || !textarea) return;
     textarea.value = editor.getMarkdown();
     const error = container.querySelector('[data-rich-editor-error]');
-    if (error) error.hidden = textarea.value.length <= 5000;
+    if (error) error.hidden = textarea.maxLength < 0 || textarea.value.length <= textarea.maxLength;
 }
 
 function updateToolbar(container) {
@@ -58,7 +58,10 @@ function mount(container) {
     error.dataset.richEditorError = '';
     error.className = 'community-rich-editor__error';
     error.setAttribute('role', 'alert');
-    error.textContent = 'Комментарий не может быть длиннее 5 000 символов.';
+    const maxLength = textarea.maxLength;
+    error.textContent = maxLength > 0
+        ? `Текст не может быть длиннее ${new Intl.NumberFormat('ru-RU').format(maxLength)} символов.`
+        : 'Текст слишком длинный.';
     error.hidden = true;
     surface.after(error);
     textarea.hidden = true;

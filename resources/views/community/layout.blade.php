@@ -53,7 +53,7 @@
                             <form method="POST" action="{{ route('community.logout') }}">@csrf<button type="submit">Выйти</button></form>
                         </nav>
                     </details>
-                    <a class="btn btn--primary btn--sm community-toolbar__post" href="{{ route('community.posts.create') }}"><x-community.icon name="plus" size="18" /><span class="community-toolbar__post-label">Создать пост</span><span class="community-toolbar__post-short">Пост</span></a>
+                    <a class="btn btn--sm community-toolbar__post" href="{{ route('community.posts.create') }}"><x-community.icon name="message-plus" size="18" /><span class="community-toolbar__post-label">Создать</span></a>
                 </div>
             @else
                 <div class="community-toolbar__actions community-toolbar__guest">

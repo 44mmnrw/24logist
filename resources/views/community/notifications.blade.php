@@ -8,7 +8,10 @@
     <div class="community-notification-list">
         @forelse($notifications as $notification)
             <a @class(['community-notification', 'is-unread' => !$notification->read_at]) href="{{ route('community.notifications.read', $notification) }}">
-                <strong>{{ $notification->data['message'] ?? 'Новое уведомление' }}</strong>
+                <span class="community-notification__content">
+                    <strong>{{ $notification->data['title'] ?? $notification->data['message'] ?? 'Новое уведомление' }}</strong>
+                    @if (!empty($notification->data['body']))<span>{{ $notification->data['body'] }}</span>@endif
+                </span>
                 <time>{{ \App\Support\CommunityDate::relative($notification->created_at) }}</time>
             </a>
         @empty<div class="community-empty">Новых уведомлений нет.</div>@endforelse
