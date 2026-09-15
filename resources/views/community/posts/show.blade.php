@@ -103,7 +103,7 @@
 
     <aside class="community-sidebar community-topic-sidebar" aria-label="О сообществе">
         <div class="community-side-card community-about-card">
-            <span class="community-side-card__eyebrow">24Logist</span>
+            <span class="community-side-card__eyebrow">логистРу</span>
             <h2>Сообщество о логистике</h2>
             <p>Практические вопросы перевозчиков, экспедиторов, грузовладельцев и логистов.</p>
             <dl class="community-about-card__stats">
