@@ -3,7 +3,7 @@
   "name": "ЛогистРу — сборщик MAX",
   "version": "1.0.0",
   "description": "Собирает сообщения из открытого чата MAX для AI-сценариев ЛогистРу.",
-  "permissions": ["activeTab", "storage"],
+  "permissions": ["activeTab", "storage", "tabs"],
   "host_permissions": [
     "https://web.max.ru/*",
     "https://24logist.ru/*",
@@ -21,8 +21,7 @@
     }
   ],
   "action": {
-    "default_title": "Сборщик MAX",
-    "default_popup": "popup.html"
+    "default_title": "Открыть сборщик MAX"
   },
   "browser_specific_settings": {
     "gecko": {

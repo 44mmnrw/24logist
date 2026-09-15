@@ -87,7 +87,11 @@ async function collectCurrentChat() {
   setBusy(true);
   setStatus('Начинаю чтение загруженной истории MAX…');
   try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const maxTabs = await chrome.tabs.query({ url: 'https://web.max.ru/*' });
+    const tab = maxTabs.sort((left, right) => (right.lastAccessed || 0) - (left.lastAccessed || 0))[0];
+    if (!tab?.url || tab.id === undefined) {
+      throw new Error('Сначала откройте нужный чат в отдельной вкладке web.max.ru.');
+    }
     const chatId = new URL(tab.url).pathname.match(/^\/(-?\d+)/)?.[1];
     const source = scenario.sources.find((item) => item.chat_id === chatId);
     if (!source) throw new Error('Открытый чат не выбран в этом сценарии.');

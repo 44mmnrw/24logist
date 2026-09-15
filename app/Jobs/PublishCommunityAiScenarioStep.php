@@ -11,6 +11,7 @@ use App\Models\CommunityPostVote;
 use App\Services\Community\CommunityCommentCounter;
 use App\Services\Community\CommunityContentRenderer;
 use App\Services\Community\CommunityRanking;
+use Carbon\CarbonInterface;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
@@ -51,6 +52,12 @@ class PublishCommunityAiScenarioStep implements ShouldQueue
                 return;
             }
 
+            if ($step->scheduled_at?->isFuture() === true) {
+                self::dispatch($step->id)->delay($step->scheduled_at);
+
+                return;
+            }
+
             $persona = $step->persona;
             $user = $persona->communityUser;
             if (! $persona->is_active || $user === null || $user->trashed() || $user->isRestricted()) {
@@ -58,18 +65,19 @@ class PublishCommunityAiScenarioStep implements ShouldQueue
             }
 
             $this->assertDailyLimit($step);
+            $publishedAt = $step->scheduled_at ?? now();
 
             if ($step->type === 'topic') {
-                $post = $this->publishTopic($step, $renderer);
+                $post = $this->publishTopic($step, $renderer, $publishedAt);
                 $step->community_post_id = $post->id;
             } else {
-                $comment = $this->publishComment($step, $renderer, $counter);
+                $comment = $this->publishComment($step, $renderer, $counter, $publishedAt);
                 $step->community_post_id = $comment->community_post_id;
                 $step->community_comment_id = $comment->id;
             }
 
             $step->status = 'published';
-            $step->published_at = now();
+            $step->published_at = $publishedAt;
             $step->last_error = null;
             $step->save();
 
@@ -93,10 +101,13 @@ class PublishCommunityAiScenarioStep implements ShouldQueue
         });
     }
 
-    private function publishTopic(CommunityAiScenarioStep $step, CommunityContentRenderer $renderer): CommunityPost
+    private function publishTopic(
+        CommunityAiScenarioStep $step,
+        CommunityContentRenderer $renderer,
+        CarbonInterface $publishedAt,
+    ): CommunityPost
     {
         $scenario = $step->scenario;
-        $publishedAt = now();
         $post = CommunityPost::query()->create([
             'community_user_id' => $step->persona->community_user_id,
             'community_category_id' => $scenario->community_category_id,
@@ -112,6 +123,7 @@ class PublishCommunityAiScenarioStep implements ShouldQueue
             'community_user_id' => $step->persona->community_user_id,
             'community_post_id' => $post->id,
         ], ['value' => 1]);
+        $post->forceFill(['created_at' => $publishedAt])->saveQuietly();
 
         return $post;
     }
@@ -120,6 +132,7 @@ class PublishCommunityAiScenarioStep implements ShouldQueue
         CommunityAiScenarioStep $step,
         CommunityContentRenderer $renderer,
         CommunityCommentCounter $counter,
+        CarbonInterface $publishedAt,
     ): CommunityComment {
         $topicStep = $step->scenario->steps()->where('type', 'topic')->first();
         $post = $topicStep?->community_post_id
@@ -147,6 +160,7 @@ class PublishCommunityAiScenarioStep implements ShouldQueue
         if ($parentComment === null) {
             $comment->update(['root_id' => $comment->id]);
         }
+        $comment->forceFill(['created_at' => $publishedAt])->saveQuietly();
         CommunityCommentVote::query()->firstOrCreate([
             'community_user_id' => $step->persona->community_user_id,
             'community_comment_id' => $comment->id,

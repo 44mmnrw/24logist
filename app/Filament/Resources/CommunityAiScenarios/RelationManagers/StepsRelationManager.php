@@ -6,6 +6,8 @@ use App\Models\CommunityAiPersona;
 use App\Models\CommunityAiScenarioStep;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -31,7 +33,18 @@ class StepsRelationManager extends RelationManager
                 )->all())
                 ->required(),
             Select::make('type')->label('Тип')->options(['topic' => 'Тема', 'comment' => 'Комментарий'])->disabled()->dehydrated(),
-            TextInput::make('planned_delay_minutes')->label('Задержка, минут')->numeric()->minValue(0)->maxValue(1440)->required(),
+            TextInput::make('planned_delay_minutes')
+                ->label('Задержка, минут')
+                ->numeric()
+                ->minValue(0)
+                ->maxValue(1440)
+                ->required()
+                ->helperText('Используется, только если точная дата не задана.'),
+            DateTimePicker::make('scheduled_at')
+                ->label('Точная дата публикации')
+                ->seconds(false)
+                ->native(false)
+                ->helperText('Можно указать дату в прошлом: материал опубликуется сразу, но в сообществе получит эту дату.'),
             TextInput::make('purpose')->label('Роль в обсуждении')->maxLength(255)->columnSpanFull(),
             TextInput::make('draft_title')->label('Заголовок')->maxLength(180)->visible(fn (?CommunityAiScenarioStep $record): bool => $record?->type === 'topic')->columnSpanFull(),
             Textarea::make('draft_body')->label('Текст')->rows(10)->required()->columnSpanFull(),
@@ -45,15 +58,24 @@ class StepsRelationManager extends RelationManager
                 TextColumn::make('sequence')->label('#')->sortable(),
                 TextColumn::make('persona.communityUser.display_name')->label('Персона')->description(fn (CommunityAiScenarioStep $record): string => '@'.$record->persona->communityUser->username),
                 TextColumn::make('type')->label('Тип')->badge()->formatStateUsing(fn (string $state): string => $state === 'topic' ? 'Тема' : 'Комментарий'),
-                TextColumn::make('draft_title')->label('Заголовок')->limit(45)->placeholder('—'),
-                TextColumn::make('draft_body')->label('Текст')->limit(80)->wrap(),
+                TextColumn::make('draft_title')->label('Заголовок')->wrap()->placeholder('—'),
+                TextColumn::make('draft_body')
+                    ->label('Текст')
+                    ->wrap()
+                    ->extraAttributes(['class' => 'whitespace-pre-wrap']),
                 TextColumn::make('planned_delay_minutes')->label('Через')->suffix(' мин.'),
+                TextColumn::make('scheduled_at')->label('Точная дата')->dateTime('d.m.Y H:i')->placeholder('По задержке'),
                 TextColumn::make('status')->label('Статус')->badge(),
                 TextColumn::make('published_at')->label('Опубликован')->dateTime('d.m.Y H:i')->placeholder('—'),
             ])
             ->defaultSort('sequence')
             ->recordActions([
-                EditAction::make()->visible(fn (CommunityAiScenarioStep $record): bool => in_array($record->status, ['draft', 'pending_review', 'approved', 'failed'], true)),
+                ViewAction::make()
+                    ->label('Открыть полностью')
+                    ->iconButton()
+                    ->tooltip('Открыть полный текст'),
+                EditAction::make()->visible(fn (CommunityAiScenarioStep $record): bool => in_array($record->status, ['draft', 'pending_review', 'approved', 'failed'], true)
+                    || ($record->status === 'scheduled' && $record->scenario->status === 'paused')),
                 Action::make('approve_step')
                     ->label('Одобрить')
                     ->icon(Heroicon::OutlinedCheckCircle)

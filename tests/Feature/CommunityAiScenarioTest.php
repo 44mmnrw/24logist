@@ -7,6 +7,7 @@ use App\Models\CommunityAiPersona;
 use App\Models\CommunityAiScenario;
 use App\Models\CommunityAiSource;
 use App\Models\CommunityCategory;
+use App\Models\CommunityComment;
 use App\Models\CommunityPost;
 use App\Models\SiteSetting;
 use App\Models\User;
@@ -141,12 +142,17 @@ class CommunityAiScenarioTest extends TestCase
                 && str_contains($prompt, '[email]');
         });
 
+        $historicalDate = now()->subMonth()->startOfHour();
+        $topicDate = $historicalDate->copy()->subHour();
         $scenario->steps()->update(['status' => 'approved']);
-        $scenario->update(['status' => CommunityAiScenario::STATUS_APPROVED]);
+        $scenario->steps()->first()->update(['scheduled_at' => $topicDate]);
+        $scenario->update(['status' => CommunityAiScenario::STATUS_APPROVED, 'planned_at' => $historicalDate]);
         Queue::fake();
         app(CommunityAiScenarioPublisher::class)->schedule($scenario->fresh());
 
         $this->assertSame(CommunityAiScenario::STATUS_SCHEDULED, $scenario->fresh()->status);
+        $this->assertSame($topicDate->toDateTimeString(), $scenario->steps()->first()->scheduled_at->toDateTimeString());
+        $this->assertSame($historicalDate->copy()->addMinutes(20)->toDateTimeString(), $scenario->steps()->skip(1)->first()->scheduled_at->toDateTimeString());
         Queue::assertPushed(PublishCommunityAiScenarioStep::class, 3);
     }
 
@@ -206,6 +212,8 @@ class CommunityAiScenarioTest extends TestCase
     public function test_publisher_creates_topic_then_comments_idempotently(): void
     {
         $personas = CommunityAiPersona::query()->take(2)->get();
+        $topicDate = now()->subMonths(2)->setTime(9, 15)->setMicrosecond(0);
+        $commentDate = $topicDate->copy()->addMinutes(17);
         $scenario = CommunityAiScenario::query()->create([
             'community_category_id' => CommunityCategory::query()->where('slug', 'general')->value('id'),
             'source_ids' => [CommunityAiSource::query()->value('id')],
@@ -220,6 +228,7 @@ class CommunityAiScenarioTest extends TestCase
             'planned_delay_minutes' => 0,
             'draft_title' => 'Scenario topic',
             'draft_body' => 'Scenario topic body',
+            'scheduled_at' => $topicDate,
             'status' => 'scheduled',
             'idempotency_key' => 'scenario-test-topic',
         ]);
@@ -229,6 +238,7 @@ class CommunityAiScenarioTest extends TestCase
             'sequence' => 2,
             'planned_delay_minutes' => 10,
             'draft_body' => 'Scenario comment body',
+            'scheduled_at' => $commentDate,
             'status' => 'scheduled',
             'idempotency_key' => 'scenario-test-comment',
         ]);
@@ -239,7 +249,14 @@ class CommunityAiScenarioTest extends TestCase
 
         $this->assertDatabaseCount('community_posts', 1);
         $this->assertDatabaseCount('community_comments', 1);
-        $this->assertSame(1, CommunityPost::query()->firstOrFail()->comments_count);
+        $publishedPost = CommunityPost::query()->firstOrFail();
+        $publishedComment = CommunityComment::query()->firstOrFail();
+        $this->assertSame(1, $publishedPost->comments_count);
+        $this->assertSame($topicDate->toDateTimeString(), $publishedPost->published_at->toDateTimeString());
+        $this->assertSame($topicDate->toDateTimeString(), $publishedPost->created_at->toDateTimeString());
+        $this->assertSame($commentDate->toDateTimeString(), $publishedComment->created_at->toDateTimeString());
+        $this->assertSame($topicDate->toDateTimeString(), $topic->fresh()->published_at->toDateTimeString());
+        $this->assertSame($commentDate->toDateTimeString(), $comment->fresh()->published_at->toDateTimeString());
         $this->assertSame(CommunityAiScenario::STATUS_COMPLETED, $scenario->fresh()->status);
     }
 }

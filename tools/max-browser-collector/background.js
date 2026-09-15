@@ -3,6 +3,19 @@ const ALLOWED_SERVERS = new Set([
   'https://24logistru.test',
 ]);
 
+chrome.action.onClicked.addListener(async () => {
+  const collectorUrl = chrome.runtime.getURL('popup.html');
+  const opened = (await chrome.tabs.query({})).filter((tab) => tab.url === collectorUrl);
+
+  if (opened[0]) {
+    await chrome.tabs.update(opened[0].id, { active: true });
+    await chrome.windows.update(opened[0].windowId, { focused: true });
+    return;
+  }
+
+  await chrome.tabs.create({ url: collectorUrl });
+});
+
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
   if (request?.type !== 'collector:api') {
     return false;

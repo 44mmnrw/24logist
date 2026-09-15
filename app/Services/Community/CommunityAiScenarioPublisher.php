@@ -23,12 +23,12 @@ final class CommunityAiScenarioPublisher
             throw new RuntimeException('В сценарии нет одобренной темы.');
         }
 
-        $startsAt = $scenario->planned_at?->isFuture() === true ? $scenario->planned_at : now();
+        $startsAt = $scenario->planned_at ?? now();
 
         foreach ($steps as $step) {
-            $scheduledAt = $startsAt->copy()->addMinutes($step->planned_delay_minutes);
+            $scheduledAt = $step->scheduled_at ?? $startsAt->copy()->addMinutes($step->planned_delay_minutes);
             $step->update(['status' => 'scheduled', 'scheduled_at' => $scheduledAt, 'last_error' => null]);
-            PublishCommunityAiScenarioStep::dispatch($step->id)->delay($scheduledAt);
+            PublishCommunityAiScenarioStep::dispatch($step->id)->delay($scheduledAt->isFuture() ? $scheduledAt : now());
         }
 
         $scenario->update([

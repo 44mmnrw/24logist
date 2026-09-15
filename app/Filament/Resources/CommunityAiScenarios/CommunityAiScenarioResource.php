@@ -75,8 +75,10 @@ class CommunityAiScenarioResource extends Resource
                         ->label('Рубрика')
                         ->placeholder('Выберет редактор'),
                     DateTimePicker::make('planned_at')
-                        ->label('Начать публикацию')
-                        ->helperText('Если дата в прошлом или не указана, сценарий начнётся сразу.'),
+                        ->label('Дата публикации темы')
+                        ->seconds(false)
+                        ->native(false)
+                        ->helperText('Можно указать дату в прошлом. Тема получит эту дату, а комментарии — её плюс заданные задержки. Пусто — публикация начинается сейчас.'),
                 ])
                 ->columns(2)
                 ->columnSpanFull(),
@@ -156,6 +158,7 @@ class CommunityAiScenarioResource extends Resource
                 ->icon(Heroicon::OutlinedPlay)
                 ->color('success')
                 ->requiresConfirmation()
+                ->modalDescription('Для каждого черновика можно указать точную дату публикации. Прошедшие даты публикуются сразу и сохраняются в ленте как исторические.')
                 ->visible(fn (CommunityAiScenario $record): bool => in_array($record->status, [CommunityAiScenario::STATUS_APPROVED, CommunityAiScenario::STATUS_PAUSED], true))
                 ->action(function (CommunityAiScenario $record): void {
                     app(CommunityAiScenarioPublisher::class)->schedule($record);
