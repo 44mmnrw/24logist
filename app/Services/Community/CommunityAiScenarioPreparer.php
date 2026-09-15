@@ -39,9 +39,12 @@ final class CommunityAiScenarioPreparer
                 $this->importer->import($source, $scenario->source_from, $scenario->source_to);
             }
 
-            $context = $this->sourceContext($scenario, $sources);
+            $contextData = $this->sourceContext($scenario, $sources);
+            $context = $contextData['text'];
             if ($context === '') {
-                throw new RuntimeException('За выбранный период не найдено текстовых сообщений.');
+                throw new RuntimeException($this->normalizedKeywords($scenario)->isNotEmpty()
+                    ? 'За выбранный период не найдено сообщений по заданным ключевым словам.'
+                    : 'За выбранный период не найдено текстовых сообщений.');
             }
 
             $personas = CommunityAiPersona::query()
@@ -68,10 +71,9 @@ final class CommunityAiScenarioPreparer
             $brief = [
                 'summary' => trim((string) ($plan['summary'] ?? '')),
                 'question' => trim((string) ($plan['question'] ?? '')),
-                'source_message_count' => CommunityAiSourceMessage::query()
-                    ->whereIn('community_ai_source_id', $sources->modelKeys())
-                    ->whereBetween('sent_at', [$scenario->source_from, $scenario->source_to])
-                    ->count(),
+                'source_message_count' => $contextData['count'],
+                'keyword_match_count' => $contextData['matched_count'],
+                'scan_keywords' => $this->normalizedKeywords($scenario)->values()->all(),
             ];
 
             $scenario->update([
@@ -81,6 +83,7 @@ final class CommunityAiScenarioPreparer
                 'settings' => array_merge($scenario->settings ?? [], [
                     'editor_persona_id' => $editor->id,
                     'source_message_count' => $brief['source_message_count'],
+                    'keyword_match_count' => $brief['keyword_match_count'],
                 ]),
             ]);
 
@@ -130,6 +133,11 @@ final class CommunityAiScenarioPreparer
             'can_create_comments' => $persona->can_create_comments,
         ])->values()->all();
 
+        $keywords = $this->normalizedKeywords($scenario);
+        $focus = $keywords->isEmpty()
+            ? 'Фокус: весь выбранный период.'
+            : 'Ключевые слова фокуса: '.$keywords->implode(', ').'. Сформируй тему только вокруг найденного обсуждения.';
+
         $messages = [
             [
                 'role' => 'system',
@@ -151,7 +159,7 @@ PROMPT,
             ],
             [
                 'role' => 'user',
-                'content' => "Период: {$scenario->source_from->toIso8601String()} — {$scenario->source_to->toIso8601String()}\n"
+                'content' => "Период: {$scenario->source_from->toIso8601String()} — {$scenario->source_to->toIso8601String()}\n{$focus}\n"
                     ."Доступные персоны:\n".json_encode($directory, JSON_UNESCAPED_UNICODE)
                     ."\n\n<chat_messages>\n{$context}\n</chat_messages>",
             ],
@@ -342,15 +350,54 @@ PROMPT],
         }
     }
 
-    /** @param EloquentCollection<int, CommunityAiSource> $sources */
-    private function sourceContext(CommunityAiScenario $scenario, EloquentCollection $sources): string
+    /**
+     * @param EloquentCollection<int, CommunityAiSource> $sources
+     * @return array{text: string, count: int, matched_count: int}
+     */
+    private function sourceContext(CommunityAiScenario $scenario, EloquentCollection $sources): array
     {
         $messages = CommunityAiSourceMessage::query()
             ->whereIn('community_ai_source_id', $sources->modelKeys())
             ->whereBetween('sent_at', [$scenario->source_from, $scenario->source_to])
             ->orderBy('sent_at')
-            ->limit(500)
             ->get();
+
+        $keywords = $this->normalizedKeywords($scenario);
+        $matchedCount = 0;
+
+        if ($keywords->isNotEmpty()) {
+            $selectedIds = [];
+            $radius = 3;
+
+            foreach ($messages->groupBy('community_ai_source_id') as $sourceMessages) {
+                $sourceMessages = $sourceMessages->values();
+
+                foreach ($sourceMessages as $index => $message) {
+                    $text = mb_strtolower((string) $message->text);
+                    $matches = $keywords->contains(
+                        fn (string $keyword): bool => str_contains($text, $keyword),
+                    );
+
+                    if (! $matches) {
+                        continue;
+                    }
+
+                    $matchedCount++;
+                    $from = max(0, $index - $radius);
+                    $to = min($sourceMessages->count() - 1, $index + $radius);
+
+                    for ($contextIndex = $from; $contextIndex <= $to; $contextIndex++) {
+                        $selectedIds[(int) $sourceMessages[$contextIndex]->id] = true;
+                    }
+                }
+            }
+
+            $messages = $messages
+                ->filter(fn (CommunityAiSourceMessage $message): bool => isset($selectedIds[(int) $message->id]))
+                ->values();
+        }
+
+        $messages = $messages->take(500);
 
         $aliases = [];
         $nextAlias = 1;
@@ -371,7 +418,21 @@ PROMPT],
             $result .= $line."\n";
         }
 
-        return trim($result);
+        return [
+            'text' => trim($result),
+            'count' => $messages->count(),
+            'matched_count' => $matchedCount,
+        ];
+    }
+
+    private function normalizedKeywords(CommunityAiScenario $scenario): \Illuminate\Support\Collection
+    {
+        return collect($scenario->scan_keywords ?? [])
+            ->filter(fn ($keyword): bool => is_string($keyword))
+            ->map(fn (string $keyword): string => mb_strtolower(trim($keyword)))
+            ->filter()
+            ->unique()
+            ->values();
     }
 
     private function anonymize(string $text): string

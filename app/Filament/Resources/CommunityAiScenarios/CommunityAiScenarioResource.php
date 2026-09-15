@@ -16,6 +16,7 @@ use Filament\Actions\ActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -64,6 +65,11 @@ class CommunityAiScenarioResource extends Resource
                         ->default(fn () => now()->subDay()->endOfDay())
                         ->after('source_from')
                         ->required(),
+                    TagsInput::make('scan_keywords')
+                        ->label('Ключевые слова и фразы')
+                        ->placeholder('Например: ЭТрН, простой на погрузке')
+                        ->helperText('Сообщения будут отобраны по любому из указанных слов или фраз. Для сохранения контекста добавятся соседние реплики. Оставьте пустым, чтобы анализировать весь период.')
+                        ->columnSpanFull(),
                     Select::make('community_category_id')
                         ->relationship('category', 'name', modifyQueryUsing: fn ($query) => $query->where('is_active', true)->where('posting_enabled', true))
                         ->label('Рубрика')
@@ -98,6 +104,12 @@ class CommunityAiScenarioResource extends Resource
                 TextColumn::make('category.name')->label('Рубрика')->placeholder('—'),
                 TextColumn::make('steps_count')->label('Шагов')->counts('steps'),
                 TextColumn::make('source_from')->label('Период чатов')->dateTime('d.m.Y H:i')->description(fn (CommunityAiScenario $record): string => 'до '.$record->source_to->format('d.m.Y H:i')),
+                TextColumn::make('scan_keywords')
+                    ->label('Ключевые слова')
+                    ->badge()
+                    ->separator(', ')
+                    ->placeholder('Весь период')
+                    ->toggleable(),
                 TextColumn::make('planned_at')->label('Запуск')->dateTime('d.m.Y H:i')->placeholder('Сразу'),
                 TextColumn::make('created_at')->label('Создан')->dateTime('d.m.Y H:i')->sortable(),
             ])

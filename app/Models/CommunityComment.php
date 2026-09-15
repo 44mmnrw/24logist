@@ -35,7 +35,7 @@ class CommunityComment extends Model
 
     public function post(): BelongsTo
     {
-        return $this->belongsTo(CommunityPost::class, 'community_post_id');
+        return $this->belongsTo(CommunityPost::class, 'community_post_id')->withTrashed();
     }
 
     public function author(): BelongsTo
@@ -80,8 +80,10 @@ class CommunityComment extends Model
             ->where('target_type', 'comment');
     }
 
-    public function getUrl(): string
+    public function getUrl(): ?string
     {
-        return $this->post->getUrl().'#comment-'.$this->id;
+        $postUrl = $this->post?->getUrl();
+
+        return $postUrl === null ? null : $postUrl.'#comment-'.$this->id;
     }
 }

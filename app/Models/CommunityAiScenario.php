@@ -45,7 +45,7 @@ class CommunityAiScenario extends Model
     ];
 
     protected $fillable = [
-        'community_category_id', 'source_ids', 'source_from', 'source_to', 'title',
+        'community_category_id', 'source_ids', 'source_from', 'source_to', 'scan_keywords', 'title',
         'editor_brief', 'status', 'planned_at', 'started_at', 'completed_at',
         'last_error', 'settings',
     ];
@@ -54,6 +54,7 @@ class CommunityAiScenario extends Model
     {
         return [
             'source_ids' => 'array',
+            'scan_keywords' => 'array',
             'settings' => 'array',
             'source_from' => 'datetime',
             'source_to' => 'datetime',

@@ -107,7 +107,7 @@ class CommunityCommentResource extends Resource
                         ->state(fn (CommunityComment $record): string => $record->author ? '@'.$record->author->username : '—'),
                     TextEntry::make('post.title')
                         ->label('Тема')
-                        ->url(fn (CommunityComment $record): string => $record->post->getUrl())
+                        ->url(fn (CommunityComment $record): ?string => $record->post?->trashed() ? null : $record->post?->getUrl())
                         ->openUrlInNewTab()
                         ->columnSpanFull(),
                     TextEntry::make('body_markdown')
@@ -198,9 +198,9 @@ class CommunityCommentResource extends Resource
             Action::make('open_public_comment')
                 ->label('Открыть на сайте')
                 ->icon(Heroicon::OutlinedArrowTopRightOnSquare)
-                ->url(fn (CommunityComment $record): string => $record->getUrl())
+                ->url(fn (CommunityComment $record): ?string => $record->post?->trashed() ? null : $record->getUrl())
                 ->openUrlInNewTab()
-                ->visible(fn (CommunityComment $record): bool => ! $record->trashed()),
+                ->visible(fn (CommunityComment $record): bool => ! $record->trashed() && $record->post !== null && ! $record->post->trashed()),
             Action::make('approve_comment')
                 ->label('Одобрить / восстановить')
                 ->icon(Heroicon::OutlinedCheckCircle)

@@ -190,6 +190,22 @@ class CommunityCommentModerationTest extends TestCase
             ->assertSeeText('Содержание комментария');
     }
 
+    public function test_admin_comment_pages_render_when_the_parent_post_is_soft_deleted(): void
+    {
+        $admin = User::factory()->create();
+        [$post, $comment] = $this->makePostWithComment();
+        $post->delete();
+
+        $this->actingAs($admin)
+            ->get(CommunityCommentResource::getUrl('index'))
+            ->assertOk();
+
+        $this->get(CommunityCommentResource::getUrl('view', ['record' => $comment]))
+            ->assertOk();
+
+        $this->assertTrue($comment->fresh()->post->trashed());
+    }
+
     public function test_admin_edit_rerenders_comment_markdown_and_is_audited(): void
     {
         $admin = User::factory()->create();

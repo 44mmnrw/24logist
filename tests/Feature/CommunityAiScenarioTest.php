@@ -20,6 +20,7 @@ use Illuminate\Http\Client\Request as HttpRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
+use RuntimeException;
 use Tests\TestCase;
 
 class CommunityAiScenarioTest extends TestCase
@@ -87,6 +88,7 @@ class CommunityAiScenarioTest extends TestCase
             'source_ids' => [$source->id],
             'source_from' => $from,
             'source_to' => $to,
+            'scan_keywords' => ['Truck', 'loading'],
             'status' => CommunityAiScenario::STATUS_DRAFT,
         ]);
 
@@ -95,6 +97,8 @@ class CommunityAiScenarioTest extends TestCase
         $scenario->refresh();
         $this->assertSame(CommunityAiScenario::STATUS_REVIEW, $scenario->status);
         $this->assertSame('carriers', $scenario->category->slug);
+        $this->assertSame(['Truck', 'loading'], $scenario->scan_keywords);
+        $this->assertSame(1, $scenario->settings['keyword_match_count']);
         $this->assertCount(3, $scenario->steps);
         $this->assertSame('topic', $scenario->steps->first()->type);
         $this->assertTrue($scenario->steps->every(fn ($step): bool => $step->status === 'pending_review'));
@@ -131,6 +135,7 @@ class CommunityAiScenarioTest extends TestCase
             $prompt = collect($request->data()['messages'] ?? [])->pluck('content')->implode("\n");
 
             return str_contains($prompt, '<chat_messages>')
+                && str_contains($prompt, 'Ключевые слова фокуса: truck, loading')
                 && ! str_contains($prompt, 'test@example.com')
                 && str_contains($prompt, '[email]');
         });
@@ -157,6 +162,43 @@ class CommunityAiScenarioTest extends TestCase
             ->get(route('filament.admin.resources.community-ai-scenarios.edit', $scenario))
             ->assertOk()
             ->assertSeeText('Сканировать и создать черновики');
+    }
+
+    public function test_it_stops_before_generation_when_keywords_do_not_match_messages(): void
+    {
+        $source = CommunityAiSource::query()->firstOrFail();
+        $from = now()->subDay()->startOfDay()->setMicrosecond(0);
+        $to = now()->subDay()->endOfDay()->setMicrosecond(0);
+
+        Http::fake([
+            'https://platform-api2.max.ru/messages*' => Http::response(['messages' => [[
+                'timestamp' => $from->copy()->addHours(12)->getTimestampMs(),
+                'sender' => ['user_id' => 123, 'name' => 'Private Person'],
+                'body' => ['mid' => 'max-message-without-match', 'text' => 'Routine discussion about fuel receipts.'],
+            ]]]),
+            '*' => Http::response([], 500),
+        ]);
+
+        $scenario = CommunityAiScenario::query()->create([
+            'source_ids' => [$source->id],
+            'source_from' => $from,
+            'source_to' => $to,
+            'scan_keywords' => ['ЭТрН'],
+            'status' => CommunityAiScenario::STATUS_DRAFT,
+        ]);
+
+        try {
+            app(CommunityAiScenarioPreparer::class)->prepare($scenario);
+            $this->fail('Preparation should fail when keywords have no matches.');
+        } catch (RuntimeException $exception) {
+            $this->assertSame(
+                'За выбранный период не найдено сообщений по заданным ключевым словам.',
+                $exception->getMessage(),
+            );
+        }
+
+        $this->assertSame(CommunityAiScenario::STATUS_FAILED, $scenario->fresh()->status);
+        $this->assertDatabaseCount('community_ai_generations', 0);
     }
 
     public function test_publisher_creates_topic_then_comments_idempotently(): void
