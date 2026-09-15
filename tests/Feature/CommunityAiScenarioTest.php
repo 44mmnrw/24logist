@@ -156,6 +156,16 @@ class CommunityAiScenarioTest extends TestCase
                 && ! str_contains($prompt, 'test@example.com')
                 && str_contains($prompt, '[email]');
         });
+        Http::assertSent(function (HttpRequest $request): bool {
+            if (! str_contains($request->url(), 'agent.timeweb.cloud')) {
+                return false;
+            }
+
+            $prompt = collect($request->data()['messages'] ?? [])->pluck('content')->implode("\n");
+
+            return str_contains($prompt, 'Профиль грамотности персонажа:')
+                && str_contains($prompt, 'Режим письма для этой реплики:');
+        });
 
         $historicalDate = now()->subMonth()->startOfHour();
         $topicDate = $historicalDate->copy()->subHour();
@@ -176,6 +186,10 @@ class CommunityAiScenarioTest extends TestCase
         $persona = CommunityAiPersona::query()->where('can_create_posts', true)->firstOrFail();
         $category = CommunityCategory::query()->firstOrFail();
         $this->actingAs(User::factory()->create());
+
+        $this->get(CommunityAiScenarioResource::getUrl('create'))
+            ->assertOk()
+            ->assertSeeText('Готовый пост + обсуждение');
 
         Livewire::test(CreateCommunityAiScenario::class)
             ->fillForm([

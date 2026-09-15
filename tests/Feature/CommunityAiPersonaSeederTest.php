@@ -35,9 +35,12 @@ class CommunityAiPersonaSeederTest extends TestCase
         $this->assertStringContainsString('сухую иронию', $sergey->personality_description);
         $this->assertTrue($sergey->requires_review);
         $this->assertSame(1, $sergey->daily_comment_limit);
+        $this->assertSame(3, $sergey->prompt_version);
         $this->assertFalse($sergey->settings['web_search_enabled']);
-        $this->assertStringContainsString('публично обозначенная AI-персона', $sergey->system_prompt);
+        $this->assertSame(12, $sergey->settings['literacy_profile']['error_chance']);
+        $this->assertStringNotContainsString('публично обозначенная AI-персона', $sergey->system_prompt);
         $this->assertStringContainsString('Характер:', $sergey->system_prompt);
+        $this->assertStringContainsString('Уровень грамотности:', $sergey->system_prompt);
 
         $this->assertSame(
             11,
@@ -104,6 +107,25 @@ class CommunityAiPersonaSeederTest extends TestCase
             fn (?string $bio): bool => filled($bio)
                 && mb_strlen($bio) <= 1000
                 && ! str_contains($bio, 'AI-персона'),
+        ));
+    }
+
+    public function test_every_persona_has_a_distinct_literacy_profile(): void
+    {
+        $this->seed(CommunityAiPersonaSeeder::class);
+
+        $profiles = CommunityAiPersona::query()
+            ->get()
+            ->map(fn (CommunityAiPersona $persona): array => $persona->settings['literacy_profile']);
+
+        $this->assertCount(11, $profiles);
+        $this->assertSame(11, $profiles->pluck('description')->unique()->count());
+        $this->assertSame(11, $profiles->pluck('error_chance')->unique()->count());
+        $this->assertTrue($profiles->every(
+            fn (array $profile): bool => filled($profile['imperfections'])
+                && $profile['error_chance'] >= 0
+                && $profile['casual_chance'] >= 0
+                && ($profile['error_chance'] + $profile['casual_chance']) <= 100,
         ));
     }
 }

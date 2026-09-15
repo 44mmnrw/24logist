@@ -14,7 +14,7 @@ class CommunityAiScenario extends Model
 
     public const MODE_LABELS = [
         self::MODE_SOURCE => 'По сообщениям MAX',
-        self::MODE_MANUAL => 'Своя тема',
+        self::MODE_MANUAL => 'Готовый пост + обсуждение',
     ];
 
     public const STATUS_DRAFT = 'draft';

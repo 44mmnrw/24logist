@@ -54,7 +54,7 @@ class CommunityAiScenarioResource extends Resource
             Section::make('Тип сценария')
                 ->schema([
                     Select::make('mode')
-                        ->label('Откуда взять тему')
+                        ->label('Как создать обсуждение')
                         ->options(CommunityAiScenario::MODE_LABELS)
                         ->default(CommunityAiScenario::MODE_SOURCE)
                         ->required()
@@ -89,10 +89,10 @@ class CommunityAiScenarioResource extends Resource
                 ->columns(2)
                 ->visible(fn (Get $get): bool => $get('mode') !== CommunityAiScenario::MODE_MANUAL)
                 ->columnSpanFull(),
-            Section::make('Тема и публикация')
+            Section::make('Пост и публикация')
                 ->schema([
                     Select::make('topic_persona_id')
-                        ->label('Автор темы')
+                        ->label('Автор поста')
                         ->options(fn (): array => CommunityAiPersona::query()
                             ->with('communityUser')
                             ->where('is_active', true)
@@ -118,25 +118,25 @@ class CommunityAiScenarioResource extends Resource
                         ->placeholder(fn (Get $get): string => $get('mode') === CommunityAiScenario::MODE_MANUAL ? 'Выберите рубрику' : 'Выберет редактор')
                         ->required(fn (Get $get): bool => $get('mode') === CommunityAiScenario::MODE_MANUAL),
                     DateTimePicker::make('planned_at')
-                        ->label('Дата публикации темы')
+                        ->label(fn (Get $get): string => $get('mode') === CommunityAiScenario::MODE_MANUAL ? 'Дата публикации поста' : 'Дата публикации темы')
                         ->seconds(false)
                         ->native(false)
                         ->helperText('Можно указать дату в прошлом. Тема получит эту дату, а комментарии — её плюс заданные задержки. Пусто — публикация начинается сейчас.'),
                     TextInput::make('title')
-                        ->label(fn (Get $get): string => $get('mode') === CommunityAiScenario::MODE_MANUAL ? 'Заголовок темы' : 'Рабочее название')
+                        ->label(fn (Get $get): string => $get('mode') === CommunityAiScenario::MODE_MANUAL ? 'Заголовок поста' : 'Рабочее название')
                         ->maxLength(180)
                         ->required(fn (Get $get): bool => $get('mode') === CommunityAiScenario::MODE_MANUAL)
                         ->columnSpanFull(),
                     Textarea::make('manual_topic_body')
-                        ->label('Текст темы')
+                        ->label('Текст поста')
                         ->rows(12)
                         ->maxLength((int) config('community.limits.post_body', 20000))
                         ->required(fn (Get $get): bool => $get('mode') === CommunityAiScenario::MODE_MANUAL)
                         ->visible(fn (Get $get): bool => $get('mode') === CommunityAiScenario::MODE_MANUAL)
                         ->columnSpanFull(),
                     Textarea::make('editor_brief')
-                        ->label(fn (Get $get): string => $get('mode') === CommunityAiScenario::MODE_MANUAL ? 'Пожелания к обсуждению' : 'Редакторский бриф')
-                        ->helperText(fn (Get $get): ?string => $get('mode') === CommunityAiScenario::MODE_MANUAL ? 'Необязательно: укажите, какие стороны вопроса должны обсудить персонажи.' : null)
+                        ->label(fn (Get $get): string => $get('mode') === CommunityAiScenario::MODE_MANUAL ? 'Пожелания к обсуждению поста' : 'Редакторский бриф')
+                        ->helperText(fn (Get $get): ?string => $get('mode') === CommunityAiScenario::MODE_MANUAL ? 'Необязательно: укажите, какие стороны поста должны обсудить персонажи.' : null)
                         ->rows(8)
                         ->columnSpanFull(),
                 ])
@@ -191,13 +191,13 @@ class CommunityAiScenarioResource extends Resource
         return [
             Action::make('prepare')
                 ->label(fn (CommunityAiScenario $record): string => $record->mode === CommunityAiScenario::MODE_MANUAL
-                    ? 'Создать черновики обсуждения'
+                    ? 'Сформировать обсуждение поста'
                     : 'Сканировать и создать черновики')
                 ->icon(Heroicon::OutlinedCpuChip)
                 ->color('primary')
                 ->requiresConfirmation()
                 ->modalDescription(fn (CommunityAiScenario $record): string => $record->mode === CommunityAiScenario::MODE_MANUAL
-                    ? 'Введённая тема останется без изменений. Timeweb AI выберет подходящих персонажей и подготовит черновики комментариев. Ничего не будет опубликовано.'
+                    ? 'Заголовок и текст поста останутся без изменений. Timeweb AI выберет подходящих персонажей и подготовит черновики комментариев и ответов на них. Ничего не будет опубликовано до вашего одобрения.'
                     : 'Сообщения будут импортированы из MAX, а затем Timeweb AI создаст бриф и черновики. Ничего не будет опубликовано.')
                 ->visible(fn (CommunityAiScenario $record): bool => in_array($record->status, [CommunityAiScenario::STATUS_DRAFT, CommunityAiScenario::STATUS_REVIEW, CommunityAiScenario::STATUS_FAILED], true))
                 ->action(function (CommunityAiScenario $record): void {

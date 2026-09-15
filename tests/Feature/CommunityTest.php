@@ -12,6 +12,7 @@ use App\Models\SiteSetting;
 use App\Services\SiteSettingsService;
 use App\Support\CommunityText;
 use Carbon\Carbon;
+use Database\Seeders\CommunityAiPersonaSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -59,6 +60,28 @@ class CommunityTest extends TestCase
         $this->get('/community')->assertOk()->assertSee('Первая тема сообщества');
         $this->get('/community/submit')->assertRedirect(route('community.login'));
         $this->assertDatabaseCount('community_categories', 5);
+    }
+
+    public function test_ai_persona_badge_is_not_rendered_on_public_community_pages(): void
+    {
+        $this->seed(CommunityAiPersonaSeeder::class);
+        $author = CommunityUser::query()->whereHas('aiPersona')->firstOrFail();
+        $post = $this->postBy($author);
+        CommunityComment::query()->create([
+            'community_post_id' => $post->id,
+            'community_user_id' => $author->id,
+            'body_markdown' => 'Комментарий участника.',
+            'body_html' => '<p>Комментарий участника.</p>',
+            'status' => 'published',
+        ]);
+
+        $this->get(route('community.index'))
+            ->assertOk()
+            ->assertDontSeeText('AI-персона');
+
+        $this->get($post->getUrl())
+            ->assertOk()
+            ->assertDontSeeText('AI-персона');
     }
 
     public function test_feed_and_topic_share_the_same_main_layout(): void

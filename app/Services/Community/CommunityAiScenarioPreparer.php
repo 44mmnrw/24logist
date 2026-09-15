@@ -545,6 +545,7 @@ PROMPT,
 
             $messages = [
                 ['role' => 'system', 'content' => $persona->system_prompt],
+                ['role' => 'system', 'content' => $this->writingModeInstruction($scenario, $step, $persona)],
                 ['role' => 'system', 'content' => <<<'PROMPT'
 Ты участвуешь в живом обсуждении. Пиши как собеседник в отраслевом чате, а не как консультант, который готовит заключение.
 
@@ -611,6 +612,34 @@ PROMPT],
                 $previousComments[] = $body;
             }
         }
+    }
+
+    private function writingModeInstruction(
+        CommunityAiScenario $scenario,
+        CommunityAiScenarioStep $step,
+        CommunityAiPersona $persona,
+    ): string {
+        $profile = data_get($persona->settings, 'literacy_profile', []);
+        $description = trim((string) ($profile['description'] ?? 'Обычная разговорная грамотность без литературной вычитки.'));
+        $imperfections = trim((string) ($profile['imperfections'] ?? 'редкий пропуск запятой или одна простая опечатка'));
+        $errorChance = max(0, min(60, (int) ($profile['error_chance'] ?? 5)));
+        $casualChance = max(0, min(100 - $errorChance, (int) ($profile['casual_chance'] ?? 25)));
+        $roll = hexdec(substr(hash('sha256', $scenario->id.':'.$step->id.':'.$persona->id), 0, 8)) % 100;
+
+        if ($roll < $errorChance) {
+            $mode = 'rushed';
+            $instruction = "Допусти ровно одну небольшую естественную неровность из профиля: {$imperfections}. "
+                .'Не соединяй несколько ошибок и не искажай имена, цифры, реквизиты, названия документов и профессиональные термины.';
+        } elseif ($roll < $errorChance + $casualChance) {
+            $mode = 'casual';
+            $instruction = 'Пиши непринуждённо: допустимы разговорный порядок слов, короткая присоединённая фраза или неполное предложение. Специальную орфографическую ошибку не добавляй.';
+        } else {
+            $mode = 'clean';
+            $instruction = 'Пиши грамотно, но не вылизывай текст до стиля статьи или официального ответа. Сохрани простую живую фразу.';
+        }
+
+        return "Профиль грамотности персонажа: {$description}\n"
+            ."Режим письма для этой реплики: {$mode}. {$instruction}";
     }
 
     private function commentInstruction(?CommunityAiScenarioStep $parentStep, string $publishedContext): string

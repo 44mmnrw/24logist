@@ -101,7 +101,7 @@ class CommunityPostController extends Controller
             return redirect($post->getUrl(), 301);
         }
 
-        $post->load(['author.aiPersona', 'category', 'photos']);
+        $post->load(['author', 'category', 'photos']);
         $communityStats = [
             'members' => CommunityUser::query()->count(),
             'topics' => CommunityPost::query()->published()->count(),
@@ -110,7 +110,7 @@ class CommunityPostController extends Controller
             ? (string) $request->query('comment_sort')
             : 'best';
         $rootsQuery = CommunityComment::query()
-            ->with(['author.aiPersona', 'photos'])
+            ->with(['author', 'photos'])
             ->where('community_post_id', $post->id)
             ->whereNull('parent_id')
             ->whereIn('status', ['published', 'deleted', 'hidden']);
@@ -126,7 +126,7 @@ class CommunityPostController extends Controller
         $descendants = $rootIds->isEmpty()
             ? collect()
             : CommunityComment::query()
-                ->with(['author.aiPersona', 'photos'])
+                ->with(['author', 'photos'])
                 ->where('community_post_id', $post->id)
                 ->whereIn('root_id', $rootIds)
                 ->whereNotIn('id', $rootIds)

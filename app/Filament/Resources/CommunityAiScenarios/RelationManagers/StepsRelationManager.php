@@ -76,25 +76,84 @@ class StepsRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                TextColumn::make('sequence')->label('#')->sortable(),
-                TextColumn::make('persona.communityUser.display_name')->label('Персона')->description(fn (CommunityAiScenarioStep $record): string => '@'.$record->persona->communityUser->username),
-                TextColumn::make('type')->label('Тип')->badge()->formatStateUsing(fn (string $state): string => $state === 'topic' ? 'Тема' : 'Комментарий'),
+                TextColumn::make('sequence')
+                    ->label('#')
+                    ->sortable()
+                    ->width('3rem')
+                    ->grow(false)
+                    ->verticallyAlignStart()
+                    ->extraCellAttributes(['style' => 'min-width: 3rem; white-space: nowrap;']),
+                TextColumn::make('persona.communityUser.display_name')
+                    ->label('Персона')
+                    ->description(fn (CommunityAiScenarioStep $record): string => '@'.$record->persona->communityUser->username)
+                    ->width('10rem')
+                    ->grow(false)
+                    ->verticallyAlignStart()
+                    ->extraCellAttributes(['style' => 'min-width: 10rem;']),
+                TextColumn::make('type')
+                    ->label('Тип')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => $state === 'topic' ? 'Тема' : 'Комментарий')
+                    ->width('7rem')
+                    ->grow(false)
+                    ->verticallyAlignStart()
+                    ->extraCellAttributes(['style' => 'min-width: 7rem; white-space: nowrap;']),
                 TextColumn::make('parentStep.persona.communityUser.display_name')
                     ->label('Ответ на')
                     ->placeholder('Основная тема')
                     ->description(fn (CommunityAiScenarioStep $record): ?string => $record->parentStep
                         ? Str::limit((string) $record->parentStep->draft_body, 80)
                         : null)
-                    ->wrap(),
-                TextColumn::make('draft_title')->label('Заголовок')->wrap()->placeholder('—'),
+                    ->wrap()
+                    ->width('13rem')
+                    ->grow(false)
+                    ->verticallyAlignStart()
+                    ->extraCellAttributes(['style' => 'min-width: 13rem; max-width: 16rem;']),
+                TextColumn::make('draft_title')
+                    ->label('Заголовок')
+                    ->wrap()
+                    ->placeholder('—')
+                    ->width('18rem')
+                    ->grow(false)
+                    ->verticallyAlignStart()
+                    ->extraCellAttributes(['style' => 'min-width: 18rem; max-width: 22rem;']),
                 TextColumn::make('draft_body')
                     ->label('Текст')
                     ->wrap()
-                    ->extraAttributes(['class' => 'whitespace-pre-wrap']),
-                TextColumn::make('planned_delay_minutes')->label('Через')->suffix(' мин.'),
-                TextColumn::make('scheduled_at')->label('Точная дата')->dateTime('d.m.Y H:i')->placeholder('По задержке'),
-                TextColumn::make('status')->label('Статус')->badge(),
-                TextColumn::make('published_at')->label('Опубликован')->dateTime('d.m.Y H:i')->placeholder('—'),
+                    ->width('30rem')
+                    ->verticallyAlignStart()
+                    ->extraAttributes(['class' => 'whitespace-pre-wrap'])
+                    ->extraCellAttributes(['style' => 'min-width: 30rem; max-width: 42rem;']),
+                TextColumn::make('planned_delay_minutes')
+                    ->label('Через')
+                    ->suffix(' мин.')
+                    ->width('5rem')
+                    ->grow(false)
+                    ->verticallyAlignStart()
+                    ->extraCellAttributes(['style' => 'min-width: 5rem; white-space: nowrap;']),
+                TextColumn::make('scheduled_at')
+                    ->label('Точная дата')
+                    ->dateTime('d.m.Y H:i')
+                    ->placeholder('По задержке')
+                    ->width('9rem')
+                    ->grow(false)
+                    ->verticallyAlignStart()
+                    ->extraCellAttributes(['style' => 'min-width: 9rem; white-space: nowrap;']),
+                TextColumn::make('status')
+                    ->label('Статус')
+                    ->badge()
+                    ->width('9rem')
+                    ->grow(false)
+                    ->verticallyAlignStart()
+                    ->extraCellAttributes(['style' => 'min-width: 9rem; white-space: nowrap;']),
+                TextColumn::make('published_at')
+                    ->label('Опубликован')
+                    ->dateTime('d.m.Y H:i')
+                    ->placeholder('—')
+                    ->width('9rem')
+                    ->grow(false)
+                    ->verticallyAlignStart()
+                    ->extraCellAttributes(['style' => 'min-width: 9rem; white-space: nowrap;']),
             ])
             ->defaultSort('sequence')
             ->recordActions([
