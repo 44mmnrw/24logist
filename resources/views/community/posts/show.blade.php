@@ -15,7 +15,7 @@
 @endpush
 
 @section('content')
-<div class="landing-shell community-topic-layout">
+<div class="landing-shell community-layout community-topic-layout">
     <div class="community-topic-column">
     <article class="community-topic">
         <header>

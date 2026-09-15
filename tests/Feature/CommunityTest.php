@@ -61,6 +61,19 @@ class CommunityTest extends TestCase
         $this->assertDatabaseCount('community_categories', 5);
     }
 
+    public function test_feed_and_topic_share_the_same_main_layout(): void
+    {
+        $post = $this->postBy(CommunityUser::factory()->create());
+
+        $this->get(route('community.index'))
+            ->assertOk()
+            ->assertSee('class="landing-shell community-layout"', false);
+
+        $this->get($post->getUrl())
+            ->assertOk()
+            ->assertSee('class="landing-shell community-layout community-topic-layout"', false);
+    }
+
     public function test_community_header_shows_guest_and_member_actions(): void
     {
         $this->get(route('community.index'))
