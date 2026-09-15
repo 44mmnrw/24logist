@@ -284,37 +284,28 @@ document.addEventListener('click', async (event) => {
 });
 
 const closeReactionPickers = (except = null) => {
-    document.querySelectorAll('[data-reaction-picker]:not([hidden])').forEach((picker) => {
-        if (picker === except) return;
-        picker.hidden = true;
-        picker.closest('.community-reactions')?.querySelector('[data-reaction-toggle]')?.setAttribute('aria-expanded', 'false');
+    document.querySelectorAll('details.community-reactions[open]').forEach((details) => {
+        if (details === except) return;
+        details.open = false;
     });
 };
 
 document.addEventListener('click', (event) => {
-    const toggle = event.target.closest('[data-reaction-toggle]');
-    if (toggle) {
-        const widget = toggle.closest('.community-reactions');
-        const picker = widget?.querySelector('[data-reaction-picker]');
-        if (!picker) return;
-
-        const willOpen = picker.hidden;
-        closeReactionPickers(picker);
-        picker.hidden = !willOpen;
-        toggle.setAttribute('aria-expanded', String(willOpen));
-        if (willOpen) picker.querySelector('button[data-code]')?.focus();
-        return;
-    }
-
     if (!event.target.closest('.community-reactions')) closeReactionPickers();
 });
 
+document.addEventListener('toggle', (event) => {
+    const details = event.target;
+    if (!details.matches?.('details.community-reactions') || !details.open) return;
+    closeReactionPickers(details);
+}, true);
+
 document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return;
-    const picker = document.querySelector('[data-reaction-picker]:not([hidden])');
-    if (!picker) return;
-    const toggle = picker.closest('.community-reactions')?.querySelector('[data-reaction-toggle]');
-    closeReactionPickers();
+    const details = document.querySelector('details.community-reactions[open]');
+    if (!details) return;
+    const toggle = details.querySelector('[data-reaction-toggle]');
+    details.open = false;
     toggle?.focus();
 });
 
@@ -349,14 +340,11 @@ document.addEventListener('click', async (event) => {
         const triggerLabel = trigger?.querySelector('[data-reaction-trigger-label]');
         const total = Object.values(result.reactions).reduce((sum, count) => sum + Number(count || 0), 0);
         const totalElement = trigger?.querySelector('[data-reaction-total]');
+        const primaryButton = activeButtons[0] || buttons[0];
 
         trigger?.classList.toggle('is-active', activeButtons.length > 0);
-        if (triggerEmoji) triggerEmoji.textContent = activeButtons[0]?.dataset.emoji || '🙂';
-        if (triggerLabel) {
-            triggerLabel.textContent = activeButtons.length > 1
-                ? `Реакции · ${activeButtons.length}`
-                : (activeButtons[0]?.dataset.label || 'Реакция');
-        }
+        if (triggerEmoji) triggerEmoji.textContent = primaryButton?.dataset.emoji || '👍';
+        if (triggerLabel) triggerLabel.textContent = primaryButton?.dataset.label || 'Полезно';
         if (totalElement) {
             totalElement.textContent = total;
             totalElement.classList.toggle('is-empty', total === 0);

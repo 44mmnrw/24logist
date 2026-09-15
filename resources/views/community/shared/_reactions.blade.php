@@ -9,11 +9,11 @@
     $firstSelected = $selectedReactions[0] ?? null;
     $triggerReaction = $firstSelected !== null
         ? \App\Services\Community\CommunitySocialService::REACTIONS[$firstSelected]
-        : null;
+        : array_values(\App\Services\Community\CommunitySocialService::REACTIONS)[0];
     $pickerId = 'community-reactions-'.$type.'-'.$target->id;
 @endphp
 @if ($canReact || $reactionTotal > 0)
-    <div
+    <details
         class="community-reactions"
         @if ($canReact)
             data-community-reactions
@@ -23,20 +23,16 @@
         @endif
         aria-label="Реакции"
     >
-        <button
+        <summary
             class="community-reaction-trigger @if ($selectedReactions !== []) is-active @endif"
-            type="button"
             data-reaction-toggle
-            aria-expanded="false"
-            aria-controls="{{ $pickerId }}"
-            aria-haspopup="menu"
         >
-            <span class="community-reaction__emoji" data-reaction-trigger-emoji aria-hidden="true">{{ $triggerReaction['emoji'] ?? '🙂' }}</span>
-            <span class="community-reaction-trigger__label" data-reaction-trigger-label>{{ count($selectedReactions) > 1 ? 'Реакции · '.count($selectedReactions) : ($triggerReaction['label'] ?? 'Реакция') }}</span>
+            <span class="community-reaction__emoji" data-reaction-trigger-emoji aria-hidden="true">{{ $triggerReaction['emoji'] }}</span>
+            <span class="community-reaction-trigger__label" data-reaction-trigger-label>{{ $triggerReaction['label'] }}</span>
             <span class="community-reaction__count @if ($reactionTotal === 0) is-empty @endif" data-reaction-total>{{ $reactionTotal }}</span>
-        </button>
+        </summary>
 
-        <div class="community-reaction-picker" id="{{ $pickerId }}" data-reaction-picker role="menu" hidden>
+        <div class="community-reaction-picker" id="{{ $pickerId }}" data-reaction-picker role="menu">
         @foreach (\App\Services\Community\CommunitySocialService::REACTIONS as $code => $reaction)
             @php $isSelected = in_array($code, $selectedReactions, true); @endphp
             @if ($canReact)
@@ -66,5 +62,5 @@
                 <span class="community-reaction-picker__hint">Можно выбрать до {{ \App\Services\Community\CommunitySocialService::MAX_REACTIONS_PER_TARGET }}</span>
             @endif
         </div>
-    </div>
+    </details>
 @endif

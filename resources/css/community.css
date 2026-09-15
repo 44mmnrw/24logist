@@ -416,7 +416,7 @@ html {
     box-shadow: 0 5px 18px rgba(42, 65, 100, .07);
 }
 
-.community-post-card:has(.community-reaction-trigger[aria-expanded="true"]) {
+.community-post-card:has(.community-reactions[open]) {
     z-index: 3;
     overflow: visible;
 }
@@ -441,6 +441,7 @@ html {
 
 .community-post-card a:not(.community-post-card__overlay),
 .community-post-card button,
+.community-post-card summary,
 .community-post-card .community-vote {
     position: relative;
     z-index: 2;
@@ -2089,6 +2090,10 @@ html {
     align-items: center;
 }
 
+.community-comment__actions details.community-reactions[open] {
+    flex-basis: auto;
+}
+
 .community-page .community-reaction-trigger {
     display: inline-flex;
     align-items: center;
@@ -2103,25 +2108,29 @@ html {
     font-size: 12px;
     line-height: 1;
     white-space: nowrap;
+    list-style: none;
 }
 
-.community-page button.community-reaction-trigger {
+.community-page .community-reaction-trigger::-webkit-details-marker {
+    display: none;
+}
+
+.community-page .community-reaction-trigger {
     cursor: pointer;
 }
 
-.community-page button.community-reaction-trigger:hover,
-.community-page button.community-reaction-trigger[aria-expanded="true"] {
+.community-page .community-reaction-trigger:hover,
+.community-page .community-reactions[open] > .community-reaction-trigger {
     border-color: #a5b9df;
     background: #eef3ff;
 }
 
-.community-page button.community-reaction-trigger.is-active {
+.community-page .community-reaction-trigger.is-active {
     border-color: #87a8ef;
     background: #e8efff;
     color: #184cb9;
 }
 
-.community-page button.community-reaction-trigger:disabled,
 .community-page button.community-reaction-option:disabled {
     cursor: wait;
     opacity: .65;
@@ -2144,7 +2153,7 @@ html {
     white-space: nowrap;
 }
 
-.community-reaction-picker[hidden] {
+.community-reactions:not([open]) .community-reaction-picker {
     display: none;
 }
 
