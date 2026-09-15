@@ -2,9 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Clusters\Landing\Resources\SiteSettings\GeneralSiteSettingResource;
+use App\Filament\Resources\CommunitySettings\CommunitySettingResource;
+use App\Filament\Resources\CommunitySettings\Pages\EditCommunitySetting;
 use App\Models\SiteSetting;
+use App\Models\User;
 use App\Services\SiteSettingsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class CommunitySettingsTest extends TestCase
@@ -93,5 +98,32 @@ class CommunitySettingsTest extends TestCase
         $this->assertSame('timeweb-ai-token', app(SiteSettingsService::class)->timewebAiToken());
         $this->assertSame('collector-token-that-is-long-enough-123', app(SiteSettingsService::class)->communityAiCollectorToken());
         $this->assertTrue(app(SiteSettingsService::class)->timewebAiConfigured());
+    }
+
+    public function test_community_settings_have_their_own_admin_page(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->get(CommunitySettingResource::getUrl('edit'))
+            ->assertOk()
+            ->assertSee('Настройки сообщества')
+            ->assertSee('Сообщество 24Logist')
+            ->assertSee('Браузерный сборщик MAX');
+
+        $this->get(GeneralSiteSettingResource::getUrl('edit'))
+            ->assertOk()
+            ->assertDontSee('Сообщество 24Logist')
+            ->assertDontSee('Браузерный сборщик MAX');
+
+        Livewire::test(EditCommunitySetting::class)
+            ->fillForm([
+                'community_enabled' => true,
+                'community_ai_collector_token' => 'new-collector-token-that-is-long-enough',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertTrue(SiteSetting::instance()->fresh()->community_enabled);
+        app(SiteSettingsService::class)->clearCache();
+        $this->assertSame('new-collector-token-that-is-long-enough', app(SiteSettingsService::class)->communityAiCollectorToken());
     }
 }

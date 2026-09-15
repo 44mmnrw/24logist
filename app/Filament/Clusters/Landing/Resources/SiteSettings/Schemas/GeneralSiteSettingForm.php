@@ -2,7 +2,6 @@
 
 namespace App\Filament\Clusters\Landing\Resources\SiteSettings\Schemas;
 
-use App\Filament\Clusters\Landing\Resources\SiteSettings\Pages\EditGeneralSiteSetting;
 use App\Models\SiteSetting;
 use App\Services\LlmsTxtService;
 use App\Support\FilamentUploadPreview;
@@ -50,10 +49,6 @@ final class GeneralSiteSettingForm
                         ->label('Личный кабинет')
                         ->icon('heroicon-o-arrow-right-end-on-rectangle')
                         ->schema(self::cabinetLoginTab()),
-                    Tab::make('community')
-                        ->label('Сообщество')
-                        ->icon('heroicon-o-chat-bubble-left-right')
-                        ->schema(self::communityTab()),
                     Tab::make('telegram_popup')
                         ->label('Telegram-окно')
                         ->icon('heroicon-o-paper-airplane')
@@ -370,7 +365,7 @@ final class GeneralSiteSettingForm
     /**
      * @return array<int, mixed>
      */
-    private static function communityTab(): array
+    public static function communityComponents(): array
     {
         return [
             Section::make('Сообщество 24Logist')
@@ -551,7 +546,7 @@ final class GeneralSiteSettingForm
                             ->requiresConfirmation()
                             ->modalHeading('Подключить webhook MAX?')
                             ->modalDescription('Сайт сохранит текущие настройки формы и затем подпишет бота на необходимые события MAX.')
-                            ->action(fn (EditGeneralSiteSetting $livewire) => $livewire->saveAndRegisterMaxWebhook()),
+                            ->action(fn ($livewire) => $livewire->saveAndRegisterMaxWebhook()),
                     ])->columnSpanFull(),
                 ])
                 ->columns(2)

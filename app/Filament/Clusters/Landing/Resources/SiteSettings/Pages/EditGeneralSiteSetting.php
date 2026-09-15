@@ -4,7 +4,6 @@ namespace App\Filament\Clusters\Landing\Resources\SiteSettings\Pages;
 
 use App\Filament\Clusters\Landing\Resources\SiteSettings\GeneralSiteSettingResource;
 use App\Models\SiteSetting;
-use App\Services\Community\MaxWebhookSubscriptionService;
 use App\Services\SiteMailService;
 use App\Services\SiteSettingsService;
 use App\Support\AppleTouchIcon;
@@ -80,29 +79,6 @@ class EditGeneralSiteSetting extends EditRecord
         ];
     }
 
-    public function saveAndRegisterMaxWebhook(): void
-    {
-        // The schema action lives inside the edit form. Persist its current state
-        // first so newly entered encrypted credentials are available to the API call.
-        $this->save(shouldRedirect: false, shouldSendSavedNotification: false);
-
-        try {
-            $message = app(MaxWebhookSubscriptionService::class)->register();
-
-            Notification::make()
-                ->title('Webhook MAX подключён')
-                ->body($message)
-                ->success()
-                ->send();
-        } catch (Throwable $exception) {
-            Notification::make()
-                ->title('Не удалось подключить webhook MAX')
-                ->body($exception->getMessage())
-                ->danger()
-                ->send();
-        }
-    }
-
     protected function mutateFormDataBeforeFill(array $data): array
     {
         foreach (['site_logo_path', 'favicon_path', 'apple_touch_icon_path', 'og_image_path', 'org_logo_path'] as $field) {
@@ -112,11 +88,7 @@ class EditGeneralSiteSetting extends EditRecord
         }
 
         $data['mail_password'] = '';
-        $data['community_enabled'] ??= false;
-        $data['community_max_enabled'] ??= false;
-        $data['community_vk_enabled'] ??= false;
-
-        foreach (['community_telegram_client_secret', 'community_telegram_bot_token', 'community_vk_client_secret', 'community_vk_service_token', 'community_max_bot_token', 'community_max_webhook_secret', 'community_ai_timeweb_token', 'community_ai_collector_token', 'route_api_secret', 'cabinet_login_api_secret'] as $field) {
+        foreach (['route_api_secret', 'cabinet_login_api_secret'] as $field) {
             $data[$field] = '';
         }
 
@@ -137,7 +109,7 @@ class EditGeneralSiteSetting extends EditRecord
 
         unset($data['mail_password']);
 
-        foreach (['community_telegram_client_secret', 'community_telegram_bot_token', 'community_vk_client_secret', 'community_vk_service_token', 'community_max_bot_token', 'community_max_webhook_secret', 'community_ai_timeweb_token', 'community_ai_collector_token', 'route_api_secret', 'cabinet_login_api_secret'] as $field) {
+        foreach (['route_api_secret', 'cabinet_login_api_secret'] as $field) {
             if (filled($data[$field] ?? null)) {
                 $this->pendingCommunitySecrets[$field] = (string) $data[$field];
             }
