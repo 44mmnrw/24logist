@@ -22,7 +22,6 @@
             class="community-reaction-trigger @if ($selectedReactions !== []) is-active @endif"
             data-reaction-toggle
             aria-label="Выбрать реакцию"
-            title="Выбрать реакцию"
         >
             <span class="community-reaction-trigger__icons" data-reaction-trigger-icons>
                 @forelse ($selectedReactions as $selectedCode)

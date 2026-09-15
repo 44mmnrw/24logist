@@ -4,11 +4,6 @@
 
 @section('content')
 <div class="landing-shell community-form-shell community-submit-shell">
-    <header class="community-submit-heading">
-        <a class="community-back" href="{{ $post->exists ? $post->getUrl() : route('community.index') }}"><x-community.icon name="arrow-left" />Назад</a>
-        <h1>{{ $post->exists ? 'Редактировать тему' : 'Создать тему' }}</h1>
-    </header>
-
     <form method="POST" action="{{ $post->exists ? route('community.posts.update', $post) : route('community.posts.store') }}" class="community-form community-submit-form" enctype="multipart/form-data" data-community-composer>
         <div class="community-submit-form__top">
             @csrf
