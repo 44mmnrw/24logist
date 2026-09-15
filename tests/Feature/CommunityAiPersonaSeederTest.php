@@ -26,6 +26,10 @@ class CommunityAiPersonaSeederTest extends TestCase
         $this->assertSame('Сергей Ковалёв', $sergey->communityUser->display_name);
         $this->assertSame('vtoraya_smena76', $sergey->communityUser->username);
         $this->assertSame('carrier', $sergey->communityUser->transport_role);
+        $this->assertSame(
+            'Свои машины, свои водители и своя головная боль :) Считаю простои, ремонт и что в итоге осталось от ставки.',
+            $sergey->communityUser->bio,
+        );
         $this->assertSame('GPT-5.4 Mini', $sergey->model);
         $this->assertSame('efbb486a-ff4a-44f7-832e-b97670296143', $sergey->provider_agent_id);
         $this->assertStringContainsString('сухую иронию', $sergey->personality_description);
@@ -84,5 +88,22 @@ class CommunityAiPersonaSeederTest extends TestCase
         $this->assertContains('Сергей Ковалёв', $displayNames);
         $this->assertContains('Елена Викторовна', $displayNames);
         $this->assertContains('Михаил', $displayNames);
+    }
+
+    public function test_personas_have_individual_human_sounding_profile_bios(): void
+    {
+        $this->seed(CommunityAiPersonaSeeder::class);
+
+        $bios = CommunityUser::query()
+            ->whereHas('aiPersona')
+            ->pluck('bio');
+
+        $this->assertCount(11, $bios);
+        $this->assertSame(11, $bios->filter()->unique()->count());
+        $this->assertTrue($bios->every(
+            fn (?string $bio): bool => filled($bio)
+                && mb_strlen($bio) <= 1000
+                && ! str_contains($bio, 'AI-персона'),
+        ));
     }
 }

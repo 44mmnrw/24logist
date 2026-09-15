@@ -231,6 +231,20 @@ class CommunityCommentResource extends Resource
 
                     return redirect(static::getUrl());
                 }),
+            Action::make('force_delete_comment')
+                ->label('Удалить окончательно')
+                ->icon(Heroicon::OutlinedTrash)
+                ->color('danger')
+                ->requiresConfirmation()
+                ->modalHeading('Окончательно удалить ветку?')
+                ->modalDescription('Это действие нельзя отменить. Комментарий, ответы, фотографии, реакции и жалобы будут удалены без возможности восстановления. Запись о решении останется в журнале аудита.')
+                ->schema(self::purgeFields())
+                ->visible(fn (CommunityComment $record): bool => $record->trashed() && $record->status === CommunityComment::STATUS_DELETED)
+                ->action(function (CommunityComment $record, array $data) {
+                    self::runPermanentDeletion($record, $data['reason']);
+
+                    return redirect(static::getUrl());
+                }),
             Action::make('warn_author')
                 ->label('Предупредить автора')
                 ->icon(Heroicon::OutlinedExclamationTriangle)
@@ -278,7 +292,43 @@ class CommunityCommentResource extends Resource
             self::bulkAction('bulk_approve', 'Одобрить / восстановить', CommunityCommentModerationService::ACTION_APPROVE, 'success', false),
             self::bulkAction('bulk_hide', 'Скрыть', CommunityCommentModerationService::ACTION_HIDE, 'warning'),
             self::bulkAction('bulk_delete', 'Удалить вместе с ответами', CommunityCommentModerationService::ACTION_DELETE, 'danger'),
+            self::bulkPurgeAction(),
         ];
+    }
+
+    private static function bulkPurgeAction(): BulkAction
+    {
+        return BulkAction::make('bulk_force_delete')
+            ->label('Удалить окончательно')
+            ->color('danger')
+            ->requiresConfirmation()
+            ->modalHeading('Окончательно удалить выбранные ветки?')
+            ->modalDescription('Действие нельзя отменить. Все связанные ответы, фотографии, реакции и жалобы будут удалены.')
+            ->schema(self::purgeFields())
+            ->action(function (Collection $records, array $data): void {
+                $processed = 0;
+                $selectedIds = $records->pluck('id')->map(fn ($id): int => (int) $id)->all();
+
+                foreach ($records as $record) {
+                    $fresh = CommunityComment::withTrashed()->find($record->getKey());
+                    if ($fresh === null
+                        || ! $fresh->trashed()
+                        || $fresh->status !== CommunityComment::STATUS_DELETED
+                        || self::hasSelectedAncestor($fresh, $selectedIds)) {
+                        continue;
+                    }
+
+                    app(CommunityCommentModerationService::class)->purge(
+                        $fresh,
+                        self::adminId(),
+                        $data['reason'],
+                    );
+                    $processed++;
+                }
+
+                Notification::make()->title('Окончательно удалено веток: '.$processed)->success()->send();
+            })
+            ->deselectRecordsAfterCompletion();
     }
 
     private static function bulkAction(string $name, string $label, string $moderationAction, string $color, bool $violationRequired = true): BulkAction
@@ -328,10 +378,28 @@ class CommunityCommentResource extends Resource
         return Textarea::make('reason')->label('Комментарий модератора')->required($required)->maxLength(1000)->rows(4);
     }
 
+    /** @return array<int, TextInput|Textarea> */
+    private static function purgeFields(): array
+    {
+        return [
+            TextInput::make('confirmation')
+                ->label('Введите УДАЛИТЬ для подтверждения')
+                ->rules(['required', 'in:УДАЛИТЬ'])
+                ->validationMessages(['in' => 'Для подтверждения введите слово УДАЛИТЬ.']),
+            self::reasonField(),
+        ];
+    }
+
     private static function runCommentModeration(CommunityComment $comment, string $action, ?string $violation = null, ?string $reason = null): void
     {
         app(CommunityCommentModerationService::class)->moderate($comment, $action, self::adminId(), $violation, $reason);
         Notification::make()->title('Действие модерации выполнено')->success()->send();
+    }
+
+    private static function runPermanentDeletion(CommunityComment $comment, string $reason): void
+    {
+        app(CommunityCommentModerationService::class)->purge($comment, self::adminId(), $reason);
+        Notification::make()->title('Комментарий окончательно удалён')->success()->send();
     }
 
     private static function runUserModeration(CommunityComment $comment, string $action, ?string $reason = null, ?int $durationDays = null): void

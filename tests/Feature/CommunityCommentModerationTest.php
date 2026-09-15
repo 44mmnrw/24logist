@@ -9,12 +9,15 @@ use App\Filament\Resources\CommunityComments\Pages\ViewCommunityComment;
 use App\Models\CommunityCategory;
 use App\Models\CommunityComment;
 use App\Models\CommunityModerationAction;
+use App\Models\CommunityNotification;
 use App\Models\CommunityPost;
 use App\Models\CommunityReport;
 use App\Models\CommunityUser;
 use App\Models\User;
 use App\Services\Community\CommunityCommentModerationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -266,6 +269,106 @@ class CommunityCommentModerationTest extends TestCase
             ->where('target_type', 'comment')
             ->where('action', 'delete')
             ->count());
+    }
+
+    public function test_permanent_deletion_removes_the_deleted_branch_and_all_attached_data(): void
+    {
+        Storage::fake('local');
+        $admin = User::factory()->create();
+        [$post, $root] = $this->makePostWithComment();
+        $child = $this->makeComment($post, $root, 'Ответ с вложениями');
+        $post->update(['comments_count' => 2]);
+        $photoPath = 'community/photos/permanent-delete.webp';
+        Storage::disk('local')->put($photoPath, 'image');
+        $photo = $child->photos()->create([
+            'path' => $photoPath,
+            'width' => 100,
+            'height' => 100,
+            'position' => 0,
+        ]);
+        $reactor = CommunityUser::factory()->create();
+        DB::table('community_reactions')->insert([
+            'community_user_id' => $reactor->id,
+            'target_type' => 'comment',
+            'target_id' => $child->id,
+            'code' => 'useful',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('community_awards')->insert([
+            'community_user_id' => $reactor->id,
+            'target_type' => 'comment',
+            'target_id' => $child->id,
+            'code' => 'diamond',
+            'is_anonymous' => false,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $moderation = app(CommunityCommentModerationService::class);
+        $moderation->moderate($root, CommunityCommentModerationService::ACTION_DELETE, $admin->id, 'spam', 'Спам-ветка.');
+        $report = CommunityReport::query()->create([
+            'community_user_id' => null,
+            'target_type' => 'comment',
+            'target_id' => $child->id,
+            'reason' => 'spam',
+            'status' => 'open',
+        ]);
+        $notification = CommunityNotification::query()->create([
+            'community_user_id' => $reactor->id,
+            'type' => 'reply',
+            'target_type' => 'comment',
+            'target_id' => $child->id,
+            'data' => ['message' => 'Ответ'],
+        ]);
+
+        $result = $moderation->purge(
+            CommunityComment::withTrashed()->findOrFail($root->id),
+            $admin->id,
+            'Срок хранения завершён.',
+        );
+
+        $this->assertSame(2, $result['deleted_count']);
+        $this->assertNull(CommunityComment::withTrashed()->find($root->id));
+        $this->assertNull(CommunityComment::withTrashed()->find($child->id));
+        $this->assertDatabaseMissing('community_photos', ['id' => $photo->id]);
+        Storage::disk('local')->assertMissing($photoPath);
+        $this->assertDatabaseMissing('community_reports', ['id' => $report->id]);
+        $this->assertDatabaseMissing('community_notifications', ['id' => $notification->id]);
+        $this->assertDatabaseMissing('community_reactions', ['target_type' => 'comment', 'target_id' => $child->id]);
+        $this->assertDatabaseMissing('community_awards', ['target_type' => 'comment', 'target_id' => $child->id]);
+        $this->assertSame(0, $post->fresh()->comments_count);
+        $this->assertDatabaseHas('community_moderation_actions', [
+            'admin_user_id' => $admin->id,
+            'target_type' => 'comment',
+            'target_id' => $root->id,
+            'action' => 'force_delete',
+            'reason' => 'Срок хранения завершён.',
+        ]);
+    }
+
+    public function test_admin_can_permanently_delete_an_already_deleted_comment_from_the_view_page(): void
+    {
+        $admin = User::factory()->create();
+        [, $comment] = $this->makePostWithComment();
+        app(CommunityCommentModerationService::class)->moderate(
+            $comment,
+            CommunityCommentModerationService::ACTION_DELETE,
+            $admin->id,
+            'other',
+            'Удалено после проверки.',
+        );
+        $this->actingAs($admin);
+
+        Livewire::test(ViewCommunityComment::class, ['record' => $comment->getRouteKey()])
+            ->callAction('force_delete_comment', [
+                'confirmation' => 'УДАЛИТЬ',
+                'reason' => 'Окончательное решение модератора.',
+            ])
+            ->assertHasNoActionErrors()
+            ->assertRedirect(CommunityCommentResource::getUrl('index'));
+
+        $this->assertNull(CommunityComment::withTrashed()->find($comment->id));
     }
 
     /** @return array{CommunityPost, CommunityComment} */

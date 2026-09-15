@@ -4,6 +4,8 @@ namespace App\Services\Community;
 
 use App\Models\CommunityComment;
 use App\Models\CommunityModerationAction;
+use App\Models\CommunityNotification;
+use App\Models\CommunityPhoto;
 use App\Models\CommunityPost;
 use App\Models\CommunityReport;
 use Illuminate\Support\Facades\DB;
@@ -33,6 +35,7 @@ final class CommunityCommentModerationService
     public function __construct(
         private readonly CommunityCommentCounter $counter,
         private readonly CommunityNotificationService $notifications,
+        private readonly CommunityPhotoService $photos,
     ) {}
 
     /**
@@ -155,6 +158,85 @@ final class CommunityCommentModerationService
     public static function actions(): array
     {
         return [self::ACTION_APPROVE, self::ACTION_HIDE, self::ACTION_DELETE];
+    }
+
+    /**
+     * Permanently removes a previously soft-deleted comment branch.
+     *
+     * @return array{moderation_action: CommunityModerationAction, deleted_comment_ids: list<int>, deleted_count: int}
+     */
+    public function purge(CommunityComment $comment, ?int $adminUserId, ?string $reason = null): array
+    {
+        $photoRecords = collect();
+
+        $result = DB::transaction(function () use ($comment, $adminUserId, $reason, &$photoRecords): array {
+            $locked = CommunityComment::withTrashed()
+                ->lockForUpdate()
+                ->findOrFail($comment->getKey());
+
+            if (! $locked->trashed() || $locked->status !== CommunityComment::STATUS_DELETED) {
+                throw new InvalidArgumentException('Only a deleted comment can be permanently deleted.');
+            }
+
+            $post = CommunityPost::withTrashed()->lockForUpdate()->findOrFail($locked->community_post_id);
+            $affectedIds = $this->subtreeIds($locked);
+            $branch = CommunityComment::withTrashed()
+                ->whereIn('id', $affectedIds)
+                ->lockForUpdate()
+                ->get();
+
+            if ($branch->contains(fn (CommunityComment $item): bool => ! $item->trashed() || $item->status !== CommunityComment::STATUS_DELETED)) {
+                throw new InvalidArgumentException('The branch contains restored comments and cannot be permanently deleted.');
+            }
+
+            $photoRecords = CommunityPhoto::query()
+                ->whereIn('community_comment_id', $affectedIds)
+                ->get();
+
+            CommunityReport::query()
+                ->where('target_type', 'comment')
+                ->whereIn('target_id', $affectedIds)
+                ->delete();
+            CommunityNotification::query()
+                ->where('target_type', 'comment')
+                ->whereIn('target_id', $affectedIds)
+                ->delete();
+            DB::table('community_reactions')
+                ->where('target_type', 'comment')
+                ->whereIn('target_id', $affectedIds)
+                ->delete();
+            DB::table('community_awards')
+                ->where('target_type', 'comment')
+                ->whereIn('target_id', $affectedIds)
+                ->delete();
+
+            $moderationAction = CommunityModerationAction::query()->create([
+                'admin_user_id' => $adminUserId,
+                'target_type' => 'comment',
+                'target_id' => $locked->id,
+                'action' => 'force_delete',
+                'reason' => filled($reason) ? trim((string) $reason) : null,
+                'metadata' => [
+                    'permanently_deleted' => true,
+                    'deleted_comment_ids' => $affectedIds,
+                    'deleted_count' => count($affectedIds),
+                    'before' => $this->snapshot($locked),
+                ],
+            ]);
+
+            $branch->sortByDesc('depth')->each->forceDelete();
+            $this->counter->sync($post);
+
+            return [
+                'moderation_action' => $moderationAction,
+                'deleted_comment_ids' => $affectedIds,
+                'deleted_count' => count($affectedIds),
+            ];
+        });
+
+        $this->photos->deleteFiles($photoRecords);
+
+        return $result;
     }
 
     /** @return list<int> */

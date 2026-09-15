@@ -36,6 +36,7 @@ class ModerationActionsRelationManager extends RelationManager
                         'approve' => 'Одобрение / восстановление',
                         'hide' => 'Скрытие',
                         'delete' => 'Удаление',
+                        'force_delete' => 'Окончательное удаление',
                         'admin_edit' => 'Редактирование',
                         default => $state,
                     }),
