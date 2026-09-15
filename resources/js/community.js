@@ -339,24 +339,26 @@ document.addEventListener('click', async (event) => {
             .filter(Boolean);
         const trigger = widget.querySelector('[data-reaction-toggle]');
         const triggerIcons = trigger?.querySelector('[data-reaction-trigger-icons]');
-        const triggerLabel = trigger?.querySelector('[data-reaction-trigger-label]');
-        const primaryButton = selectedButtons[0];
 
         trigger?.classList.toggle('is-active', selectedButtons.length > 0);
         if (triggerIcons) {
-            const emojis = selectedButtons.length
-                ? selectedButtons.map((item) => item.dataset.emoji)
-                : ['👍'];
-            triggerIcons.replaceChildren(...emojis.map((emoji) => {
+            const reactionChips = (selectedButtons.length ? selectedButtons : [null]).map((item) => {
+                const chip = document.createElement('span');
+                chip.className = `community-reaction-chip${item ? '' : ' community-reaction-chip--empty'}`;
                 const icon = document.createElement('span');
                 icon.className = 'community-reaction__emoji';
-                icon.textContent = emoji;
-                return icon;
-            }));
-        }
-        if (triggerLabel) {
-            triggerLabel.textContent = primaryButton?.dataset.label || '';
-            triggerLabel.classList.toggle('is-empty', !primaryButton);
+                icon.setAttribute('aria-hidden', 'true');
+                icon.textContent = item?.dataset.emoji || '👍';
+                chip.append(icon);
+                if (item) {
+                    const label = document.createElement('span');
+                    label.className = 'community-reaction-chip__label';
+                    label.textContent = item.dataset.label;
+                    chip.append(label);
+                }
+                return chip;
+            });
+            triggerIcons.replaceChildren(...reactionChips);
         }
     } catch (error) {
         window.alert(error.message || 'Не удалось сохранить реакцию. Обновите страницу и попробуйте ещё раз.');

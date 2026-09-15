@@ -675,7 +675,7 @@ html {
 }
 
 @container (max-width: 780px) {
-    .community-post-card__footer .community-reaction-trigger__label {
+    .community-post-card__footer .community-reaction-chip__label {
         display: none;
     }
 }
@@ -2097,12 +2097,11 @@ html {
 .community-page .community-reaction-trigger {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
     min-height: 30px;
-    padding: 4px 8px;
-    border: 1px solid #e1e8f0;
-    border-radius: 999px;
-    background: #f7f9fc;
+    padding: 0;
+    border: 0;
+    background: transparent;
     color: #41536b;
     font: inherit;
     font-size: 0.8077rem;
@@ -2113,12 +2112,32 @@ html {
 
 .community-reaction-trigger__icons {
     display: inline-flex;
+    flex-wrap: nowrap;
     align-items: center;
-    gap: 2px;
+    gap: 4px;
 }
 
-.community-reaction-trigger__label.is-empty {
-    display: none;
+.community-reaction-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 30px;
+    padding: 4px 8px;
+    border: 1px solid #87a8ef;
+    border-radius: 999px;
+    background: #e8efff;
+    color: #184cb9;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.community-reaction-chip--empty {
+    justify-content: center;
+    min-width: 30px;
+    padding-inline: 6px;
+    border-color: #e1e8f0;
+    background: #f7f9fc;
+    color: #41536b;
 }
 
 .community-page .community-reaction-trigger::-webkit-details-marker {
@@ -2131,14 +2150,13 @@ html {
 
 .community-page .community-reaction-trigger:hover,
 .community-page .community-reactions[open] > .community-reaction-trigger {
-    border-color: #a5b9df;
-    background: #eef3ff;
+    background: transparent;
 }
 
-.community-page .community-reaction-trigger.is-active {
+.community-page .community-reaction-trigger:hover .community-reaction-chip,
+.community-page .community-reactions[open] > .community-reaction-trigger .community-reaction-chip {
     border-color: #87a8ef;
-    background: #e8efff;
-    color: #184cb9;
+    background: #dfe9ff;
 }
 
 .community-page button.community-reaction-option:disabled {
