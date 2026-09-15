@@ -32,9 +32,11 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class CommunityPostResource extends Resource
 {
@@ -208,6 +210,8 @@ class CommunityPostResource extends Resource
                 Filter::make('with_open_reports')
                     ->label('Только с открытыми жалобами')
                     ->query(fn (Builder $query): Builder => $query->whereHas('openReports')),
+                TrashedFilter::make()
+                    ->label('Удалённые темы'),
             ])
             ->defaultSort('created_at', 'desc')
             ->recordUrl(fn (CommunityPost $record): string => static::getUrl('view', ['record' => $record]))
@@ -256,7 +260,11 @@ class CommunityPostResource extends Resource
                 ->modalDescription('Содержимое сохранится в админке и журнале, но тема больше не будет доступна публично.')
                 ->schema([self::reasonField()])
                 ->visible(fn (CommunityPost $record): bool => $record->status !== CommunityPost::STATUS_DELETED)
-                ->action(fn (CommunityPost $record, array $data) => self::runModeration($record, CommunityPostModerationService::ACTION_DELETE, $data['reason'])),
+                ->action(function (CommunityPost $record, array $data) {
+                    self::runModeration($record, CommunityPostModerationService::ACTION_DELETE, $data['reason']);
+
+                    return redirect(static::getUrl());
+                }),
             Action::make('lock_post')
                 ->label('Закрыть обсуждение')
                 ->icon(Heroicon::OutlinedLockClosed)
@@ -387,6 +395,12 @@ class CommunityPostResource extends Resource
     public static function getNavigationBadgeColor(): string|array|null
     {
         return 'danger';
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([SoftDeletingScope::class]);
     }
 
     public static function canCreate(): bool

@@ -391,6 +391,24 @@ final class GeneralSiteSettingForm
                 ])
                 ->columns(1)
                 ->columnSpanFull(),
+            Section::make('AI-персонажи Timeweb')
+                ->description('Один общий Bearer-токен используется сервером для обращений к 11 агентам Timeweb. Токен хранится в базе в зашифрованном виде и после сохранения не показывается.')
+                ->schema([
+                    Placeholder::make('community_ai_timeweb_token_status')
+                        ->label('Токен доступа')
+                        ->content(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_ai_timeweb_token') ? '***' : 'Не настроен'),
+                    TextInput::make('community_ai_timeweb_token')
+                        ->label('Новый токен доступа Timeweb AI')
+                        ->password()
+                        ->revealable()
+                        ->autocomplete('new-password')
+                        ->dehydrated()
+                        ->maxLength(4096)
+                        ->placeholder(fn (?SiteSetting $record): string => $record?->hasCommunitySecret('community_ai_timeweb_token') ? '***' : '')
+                        ->helperText('Вставьте API-токен из Timeweb Cloud. Это не Access ID агента. Оставьте поле пустым, чтобы сохранить действующий токен.'),
+                ])
+                ->columns(2)
+                ->columnSpanFull(),
             Section::make('Авторизация через Telegram')
                 ->description('В @BotFather откройте Login Widget, добавьте https://24logist.ru и https://24logist.ru/community/auth/telegram/callback в Allowed URLs и скопируйте Client ID и Client Secret. После сохранения кнопка входа появится автоматически. Значения хранятся в базе в зашифрованном виде.')
                 ->schema([

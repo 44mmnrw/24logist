@@ -1,0 +1,12 @@
+﻿Персонаж;Роль;Access ID;OpenAI URL
+Сергей ; владелец небольшого автопарка.;efbb486a-ff4a-44f7-832e-b97670296143;https://agent.timeweb.cloud/api/v1/cloud-ai/agents/efbb486a-ff4a-44f7-832e-b97670296143/v1
+Анна ; логист.;8f0b42e6-26c2-4bee-b39e-7980a36ec30f;https://agent.timeweb.cloud/api/v1/cloud-ai/agents/8f0b42e6-26c2-4bee-b39e-7980a36ec30f/v1
+Михаил ; водитель-дальнобойщик.;422fa435-fd2f-48ec-a1da-fd2f832ba632;https://agent.timeweb.cloud/api/v1/cloud-ai/agents/422fa435-fd2f-48ec-a1da-fd2f832ba632/v1
+Игорь ; экспедитор.;9d098d74-2b46-4925-ae59-d2ecf4e40646;https://agent.timeweb.cloud/api/v1/cloud-ai/agents/9d098d74-2b46-4925-ae59-d2ecf4e40646/v1
+Ольга ; логист грузовладельца.;7fc7831a-52dd-46da-bdd7-c744db5d54b4;https://agent.timeweb.cloud/api/v1/cloud-ai/agents/7fc7831a-52dd-46da-bdd7-c744db5d54b4/v1
+Максим ; специалист по транспортным биржам.;b6dd09a1-d917-4c9e-b6d6-bcded7c4a78d;https://agent.timeweb.cloud/api/v1/cloud-ai/agents/b6dd09a1-d917-4c9e-b6d6-bcded7c4a78d/v1
+Елена ; транспортный юрист.;823c5647-0b88-4ae0-906e-bc490cd9e2f3;https://agent.timeweb.cloud/api/v1/cloud-ai/agents/823c5647-0b88-4ae0-906e-bc490cd9e2f3/v1
+Наталья ; бухгалтер экспедитора.;5f53c851-88a0-4668-9227-b218419952a6;https://agent.timeweb.cloud/api/v1/cloud-ai/agents/5f53c851-88a0-4668-9227-b218419952a6/v1
+Артём ; специалист по международным перевозкам и таможне.;3190cf33-b66b-4f9e-b6ab-7546e0927be0;https://agent.timeweb.cloud/api/v1/cloud-ai/agents/3190cf33-b66b-4f9e-b6ab-7546e0927be0/v1
+Андрей ; логист экспедитора.;7272804c-ec42-4cd3-b66e-c6191a8745fc;https://agent.timeweb.cloud/api/v1/cloud-ai/agents/7272804c-ec42-4cd3-b66e-c6191a8745fc/v1
+Роман ; начинающий перевозчик, который преимущественно задаёт вопросы.;cdfc8ef9-b669-4e91-92e2-c97fc169960a;https://agent.timeweb.cloud/api/v1/cloud-ai/agents/cdfc8ef9-b669-4e91-92e2-c97fc169960a/v1

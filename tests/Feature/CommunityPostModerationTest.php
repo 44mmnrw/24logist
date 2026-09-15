@@ -107,12 +107,19 @@ class CommunityPostModerationTest extends TestCase
         $this->assertNull($post->fresh()->locked_at);
 
         $moderation->moderate($post, CommunityPostModerationService::ACTION_DELETE, $admin->id, 'Грубое нарушение');
-        $post->refresh();
+        $post = CommunityPost::withTrashed()->findOrFail($post->id);
 
         $this->assertSame(CommunityPost::STATUS_DELETED, $post->status);
+        $this->assertTrue($post->trashed());
         $this->assertFalse($post->is_pinned);
         $this->assertNotNull($post->locked_at);
         $this->assertSame(5, $post->moderationActions()->count());
+
+        $moderation->moderate($post, CommunityPostModerationService::ACTION_APPROVE, $admin->id, 'Восстановлено');
+
+        $restoredPost = CommunityPost::query()->findOrFail($post->id);
+        $this->assertFalse($restoredPost->trashed());
+        $this->assertSame(CommunityPost::STATUS_PUBLISHED, $restoredPost->status);
     }
 
     public function test_hidden_post_cannot_be_pinned(): void
@@ -203,6 +210,24 @@ class CommunityPostModerationTest extends TestCase
             'action' => 'hide',
             'reason' => 'Проверено в админке',
         ]);
+    }
+
+    public function test_admin_delete_action_soft_deletes_the_post_and_redirects_to_the_list(): void
+    {
+        $admin = User::factory()->create();
+        $post = $this->makePost();
+        $this->actingAs($admin);
+
+        Livewire::test(ViewCommunityPost::class, ['record' => $post->getRouteKey()])
+            ->callAction('delete_post', ['reason' => 'Спам'])
+            ->assertHasNoActionErrors()
+            ->assertRedirect(CommunityPostResource::getUrl('index'));
+
+        $this->assertSoftDeleted('community_posts', ['id' => $post->id]);
+        $this->assertSame(
+            CommunityPost::STATUS_DELETED,
+            CommunityPost::withTrashed()->findOrFail($post->id)->status,
+        );
     }
 
     public function test_admin_can_bulk_moderate_posts_without_resurrecting_deleted_topics(): void

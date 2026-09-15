@@ -34,8 +34,9 @@ final class CommunityPostModerationService
         }
 
         return DB::transaction(function () use ($post, $action, $adminUserId, $reason): array {
-            $locked = CommunityPost::query()->lockForUpdate()->findOrFail($post->getKey());
+            $locked = CommunityPost::withTrashed()->lockForUpdate()->findOrFail($post->getKey());
             $before = $this->snapshot($locked);
+            $wasTrashed = $locked->trashed();
 
             $attributes = match ($action) {
                 self::ACTION_APPROVE => [
@@ -63,10 +64,18 @@ final class CommunityPostModerationService
             }
 
             $locked->fill($attributes);
-            $changed = $locked->isDirty();
+            $changed = $locked->isDirty()
+                || ($action === self::ACTION_DELETE && ! $wasTrashed)
+                || ($action === self::ACTION_APPROVE && $wasTrashed);
 
-            if ($changed) {
+            if ($locked->isDirty()) {
                 $locked->save();
+            }
+
+            if ($action === self::ACTION_DELETE && ! $wasTrashed) {
+                $locked->delete();
+            } elseif ($action === self::ACTION_APPROVE && $wasTrashed) {
+                $locked->restore();
             }
 
             $reportsStatus = match ($action) {
@@ -96,7 +105,7 @@ final class CommunityPostModerationService
                 ],
             ]);
 
-            return ['post' => $locked->refresh(), 'changed' => $changed];
+            return ['post' => $locked, 'changed' => $changed];
         });
     }
 
@@ -122,6 +131,7 @@ final class CommunityPostModerationService
             'is_pinned' => (bool) $post->is_pinned,
             'locked_at' => $post->locked_at?->toIso8601String(),
             'published_at' => $post->published_at?->toIso8601String(),
+            'deleted_at' => $post->deleted_at?->toIso8601String(),
         ];
     }
 }

@@ -23,10 +23,34 @@ final class CommunityNotificationService
             return null;
         }
 
+        return $this->persist($recipient, $actor->id, $type, $targetType, $targetId, $data);
+    }
+
+    /** @param array<string, mixed> $data */
+    public function createSystem(
+        CommunityUser $recipient,
+        string $type,
+        string $targetType,
+        int $targetId,
+        array $data,
+    ): ?CommunityNotification {
+        return $this->persist($recipient, null, $type, $targetType, $targetId, $data);
+    }
+
+    /** @param array<string, mixed> $data */
+    private function persist(
+        CommunityUser $recipient,
+        ?int $actorId,
+        string $type,
+        string $targetType,
+        int $targetId,
+        array $data,
+    ): ?CommunityNotification {
+
         try {
             $notification = CommunityNotification::query()->create([
                 'community_user_id' => $recipient->id,
-                'actor_id' => $actor->id,
+                'actor_id' => $actorId,
                 'type' => $type,
                 'target_type' => $targetType,
                 'target_id' => $targetId,

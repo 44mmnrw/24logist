@@ -5,6 +5,7 @@ namespace App\Models;
 use Database\Factories\CommunityUserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -56,9 +57,25 @@ class CommunityUser extends Authenticatable
         return $this->hasMany(CommunityComment::class);
     }
 
+    public function aiPersona(): HasOne
+    {
+        return $this->hasOne(CommunityAiPersona::class);
+    }
+
     public function communityNotifications(): HasMany
     {
         return $this->hasMany(CommunityNotification::class);
+    }
+
+    public function moderationActions(): HasMany
+    {
+        return $this->hasMany(CommunityModerationAction::class, 'target_id')
+            ->where('target_type', 'user');
+    }
+
+    public function warnings(): HasMany
+    {
+        return $this->moderationActions()->where('action', 'warn');
     }
 
     public function isOnboarded(): bool

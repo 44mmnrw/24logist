@@ -255,6 +255,7 @@ class CommunityPostController extends Controller
                 'status' => 'deleted',
             ]);
             CommunityPhoto::query()->whereIn('id', $attachedPhotos->pluck('id'))->delete();
+            $post->delete();
         });
         $photos->deleteFiles($attachedPhotos);
 

@@ -20,5 +20,6 @@ class DatabaseSeeder extends Seeder
         $this->call(FunctionalSectionSeeder::class);
         $this->call(CmsPagesSeeder::class);
         $this->call(SeoMonitoringSeeder::class);
+        $this->call(CommunityAiPersonaSeeder::class);
     }
 }

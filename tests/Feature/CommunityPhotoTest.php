@@ -115,6 +115,7 @@ class CommunityPhotoTest extends TestCase
 
         $this->actingAs($user, 'community')->delete(route('community.posts.destroy', $post))->assertRedirect(route('community.index'));
 
+        $this->assertSoftDeleted('community_posts', ['id' => $post->id]);
         $this->assertDatabaseCount('community_photos', 0);
         Storage::disk('local')->assertMissing($postPhoto->path);
         Storage::disk('local')->assertMissing($commentPhoto->path);

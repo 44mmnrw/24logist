@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Cache;
 
 class SiteSettingsService
 {
-    private const CACHE_KEY = 'site.settings.v21';
+    private const CACHE_KEY = 'site.settings.v22';
 
     public function get(): SiteSetting
     {
@@ -157,6 +157,16 @@ class SiteSettingsService
         return (string) $this->get()->getAttribute('community_max_webhook_secret');
     }
 
+    public function timewebAiToken(): string
+    {
+        return trim((string) $this->get()->getAttribute('community_ai_timeweb_token'));
+    }
+
+    public function timewebAiConfigured(): bool
+    {
+        return $this->timewebAiToken() !== '';
+    }
+
     public function routeCalculatorEnabled(): bool
     {
         return (bool) $this->get()->getAttribute('route_calculator_enabled');
@@ -266,6 +276,7 @@ class SiteSettingsService
     public function clearCache(): void
     {
         Cache::forget(self::CACHE_KEY);
+        Cache::forget('site.settings.v21');
         Cache::forget('site.settings.v20');
         Cache::forget('site.settings.v19');
         Cache::forget('site.settings.v18');
