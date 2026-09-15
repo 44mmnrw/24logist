@@ -73,6 +73,9 @@ php artisan db:seed --class=FunctionalSectionSeeder --force --no-interaction
 log "seed growth section data"
 php artisan db:seed --class=GrowthSectionSeeder --force --no-interaction
 
+log "seed community AI personas"
+php artisan db:seed --class=CommunityAiPersonaSeeder --force --no-interaction
+
 php artisan storage:link --force 2>/dev/null || true
 mkdir -p storage/app/public/livewire-tmp
 chmod -R ug+rwx storage bootstrap/cache

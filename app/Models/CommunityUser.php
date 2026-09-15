@@ -18,7 +18,7 @@ class CommunityUser extends Authenticatable
 
     protected $fillable = [
         'username', 'display_name', 'avatar_path', 'avatar_source', 'transport_role', 'bio', 'role', 'karma', 'onboarded_at', 'terms_accepted_at',
-        'suspended_until', 'banned_at',
+        'suspended_until', 'banned_at', 'last_login_at', 'last_seen_at', 'last_login_ip', 'last_user_agent',
     ];
 
     public const TRANSPORT_ROLES = [
@@ -37,6 +37,8 @@ class CommunityUser extends Authenticatable
         return [
             'onboarded_at' => 'datetime',
             'terms_accepted_at' => 'datetime',
+            'last_login_at' => 'datetime',
+            'last_seen_at' => 'datetime',
             'suspended_until' => 'datetime',
             'banned_at' => 'datetime',
         ];
@@ -60,6 +62,11 @@ class CommunityUser extends Authenticatable
     public function aiPersona(): HasOne
     {
         return $this->hasOne(CommunityAiPersona::class);
+    }
+
+    public function sessions(): HasMany
+    {
+        return $this->hasMany(CommunityUserSession::class);
     }
 
     public function communityNotifications(): HasMany

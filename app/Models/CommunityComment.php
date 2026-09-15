@@ -11,6 +11,18 @@ class CommunityComment extends Model
 {
     use SoftDeletes;
 
+    public const STATUS_PUBLISHED = 'published';
+
+    public const STATUS_HIDDEN = 'hidden';
+
+    public const STATUS_DELETED = 'deleted';
+
+    public const STATUS_LABELS = [
+        self::STATUS_PUBLISHED => 'Опубликован',
+        self::STATUS_HIDDEN => 'Скрыт',
+        self::STATUS_DELETED => 'Удалён',
+    ];
+
     protected $fillable = [
         'community_post_id', 'community_user_id', 'parent_id', 'root_id', 'depth',
         'body_markdown', 'body_html', 'status', 'score', 'edited_at',
@@ -49,5 +61,27 @@ class CommunityComment extends Model
     public function photos(): HasMany
     {
         return $this->hasMany(CommunityPhoto::class)->orderBy('position')->orderBy('id');
+    }
+
+    public function reports(): HasMany
+    {
+        return $this->hasMany(CommunityReport::class, 'target_id')
+            ->where('target_type', 'comment');
+    }
+
+    public function openReports(): HasMany
+    {
+        return $this->reports()->where('status', 'open');
+    }
+
+    public function moderationActions(): HasMany
+    {
+        return $this->hasMany(CommunityModerationAction::class, 'target_id')
+            ->where('target_type', 'comment');
+    }
+
+    public function getUrl(): string
+    {
+        return $this->post->getUrl().'#comment-'.$this->id;
     }
 }

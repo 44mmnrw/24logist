@@ -148,7 +148,7 @@ Route::view('/epd-game', 'epd-game')
     ]))
     ->name('epd-game');
 
-Route::middleware(['community.locale', 'community.enabled'])->prefix('community')->name('community.')->group(function (): void {
+Route::middleware(['community.locale', 'community.enabled', 'community.activity'])->prefix('community')->name('community.')->group(function (): void {
     Route::get('/', [CommunityController::class, 'index'])->name('index');
     Route::get('/c/{category}', [CommunityController::class, 'category'])->name('categories.show');
     Route::get('/p/{post}/{slug?}', [CommunityPostController::class, 'show'])

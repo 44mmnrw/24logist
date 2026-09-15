@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\Community\CommunityIdentityManager;
+use App\Services\Community\CommunitySessionTracker;
 use App\Services\Community\CommunityAvatarService;
 use App\Services\SiteSettingsService;
 use Illuminate\Http\RedirectResponse;
@@ -51,6 +52,7 @@ class VkCommunityAuthController extends Controller
         Request $request,
         CommunityIdentityManager $identities,
         CommunityAvatarService $avatars,
+        CommunitySessionTracker $sessions,
     ): RedirectResponse
     {
         abort_unless($this->settings->communityVkEnabled(), 404);
@@ -101,6 +103,7 @@ class VkCommunityAuthController extends Controller
         $avatars->syncFromProvider($user, 'vk', $avatarUrl);
         auth('community')->login($user, true);
         $request->session()->regenerate();
+        $sessions->login($request, $user, 'vk');
 
         $message = $linkTo ? 'VK ID привязан к профилю.' : 'Вход через VK ID выполнен.';
 

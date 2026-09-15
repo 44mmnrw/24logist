@@ -38,7 +38,7 @@ class CommunityController extends Controller
         $like = '%'.addcslashes($search, '%_\\').'%';
 
         $posts = CommunityPost::query()
-            ->with(['author', 'category', 'photos'])
+            ->with(['author.aiPersona', 'category', 'photos'])
             ->published()
             ->when($sort === 'unanswered', fn (Builder $query) => $query
                 ->whereNull('resolved_at')

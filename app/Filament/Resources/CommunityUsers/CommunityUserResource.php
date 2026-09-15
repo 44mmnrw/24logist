@@ -4,7 +4,11 @@ namespace App\Filament\Resources\CommunityUsers;
 
 use App\Filament\Resources\CommunityUsers\Pages\EditCommunityUser;
 use App\Filament\Resources\CommunityUsers\Pages\ListCommunityUsers;
+use App\Filament\Resources\CommunityUsers\RelationManagers\CommentsRelationManager;
+use App\Filament\Resources\CommunityUsers\RelationManagers\IdentitiesRelationManager;
 use App\Filament\Resources\CommunityUsers\RelationManagers\ModerationActionsRelationManager;
+use App\Filament\Resources\CommunityUsers\RelationManagers\PostsRelationManager;
+use App\Filament\Resources\CommunityUsers\RelationManagers\SessionsRelationManager;
 use App\Models\CommunityUser;
 use App\Services\Community\CommunityUserModerationService;
 use BackedEnum;
@@ -52,6 +56,13 @@ class CommunityUserResource extends Resource
             Select::make('role')->label('Права в сообществе')->options(['user' => 'Участник', 'moderator' => 'Модератор'])->required(),
             Textarea::make('bio')->label('О себе')->rows(5)->maxLength(1000)->columnSpanFull(),
             TextInput::make('karma')->label('Рейтинг')->numeric()->disabled(),
+            TextInput::make('avatar_source')->label('Источник аватара')->disabled()->placeholder('—'),
+            DateTimePicker::make('onboarded_at')->label('Профиль заполнен')->disabled()->dehydrated(false),
+            DateTimePicker::make('terms_accepted_at')->label('Правила приняты')->disabled()->dehydrated(false),
+            DateTimePicker::make('last_login_at')->label('Последний вход')->disabled()->dehydrated(false),
+            DateTimePicker::make('last_seen_at')->label('Последняя активность')->disabled()->dehydrated(false),
+            TextInput::make('last_login_ip')->label('IP последнего входа')->disabled()->dehydrated(false)->placeholder('—'),
+            Textarea::make('last_user_agent')->label('Последний User-Agent')->disabled()->dehydrated(false)->rows(3)->columnSpanFull(),
             DateTimePicker::make('suspended_until')->label('Ограничен до')->disabled()->dehydrated(false),
             DateTimePicker::make('banned_at')->label('Заблокирован с')->disabled()->dehydrated(false),
             DateTimePicker::make('created_at')->label('Дата регистрации')->disabled(),
@@ -88,6 +99,7 @@ class CommunityUserResource extends Resource
                 TextColumn::make('comments_count')->label('Комментариев')->counts('comments'),
                 TextColumn::make('suspended_until')->label('Ограничен до')->dateTime('d.m.Y H:i')->placeholder('—'),
                 TextColumn::make('created_at')->label('Дата регистрации')->dateTime('d.m.Y H:i')->sortable(),
+                TextColumn::make('last_seen_at')->label('Активность')->dateTime('d.m.Y H:i')->placeholder('—')->sortable(),
             ])
             ->filters([
                 SelectFilter::make('role')->label('Права')->options(['user' => 'Участник', 'moderator' => 'Модератор']),
@@ -253,7 +265,13 @@ class CommunityUserResource extends Resource
 
     public static function getRelations(): array
     {
-        return [ModerationActionsRelationManager::class];
+        return [
+            IdentitiesRelationManager::class,
+            SessionsRelationManager::class,
+            PostsRelationManager::class,
+            CommentsRelationManager::class,
+            ModerationActionsRelationManager::class,
+        ];
     }
 
     public static function getEloquentQuery(): Builder

@@ -78,6 +78,11 @@ class VkCommunityAuthTest extends TestCase
         $this->assertFalse($identity->bot_access);
         $this->assertStringNotContainsString('must-not-be-stored', $identity->toJson());
         $this->assertSame('vk', auth('community')->user()->fresh()->avatar_source);
+        $this->assertDatabaseHas('community_user_sessions', [
+            'community_user_id' => auth('community')->id(),
+            'community_identity_id' => $identity->id,
+            'provider' => 'vk',
+        ]);
         Storage::disk('public')->assertExists(auth('community')->user()->fresh()->avatar_path);
         Http::assertSent(fn (HttpRequest $request): bool => $request->url() === 'https://id.vk.ru/oauth2/auth'
             && $request['code'] === 'one-time-code'

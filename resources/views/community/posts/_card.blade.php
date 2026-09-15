@@ -11,6 +11,7 @@
                 <a class="community-category-pill" href="{{ route('community.categories.show', $post->category) }}">{{ $post->category->name }}</a>
                 <span class="community-meta__separator">•</span>
                 @if ($post->author)<a href="{{ route('community.profile', $post->author) }}" title="{{ '@'.$post->author->username }}">{{ $post->author->displayName() }}</a>@else<span>[удалён]</span>@endif
+                @if ($post->author?->aiPersona)<span class="community-author-flair">AI-персона</span>@endif
                 <span class="community-meta__separator">•</span><time datetime="{{ $post->published_at?->toIso8601String() }}">{{ \App\Support\CommunityDate::relative($post->published_at) }}</time>
                 @if ($post->locked_at)<span class="community-post-card__status">Закрыто</span>@endif
                 @if ($post->accepted_comment_id)<span class="community-post-card__status community-post-card__status--resolved">Есть решение</span>@endif

@@ -5,6 +5,7 @@
             <div class="community-meta">
                 @if ($comment->author)<a href="{{ route('community.profile', $comment->author) }}" title="{{ '@'.$comment->author->username }}">{{ $comment->author->displayName() }}</a>@else<span>[удалён]</span>@endif
                 @if ($comment->author?->transportRoleLabel())<span class="community-author-flair">{{ $comment->author->transportRoleLabel() }}</span>@endif
+                @if ($comment->author?->aiPersona)<span class="community-author-flair">AI-персона</span>@endif
                 <span>•</span><time>{{ \App\Support\CommunityDate::relative($comment->created_at) }}</time>@if($comment->edited_at)<span>• изменено</span>@endif
             </div>
             @if ($comment->status === 'deleted')

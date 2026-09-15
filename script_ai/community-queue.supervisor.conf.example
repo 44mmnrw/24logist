@@ -1,5 +1,5 @@
 [program:24logist-community-queue]
-command=/usr/bin/php /var/www/logist_sys/data/www/24logist.ru/.app/artisan queue:work database --queue=default --sleep=3 --tries=3 --timeout=60 --max-time=3600
+command=/usr/bin/php /var/www/logist_sys/data/www/24logist.ru/.app/artisan queue:work database --queue=community-ai,default --sleep=3 --tries=3 --timeout=120 --max-time=3600
 directory=/var/www/logist_sys/data/www/24logist.ru/.app
 user=logist_sys
 numprocs=1

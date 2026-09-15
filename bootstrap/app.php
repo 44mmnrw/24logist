@@ -10,6 +10,7 @@ use App\Http\Middleware\EnsureCommunityEnabled;
 use App\Http\Middleware\EnsureCommunityModerator;
 use App\Http\Middleware\EnsureCommunityOnboarded;
 use App\Http\Middleware\UseRussianCommunityLocale;
+use App\Http\Middleware\TrackCommunityActivity;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -44,6 +45,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'community.auth' => EnsureCommunityAuthenticated::class,
             'community.onboarded' => EnsureCommunityOnboarded::class,
             'community.moderator' => EnsureCommunityModerator::class,
+            'community.activity' => TrackCommunityActivity::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

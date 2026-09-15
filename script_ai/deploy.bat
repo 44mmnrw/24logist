@@ -284,6 +284,15 @@ if errorlevel 1 (
 echo [OK] Growth section data seeded.
 
 echo.
+echo [4.2] Seed community AI personas...
+call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "cd %SERVER_APP% && php artisan db:seed --class=CommunityAiPersonaSeeder --force --no-interaction"
+if errorlevel 1 (
+	echo [ERROR] CommunityAiPersonaSeeder failed on server.
+	exit /b 1
+)
+echo [OK] Community AI personas seeded.
+
+echo.
 echo [4.9] Ensure Node.js on server ^($HOME/opt/node^)...
 call :fn_run_ssh "%SERVER_USER%@%SERVER_HOST%" "test -x $HOME/opt/node/bin/node || (test -f %SERVER_APP%/script_ai/install-node-server.sh && sed -i 's/\r$//' %SERVER_APP%/script_ai/install-node-server.sh && bash %SERVER_APP%/script_ai/install-node-server.sh) || (echo [ERROR] Node missing. Install: bash script_ai/install-node-server.sh && exit 1)"
 if errorlevel 1 exit /b 1

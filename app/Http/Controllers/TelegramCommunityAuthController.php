@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\Community\CommunityAvatarService;
 use App\Services\Community\CommunityIdentityManager;
+use App\Services\Community\CommunitySessionTracker;
 use App\Services\Community\TelegramIdTokenVerifier;
 use App\Services\SiteSettingsService;
 use Illuminate\Http\Client\ConnectionException;
@@ -52,6 +53,7 @@ class TelegramCommunityAuthController extends Controller
         TelegramIdTokenVerifier $verifier,
         CommunityIdentityManager $identities,
         CommunityAvatarService $avatars,
+        CommunitySessionTracker $sessions,
     ): RedirectResponse {
         $flow = $request->session()->pull('community.telegram');
         $state = $request->query('state');
@@ -91,6 +93,7 @@ class TelegramCommunityAuthController extends Controller
         $avatars->syncFromProvider($user, 'telegram', is_string($claims['picture'] ?? null) ? $claims['picture'] : null);
         auth('community')->login($user, true);
         $request->session()->regenerate();
+        $sessions->login($request, $user, 'telegram');
 
         $message = $linkTo ? 'Telegram привязан к профилю.' : 'Вход через Telegram выполнен.';
 

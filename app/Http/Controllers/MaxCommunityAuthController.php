@@ -6,6 +6,7 @@ use App\Models\CommunityLoginChallenge;
 use App\Models\CommunityUser;
 use App\Services\Community\CommunityAvatarService;
 use App\Services\Community\CommunityIdentityManager;
+use App\Services\Community\CommunitySessionTracker;
 use App\Services\Community\MaxInitDataReplayGuard;
 use App\Services\Community\MaxInitDataValidator;
 use App\Services\Community\MaxLoginReturnService;
@@ -142,7 +143,11 @@ class MaxCommunityAuthController extends Controller
         ]);
     }
 
-    public function complete(Request $request, CommunityLoginChallenge $challenge): RedirectResponse
+    public function complete(
+        Request $request,
+        CommunityLoginChallenge $challenge,
+        CommunitySessionTracker $sessions,
+    ): RedirectResponse
     {
         abort_unless($this->siteSettings->communityMaxEnabled(), 404);
 
@@ -169,6 +174,7 @@ class MaxCommunityAuthController extends Controller
         $user = CommunityUser::query()->findOrFail($challenge->community_user_id);
         auth('community')->login($user, true);
         $request->session()->regenerate();
+        $sessions->login($request, $user, 'max');
 
         return redirect()->to($user->isOnboarded()
             ? $request->session()->pull('url.intended', route('community.index'))

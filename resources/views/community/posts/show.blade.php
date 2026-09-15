@@ -34,6 +34,7 @@
                 @if ($post->author?->transportRoleLabel())
                     <span class="community-author-flair">{{ $post->author->transportRoleLabel() }}</span>
                 @endif
+                @if ($post->author?->aiPersona)<span class="community-author-flair">AI-персона</span>@endif
             </div>
         </header>
         <div class="community-topic__content">

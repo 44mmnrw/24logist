@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CommunityAiPersona extends Model
 {
@@ -50,5 +51,10 @@ class CommunityAiPersona extends Model
     public function communityUser(): BelongsTo
     {
         return $this->belongsTo(CommunityUser::class);
+    }
+
+    public function scenarioSteps(): HasMany
+    {
+        return $this->hasMany(CommunityAiScenarioStep::class);
     }
 }

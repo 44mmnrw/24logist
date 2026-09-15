@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Models\CommunityIdentity;
 use App\Models\CommunityModerationAction;
 use App\Models\CommunityUser;
+use App\Models\CommunityUserSession;
 use App\Models\User;
 use App\Services\Community\CommunityUserModerationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -29,6 +31,45 @@ class CommunityUserModerationTest extends TestCase
             ->get(route('filament.admin.resources.community-users.index'))
             ->assertOk()
             ->assertSee('Участники сообщества');
+    }
+
+    public function test_admin_can_open_full_participant_metadata_page(): void
+    {
+        $admin = User::factory()->create();
+        $user = CommunityUser::factory()->create([
+            'last_login_ip' => '203.0.113.15',
+            'last_login_at' => now(),
+            'last_seen_at' => now(),
+            'last_user_agent' => 'Metadata browser',
+        ]);
+        $identity = CommunityIdentity::query()->create([
+            'community_user_id' => $user->id,
+            'provider' => 'telegram',
+            'provider_user_id' => '123456789',
+            'last_verified_at' => now(),
+        ]);
+        CommunityUserSession::query()->create([
+            'community_user_id' => $user->id,
+            'community_identity_id' => $identity->id,
+            'session_id_hash' => hash('sha256', 'admin-metadata-test'),
+            'provider' => 'telegram',
+            'ip_address' => '203.0.113.15',
+            'user_agent' => 'Metadata browser',
+            'logged_in_at' => now(),
+            'last_seen_at' => now(),
+            'expires_at' => now()->addHour(),
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('filament.admin.resources.community-users.edit', $user))
+            ->assertOk()
+            ->assertSee('203.0.113.15')
+            ->assertSee('Metadata browser')
+            ->assertSee('User-Agent')
+            ->assertSeeText('Привязанные соцсети и способы входа')
+            ->assertSeeText('Сессии и история активности')
+            ->assertSeeText('Темы участника')
+            ->assertSeeText('Комментарии участника');
     }
 
     public function test_admin_can_warn_a_user_and_the_user_receives_the_warning(): void
