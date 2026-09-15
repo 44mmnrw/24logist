@@ -34,7 +34,8 @@ final class MaxChatImportService
 
         $created = 0;
         $lowerBound = $from->getTimestampMs();
-        $cursor = $to->getTimestampMs();
+        $upperBound = $to->getTimestampMs();
+        $cursor = $upperBound;
 
         try {
             for ($page = 0; $page < 50 && $cursor >= $lowerBound; $page++) {
@@ -44,8 +45,9 @@ final class MaxChatImportService
                     ->withHeaders(['Authorization' => $token])
                     ->get(self::ENDPOINT, [
                         'chat_id' => $source->external_chat_id,
-                        'from' => $lowerBound,
-                        'to' => $cursor,
+                        // MAX names the upper time boundary `from` and the lower one `to`.
+                        'from' => $cursor,
+                        'to' => $lowerBound,
                         'count' => 100,
                     ]);
 
@@ -70,7 +72,7 @@ final class MaxChatImportService
                     }
 
                     $oldestTimestamp = min($oldestTimestamp, $timestamp);
-                    if ($timestamp < $lowerBound || $timestamp > $to->getTimestampMs()) {
+                    if ($timestamp < $lowerBound || $timestamp > $upperBound) {
                         continue;
                     }
 

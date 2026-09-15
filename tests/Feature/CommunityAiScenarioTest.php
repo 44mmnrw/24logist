@@ -114,8 +114,8 @@ class CommunityAiScenarioTest extends TestCase
 
             parse_str((string) parse_url($request->url(), PHP_URL_QUERY), $query);
 
-            return (int) ($query['from'] ?? 0) === $from->getTimestampMs()
-                && (int) ($query['to'] ?? 0) === $to->getTimestampMs()
+            return (int) ($query['from'] ?? 0) === $to->getTimestampMs()
+                && (int) ($query['to'] ?? 0) === $from->getTimestampMs()
                 && $request->hasHeader('Authorization', 'max-test-token');
         });
         Http::assertSent(function (HttpRequest $request): bool {
