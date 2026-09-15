@@ -283,6 +283,41 @@ document.addEventListener('click', async (event) => {
     }
 });
 
+const closeReactionPickers = (except = null) => {
+    document.querySelectorAll('[data-reaction-picker]:not([hidden])').forEach((picker) => {
+        if (picker === except) return;
+        picker.hidden = true;
+        picker.closest('.community-reactions')?.querySelector('[data-reaction-toggle]')?.setAttribute('aria-expanded', 'false');
+    });
+};
+
+document.addEventListener('click', (event) => {
+    const toggle = event.target.closest('[data-reaction-toggle]');
+    if (toggle) {
+        const widget = toggle.closest('.community-reactions');
+        const picker = widget?.querySelector('[data-reaction-picker]');
+        if (!picker) return;
+
+        const willOpen = picker.hidden;
+        closeReactionPickers(picker);
+        picker.hidden = !willOpen;
+        toggle.setAttribute('aria-expanded', String(willOpen));
+        if (willOpen) picker.querySelector('button[data-code]')?.focus();
+        return;
+    }
+
+    if (!event.target.closest('.community-reactions')) closeReactionPickers();
+});
+
+document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    const picker = document.querySelector('[data-reaction-picker]:not([hidden])');
+    if (!picker) return;
+    const toggle = picker.closest('.community-reactions')?.querySelector('[data-reaction-toggle]');
+    closeReactionPickers();
+    toggle?.focus();
+});
+
 document.addEventListener('click', async (event) => {
     const button = event.target.closest('[data-community-reactions] button[data-code]');
     if (!button) return;
@@ -298,16 +333,36 @@ document.addEventListener('click', async (event) => {
             headers: {'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken},
             body: JSON.stringify({target_type: widget.dataset.type, target_id: Number(widget.dataset.id), code: button.dataset.code}),
         });
-        if (!response.ok) throw new Error('reaction_failed');
         const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Не удалось сохранить реакцию.');
+        const selected = Array.isArray(result.selected) ? result.selected : (result.selected ? [result.selected] : []);
         buttons.forEach((item) => {
-            const active = result.selected === item.dataset.code;
+            const active = selected.includes(item.dataset.code);
             item.classList.toggle('is-active', active);
-            item.setAttribute('aria-pressed', String(active));
+            item.setAttribute('aria-checked', String(active));
             item.querySelector('[data-reaction-count]').textContent = result.reactions[item.dataset.code] || 0;
         });
-    } catch (_) {
-        window.alert('Не удалось сохранить реакцию. Обновите страницу и попробуйте ещё раз.');
+
+        const activeButtons = [...buttons].filter((item) => selected.includes(item.dataset.code));
+        const trigger = widget.querySelector('[data-reaction-toggle]');
+        const triggerEmoji = trigger?.querySelector('[data-reaction-trigger-emoji]');
+        const triggerLabel = trigger?.querySelector('[data-reaction-trigger-label]');
+        const total = Object.values(result.reactions).reduce((sum, count) => sum + Number(count || 0), 0);
+        const totalElement = trigger?.querySelector('[data-reaction-total]');
+
+        trigger?.classList.toggle('is-active', activeButtons.length > 0);
+        if (triggerEmoji) triggerEmoji.textContent = activeButtons[0]?.dataset.emoji || '🙂';
+        if (triggerLabel) {
+            triggerLabel.textContent = activeButtons.length > 1
+                ? `Реакции · ${activeButtons.length}`
+                : (activeButtons[0]?.dataset.label || 'Реакция');
+        }
+        if (totalElement) {
+            totalElement.textContent = total;
+            totalElement.classList.toggle('is-empty', total === 0);
+        }
+    } catch (error) {
+        window.alert(error.message || 'Не удалось сохранить реакцию. Обновите страницу и попробуйте ещё раз.');
     } finally {
         buttons.forEach((item) => { item.disabled = false; });
     }

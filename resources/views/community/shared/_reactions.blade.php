@@ -4,17 +4,67 @@
         && !auth('community')->user()->isRestricted()
         && (int) $target->community_user_id !== (int) auth('community')->id();
     $reactionCounts = $social['reactions'] ?? [];
+    $selectedReactions = array_values((array) ($social['selected'] ?? []));
+    $reactionTotal = array_sum($reactionCounts);
+    $firstSelected = $selectedReactions[0] ?? null;
+    $triggerReaction = $firstSelected !== null
+        ? \App\Services\Community\CommunitySocialService::REACTIONS[$firstSelected]
+        : null;
+    $pickerId = 'community-reactions-'.$type.'-'.$target->id;
 @endphp
-@if ($canReact || array_sum($reactionCounts) > 0)
-    <div class="community-reactions" @if ($canReact) data-community-reactions data-type="{{ $type }}" data-id="{{ $target->id }}" data-endpoint="{{ route('community.react') }}" @endif aria-label="Реакции">
+@if ($canReact || $reactionTotal > 0)
+    <div
+        class="community-reactions"
+        @if ($canReact)
+            data-community-reactions
+            data-type="{{ $type }}"
+            data-id="{{ $target->id }}"
+            data-endpoint="{{ route('community.react') }}"
+        @endif
+        aria-label="Реакции"
+    >
+        <button
+            class="community-reaction-trigger @if ($selectedReactions !== []) is-active @endif"
+            type="button"
+            data-reaction-toggle
+            aria-expanded="false"
+            aria-controls="{{ $pickerId }}"
+            aria-haspopup="menu"
+        >
+            <span class="community-reaction__emoji" data-reaction-trigger-emoji aria-hidden="true">{{ $triggerReaction['emoji'] ?? '🙂' }}</span>
+            <span class="community-reaction-trigger__label" data-reaction-trigger-label>{{ count($selectedReactions) > 1 ? 'Реакции · '.count($selectedReactions) : ($triggerReaction['label'] ?? 'Реакция') }}</span>
+            <span class="community-reaction__count @if ($reactionTotal === 0) is-empty @endif" data-reaction-total>{{ $reactionTotal }}</span>
+        </button>
+
+        <div class="community-reaction-picker" id="{{ $pickerId }}" data-reaction-picker role="menu" hidden>
         @foreach (\App\Services\Community\CommunitySocialService::REACTIONS as $code => $reaction)
+            @php $isSelected = in_array($code, $selectedReactions, true); @endphp
             @if ($canReact)
-                <button class="community-reaction @if (($social['selected'] ?? null) === $code) is-active @endif" type="button" data-code="{{ $code }}" aria-pressed="{{ ($social['selected'] ?? null) === $code ? 'true' : 'false' }}" title="{{ $reaction['label'] }}">
-                    <span class="community-reaction__emoji" aria-hidden="true">{{ $reaction['emoji'] }}</span><span class="community-reaction__label">{{ $reaction['label'] }}</span><span class="community-reaction__count" data-reaction-count="{{ $code }}">{{ $reactionCounts[$code] ?? 0 }}</span>
+                <button
+                    class="community-reaction-option @if ($isSelected) is-active @endif"
+                    type="button"
+                    data-code="{{ $code }}"
+                    data-emoji="{{ $reaction['emoji'] }}"
+                    data-label="{{ $reaction['label'] }}"
+                    role="menuitemcheckbox"
+                    aria-checked="{{ $isSelected ? 'true' : 'false' }}"
+                    title="{{ $reaction['label'] }}"
+                >
+                    <span class="community-reaction__emoji" aria-hidden="true">{{ $reaction['emoji'] }}</span>
+                    <span class="community-reaction-option__label">{{ $reaction['label'] }}</span>
+                    <span class="community-reaction__count" data-reaction-count="{{ $code }}">{{ $reactionCounts[$code] ?? 0 }}</span>
                 </button>
             @elseif (($reactionCounts[$code] ?? 0) > 0)
-                <span class="community-reaction" title="{{ $reaction['label'] }}"><span class="community-reaction__emoji" aria-hidden="true">{{ $reaction['emoji'] }}</span><span class="community-reaction__label">{{ $reaction['label'] }}</span><span class="community-reaction__count">{{ $reactionCounts[$code] }}</span></span>
+                <span class="community-reaction-option is-readonly" role="menuitem">
+                    <span class="community-reaction__emoji" aria-hidden="true">{{ $reaction['emoji'] }}</span>
+                    <span class="community-reaction-option__label">{{ $reaction['label'] }}</span>
+                    <span class="community-reaction__count">{{ $reactionCounts[$code] }}</span>
+                </span>
             @endif
         @endforeach
+            @if ($canReact)
+                <span class="community-reaction-picker__hint">Можно выбрать до {{ \App\Services\Community\CommunitySocialService::MAX_REACTIONS_PER_TARGET }}</span>
+            @endif
+        </div>
     </div>
 @endif

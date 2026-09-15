@@ -40,7 +40,7 @@ class CommunitySocialTest extends TestCase
             ->assertOk()->assertSee($waiting->title)->assertDontSee($answered->title);
     }
 
-    public function test_reactions_can_be_changed_or_removed_without_affecting_votes_or_karma(): void
+    public function test_up_to_three_reactions_can_be_selected_and_removed_without_affecting_votes_or_karma(): void
     {
         $author = CommunityUser::factory()->create();
         $reader = CommunityUser::factory()->create();
@@ -48,13 +48,15 @@ class CommunitySocialTest extends TestCase
 
         $this->actingAs($reader, 'community')
             ->postJson(route('community.react'), ['target_type' => 'post', 'target_id' => $post->id, 'code' => 'useful'])
-            ->assertOk()->assertJsonPath('reactions.useful', 1)->assertJsonPath('selected', 'useful');
+            ->assertOk()->assertJsonPath('reactions.useful', 1)->assertJsonPath('selected.0', 'useful');
         $this->postJson(route('community.react'), ['target_type' => 'post', 'target_id' => $post->id, 'code' => 'thanks'])
-            ->assertOk()->assertJsonPath('reactions.thanks', 1)->assertJsonPath('selected', 'thanks');
-        $this->assertDatabaseCount('community_reactions', 1);
+            ->assertOk()->assertJsonPath('reactions.thanks', 1)->assertJsonCount(2, 'selected');
+        $this->postJson(route('community.react'), ['target_type' => 'post', 'target_id' => $post->id, 'code' => 'same'])
+            ->assertOk()->assertJsonPath('reactions.same', 1)->assertJsonCount(3, 'selected');
+        $this->assertDatabaseCount('community_reactions', 3);
         $this->postJson(route('community.react'), ['target_type' => 'post', 'target_id' => $post->id, 'code' => 'thanks'])
-            ->assertOk()->assertJsonPath('selected', null);
-        $this->assertDatabaseCount('community_reactions', 0);
+            ->assertOk()->assertJsonPath('selected.0', 'useful')->assertJsonPath('selected.1', 'same')->assertJsonCount(2, 'selected');
+        $this->assertDatabaseCount('community_reactions', 2);
         $this->assertSame(1, $post->fresh()->score);
         $this->assertSame(0, $author->fresh()->karma);
 
