@@ -17,7 +17,7 @@ class CommunityUser extends Authenticatable
     use HasFactory, Notifiable, SoftDeletes;
 
     protected $fillable = [
-        'username', 'display_name', 'avatar_path', 'avatar_source', 'transport_role', 'bio', 'role', 'karma', 'onboarded_at', 'terms_accepted_at',
+        'username', 'display_name', 'avatar_path', 'avatar_source', 'transport_role', 'bio', 'role', 'karma', 'show_karma', 'onboarded_at', 'terms_accepted_at',
         'suspended_until', 'banned_at', 'last_login_at', 'last_seen_at', 'last_login_ip', 'last_user_agent',
     ];
 
@@ -37,6 +37,7 @@ class CommunityUser extends Authenticatable
         return [
             'onboarded_at' => 'datetime',
             'terms_accepted_at' => 'datetime',
+            'show_karma' => 'boolean',
             'last_login_at' => 'datetime',
             'last_seen_at' => 'datetime',
             'suspended_until' => 'datetime',

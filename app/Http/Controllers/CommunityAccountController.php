@@ -8,6 +8,7 @@ use App\Models\CommunityPost;
 use App\Models\CommunityPostVote;
 use App\Models\CommunityUser;
 use App\Services\Community\CommunityAvatarService;
+use App\Services\Community\CommunityKarmaService;
 use App\Services\Community\CommunityRanking;
 use App\Services\Community\CommunitySessionTracker;
 use Illuminate\Http\RedirectResponse;
@@ -115,6 +116,7 @@ class CommunityAccountController extends Controller
             'display_name' => ['required', 'string', 'min:2', 'max:50', 'regex:/^[\pL\pN][\pL\pN ._-]*$/u'],
             'transport_role' => ['nullable', Rule::in(array_keys(CommunityUser::TRANSPORT_ROLES))],
             'bio' => ['nullable', 'string', 'max:1000'],
+            'show_karma' => ['nullable', 'boolean'],
             'telegram_notifications' => ['nullable', 'boolean'],
             'max_notifications' => ['nullable', 'boolean'],
             'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192', 'dimensions:max_width=4096,max_height=4096'],
@@ -135,6 +137,7 @@ class CommunityAccountController extends Controller
                 ? (filled($data['transport_role']) ? $data['transport_role'] : null)
                 : $user->transport_role,
             'bio' => filled($data['bio'] ?? null) ? $data['bio'] : null,
+            'show_karma' => (bool) ($data['show_karma'] ?? false),
         ]);
 
         foreach (['telegram', 'max'] as $provider) {
@@ -150,12 +153,28 @@ class CommunityAccountController extends Controller
         return back()->with('status', 'Настройки профиля сохранены.');
     }
 
-    public function destroy(Request $request, CommunityAvatarService $avatars): RedirectResponse
-    {
+    public function destroy(
+        Request $request,
+        CommunityAvatarService $avatars,
+        CommunityKarmaService $karma,
+    ): RedirectResponse {
         $request->validate(['confirmation' => ['required', 'in:УДАЛИТЬ']]);
         /** @var CommunityUser $user */
         $user = auth('community')->user();
         $avatarPath = $user->avatar_path;
+        $affectedKarmaUserIds = CommunityPost::query()
+            ->whereIn('id', CommunityPostVote::query()->where('community_user_id', $user->id)->select('community_post_id'))
+            ->pluck('community_user_id')
+            ->merge(CommunityComment::query()
+                ->whereIn('id', CommunityCommentVote::query()->where('community_user_id', $user->id)->select('community_comment_id'))
+                ->pluck('community_user_id'));
+
+        foreach (['community_reactions', 'community_awards'] as $table) {
+            $targets = DB::table($table)->where('community_user_id', $user->id)->get(['target_type', 'target_id']);
+            $affectedKarmaUserIds = $affectedKarmaUserIds
+                ->merge(CommunityPost::query()->whereIn('id', $targets->where('target_type', 'post')->pluck('target_id'))->pluck('community_user_id'))
+                ->merge(CommunityComment::query()->whereIn('id', $targets->where('target_type', 'comment')->pluck('target_id'))->pluck('community_user_id'));
+        }
 
         DB::transaction(function () use ($user): void {
             CommunityPostVote::query()->where('community_user_id', $user->id)->get()->each(function (CommunityPostVote $vote): void {
@@ -175,6 +194,7 @@ class CommunityAccountController extends Controller
             $user->identities()->delete();
             $user->forceDelete();
         });
+        $karma->recalculateMany($affectedKarmaUserIds);
         $avatars->deletePath($avatarPath);
 
         auth('community')->logout();

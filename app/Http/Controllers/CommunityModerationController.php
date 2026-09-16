@@ -8,6 +8,7 @@ use App\Models\CommunityPost;
 use App\Models\CommunityReport;
 use App\Models\CommunityUser;
 use App\Services\Community\CommunityCommentCounter;
+use App\Services\Community\CommunityKarmaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,8 +28,12 @@ class CommunityModerationController extends Controller
         return view('community.moderation.index', compact('reports', 'targets'));
     }
 
-    public function act(Request $request, CommunityReport $report, CommunityCommentCounter $counter): RedirectResponse
-    {
+    public function act(
+        Request $request,
+        CommunityReport $report,
+        CommunityCommentCounter $counter,
+        CommunityKarmaService $karma,
+    ): RedirectResponse {
         $data = $request->validate([
             'action' => ['required', 'in:dismiss,hide,restore,lock,unlock,pin,unpin,suspend_1,suspend_7,suspend_30,ban'],
             'reason' => ['nullable', 'string', 'max:1000'],
@@ -61,6 +66,22 @@ class CommunityModerationController extends Controller
                 'resolved_at' => now(),
             ]);
         });
+
+        $target = match ($report->target_type) {
+            'post' => CommunityPost::withTrashed()->find($report->target_id),
+            'comment' => CommunityComment::withTrashed()->find($report->target_id),
+            default => null,
+        };
+        if ($target instanceof CommunityPost) {
+            $karma->recalculateMany(
+                $target->comments()->withTrashed()->pluck('community_user_id')->push($target->community_user_id),
+            );
+        } elseif ($target instanceof CommunityComment) {
+            $karma->recalculateMany([
+                $target->community_user_id,
+                CommunityPost::withTrashed()->whereKey($target->community_post_id)->value('community_user_id'),
+            ]);
+        }
 
         return back()->with('status', 'Действие модерации выполнено.');
     }

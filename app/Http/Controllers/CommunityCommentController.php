@@ -9,6 +9,7 @@ use App\Models\CommunityPostSubscription;
 use App\Models\CommunityUser;
 use App\Services\Community\CommunityCommentCounter;
 use App\Services\Community\CommunityContentRenderer;
+use App\Services\Community\CommunityKarmaService;
 use App\Services\Community\CommunityNotificationService;
 use App\Services\Community\CommunityPhotoService;
 use Illuminate\Http\RedirectResponse;
@@ -26,6 +27,7 @@ class CommunityCommentController extends Controller
         CommunityCommentCounter $counter,
         CommunityNotificationService $notifications,
         CommunityPhotoService $photos,
+        CommunityKarmaService $karma,
     ): RedirectResponse {
         $user = auth('community')->user();
         abort_if($user->isRestricted(), 403, 'Комментарии для аккаунта временно ограничены.');
@@ -89,6 +91,8 @@ class CommunityCommentController extends Controller
 
             throw $e;
         }
+
+        $karma->recalculate($post->community_user_id);
 
         $recipient = $parent?->author ?: $post->author;
 
@@ -181,10 +185,15 @@ class CommunityCommentController extends Controller
         return redirect($comment->post->getUrl().'#comment-'.$comment->id)->with('status', 'Комментарий обновлён.');
     }
 
-    public function destroy(CommunityComment $comment, CommunityCommentCounter $counter, CommunityPhotoService $photos): RedirectResponse
-    {
+    public function destroy(
+        CommunityComment $comment,
+        CommunityCommentCounter $counter,
+        CommunityPhotoService $photos,
+        CommunityKarmaService $karma,
+    ): RedirectResponse {
         $this->assertOwner($comment);
         $post = $comment->post;
+        $karmaUserIds = [$post->community_user_id, $comment->community_user_id];
         $attachedPhotos = $comment->photos()->get();
         DB::transaction(function () use ($post, $comment, $counter): void {
             $lockedPost = CommunityPost::query()->whereKey($post->id)->lockForUpdate()->firstOrFail();
@@ -202,6 +211,8 @@ class CommunityCommentController extends Controller
             $lockedComment->photos()->delete();
             $counter->sync($lockedPost);
         });
+
+        $karma->recalculateMany($karmaUserIds);
 
         $photos->deleteFiles($attachedPhotos);
 

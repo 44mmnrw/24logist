@@ -219,6 +219,7 @@ class CommunityTest extends TestCase
         $root = CommunityComment::query()->firstOrFail();
         $this->assertSame($root->id, $root->root_id);
         $this->assertSame(1, $post->fresh()->comments_count);
+        $this->assertSame(1, $author->fresh()->karma);
         $this->assertDatabaseCount('community_notifications', 1);
 
         $parent = $root;
@@ -407,6 +408,7 @@ class CommunityTest extends TestCase
         $this->actingAs($author, 'community')
             ->post(route('community.posts.accept_answer', [$post, $comment]))->assertRedirect();
         $this->assertSame($comment->id, $post->fresh()->accepted_comment_id);
+        $this->assertSame(10, $responder->fresh()->karma);
         $this->assertDatabaseHas('community_notifications', [
             'community_user_id' => $responder->id, 'type' => 'answer_accepted',
         ]);
@@ -416,6 +418,37 @@ class CommunityTest extends TestCase
             ->delete(route('community.comments.destroy', $comment))->assertRedirect();
         $this->assertNull($post->fresh()->accepted_comment_id);
         $this->assertNull($post->fresh()->resolved_at);
+        $this->assertSame(0, $responder->fresh()->karma);
+    }
+
+    public function test_user_can_hide_and_show_karma_in_public_profile(): void
+    {
+        $user = CommunityUser::factory()->create([
+            'username' => 'private_rating',
+            'karma' => 17,
+            'show_karma' => false,
+        ]);
+
+        $this->get(route('community.profile', $user))
+            ->assertOk()
+            ->assertDontSee('17 рейтинга');
+
+        $this->actingAs($user, 'community')
+            ->put(route('community.settings.update'), ['show_karma' => 1])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $this->assertTrue($user->fresh()->show_karma);
+        $this->get(route('community.profile', $user->fresh()))
+            ->assertOk()
+            ->assertSee('17 рейтинга');
+
+        $this->actingAs($user->fresh(), 'community')
+            ->put(route('community.settings.update'), [])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $this->assertFalse($user->fresh()->show_karma);
     }
 
     public function test_authenticated_reader_sees_functional_report_controls(): void

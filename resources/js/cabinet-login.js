@@ -311,6 +311,7 @@ if (modal) {
                 password_confirmation: String(formData.get('password_confirmation') ?? ''),
                 terms_accepted: formData.has('terms_accepted'),
                 privacy_policy_accepted: formData.has('privacy_policy_accepted'),
+                referral_code: String(formData.get('referral_code') ?? '').trim(),
             }
             : mode === 'password-reset'
                 ? {

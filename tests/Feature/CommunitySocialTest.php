@@ -40,7 +40,7 @@ class CommunitySocialTest extends TestCase
             ->assertOk()->assertSee($waiting->title)->assertDontSee($answered->title);
     }
 
-    public function test_up_to_three_reactions_can_be_selected_and_removed_without_affecting_votes_or_karma(): void
+    public function test_up_to_three_reactions_can_be_selected_and_removed_and_update_karma(): void
     {
         $author = CommunityUser::factory()->create();
         $reader = CommunityUser::factory()->create();
@@ -64,7 +64,7 @@ class CommunitySocialTest extends TestCase
             ->assertOk()->assertJsonPath('reactions.frustrated', 1)->assertJsonCount(3, 'selected');
         $this->assertDatabaseCount('community_reactions', 3);
         $this->assertSame(1, $post->fresh()->score);
-        $this->assertSame(0, $author->fresh()->karma);
+        $this->assertSame(4, $author->fresh()->karma);
 
         $this->actingAs($author, 'community')
             ->postJson(route('community.react'), ['target_type' => 'post', 'target_id' => $post->id, 'code' => 'useful'])
@@ -95,11 +95,13 @@ class CommunitySocialTest extends TestCase
         $this->assertStringNotContainsString('thankful_reader', $notification->data['message']);
         $this->assertSame('Очень помогло', $notification->data['body']);
         $this->assertSame('Вам анонимно вручили награду «Золотой ответ»', $notification->data['title']);
+        $this->assertSame(5, $author->fresh()->karma);
 
         $this->post(route('community.award'), [
             'target_type' => 'post', 'target_id' => $post->id, 'code' => 'fire',
         ])->assertRedirect();
         $this->assertDatabaseCount('community_awards', 1);
+        $this->assertSame(5, $author->fresh()->karma);
         $this->get($post->getUrl())->assertOk()->assertSee('Золотой ответ')->assertSee('Удалить награду');
         $this->actingAs($author, 'community')->delete(route('community.award.destroy'), [
             'target_type' => 'post', 'target_id' => $post->id,
@@ -111,6 +113,7 @@ class CommunitySocialTest extends TestCase
         ])->assertRedirect($post->getUrl());
         $this->assertDatabaseCount('community_awards', 0);
         $this->assertDatabaseCount('community_notifications', 0);
+        $this->assertSame(0, $author->fresh()->karma);
         $this->actingAs($author, 'community')->post(route('community.award'), [
             'target_type' => 'post', 'target_id' => $post->id, 'code' => 'gold',
         ])->assertForbidden();

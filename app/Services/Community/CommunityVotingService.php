@@ -13,6 +13,8 @@ use InvalidArgumentException;
 
 final class CommunityVotingService
 {
+    public function __construct(private readonly CommunityKarmaService $karma) {}
+
     /** @return array{score: int, user_vote: int} */
     public function vote(CommunityUser $user, string $type, int $targetId, int $value): array
     {
@@ -72,6 +74,6 @@ final class CommunityVotingService
             return;
         }
 
-        CommunityUser::query()->whereKey($authorId)->increment('karma', $delta);
+        $this->karma->recalculate((int) $authorId);
     }
 }

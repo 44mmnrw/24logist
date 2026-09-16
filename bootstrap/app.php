@@ -9,6 +9,7 @@ use App\Http\Middleware\EnsureCommunityAuthenticated;
 use App\Http\Middleware\EnsureCommunityEnabled;
 use App\Http\Middleware\EnsureCommunityModerator;
 use App\Http\Middleware\EnsureCommunityOnboarded;
+use App\Http\Middleware\EnsureReferralPlatformAccess;
 use App\Http\Middleware\UseRussianCommunityLocale;
 use App\Http\Middleware\TrackCommunityActivity;
 use Illuminate\Foundation\Application;
@@ -18,6 +19,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
@@ -47,6 +49,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'community.onboarded' => EnsureCommunityOnboarded::class,
             'community.moderator' => EnsureCommunityModerator::class,
             'community.activity' => TrackCommunityActivity::class,
+            'referral.platform' => EnsureReferralPlatformAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

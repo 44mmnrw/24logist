@@ -58,7 +58,8 @@ final class CabinetLoginClient
      *     password_confirmation: string,
      *     capabilities: list<string>,
      *     terms_accepted: bool,
-     *     privacy_policy_accepted: bool
+     *     privacy_policy_accepted: bool,
+     *     referral_code?: string
      * } $fields
      */
     public function register(array $fields, string $clientIp, string $clientUserAgent): Response

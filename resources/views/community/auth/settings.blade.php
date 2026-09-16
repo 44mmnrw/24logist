@@ -32,6 +32,11 @@
                 <textarea name="bio" rows="5" maxlength="1000" placeholder="Расскажите о своём опыте, специализации или географии перевозок…">{{ old('bio', $user->bio) }}</textarea>
                 <small>До 1000 символов. Контактные и персональные данные лучше не публиковать.</small>
             </label>
+            <label class="community-check">
+                <input type="hidden" name="show_karma" value="0">
+                <input type="checkbox" name="show_karma" value="1" @checked((bool) old('show_karma', $user->show_karma))>
+                <span>Показывать мой рейтинг в публичном профиле</span>
+            </label>
             <h2>Фото профиля</h2>
             <div class="community-avatar-setting">
                 <div class="community-avatar-setting__preview">

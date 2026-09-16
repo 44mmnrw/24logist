@@ -36,6 +36,7 @@ final class CommunityCommentModerationService
         private readonly CommunityCommentCounter $counter,
         private readonly CommunityNotificationService $notifications,
         private readonly CommunityPhotoService $photos,
+        private readonly CommunityKarmaService $karma,
     ) {}
 
     /**
@@ -133,6 +134,16 @@ final class CommunityCommentModerationService
             ];
         });
 
+        $postAuthorId = CommunityPost::withTrashed()
+            ->whereKey($result['comment']->community_post_id)
+            ->value('community_user_id');
+        $affectedAuthorIds = CommunityComment::withTrashed()
+            ->whereIn('id', $result['affected_comment_ids'])
+            ->pluck('community_user_id')
+            ->push($postAuthorId)
+            ->all();
+        $this->karma->recalculateMany($affectedAuthorIds);
+
         $this->notifyAuthor($result['comment'], $result['moderation_action'], $action, $violationCode, $reason);
         if (in_array($action, [self::ACTION_APPROVE, self::ACTION_DELETE], true)) {
             CommunityComment::withTrashed()
@@ -168,8 +179,9 @@ final class CommunityCommentModerationService
     public function purge(CommunityComment $comment, ?int $adminUserId, ?string $reason = null): array
     {
         $photoRecords = collect();
+        $karmaUserIds = [];
 
-        $result = DB::transaction(function () use ($comment, $adminUserId, $reason, &$photoRecords): array {
+        $result = DB::transaction(function () use ($comment, $adminUserId, $reason, &$photoRecords, &$karmaUserIds): array {
             $locked = CommunityComment::withTrashed()
                 ->lockForUpdate()
                 ->findOrFail($comment->getKey());
@@ -184,6 +196,7 @@ final class CommunityCommentModerationService
                 ->whereIn('id', $affectedIds)
                 ->lockForUpdate()
                 ->get();
+            $karmaUserIds = $branch->pluck('community_user_id')->push($post->community_user_id)->all();
 
             if ($branch->contains(fn (CommunityComment $item): bool => ! $item->trashed() || $item->status !== CommunityComment::STATUS_DELETED)) {
                 throw new InvalidArgumentException('The branch contains restored comments and cannot be permanently deleted.');
@@ -233,6 +246,8 @@ final class CommunityCommentModerationService
                 'deleted_count' => count($affectedIds),
             ];
         });
+
+        $this->karma->recalculateMany($karmaUserIds);
 
         $this->photos->deleteFiles($photoRecords);
 

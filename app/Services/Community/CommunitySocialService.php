@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 
 final class CommunitySocialService
 {
+    public function __construct(private readonly CommunityKarmaService $karma) {}
+
     public const MAX_REACTIONS_PER_TARGET = 3;
 
     public const REACTIONS = [
@@ -114,6 +116,8 @@ final class CommunitySocialService
             }
         });
 
+        $this->karma->recalculate((int) $target->community_user_id);
+
         return $this->summary($type, $id, $user->id);
     }
 
@@ -122,7 +126,7 @@ final class CommunitySocialService
         $target = $this->target($type, $id);
         abort_if($target->community_user_id === null || (int) $target->community_user_id === (int) $user->id, 403);
 
-        return DB::transaction(function () use ($user, $type, $id, $code, $message, $anonymous): ?int {
+        $awardId = DB::transaction(function () use ($user, $type, $id, $code, $message, $anonymous): ?int {
             $query = $type === 'post' ? CommunityPost::query() : CommunityComment::query();
             $locked = $query->whereKey($id)->lockForUpdate()->firstOrFail();
             abort_unless($locked->status === 'published', 404);
@@ -141,13 +145,19 @@ final class CommunitySocialService
                 'created_at' => now(), 'updated_at' => now(),
             ]);
         });
+
+        if ($awardId !== null) {
+            $this->karma->recalculate((int) $target->community_user_id);
+        }
+
+        return $awardId;
     }
 
     public function removeAward(CommunityUser $user, string $type, int $id): bool
     {
         $this->target($type, $id);
 
-        return DB::transaction(function () use ($user, $type, $id): bool {
+        $removed = DB::transaction(function () use ($user, $type, $id): bool {
             $award = DB::table('community_awards')
                 ->where('community_user_id', $user->id)
                 ->where('target_type', $type)
@@ -167,5 +177,11 @@ final class CommunitySocialService
 
             return true;
         });
+
+        if ($removed) {
+            $this->karma->recalculate((int) $this->target($type, $id)->community_user_id);
+        }
+
+        return $removed;
     }
 }

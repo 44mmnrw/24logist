@@ -24,6 +24,8 @@ final class CommunityPostModerationService
 
     public const ACTION_UNPIN = 'unpin';
 
+    public function __construct(private readonly CommunityKarmaService $karma) {}
+
     /**
      * @return array{post: CommunityPost, changed: bool}
      */
@@ -33,7 +35,7 @@ final class CommunityPostModerationService
             throw new InvalidArgumentException('Unsupported post moderation action.');
         }
 
-        return DB::transaction(function () use ($post, $action, $adminUserId, $reason): array {
+        $result = DB::transaction(function () use ($post, $action, $adminUserId, $reason): array {
             $locked = CommunityPost::withTrashed()->lockForUpdate()->findOrFail($post->getKey());
             $before = $this->snapshot($locked);
             $wasTrashed = $locked->trashed();
@@ -107,6 +109,17 @@ final class CommunityPostModerationService
 
             return ['post' => $locked, 'changed' => $changed];
         });
+
+        if (in_array($action, [self::ACTION_APPROVE, self::ACTION_HIDE, self::ACTION_DELETE], true)) {
+            $userIds = $post->comments()
+                ->withTrashed()
+                ->pluck('community_user_id')
+                ->push($post->community_user_id)
+                ->all();
+            $this->karma->recalculateMany($userIds);
+        }
+
+        return $result;
     }
 
     /** @return list<string> */

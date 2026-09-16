@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\CabinetLoginClient;
+use App\Services\Referral\ReferralProgramService;
 use App\Services\SiteSettingsService;
 use Illuminate\Http\Client\Response as PlatformResponse;
 use Illuminate\Http\JsonResponse;
@@ -19,6 +20,7 @@ final class CabinetLoginController extends Controller
     public function __construct(
         private readonly SiteSettingsService $settings,
         private readonly CabinetLoginClient $client,
+        private readonly ReferralProgramService $referrals,
     ) {}
 
     public function login(Request $request): JsonResponse
@@ -71,6 +73,7 @@ final class CabinetLoginController extends Controller
             'capabilities.*' => ['string', Rule::in(['cargo_owner', 'forwarder'])],
             'terms_accepted' => ['accepted'],
             'privacy_policy_accepted' => ['accepted'],
+            'referral_code' => ['nullable', 'string', 'max:32', 'regex:/^[A-Za-z0-9_-]{6,32}$/'],
         ], [
             'inn.regex' => 'ИНН должен содержать 10 или 12 цифр.',
             'phone.regex' => 'Введите корректный номер телефона в формате +7 (999) 999-99-99.',
@@ -78,6 +81,9 @@ final class CabinetLoginController extends Controller
             'terms_accepted.accepted' => 'Необходимо принять пользовательское соглашение.',
             'privacy_policy_accepted.accepted' => 'Необходимо принять политику обработки ПДн.',
         ]);
+
+        $cookieReferralCode = trim((string) $request->cookie((string) config('referrals.cookie_name', 'logistru_referral')));
+        $referralCode = $cookieReferralCode !== '' ? $cookieReferralCode : trim((string) ($validated['referral_code'] ?? ''));
 
         $fields = [
             'name' => trim($validated['name']),
@@ -91,6 +97,9 @@ final class CabinetLoginController extends Controller
             'terms_accepted' => true,
             'privacy_policy_accepted' => true,
         ];
+        if ($referralCode !== '') {
+            $fields['referral_code'] = $referralCode;
+        }
 
         try {
             $response = $this->client->register(
@@ -103,7 +112,17 @@ final class CabinetLoginController extends Controller
                 return $this->platformError($response, true);
             }
 
-            return $this->storeHandoff($request, $this->client->extractHandoff($response));
+            if ($referralCode !== '') {
+                $this->referrals->captureRegistration([
+                    'referral_code' => $referralCode,
+                    'company_name' => $fields['account_name'],
+                    'inn' => $fields['inn'],
+                    'email' => $fields['email'],
+                ]);
+            }
+
+            return $this->storeHandoff($request, $this->client->extractHandoff($response))
+                ->withCookie(cookie()->forget((string) config('referrals.cookie_name', 'logistru_referral')));
         } catch (RuntimeException) {
             return $this->jsonError('Платформа временно недоступна. Попробуйте ещё раз.', 503);
         }
@@ -253,7 +272,7 @@ final class CabinetLoginController extends Controller
 
         $allowedFields = [
             'name', 'account_name', 'inn', 'email', 'phone', 'password',
-            'capabilities', 'terms_accepted', 'privacy_policy_accepted',
+            'capabilities', 'terms_accepted', 'privacy_policy_accepted', 'referral_code',
         ];
         $errors = [];
 

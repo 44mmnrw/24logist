@@ -146,6 +146,11 @@
                         <input type="email" name="email" autocomplete="email" inputmode="email" required maxlength="255">
                     </label>
 
+                    <label class="cabinet-login-modal__field cabinet-login-modal__field--wide">
+                        <span>Реферальный код <small>(если его передали без ссылки)</small></span>
+                        <input type="text" name="referral_code" autocomplete="off" minlength="6" maxlength="32" pattern="[A-Za-z0-9_-]{6,32}">
+                    </label>
+
                     <fieldset class="cabinet-login-modal__fieldset cabinet-login-modal__field--wide">
                         <legend>Чем занимается компания</legend>
                         <label class="cabinet-login-modal__check">

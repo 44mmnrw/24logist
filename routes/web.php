@@ -26,6 +26,10 @@ use App\Http\Controllers\OgHeroCardController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PwaIconController;
 use App\Http\Controllers\RouteCalculatorController;
+use App\Http\Controllers\ReferralRedirectController;
+use App\Http\Controllers\ReferralPortalController;
+use App\Http\Controllers\ReferralPayoutExportController;
+use App\Http\Controllers\ReferralPlacementExportController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\TelegramCommunityAuthController;
 use App\Http\Controllers\VkCommunityAuthController;
@@ -62,6 +66,24 @@ Route::get('/', LandingController::class)
 
 Route::get('/csrf-token', CsrfTokenController::class)
     ->name('csrf.token');
+
+Route::get('/r/{code}', ReferralRedirectController::class)
+    ->where('code', '[A-Za-z0-9_-]{6,32}')
+    ->middleware('throttle:60,1')
+    ->name('referrals.redirect');
+
+Route::prefix('referral-program/{participant}')->middleware('signed')->name('referrals.portal.')->group(function (): void {
+    Route::get('/', [ReferralPortalController::class, 'show'])->name('show');
+    Route::post('/offer', [ReferralPortalController::class, 'acceptOffer'])->name('offer');
+    Route::post('/bank-details', [ReferralPortalController::class, 'bankDetails'])->name('bank-details');
+    Route::post('/placements', [ReferralPortalController::class, 'placement'])->name('placements');
+});
+
+Route::middleware('auth')->prefix('admin/referrals/payouts')->group(function (): void {
+    Route::get('/export.csv', [ReferralPayoutExportController::class, 'csv']);
+    Route::get('/export.xlsx', [ReferralPayoutExportController::class, 'xlsx']);
+});
+Route::middleware('auth')->get('/admin/referrals/placements/export.csv', ReferralPlacementExportController::class);
 
 Route::post('/leads/quiz', [LandingLeadController::class, 'storeQuiz'])
     ->middleware('throttle:12,1')

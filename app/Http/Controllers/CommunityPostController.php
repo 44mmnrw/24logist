@@ -10,6 +10,7 @@ use App\Models\CommunityPostSubscription;
 use App\Models\CommunityPostVote;
 use App\Models\CommunityUser;
 use App\Services\Community\CommunityContentRenderer;
+use App\Services\Community\CommunityKarmaService;
 use App\Services\Community\CommunityPhotoService;
 use App\Services\Community\CommunityRanking;
 use App\Services\Community\CommunitySocialService;
@@ -238,9 +239,10 @@ class CommunityPostController extends Controller
         return redirect($post->getUrl())->with('status', 'Тема обновлена.');
     }
 
-    public function destroy(CommunityPost $post, CommunityPhotoService $photos): RedirectResponse
+    public function destroy(CommunityPost $post, CommunityPhotoService $photos, CommunityKarmaService $karma): RedirectResponse
     {
         $this->assertOwner($post);
+        $karmaUserIds = $post->comments()->withTrashed()->pluck('community_user_id')->push($post->community_user_id)->all();
         $attachedPhotos = CommunityPhoto::query()
             ->where('community_post_id', $post->id)
             ->orWhereIn('community_comment_id', DB::table('community_comments')->select('id')->where('community_post_id', $post->id))
@@ -257,6 +259,7 @@ class CommunityPostController extends Controller
             CommunityPhoto::query()->whereIn('id', $attachedPhotos->pluck('id'))->delete();
             $post->delete();
         });
+        $karma->recalculateMany($karmaUserIds);
         $photos->deleteFiles($attachedPhotos);
 
         return redirect()->route('community.index')->with('status', 'Тема удалена.');

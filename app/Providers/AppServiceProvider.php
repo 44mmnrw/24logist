@@ -3,7 +3,15 @@
 namespace App\Providers;
 
 use App\Models\LandingLead;
+use App\Models\ReferralAttribution;
+use App\Models\ReferralCommission;
+use App\Models\ReferralParticipant;
+use App\Models\ReferralPayout;
+use App\Models\ReferralPlacement;
+use App\Models\ReferralProgramSetting;
+use App\Models\ReferralTerm;
 use App\Observers\LandingLeadObserver;
+use App\Observers\ReferralAuditObserver;
 use App\Services\LandingPageService;
 use App\Support\CanonicalUrl;
 use Filament\Facades\Filament;
@@ -77,5 +85,8 @@ class AppServiceProvider extends ServiceProvider
         });
 
         LandingLead::observe(LandingLeadObserver::class);
+        foreach ([ReferralProgramSetting::class, ReferralTerm::class, ReferralParticipant::class, ReferralPlacement::class, ReferralAttribution::class, ReferralCommission::class, ReferralPayout::class] as $model) {
+            $model::observe(ReferralAuditObserver::class);
+        }
     }
 }

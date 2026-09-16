@@ -10,6 +10,7 @@ use App\Models\CommunityPost;
 use App\Models\CommunityPostVote;
 use App\Services\Community\CommunityCommentCounter;
 use App\Services\Community\CommunityContentRenderer;
+use App\Services\Community\CommunityKarmaService;
 use App\Services\Community\CommunityRanking;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -35,9 +36,12 @@ class PublishCommunityAiScenarioStep implements ShouldQueue
         $this->onQueue('community-ai');
     }
 
-    public function handle(CommunityContentRenderer $renderer, CommunityCommentCounter $counter): void
-    {
-        DB::transaction(function () use ($renderer, $counter): void {
+    public function handle(
+        CommunityContentRenderer $renderer,
+        CommunityCommentCounter $counter,
+        CommunityKarmaService $karma,
+    ): void {
+        DB::transaction(function () use ($renderer, $counter, $karma): void {
             $step = CommunityAiScenarioStep::query()
                 ->with(['scenario', 'persona.communityUser'])
                 ->lockForUpdate()
@@ -74,6 +78,7 @@ class PublishCommunityAiScenarioStep implements ShouldQueue
                 $comment = $this->publishComment($step, $renderer, $counter, $publishedAt);
                 $step->community_post_id = $comment->community_post_id;
                 $step->community_comment_id = $comment->id;
+                $karma->recalculate($comment->post()->value('community_user_id'));
             }
 
             $step->status = 'published';
@@ -105,8 +110,7 @@ class PublishCommunityAiScenarioStep implements ShouldQueue
         CommunityAiScenarioStep $step,
         CommunityContentRenderer $renderer,
         CarbonInterface $publishedAt,
-    ): CommunityPost
-    {
+    ): CommunityPost {
         $scenario = $step->scenario;
         $post = CommunityPost::query()->create([
             'community_user_id' => $step->persona->community_user_id,
