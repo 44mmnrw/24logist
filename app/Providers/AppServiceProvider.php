@@ -6,6 +6,7 @@ use App\Models\LandingLead;
 use App\Models\ReferralAttribution;
 use App\Models\ReferralCommission;
 use App\Models\ReferralParticipant;
+use App\Models\ReferralPartnerApplication;
 use App\Models\ReferralPayout;
 use App\Models\ReferralPlacement;
 use App\Models\ReferralProgramSetting;
@@ -85,7 +86,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         LandingLead::observe(LandingLeadObserver::class);
-        foreach ([ReferralProgramSetting::class, ReferralTerm::class, ReferralParticipant::class, ReferralPlacement::class, ReferralAttribution::class, ReferralCommission::class, ReferralPayout::class] as $model) {
+        foreach ([ReferralProgramSetting::class, ReferralTerm::class, ReferralParticipant::class, ReferralPartnerApplication::class, ReferralPlacement::class, ReferralAttribution::class, ReferralCommission::class, ReferralPayout::class] as $model) {
             $model::observe(ReferralAuditObserver::class);
         }
     }

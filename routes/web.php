@@ -30,6 +30,7 @@ use App\Http\Controllers\ReferralRedirectController;
 use App\Http\Controllers\ReferralPortalController;
 use App\Http\Controllers\ReferralPayoutExportController;
 use App\Http\Controllers\ReferralPlacementExportController;
+use App\Http\Controllers\ReferralPartnerRegistrationController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\TelegramCommunityAuthController;
 use App\Http\Controllers\VkCommunityAuthController;
@@ -71,6 +72,10 @@ Route::get('/r/{code}', ReferralRedirectController::class)
     ->where('code', '[A-Za-z0-9_-]{6,32}')
     ->middleware('throttle:60,1')
     ->name('referrals.redirect');
+
+Route::get('/partners/register', [ReferralPartnerRegistrationController::class, 'create'])->name('referrals.partners.register');
+Route::post('/partners/register', [ReferralPartnerRegistrationController::class, 'store'])->middleware('throttle:5,1')->name('referrals.partners.store');
+Route::get('/partners/registered', [ReferralPartnerRegistrationController::class, 'registered'])->name('referrals.partners.registered');
 
 Route::prefix('referral-program/{participant}')->middleware('signed')->name('referrals.portal.')->group(function (): void {
     Route::get('/', [ReferralPortalController::class, 'show'])->name('show');

@@ -18,9 +18,11 @@ class ReferralAttributionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserPlus;
 
-    protected static ?string $navigationLabel = 'Атрибуции';
+    protected static ?string $navigationLabel = 'Приглашённые компании';
 
-    protected static ?string $pluralModelLabel = 'Атрибуции';
+    protected static ?string $modelLabel = 'приглашённая компания';
+
+    protected static ?string $pluralModelLabel = 'Приглашённые компании';
 
     protected static string|\UnitEnum|null $navigationGroup = 'Реферальная программа';
 

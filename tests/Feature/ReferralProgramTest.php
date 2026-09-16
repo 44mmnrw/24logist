@@ -165,10 +165,32 @@ class ReferralProgramTest extends TestCase
         $this->actingAs($admin)->get('/admin/referral-settings')->assertOk();
         $this->actingAs($admin)->get('/admin/referral-terms')->assertOk();
         $this->actingAs($admin)->get('/admin/referral-participants')->assertOk();
+        $this->actingAs($admin)->get('/admin/referral-partner-applications')->assertOk();
         $this->actingAs($admin)->get('/admin/referrals/payouts/export.csv')->assertOk();
         $this->actingAs($admin)->get('/admin/referrals/placements/export.csv')->assertOk();
         if (class_exists(\ZipArchive::class)) {
             $this->actingAs($admin)->get('/admin/referrals/payouts/export.xlsx')->assertOk();
         }
+    }
+
+    public function test_company_can_submit_partner_application_without_becoming_active_automatically(): void
+    {
+        $this->get('/partners/register')->assertOk()->assertSee('Стать партнёром');
+
+        $this->post('/partners/register', [
+            'company_name' => 'ООО Новый партнёр',
+            'inn' => '7701000099',
+            'contact_name' => 'Иван Иванов',
+            'contact_email' => 'new-partner@example.test',
+            'contact_phone' => '+7 999 111-22-33',
+            'terms_accepted' => '1',
+            'privacy_accepted' => '1',
+        ])->assertRedirect(route('referrals.partners.registered'));
+
+        $this->assertDatabaseHas('referral_partner_applications', [
+            'inn' => '7701000099',
+            'status' => 'pending',
+        ]);
+        $this->assertDatabaseMissing('referral_participants', ['inn' => '7701000099']);
     }
 }

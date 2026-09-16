@@ -26,11 +26,11 @@ class ReferralParticipantResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
 
-    protected static ?string $navigationLabel = 'Участники пилота';
+    protected static ?string $navigationLabel = 'Партнёры';
 
-    protected static ?string $modelLabel = 'участник';
+    protected static ?string $modelLabel = 'партнёр';
 
-    protected static ?string $pluralModelLabel = 'Участники пилота';
+    protected static ?string $pluralModelLabel = 'Партнёры';
 
     protected static string|\UnitEnum|null $navigationGroup = 'Реферальная программа';
 
