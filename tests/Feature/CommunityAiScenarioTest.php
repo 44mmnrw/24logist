@@ -10,6 +10,7 @@ use App\Models\CommunityAiGeneration;
 use App\Models\CommunityAiPersona;
 use App\Models\CommunityAiScenario;
 use App\Models\CommunityAiSource;
+use App\Models\CommunityAiSourceMessage;
 use App\Models\CommunityCategory;
 use App\Models\CommunityComment;
 use App\Models\CommunityPost;
@@ -186,19 +187,25 @@ class CommunityAiScenarioTest extends TestCase
     {
         $persona = CommunityAiPersona::query()->where('can_create_posts', true)->firstOrFail();
         $category = CommunityCategory::query()->firstOrFail();
+        $source = CommunityAiSource::query()->firstOrFail();
+        $from = now()->subDay()->startOfDay();
+        $to = now()->subDay()->endOfDay();
         $this->actingAs(User::factory()->create());
 
         $this->get(CommunityAiScenarioResource::getUrl('create'))
             ->assertOk()
-            ->assertSeeText('Готовый пост + обсуждение');
+            ->assertSeeText('Пост из чата + обсуждение');
 
         Livewire::test(CreateCommunityAiScenario::class)
             ->fillForm([
                 'mode' => CommunityAiScenario::MODE_MANUAL,
                 'topic_persona_id' => $persona->id,
                 'community_category_id' => $category->id,
-                'title' => 'Тема редактора',
-                'manual_topic_body' => 'Точный текст темы, который нельзя переписывать.',
+                'source_ids' => [$source->id],
+                'source_from' => $from,
+                'source_to' => $to,
+                'source_post_title' => 'Тема редактора',
+                'manual_topic_body' => 'Исходный пост, по которому нужно создать новую тему.',
                 'editor_brief' => 'Обсудить риски для разных сторон.',
                 'planned_at' => now()->addHour(),
             ])
@@ -208,25 +215,42 @@ class CommunityAiScenarioTest extends TestCase
         $scenario = CommunityAiScenario::query()->latest('id')->firstOrFail();
         $this->assertSame(CommunityAiScenario::MODE_MANUAL, $scenario->mode);
         $this->assertSame($persona->id, $scenario->topic_persona_id);
-        $this->assertSame('Тема редактора', $scenario->title);
-        $this->assertSame('Точный текст темы, который нельзя переписывать.', $scenario->manual_topic_body);
-        $this->assertSame([], $scenario->source_ids);
+        $this->assertNull($scenario->title);
+        $this->assertSame('Тема редактора', $scenario->source_post_title);
+        $this->assertSame('Исходный пост, по которому нужно создать новую тему.', $scenario->manual_topic_body);
+        $this->assertSame([$source->id], $scenario->source_ids);
     }
 
-    public function test_manual_topic_is_kept_verbatim_while_comment_drafts_are_generated(): void
+    public function test_source_post_is_rewritten_and_comments_use_collected_discussion(): void
     {
         $personas = CommunityAiPersona::query()->with('communityUser')->take(5)->get();
         $topicPersona = $personas->first();
         $commenters = $personas->skip(1)->values();
+        $source = CommunityAiSource::query()->firstOrFail();
+        $from = now()->subDay()->startOfDay();
+        $to = now()->subDay()->endOfDay();
+        CommunityAiSourceMessage::query()->create([
+            'community_ai_source_id' => $source->id,
+            'external_message_id' => 'manual-context-1',
+            'sender_key' => hash('sha256', 'participant-1'),
+            'text' => 'В чате спорили, можно ли отозвать уже подписанный документ.',
+            'content_hash' => hash('sha256', 'manual-context-1'),
+            'sent_at' => $from->copy()->addHours(12),
+        ]);
         $aiCall = 0;
+        $planPrompt = '';
+        $commentPrompt = '';
 
-        Http::fake(function (HttpRequest $request) use ($commenters, &$aiCall) {
+        Http::fake(function (HttpRequest $request) use ($commenters, &$aiCall, &$planPrompt, &$commentPrompt) {
             $this->assertStringContainsString('agent.timeweb.cloud', $request->url());
             $aiCall++;
             $prompt = collect($request->data()['messages'] ?? [])->pluck('content')->implode("\n");
 
             if (str_contains($prompt, 'Доступные комментаторы:')) {
+                $planPrompt = $prompt;
                 $content = [
+                    'topic_title' => 'Как вернуть документ на исправление',
+                    'discussion_summary' => 'Люди спорили, можно ли отозвать уже подписанный документ.',
                     'participants' => [
                         ['persona_slug' => $commenters[0]->slug, 'purpose' => 'Даёт практическую оценку', 'delay_minutes' => 11],
                         ['persona_slug' => $commenters[1]->slug, 'purpose' => 'Проверяет документы', 'delay_minutes' => 27],
@@ -234,12 +258,21 @@ class CommunityAiScenarioTest extends TestCase
                         ['persona_slug' => $commenters[3]->slug, 'purpose' => 'Отвечает на первый комментарий', 'delay_minutes' => 61, 'reply_to' => $commenters[0]->slug],
                     ],
                 ];
+            } elseif ($aiCall === 2) {
+                $content = [
+                    'action' => 'topic',
+                    'title' => 'Документ ушёл с ошибкой',
+                    'body' => 'Ошибку заметили после подписания документа. Можно ли вернуть его на исправление?',
+                    'needs_review' => true,
+                    'reason' => 'Пересказывает исходный пост',
+                ];
             } else {
+                $commentPrompt = $prompt;
                 $bodies = [
-                    2 => 'Уточните у получателя, в каком разделе находится документ.',
-                    3 => 'Если документ уже оформлен, отправителю проще отозвать его и прислать заново.',
-                    4 => 'Какой статус документа сейчас видит вторая сторона?',
-                    5 => 'Да, но сначала стоит получить от получателя снимок экрана со статусом.',
+                    3 => 'Уточните у получателя, в каком разделе находится документ.',
+                    4 => 'Если документ уже оформлен, отправителю проще отозвать его и прислать заново.',
+                    5 => 'Какой статус документа сейчас видит вторая сторона?',
+                    6 => 'Да, но сначала стоит получить от получателя снимок экрана со статусом.',
                 ];
                 $content = [
                     'action' => 'comment',
@@ -262,10 +295,10 @@ class CommunityAiScenarioTest extends TestCase
             'mode' => CommunityAiScenario::MODE_MANUAL,
             'topic_persona_id' => $topicPersona->id,
             'community_category_id' => CommunityCategory::query()->firstOrFail()->id,
-            'source_ids' => [],
-            'source_from' => now()->subDay(),
-            'source_to' => now(),
-            'title' => 'Ручная тема без изменений',
+            'source_ids' => [$source->id],
+            'source_from' => $from,
+            'source_to' => $to,
+            'source_post_title' => 'Исходный заголовок',
             'manual_topic_body' => "Первый абзац.\n\nВторой абзац и вопрос?",
             'editor_brief' => 'Нужны разные позиции.',
             'status' => CommunityAiScenario::STATUS_DRAFT,
@@ -279,8 +312,8 @@ class CommunityAiScenarioTest extends TestCase
         $this->assertCount(5, $steps);
         $this->assertSame('topic', $steps[0]->type);
         $this->assertSame($topicPersona->id, $steps[0]->community_ai_persona_id);
-        $this->assertSame('Ручная тема без изменений', $steps[0]->draft_title);
-        $this->assertSame("Первый абзац.\n\nВторой абзац и вопрос?", $steps[0]->draft_body);
+        $this->assertSame('Документ ушёл с ошибкой', $steps[0]->draft_title);
+        $this->assertSame('Ошибку заметили после подписания документа. Можно ли вернуть его на исправление?', $steps[0]->draft_body);
         $this->assertSame('pending_review', $steps[0]->status);
         $this->assertSame('comment', $steps[1]->type);
         $this->assertSame('comment', $steps[2]->type);
@@ -288,7 +321,10 @@ class CommunityAiScenarioTest extends TestCase
         $this->assertSame('comment', $steps[4]->type);
         $this->assertNull($steps[1]->parent_step_id);
         $this->assertSame($steps[1]->id, $steps[4]->parent_step_id);
-        $this->assertSame(5, $aiCall);
+        $this->assertSame(6, $aiCall);
+        $this->assertStringContainsString('<source_post>', $planPrompt);
+        $this->assertStringContainsString('В чате спорили, можно ли отозвать', $planPrompt);
+        $this->assertStringContainsString('Люди спорили, можно ли отозвать', $commentPrompt);
         Http::assertNotSent(fn (HttpRequest $request): bool => str_starts_with($request->url(), 'https://platform-api2.max.ru'));
     }
 
@@ -297,6 +333,17 @@ class CommunityAiScenarioTest extends TestCase
         $personas = CommunityAiPersona::query()->with('communityUser')->take(5)->get();
         $topicPersona = $personas->first();
         $commenters = $personas->skip(1)->values();
+        $source = CommunityAiSource::query()->firstOrFail();
+        $from = now()->subDay()->startOfDay();
+        $to = now()->subDay()->endOfDay();
+        CommunityAiSourceMessage::query()->create([
+            'community_ai_source_id' => $source->id,
+            'external_message_id' => 'style-context-1',
+            'sender_key' => hash('sha256', 'participant-style'),
+            'text' => 'Получатель не может поправить заказчика в документе.',
+            'content_hash' => hash('sha256', 'style-context-1'),
+            'sent_at' => $from->copy()->addHours(12),
+        ]);
         $aiCall = 0;
         $retryPrompt = '';
 
@@ -307,6 +354,8 @@ class CommunityAiScenarioTest extends TestCase
 
             if (str_contains($prompt, 'Доступные комментаторы:')) {
                 $content = [
+                    'topic_title' => 'Поле заказчика нельзя изменить',
+                    'discussion_summary' => 'В чате уточняли статус документа и можность вернуть его отправителю.',
                     'participants' => [
                         ['persona_slug' => $commenters[0]->slug, 'purpose' => 'Задаёт один вопрос о статусе документа', 'delay_minutes' => 10],
                         ['persona_slug' => $commenters[1]->slug, 'purpose' => 'Коротко предлагает вернуть документ отправителю', 'delay_minutes' => 25],
@@ -316,22 +365,30 @@ class CommunityAiScenarioTest extends TestCase
                 ];
             } elseif ($aiCall === 2) {
                 $content = [
+                    'action' => 'topic',
+                    'title' => 'Не даёт изменить заказчика',
+                    'body' => 'Получатель видит документ, но поле заказчика заблокировано. Где искать причину?',
+                    'needs_review' => true,
+                    'reason' => 'Создаёт тему',
+                ];
+            } elseif ($aiCall === 3) {
+                $content = [
                     'action' => 'comment',
                     'title' => null,
-                    'body' => 'Я бы сначала разделила технический маршрут и юридическое содержание. В данном случае необходимо определить полномочия всех участников процесса.',
+                    'body' => 'Я бы сначала разделила технический маршрут — и юридическое содержание. В данном случае вывод такой: необходимо определить полномочия; всех участников процесса.',
                     'needs_review' => true,
                     'reason' => 'Даёт полный анализ',
                 ];
-            } elseif ($aiCall === 3) {
+            } elseif ($aiCall === 4) {
                 $retryPrompt = $prompt;
                 $content = [
                     'action' => 'comment',
                     'title' => null,
-                    'body' => 'А документ у получателя сейчас во входящих или уже в архиве? От этого и зависит, даст ли система его поправить.',
+                    'body' => 'А документ сейчас во входящих — или уже в архиве: это видно; у получателя?',
                     'needs_review' => true,
                     'reason' => 'Задаёт один уточняющий вопрос',
                 ];
-            } elseif ($aiCall === 4) {
+            } elseif ($aiCall === 5) {
                 $content = [
                     'action' => 'comment',
                     'title' => null,
@@ -339,7 +396,7 @@ class CommunityAiScenarioTest extends TestCase
                     'needs_review' => true,
                     'reason' => 'Предлагает один шаг',
                 ];
-            } elseif ($aiCall === 5) {
+            } elseif ($aiCall === 6) {
                 $content = [
                     'action' => 'comment',
                     'title' => null,
@@ -369,10 +426,10 @@ class CommunityAiScenarioTest extends TestCase
             'mode' => CommunityAiScenario::MODE_MANUAL,
             'topic_persona_id' => $topicPersona->id,
             'community_category_id' => CommunityCategory::query()->firstOrFail()->id,
-            'source_ids' => [],
-            'source_from' => now()->subDay(),
-            'source_to' => now(),
-            'title' => 'Документ нельзя отредактировать',
+            'source_ids' => [$source->id],
+            'source_from' => $from,
+            'source_to' => $to,
+            'source_post_title' => 'Документ нельзя отредактировать',
             'manual_topic_body' => 'У получателя заблокировано поле заказчика. Что проверить?',
             'status' => CommunityAiScenario::STATUS_DRAFT,
         ]);
@@ -380,10 +437,14 @@ class CommunityAiScenarioTest extends TestCase
         app(CommunityAiScenarioPreparer::class)->prepare($scenario);
 
         $comments = $scenario->steps()->where('type', 'comment')->orderBy('sequence')->pluck('draft_body')->all();
-        $this->assertSame(6, $aiCall);
-        $this->assertSame('А документ у получателя сейчас во входящих или уже в архиве? От этого и зависит, даст ли система его поправить.', $comments[0]);
+        $this->assertSame(7, $aiCall);
+        $this->assertSame('А документ сейчас во входящих, или уже в архиве, это видно, у получателя?', $comments[0]);
+        $this->assertDoesNotMatchRegularExpression('/[-\x{00AD}\x{2010}-\x{2015}\x{2212}:;]/u', $comments[0]);
         $this->assertStringContainsString('шаблонное вступление', $retryPrompt);
         $this->assertStringContainsString('канцелярит', $retryPrompt);
+        $this->assertStringContainsString('использованы тире или дефисы', $retryPrompt);
+        $this->assertStringContainsString('использовано двоеточие', $retryPrompt);
+        $this->assertStringContainsString('использована точка с запятой', $retryPrompt);
         $this->assertDatabaseHas('community_ai_generations', [
             'community_ai_scenario_id' => $scenario->id,
             'community_ai_scenario_step_id' => $scenario->steps()->where('type', 'comment')->orderBy('sequence')->value('id'),

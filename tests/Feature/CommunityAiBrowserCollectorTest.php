@@ -115,26 +115,45 @@ class CommunityAiBrowserCollectorTest extends TestCase
         Queue::assertPushed(PrepareCommunityAiScenario::class, fn ($job): bool => $job->scenarioId === $scenario->id);
     }
 
-    public function test_manual_scenarios_are_not_exposed_to_the_browser_collector(): void
+    public function test_source_post_scenarios_can_collect_context_and_queue_generation(): void
     {
+        Queue::fake();
+        $source = CommunityAiSource::query()->firstOrFail();
+        $from = now()->subDay()->startOfDay();
+        $to = now()->subDay()->endOfDay();
         $manualScenario = CommunityAiScenario::query()->create([
             'mode' => CommunityAiScenario::MODE_MANUAL,
-            'source_ids' => [],
-            'source_from' => now(),
-            'source_to' => now(),
-            'title' => 'Ручная тема',
-            'manual_topic_body' => 'Текст ручной темы.',
+            'source_ids' => [$source->id],
+            'source_from' => $from,
+            'source_to' => $to,
+            'source_post_title' => 'Исходный пост',
+            'manual_topic_body' => 'Полный текст поста из MAX.',
             'status' => CommunityAiScenario::STATUS_DRAFT,
         ]);
 
         $this->withToken(self::TOKEN)
             ->getJson(route('community.ai.collector.scenarios'))
             ->assertOk()
-            ->assertJsonMissing(['id' => $manualScenario->id]);
+            ->assertJsonPath('scenarios.0.id', $manualScenario->id)
+            ->assertJsonPath('scenarios.0.mode', CommunityAiScenario::MODE_MANUAL)
+            ->assertJsonPath('scenarios.0.sources.0.chat_id', $source->external_chat_id);
+
+        CommunityAiSourceMessage::query()->create([
+            'community_ai_source_id' => $source->id,
+            'external_message_id' => 'manual-collected-message',
+            'sender_key' => hash('sha256', 'participant-manual'),
+            'text' => 'Контекст обсуждения исходного поста.',
+            'content_hash' => hash('sha256', 'manual-collected-message'),
+            'sent_at' => $from->copy()->addHours(12),
+        ]);
 
         $this->withToken(self::TOKEN)
             ->postJson(route('community.ai.collector.prepare', $manualScenario))
-            ->assertUnprocessable()
-            ->assertJsonPath('message', 'Ручной сценарий запускается из админки.');
+            ->assertOk()
+            ->assertJsonPath('queued', true)
+            ->assertJsonPath('messages_count', 1);
+
+        $this->assertSame(CommunityAiScenario::STATUS_QUEUED, $manualScenario->fresh()->status);
+        Queue::assertPushed(PrepareCommunityAiScenario::class, fn ($job): bool => $job->scenarioId === $manualScenario->id);
     }
 }

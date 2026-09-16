@@ -13,9 +13,6 @@ class CreateCommunityAiScenario extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         if (($data['mode'] ?? null) === CommunityAiScenario::MODE_MANUAL) {
-            $data['source_ids'] = [];
-            $data['source_from'] = now();
-            $data['source_to'] = now();
             $data['scan_keywords'] = [];
         }
 

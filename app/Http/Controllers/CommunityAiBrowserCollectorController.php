@@ -26,7 +26,6 @@ class CommunityAiBrowserCollectorController extends Controller
         $this->authorizeCollector($request);
 
         $scenarios = CommunityAiScenario::query()
-            ->where('mode', CommunityAiScenario::MODE_SOURCE)
             ->whereIn('status', [
                 CommunityAiScenario::STATUS_DRAFT,
                 CommunityAiScenario::STATUS_FAILED,
@@ -59,7 +58,9 @@ class CommunityAiBrowserCollectorController extends Controller
 
                 return [
                     'id' => $scenario->id,
-                    'title' => $scenario->title ?: 'Сценарий #'.$scenario->id,
+                    'title' => $scenario->title ?: $scenario->source_post_title ?: 'Сценарий #'.$scenario->id,
+                    'mode' => $scenario->mode,
+                    'mode_label' => CommunityAiScenario::MODE_LABELS[$scenario->mode] ?? $scenario->mode,
                     'status' => $scenario->status,
                     'source_from' => $scenario->source_from->toIso8601String(),
                     'source_to' => $scenario->source_to->toIso8601String(),
@@ -88,7 +89,6 @@ class CommunityAiBrowserCollectorController extends Controller
         ]);
 
         $scenario = CommunityAiScenario::query()->findOrFail((int) $data['scenario_id']);
-        abort_unless($scenario->mode === CommunityAiScenario::MODE_SOURCE, 422, 'Ручной сценарий не использует сборщик MAX.');
         abort_unless(in_array($scenario->status, [
             CommunityAiScenario::STATUS_DRAFT,
             CommunityAiScenario::STATUS_FAILED,
@@ -165,8 +165,6 @@ class CommunityAiBrowserCollectorController extends Controller
         $this->authorizeCollector($request);
 
         $scenario = CommunityAiScenario::query()->findOrFail($scenario);
-        abort_unless($scenario->mode === CommunityAiScenario::MODE_SOURCE, 422, 'Ручной сценарий запускается из админки.');
-
         abort_unless(in_array($scenario->status, [
             CommunityAiScenario::STATUS_DRAFT,
             CommunityAiScenario::STATUS_FAILED,

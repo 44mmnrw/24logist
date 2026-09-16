@@ -14,7 +14,7 @@ class CommunityAiScenario extends Model
 
     public const MODE_LABELS = [
         self::MODE_SOURCE => 'По сообщениям MAX',
-        self::MODE_MANUAL => 'Готовый пост + обсуждение',
+        self::MODE_MANUAL => 'Пост из чата + обсуждение',
     ];
 
     public const STATUS_DRAFT = 'draft';
@@ -55,7 +55,7 @@ class CommunityAiScenario extends Model
 
     protected $fillable = [
         'mode', 'community_category_id', 'topic_persona_id', 'source_ids', 'source_from', 'source_to',
-        'scan_keywords', 'title', 'editor_brief', 'manual_topic_body', 'status', 'planned_at', 'started_at', 'completed_at',
+        'scan_keywords', 'title', 'editor_brief', 'manual_topic_body', 'source_post_title', 'status', 'planned_at', 'started_at', 'completed_at',
         'last_error', 'settings',
     ];
 

@@ -69,11 +69,16 @@ function renderScenario() {
   elements.details.hidden = !scenario;
   if (!scenario) return;
 
+  const usesSourcePost = scenario.mode === 'manual';
+  elements.collect.textContent = usesSourcePost ? 'Собрать обсуждение поста' : 'Собрать открытый чат';
+  elements.prepare.textContent = usesSourcePost ? 'Создать тему и обсуждение' : 'Сформировать черновики';
+
   const sources = scenario.sources.map((source) =>
     `<li>${escapeHtml(source.name)} — собрано ${source.messages_count}</li>`
   ).join('');
   const keywords = scenario.scan_keywords.length ? scenario.scan_keywords.join(', ') : 'весь период';
   elements.details.innerHTML = `
+    <strong>Тип:</strong> ${escapeHtml(scenario.mode_label)}<br>
     <strong>Период:</strong> ${formatDate(scenario.source_from)} — ${formatDate(scenario.source_to)}<br>
     <strong>Фокус:</strong> ${escapeHtml(keywords)}
     <ul>${sources}</ul>

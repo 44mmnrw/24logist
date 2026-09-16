@@ -16,4 +16,17 @@
 .referral-portal th, .referral-portal td { text-align: left; padding: 12px; border-bottom: 1px solid #e5ebf3; }
 .referral-portal__table { overflow-x: auto; }
 .referral-portal__notice { padding: 14px 16px; border-radius: 12px; background: #e8f3ff; margin-bottom: 16px; }
+.referral-bank-card { align-self: start; padding: 18px 20px; }
+.referral-bank-card__header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #e5ebf3; }
+.referral-bank-card__header h2 { margin: 0; font-size: 18px; }
+.referral-bank-card__status { flex: 0 0 auto; padding: 4px 9px; border: 1px solid #d7a72b; border-radius: 999px; color: #8a6500; background: #fff9e8; font-size: 12px; line-height: 1.2; }
+.referral-bank-card__status.is-verified { border-color: #22a866; color: #137443; background: #effbf5; }
+.referral-bank-form { display: grid; gap: 7px; }
+.referral-bank-form__row { display: grid !important; grid-template-columns: 132px minmax(0, 360px); align-items: center; gap: 12px; margin: 0 !important; font-size: 13px; }
+.referral-bank-form__row > span { color: #33415a; }
+.referral-bank-form__row input { min-height: 34px; padding: 6px 9px; border-radius: 4px; font-size: 13px; }
+.referral-bank-form__actions { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 7px; padding-top: 10px; border-top: 1px solid #edf1f6; }
+.referral-bank-form__actions span { max-width: 290px; font-size: 11px; line-height: 1.35; }
+.referral-bank-form__actions button { flex: 0 0 auto; padding: 8px 13px; border-radius: 6px; font-size: 13px; }
 @media (max-width: 900px) { .referral-portal__metrics { grid-template-columns: repeat(2, 1fr); } .referral-portal__grid { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .referral-bank-card__header, .referral-bank-form__actions { align-items: flex-start; flex-direction: column; } .referral-bank-form__row { grid-template-columns: 1fr; gap: 4px; } .referral-bank-form__row input, .referral-bank-form__actions button { width: 100%; } }

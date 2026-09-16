@@ -42,16 +42,23 @@
                     </form>
                 @endif
             </article>
-            <article class="referral-portal__card">
-                <h2>Платёжные реквизиты</h2>
-                <p class="referral-portal__muted">{{ $participant->bank_details_verified_at ? 'Проверены администратором' : 'Ожидают заполнения или проверки' }}</p>
-                <form method="post" action="{{ URL::signedRoute('referrals.portal.bank-details', ['participant' => $participant->id]) }}">@csrf
-                    <label>Получатель<input name="recipient" required autocomplete="off"></label>
-                    <label>Расчётный счёт<input name="account" required maxlength="20" autocomplete="off"></label>
-                    <label>Банк<input name="bank_name" required autocomplete="off"></label>
-                    <label>БИК<input name="bik" required maxlength="9" autocomplete="off"></label>
-                    <label>Корреспондентский счёт<input name="correspondent_account" required maxlength="20" autocomplete="off"></label>
-                    <button>Сохранить</button>
+            <article class="referral-portal__card referral-bank-card">
+                <div class="referral-bank-card__header">
+                    <h2>Основные реквизиты счёта</h2>
+                    <span class="referral-bank-card__status {{ $participant->bank_details_verified_at ? 'is-verified' : '' }}">
+                        {{ $participant->bank_details_verified_at ? 'Проверены' : 'Ожидают проверки' }}
+                    </span>
+                </div>
+                <form class="referral-bank-form" method="post" action="{{ URL::signedRoute('referrals.portal.bank-details', ['participant' => $participant->id]) }}">@csrf
+                    <label class="referral-bank-form__row"><span>Получатель</span><input name="recipient" required autocomplete="off"></label>
+                    <label class="referral-bank-form__row"><span>Расчётный счёт</span><input name="account" required maxlength="20" inputmode="numeric" autocomplete="off"></label>
+                    <label class="referral-bank-form__row"><span>Банк</span><input name="bank_name" required autocomplete="off"></label>
+                    <label class="referral-bank-form__row"><span>БИК</span><input name="bik" required maxlength="9" inputmode="numeric" autocomplete="off"></label>
+                    <label class="referral-bank-form__row"><span>Корр. счёт</span><input name="correspondent_account" required maxlength="20" inputmode="numeric" autocomplete="off"></label>
+                    <div class="referral-bank-form__actions">
+                        <span class="referral-portal__muted">После изменения реквизиты нужно проверить повторно.</span>
+                        <button>Сохранить реквизиты</button>
+                    </div>
                 </form>
             </article>
             @if($settings->public_placements_enabled)
