@@ -2,10 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\CommunityAiPersonas\CommunityAiPersonaResource;
+use App\Filament\Resources\CommunityAiPersonas\Pages\EditCommunityAiPersona;
 use App\Models\CommunityAiPersona;
 use App\Models\CommunityUser;
+use App\Models\User;
+use App\Services\Community\CommunityAiPersonaPromptBuilder;
 use Database\Seeders\CommunityAiPersonaSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class CommunityAiPersonaSeederTest extends TestCase
@@ -35,7 +40,7 @@ class CommunityAiPersonaSeederTest extends TestCase
         $this->assertStringContainsString('сухую иронию', $sergey->personality_description);
         $this->assertTrue($sergey->requires_review);
         $this->assertSame(1, $sergey->daily_comment_limit);
-        $this->assertSame(3, $sergey->prompt_version);
+        $this->assertSame(4, $sergey->prompt_version);
         $this->assertFalse($sergey->settings['web_search_enabled']);
         $this->assertSame(12, $sergey->settings['literacy_profile']['error_chance']);
         $this->assertStringNotContainsString('публично обозначенная AI-персона', $sergey->system_prompt);
@@ -48,21 +53,98 @@ class CommunityAiPersonaSeederTest extends TestCase
         );
     }
 
-    public function test_the_seeder_is_idempotent_and_restores_seeded_settings(): void
+    public function test_the_seeder_is_idempotent_and_preserves_platform_managed_settings(): void
     {
         $this->seed(CommunityAiPersonaSeeder::class);
 
-        CommunityAiPersona::query()
+        $persona = CommunityAiPersona::query()
             ->where('slug', 'anna-logistician')
-            ->update(['daily_comment_limit' => 99]);
+            ->firstOrFail();
+        $settings = $persona->settings;
+        $settings['custom_instructions'] = 'Не используй слово «коллеги».';
+        $persona->update([
+            'daily_comment_limit' => 99,
+            'personality_description' => 'Настройка, изменённая в админке.',
+            'settings' => $settings,
+        ]);
 
         $this->seed(CommunityAiPersonaSeeder::class);
 
         $this->assertDatabaseCount('community_ai_personas', 11);
-        $this->assertSame(
-            1,
-            CommunityAiPersona::query()->where('slug', 'anna-logistician')->value('daily_comment_limit'),
-        );
+        $persona->refresh();
+        $this->assertSame(99, $persona->daily_comment_limit);
+        $this->assertSame('Настройка, изменённая в админке.', $persona->personality_description);
+        $this->assertSame('Не используй слово «коллеги».', $persona->settings['custom_instructions']);
+    }
+
+    public function test_platform_prompt_is_built_from_current_persona_settings(): void
+    {
+        $this->seed(CommunityAiPersonaSeeder::class);
+
+        $persona = CommunityAiPersona::query()
+            ->with('communityUser')
+            ->where('slug', 'mikhail-driver')
+            ->firstOrFail();
+        $settings = $persona->settings;
+        $settings['communication_style'] = 'Пишет очень коротко и начинает сразу с практической детали.';
+        $settings['custom_instructions'] = 'Иногда заканчивай реплику коротким вопросом.';
+        $persona->update(['settings' => $settings]);
+
+        $prompt = app(CommunityAiPersonaPromptBuilder::class)->build($persona->fresh('communityUser'));
+
+        $this->assertStringContainsString('Пишет очень коротко и начинает сразу с практической детали.', $prompt);
+        $this->assertStringContainsString('Иногда заканчивай реплику коротким вопросом.', $prompt);
+        $this->assertStringContainsString('Михаил', $prompt);
+    }
+
+    public function test_admin_can_open_platform_persona_settings(): void
+    {
+        $this->seed(CommunityAiPersonaSeeder::class);
+        $persona = CommunityAiPersona::query()->firstOrFail();
+
+        $this->actingAs(User::factory()->create())
+            ->get(CommunityAiPersonaResource::getUrl('edit', ['record' => $persona]))
+            ->assertOk()
+            ->assertSeeText('Характер и голос')
+            ->assertSeeText('Грамотность и естественные неровности')
+            ->assertSeeText('Модель выбирается в настройках самого агента Timeweb');
+    }
+
+    public function test_admin_can_save_persona_voice_settings_used_by_the_prompt(): void
+    {
+        $this->seed(CommunityAiPersonaSeeder::class);
+        $persona = CommunityAiPersona::query()->firstOrFail();
+        $settings = $persona->settings;
+        $settings['communication_style'] = 'Короткие реплики без приветствий.';
+        $settings['custom_instructions'] = 'Иногда уточняй цену простоя.';
+
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(EditCommunityAiPersona::class, ['record' => $persona->getRouteKey()])
+            ->fillForm([
+                'role_description' => $persona->role_description,
+                'personality_description' => 'Прямой и немного ироничный практик.',
+                'settings' => $settings,
+                'is_active' => true,
+                'requires_review' => true,
+                'can_create_posts' => true,
+                'can_create_comments' => true,
+                'daily_post_limit' => 2,
+                'daily_comment_limit' => 8,
+                'max_post_tokens' => 900,
+                'max_comment_tokens' => 350,
+                'provider_agent_id' => $persona->provider_agent_id,
+                'provider_base_url' => $persona->provider_base_url,
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $persona->refresh();
+        $this->assertSame('Прямой и немного ироничный практик.', $persona->personality_description);
+        $this->assertSame('Короткие реплики без приветствий.', $persona->settings['communication_style']);
+        $this->assertSame(8, $persona->daily_comment_limit);
+        $this->assertSame(5, $persona->prompt_version);
+        $this->assertStringContainsString('Иногда уточняй цену простоя.', $persona->system_prompt);
     }
 
     public function test_persona_usernames_look_like_public_handles_not_internal_identifiers(): void

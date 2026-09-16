@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\CommunityAiPersona;
 use App\Models\CommunityUser;
+use App\Services\Community\CommunityAiPersonaPromptBuilder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -17,9 +18,11 @@ class CommunityAiPersonaSeeder extends Seeder
                     ->where('slug', $data['slug'])
                     ->first();
 
-                $user = $existingPersona
-                    ? CommunityUser::withTrashed()->findOrFail($existingPersona->community_user_id)
-                    : CommunityUser::withTrashed()->firstOrNew(['username' => $data['username']]);
+                if ($existingPersona !== null) {
+                    continue;
+                }
+
+                $user = CommunityUser::withTrashed()->firstOrNew(['username' => $data['username']]);
 
                 $user->fill([
                     'username' => $data['username'],
@@ -36,44 +39,49 @@ class CommunityAiPersonaSeeder extends Seeder
                 $user->deleted_at = null;
                 $user->save();
 
-                CommunityAiPersona::query()->updateOrCreate(
-                    ['slug' => $data['slug']],
-                    [
-                        'community_user_id' => $user->id,
-                        'role_description' => $data['role'],
-                        'personality_description' => $data['personality'],
-                        'provider' => 'timeweb',
-                        'provider_agent_id' => $data['access_id'],
-                        'provider_base_url' => $data['base_url'],
-                        'model' => 'GPT-5.4 Mini',
-                        'prompt_version' => 3,
-                        'system_prompt' => $this->systemPrompt($data),
-                        'is_active' => true,
-                        'can_create_posts' => true,
-                        'can_create_comments' => true,
-                        'requires_review' => true,
-                        'daily_post_limit' => 1,
-                        'daily_comment_limit' => 1,
-                        'max_post_tokens' => 1000,
-                        'max_comment_tokens' => 500,
-                        'settings' => [
-                            'reasoning_mode' => 'minimal',
-                            'web_search_enabled' => false,
-                            'image_generation_enabled' => false,
-                            'allow_reply_to_ai_persona' => false,
-                            'category_slugs' => $data['category_slugs'],
-                            'communication_style' => $data['style'],
-                            'expertise' => $data['expertise'],
-                            'viewpoint' => $data['viewpoint'],
-                            'literacy_profile' => [
-                                'description' => $data['literacy'],
-                                'casual_chance' => $data['casual_chance'],
-                                'error_chance' => $data['error_chance'],
-                                'imperfections' => $data['imperfections'],
-                            ],
-                        ],
+                $settings = [
+                    'reasoning_mode' => 'minimal',
+                    'web_search_enabled' => false,
+                    'image_generation_enabled' => false,
+                    'allow_reply_to_ai_persona' => false,
+                    'category_slugs' => $data['category_slugs'],
+                    'communication_style' => $data['style'],
+                    'expertise' => $data['expertise'],
+                    'viewpoint' => $data['viewpoint'],
+                    'literacy_profile' => [
+                        'description' => $data['literacy'],
+                        'casual_chance' => $data['casual_chance'],
+                        'error_chance' => $data['error_chance'],
+                        'imperfections' => $data['imperfections'],
                     ],
-                );
+                ];
+
+                CommunityAiPersona::query()->create([
+                    'slug' => $data['slug'],
+                    'community_user_id' => $user->id,
+                    'role_description' => $data['role'],
+                    'personality_description' => $data['personality'],
+                    'provider' => 'timeweb',
+                    'provider_agent_id' => $data['access_id'],
+                    'provider_base_url' => $data['base_url'],
+                    'model' => 'GPT-5.4 Mini',
+                    'prompt_version' => 4,
+                    'system_prompt' => app(CommunityAiPersonaPromptBuilder::class)->buildFromValues(
+                        name: $data['name'],
+                        role: $data['role'],
+                        personality: $data['personality'],
+                        settings: $settings,
+                    ),
+                    'is_active' => true,
+                    'can_create_posts' => true,
+                    'can_create_comments' => true,
+                    'requires_review' => true,
+                    'daily_post_limit' => 1,
+                    'daily_comment_limit' => 1,
+                    'max_post_tokens' => 1000,
+                    'max_comment_tokens' => 500,
+                    'settings' => $settings,
+                ]);
             }
         });
     }
@@ -312,45 +320,5 @@ class CommunityAiPersonaSeeder extends Seeder
                 'category_slugs' => ['general', 'carriers', '24logist'],
             ],
         ];
-    }
-
-    /** @param array<string, mixed> $persona */
-    private function systemPrompt(array $persona): string
-    {
-        return <<<PROMPT
-Ты — {$persona['name']}, участник сообщества о логистике и автомобильных перевозках.
-
-Роль: {$persona['role']}.
-Характер: {$persona['personality']}
-Область знаний: {$persona['expertise']}
-Манера общения: {$persona['style']}
-Позиция: {$persona['viewpoint']}
-Уровень грамотности: {$persona['literacy']}
-
-Твоя задача — поддерживать содержательные обсуждения о логистике и автомобильных перевозках.
-
-Правила:
-1. Пиши естественным разговорным русским языком и сохраняй заданный характер. Не пиши как консультант, автор инструкции или официального заключения.
-2. Не выдавай себя за реального человека и не придумывай личный опыт.
-3. Не повторяй уже высказанные мысли. Добавляй новый аргумент, полезное уточнение или один уместный вопрос.
-4. Не придумывай законы, тарифы, статистику, документы, события и ссылки.
-5. Если нужны актуальные сведения или проверка специалистом, установи needs_review=true.
-6. Не публикуй персональные данные и не давай опасных либо незаконных рекомендаций.
-7. В обычном режиме не отвечай другой AI-персоне. В согласованном сценарии с scenario_mode=true можно отвечать по теме, но выбирай skip, если содержательного вклада нет.
-8. Один комментарий — одна мысль: короткий вопрос, возражение, практическая деталь, сомнение или реакция на предыдущую реплику. Обычно это 1–3 коротких предложения, не больше 75 слов.
-9. Не пытайся закрыть вопрос целиком. Не пересказывай тему, не раскладывай всё по ролям, не перечисляй все возможные риски и не подводи итог за остальных.
-10. Не используй длинные абзацы, списки, подзаголовки и канцелярит. Избегай оборотов «осуществлять», «целесообразно», «в части», «с точки зрения», «таким образом».
-11. Не начинай комментарии с «Я бы», «Тут я бы», «Здесь важно», «Стоит разделить», «В данном случае», «Следует», «Необходимо», а также с шаблонов вроде «важный вопрос», «безусловно» и «как искусственный интеллект».
-12. Разговаривай с участниками, а не выступай перед аудиторией. Допускаются простые слова, короткая фраза и один естественный уточняющий вопрос.
-
-Верни только JSON:
-{
-  "action": "comment|topic|skip",
-  "title": null,
-  "body": null,
-  "needs_review": false,
-  "reason": "краткая причина решения"
-}
-PROMPT;
     }
 }

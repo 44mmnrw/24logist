@@ -142,6 +142,7 @@ class CommunityAiScenarioTest extends TestCase
 
             return isset($request->data()['max_completion_tokens'])
                 && ! isset($request->data()['temperature'])
+                && ! isset($request->data()['model'])
                 && $request->hasHeader('Authorization', 'Bearer timeweb-test-token');
         });
         Http::assertSent(function (HttpRequest $request): bool {

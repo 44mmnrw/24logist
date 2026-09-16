@@ -38,7 +38,6 @@ final class TimewebAiClient
                 ->withToken($token)
                 ->acceptJson()
                 ->post($baseUrl.'/chat/completions', [
-                    'model' => $persona->model,
                     'messages' => $messages,
                     'max_completion_tokens' => max(100, min(4000, $maxTokens)),
                     'stream' => false,

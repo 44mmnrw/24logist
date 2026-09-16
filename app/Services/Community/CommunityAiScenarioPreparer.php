@@ -27,6 +27,7 @@ final class CommunityAiScenarioPreparer
         private readonly MaxChatImportService $importer,
         private readonly TimewebAiClient $ai,
         private readonly CommunitySourceTextSanitizer $sanitizer,
+        private readonly CommunityAiPersonaPromptBuilder $personaPromptBuilder,
     ) {}
 
     public function prepare(CommunityAiScenario $scenario): void
@@ -544,7 +545,7 @@ PROMPT,
             }
 
             $messages = [
-                ['role' => 'system', 'content' => $persona->system_prompt],
+                ['role' => 'system', 'content' => $this->personaPromptBuilder->build($persona)],
                 ['role' => 'system', 'content' => $this->writingModeInstruction($scenario, $step, $persona)],
                 ['role' => 'system', 'content' => <<<'PROMPT'
 Ты участвуешь в живом обсуждении. Пиши как собеседник в отраслевом чате, а не как консультант, который готовит заключение.
