@@ -61,7 +61,12 @@ class CommunityAiPersonaSeederTest extends TestCase
         $newPersona = CommunityAiPersona::query()
             ->where('slug', 'viktor-fleet-carrier')
             ->firstOrFail();
-        $this->assertFalse($newPersona->is_active);
+        $this->assertTrue($newPersona->is_active);
+        $this->assertSame('6a93eedb-0931-49a3-b085-7413d7b8dbcd', $newPersona->provider_agent_id);
+        $this->assertSame(
+            'https://agent.timeweb.cloud/api/v1/cloud-ai/agents/6a93eedb-0931-49a3-b085-7413d7b8dbcd/v1',
+            $newPersona->provider_base_url,
+        );
     }
 
     public function test_the_seeder_is_idempotent_and_preserves_platform_managed_settings(): void

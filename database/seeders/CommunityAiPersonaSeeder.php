@@ -31,6 +31,8 @@ class CommunityAiPersonaSeeder extends Seeder
                     $this->setRegistrationDate($existingUser, $registeredAt);
                     $this->setRegistrationDate($existingPersona, $registeredAt);
 
+                    $providerChanged = $existingPersona->provider_agent_id !== $data['access_id'];
+
                     $settings = $existingPersona->settings ?? [];
                     data_set($settings, 'literacy_profile.error_chance', $data['error_chance']);
                     if (blank(data_get($settings, 'professional_language.vocabulary'))) {
@@ -48,7 +50,10 @@ class CommunityAiPersonaSeeder extends Seeder
                     if (data_get($settings, 'professional_language.usage_chance') === null) {
                         data_set($settings, 'professional_language.usage_chance', $professionalLanguage['usage_chance']);
                     }
-                    $existingPersona->forceFill([
+                    $providerUpdates = [
+                        'provider' => 'timeweb',
+                        'provider_agent_id' => $data['access_id'],
+                        'provider_base_url' => $data['base_url'],
                         'settings' => $settings,
                         'prompt_version' => max(6, $existingPersona->prompt_version),
                         'system_prompt' => app(CommunityAiPersonaPromptBuilder::class)->buildFromValues(
@@ -57,7 +62,15 @@ class CommunityAiPersonaSeeder extends Seeder
                             personality: $existingPersona->personality_description,
                             settings: $settings,
                         ),
-                    ])->saveQuietly();
+                    ];
+
+                    // Activate a persona only when its temporary agent ID is replaced.
+                    // A later manual deactivation in the admin panel must survive reruns.
+                    if ($providerChanged && ($data['is_active'] ?? true)) {
+                        $providerUpdates['is_active'] = true;
+                    }
+
+                    $existingPersona->forceFill($providerUpdates)->saveQuietly();
 
                     continue;
                 }
@@ -561,6 +574,37 @@ class CommunityAiPersonaSeeder extends Seeder
     /** @return list<array<string, mixed>> */
     private function additionalPersonas(): array
     {
+        // access_id values are read from the Timeweb Cloud management API.
+        // Keeping them in the seeder makes production deployment deterministic and
+        // avoids storing a temporary account-level API token in the application.
+        $agentIds = [
+            'viktor-fleet-carrier' => '6a93eedb-0931-49a3-b085-7413d7b8dbcd',
+            'denis-private-carrier' => '2e7ca7b5-e546-4a42-a268-b408d7ba5529',
+            'svetlana-carrier-manager' => '2812788b-7ced-42a9-9102-30a0b11afd74',
+            'pavel-reefer-carrier' => 'be827896-26cd-432c-9feb-46c5b79925a2',
+            'timur-regional-carrier' => '843cc670-1606-4b86-956e-a307e0abb4be',
+            'marina-spot-forwarder' => 'feea0cc9-5d25-4897-b732-15fab6ed8ddd',
+            'kirill-forwarder-dispatcher' => '5435c2fc-601b-4c0b-8e48-43b70438ffb9',
+            'larisa-senior-forwarder' => '7a99e085-9734-45c8-a995-b09fe11737ea',
+            'vadim-problem-forwarder' => '033ea9e9-b88f-4d91-b37a-2e01c6cf2c62',
+            'ksenia-client-forwarder' => '5d9e94b0-17c8-4d30-ab9d-75e422593cc9',
+            'alexey-transport-procurement' => '4aa85baf-4ee3-4bb8-984e-765414c2ce0a',
+            'irina-warehouse-manager' => '5197245e-d4ce-42c1-bd4a-309f718db2d3',
+            'boris-logistics-director' => 'a6003bf8-af79-46bf-8000-0b01a5794bda',
+            'darya-ecommerce-cargo-owner' => '135c5810-0b7e-4a88-8aa4-9f4d854ab050',
+            'nikolay-building-cargo-owner' => 'c070b55e-5742-42da-ae61-f012fc6a44d0',
+            'yulia-planning-logistician' => '38759677-22fb-4926-83f7-41bba40506aa',
+            'evgeny-logistics-analyst' => '03b79cf4-d0b4-4ebf-9627-405b7eebc560',
+            'katya-junior-logistician' => 'accce993-28a3-430a-afac-b3ab252fdfaf',
+            'oleg-warehouse-logistician' => 'bf6c4534-757b-4ce5-b0a8-c303aaec3cc4',
+            'valeria-delivery-quality' => '048a3114-11a1-4b60-81f8-71cfa89e4b04',
+            'stanislav-commercial-forwarder' => '209a5d50-8f25-44aa-bd92-3364a2346f01',
+            'alena-edo-forwarder' => 'dcf7f450-b62c-42be-b2de-098bd0d3df97',
+            'ruslan-complex-routes' => 'd8a8dfe0-fe0f-4c63-a314-1e1c980231a4',
+            'galina-forwarder-settlements' => 'c740c9c3-a23e-481c-a15f-b92388b01334',
+            'nikita-marketplace-forwarder' => '3660af3a-16e2-4dca-83a1-c433d8bccc1f',
+        ];
+
         $personas = [
             [
                 'slug' => 'viktor-fleet-carrier', 'username' => 'krug_na_baze', 'name' => 'Виктор Мельников',
@@ -889,30 +933,16 @@ class CommunityAiPersonaSeeder extends Seeder
             ],
         ];
 
-        return array_map(function (array $persona): array {
-            $accessId = $this->pendingAgentId($persona['slug']);
+        return array_map(function (array $persona) use ($agentIds): array {
+            $accessId = $agentIds[$persona['slug']];
 
             return [
                 ...$persona,
                 'access_id' => $accessId,
                 'base_url' => "https://agent.timeweb.cloud/api/v1/cloud-ai/agents/{$accessId}/v1",
-                'is_active' => false,
+                'is_active' => true,
             ];
         }, $personas);
-    }
-
-    private function pendingAgentId(string $slug): string
-    {
-        $hash = md5('24logist-community-persona:'.$slug);
-
-        return sprintf(
-            '%s-%s-4%s-a%s-%s',
-            substr($hash, 0, 8),
-            substr($hash, 8, 4),
-            substr($hash, 12, 3),
-            substr($hash, 15, 3),
-            substr($hash, 18, 12),
-        );
     }
 
     /** @return array<string, string> */
