@@ -125,7 +125,10 @@ class CommunityAiScenarioTest extends TestCase
         $this->assertTrue($commentSteps->every(fn ($step): bool => in_array($step->conversation_move, [
             'question', 'agree', 'disagree', 'clarify', 'correct', 'doubt', 'practical_detail', 'support', 'light_humor', 'partial_answer',
         ], true)));
-        $this->assertTrue($commentSteps->every(fn ($step): bool => $step->target_word_count >= 5 && $step->target_word_count <= 60));
+        $this->assertTrue($commentSteps->every(fn ($step): bool => $step->target_word_count >= 5 && $step->target_word_count <= 65));
+        $this->assertTrue($commentSteps->whereNull('parent_step_id')->every(
+            fn ($step): bool => in_array($step->conversation_move, ['question', 'clarify', 'doubt', 'practical_detail', 'partial_answer'], true),
+        ));
         $this->assertDatabaseCount('community_ai_source_messages', 1);
         $this->assertDatabaseCount('community_ai_generations', 6);
         $encryptedText = (string) DB::table('community_ai_source_messages')->value('text');
@@ -245,9 +248,10 @@ class CommunityAiScenarioTest extends TestCase
         ]);
         $aiCall = 0;
         $planPrompt = '';
-        $commentPrompt = '';
+        $replyPrompt = '';
+        $lastRootPrompt = '';
 
-        Http::fake(function (HttpRequest $request) use ($commenters, &$aiCall, &$planPrompt, &$commentPrompt) {
+        Http::fake(function (HttpRequest $request) use ($commenters, &$aiCall, &$planPrompt, &$replyPrompt, &$lastRootPrompt) {
             $this->assertStringContainsString('agent.timeweb.cloud', $request->url());
             $aiCall++;
             $prompt = collect($request->data()['messages'] ?? [])->pluck('content')->implode("\n");
@@ -273,12 +277,16 @@ class CommunityAiScenarioTest extends TestCase
                     'reason' => 'Пересказывает исходный пост',
                 ];
             } else {
-                $commentPrompt = $prompt;
+                if (str_contains($prompt, 'Ты отвечаешь именно на комментарий')) {
+                    $replyPrompt = $prompt;
+                } else {
+                    $lastRootPrompt = $prompt;
+                }
                 $bodies = [
                     3 => 'Уточните у получателя, в каком разделе находится документ.',
-                    4 => 'Если документ уже оформлен, отправителю проще отозвать его и прислать заново.',
-                    5 => 'Какой статус документа сейчас видит вторая сторона?',
-                    6 => 'Да, но сначала стоит получить от получателя снимок экрана со статусом.',
+                    4 => 'Да, но сначала стоит получить от получателя снимок экрана со статусом.',
+                    5 => 'Если документ уже оформлен, отправителю проще отозвать его и прислать заново.',
+                    6 => 'Какой статус документа сейчас видит вторая сторона?',
                 ];
                 $content = [
                     'action' => 'comment',
@@ -326,17 +334,21 @@ class CommunityAiScenarioTest extends TestCase
         $this->assertSame('comment', $steps[3]->type);
         $this->assertSame('comment', $steps[4]->type);
         $this->assertNull($steps[1]->parent_step_id);
-        $this->assertSame($steps[1]->id, $steps[4]->parent_step_id);
+        $this->assertSame($steps[1]->id, $steps[2]->parent_step_id);
+        $this->assertNull($steps[3]->parent_step_id);
+        $this->assertNull($steps[4]->parent_step_id);
         $this->assertSame(6, $aiCall);
         $this->assertStringContainsString('<source_post>', $planPrompt);
         $this->assertStringContainsString('В чате спорили, можно ли отозвать', $planPrompt);
-        $this->assertStringContainsString('Люди спорили, можно ли отозвать', $commentPrompt);
-        $this->assertStringContainsString('Ориентир длины:', $commentPrompt);
-        $this->assertStringContainsString('Ты отвечаешь именно на комментарий', $commentPrompt);
-        $this->assertStringContainsString('Уточните у получателя', $commentPrompt);
-        $this->assertStringContainsString('Какой статус документа', $commentPrompt);
-        $this->assertStringNotContainsString('Если документ уже оформлен', $commentPrompt);
-        $this->assertStringNotContainsString('Всё обсуждение до тебя', $commentPrompt);
+        $this->assertStringContainsString('Люди спорили, можно ли отозвать', $replyPrompt);
+        $this->assertStringContainsString('Ориентир длины:', $replyPrompt);
+        $this->assertStringContainsString('Ты отвечаешь именно на комментарий', $replyPrompt);
+        $this->assertStringContainsString('Уточните у получателя', $replyPrompt);
+        $this->assertStringNotContainsString('Если документ уже оформлен', $replyPrompt);
+        $this->assertStringNotContainsString('Какой статус документа', $replyPrompt);
+        $this->assertStringNotContainsString('Всё обсуждение до тебя', $replyPrompt);
+        $this->assertStringContainsString('В обсуждении уже прозвучали такие позиции', $lastRootPrompt);
+        $this->assertStringContainsString('Если документ уже оформлен', $lastRootPrompt);
         Http::assertNotSent(fn (HttpRequest $request): bool => str_starts_with($request->url(), 'https://platform-api2.max.ru'));
     }
 
@@ -481,6 +493,26 @@ class CommunityAiScenarioTest extends TestCase
         $this->assertContains('использовано длинное тире', $longDashViolations);
         $this->assertSame('А у других как-то иначе?', $normalizeMethod->invoke($service, 'А у других как-то иначе?'));
         $this->assertSame('Сверили документы, даты разошлись.', $normalizeMethod->invoke($service, 'Сверили документы — даты разошлись.'));
+    }
+
+    public function test_discussion_memory_does_not_mix_unrelated_reply_threads(): void
+    {
+        $service = app(CommunityAiScenarioPreparer::class);
+        $memoryMethod = new \ReflectionMethod($service, 'discussionMemory');
+        $turns = [
+            ['step_id' => 10, 'root_step_id' => 10, 'name' => 'Анна', 'body' => 'Нужно сначала узнать статус документа.'],
+            ['step_id' => 11, 'root_step_id' => 10, 'name' => 'Игорь', 'body' => 'Да, без статуса непонятно, можно ли его вернуть.'],
+            ['step_id' => 20, 'root_step_id' => 20, 'name' => 'Марина', 'body' => 'Я бы ещё проверила права получателя.'],
+        ];
+
+        $replyMemory = $memoryMethod->invoke($service, $turns, 10);
+        $rootMemory = $memoryMethod->invoke($service, $turns, null);
+
+        $this->assertStringContainsString('без статуса непонятно', $replyMemory);
+        $this->assertStringNotContainsString('права получателя', $replyMemory);
+        $this->assertStringContainsString('статус документа', $rootMemory);
+        $this->assertStringContainsString('права получателя', $rootMemory);
+        $this->assertStringNotContainsString('без статуса непонятно', $rootMemory);
     }
 
     public function test_timeweb_error_message_is_included_without_raw_response_data(): void

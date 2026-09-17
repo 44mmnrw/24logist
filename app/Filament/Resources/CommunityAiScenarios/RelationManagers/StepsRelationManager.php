@@ -86,7 +86,7 @@ class StepsRelationManager extends RelationManager
                 ->label('Ориентир длины, слов')
                 ->numeric()
                 ->minValue(5)
-                ->maxValue(60)
+                ->maxValue(65)
                 ->visible(fn (?CommunityAiScenarioStep $record): bool => $record?->type === 'comment'),
             TextInput::make('draft_title')->label('Заголовок')->maxLength(180)->visible(fn (?CommunityAiScenarioStep $record): bool => $record?->type === 'topic')->columnSpanFull(),
             Textarea::make('draft_body')->label('Текст')->rows(10)->required()->columnSpanFull(),
