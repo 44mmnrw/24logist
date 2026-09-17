@@ -87,7 +87,8 @@ class CommunityAiPersonaSeederTest extends TestCase
         $this->assertSame(99, $persona->daily_comment_limit);
         $this->assertSame('Настройка, изменённая в админке.', $persona->personality_description);
         $this->assertSame('Не используй слово «коллеги».', $persona->settings['custom_instructions']);
-        $this->assertSame('свой термин (настройка из админки)', $persona->settings['professional_language']['vocabulary']);
+        $this->assertStringContainsString('свой термин (настройка из админки)', $persona->settings['professional_language']['vocabulary']);
+        $this->assertStringContainsString('ЭЗЗ (электронная заказ-заявка)', $persona->settings['professional_language']['vocabulary']);
     }
 
     public function test_platform_prompt_is_built_from_current_persona_settings(): void
@@ -128,6 +129,17 @@ class CommunityAiPersonaSeederTest extends TestCase
             $driver->settings['professional_language']['vocabulary'],
             $forwarder->settings['professional_language']['vocabulary'],
         );
+
+        $requiredTerms = ['ГСМ', 'ГО', 'ГП', 'ГВ', 'ЭТРН', 'ЛОП', 'ЭДО', 'СВХ', 'ЭЗЗ', 'юрлицо'];
+        $this->assertTrue(CommunityAiPersona::query()->get()->every(
+            function (CommunityAiPersona $persona) use ($requiredTerms): bool {
+                $vocabulary = (string) data_get($persona->settings, 'professional_language.vocabulary', '');
+
+                return collect($requiredTerms)->every(
+                    fn (string $term): bool => str_contains($vocabulary, $term),
+                );
+            },
+        ));
     }
 
     public function test_admin_can_open_platform_persona_settings(): void

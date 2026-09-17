@@ -35,6 +35,15 @@ class CommunityAiPersonaSeeder extends Seeder
                     data_set($settings, 'literacy_profile.error_chance', $data['error_chance']);
                     if (blank(data_get($settings, 'professional_language.vocabulary'))) {
                         data_set($settings, 'professional_language.vocabulary', $professionalLanguage['vocabulary']);
+                    } else {
+                        data_set(
+                            $settings,
+                            'professional_language.vocabulary',
+                            $this->mergeRequiredVocabulary(
+                                (string) data_get($settings, 'professional_language.vocabulary'),
+                                $this->commonProfessionalVocabulary(),
+                            ),
+                        );
                     }
                     if (data_get($settings, 'professional_language.usage_chance') === null) {
                         data_set($settings, 'professional_language.usage_chance', $professionalLanguage['usage_chance']);
@@ -131,14 +140,7 @@ class CommunityAiPersonaSeeder extends Seeder
     /** @return array{usage_chance: int, vocabulary: string} */
     private function professionalLanguage(string $transportRole, string $roleDescription): array
     {
-        $common = [
-            'заявка (согласованные условия конкретной перевозки)',
-            'ставка (цена конкретной перевозки с учётом формы оплаты)',
-            'подача (прибытие машины на погрузку)',
-            'окно или слот (согласованное время погрузки либо выгрузки)',
-            'простой (ожидание сверх согласованного времени)',
-            'порожняк (пробег машины без груза)',
-        ];
+        $common = $this->commonProfessionalVocabulary();
 
         $roleVocabulary = match ($transportRole) {
             'carrier' => [
@@ -277,12 +279,46 @@ class CommunityAiPersonaSeeder extends Seeder
             ...$common,
             ...$roleVocabulary,
             ...$specialty,
-        ])), 0, 20);
+        ])), 0, 32);
 
         return [
             'usage_chance' => $usageChance,
             'vocabulary' => implode("\n", $vocabulary),
         ];
+    }
+
+    /** @return list<string> */
+    private function commonProfessionalVocabulary(): array
+    {
+        return [
+            'заявка (согласованные условия конкретной перевозки)',
+            'ставка (цена конкретной перевозки с учётом формы оплаты)',
+            'подача (прибытие машины на погрузку)',
+            'окно или слот (согласованное время погрузки либо выгрузки)',
+            'простой (ожидание сверх согласованного времени)',
+            'порожняк (пробег машины без груза)',
+            'ГСМ (горюче-смазочные материалы)',
+            'ГО (грузоотправитель)',
+            'ГП (грузополучатель)',
+            'ГВ (грузовладелец)',
+            'ЭТРН или ЭТрН (электронная транспортная накладная, нормативное написание ЭТрН)',
+            'ЛОП (лицо, осуществляющее погрузку или отвечающее за неё)',
+            'ЭДО (электронный документооборот)',
+            'СВХ (склад временного хранения)',
+            'ЭЗЗ (электронная заказ-заявка)',
+            'юрлицо или юр лицо (юридическое лицо)',
+        ];
+    }
+
+    /** @param list<string> $required */
+    private function mergeRequiredVocabulary(string $current, array $required): string
+    {
+        $lines = preg_split('/\R/u', trim($current), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        return implode("\n", array_values(array_unique([
+            ...$lines,
+            ...$required,
+        ])));
     }
 
     /**
