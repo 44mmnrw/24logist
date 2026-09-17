@@ -107,6 +107,7 @@ class CommunitySettingsTest extends TestCase
             ->assertOk()
             ->assertSee('Настройки сообщества')
             ->assertSee('Сообщество 24Logist')
+            ->assertSee('Плашка «Сообщество о логистике»')
             ->assertSee('Браузерный сборщик MAX');
 
         $this->get(GeneralSiteSettingResource::getUrl('edit'))

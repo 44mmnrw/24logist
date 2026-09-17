@@ -62,6 +62,49 @@ class CommunityTest extends TestCase
         $this->assertDatabaseCount('community_categories', 5);
     }
 
+    public function test_every_topic_gets_complete_seo_metadata_and_renders_it(): void
+    {
+        $post = $this->postBy(CommunityUser::factory()->create());
+        $post->refresh();
+
+        $this->assertNotEmpty($post->meta_title);
+        $this->assertStringContainsString('ЛогистРу', $post->meta_title);
+        $this->assertSame('Текст', $post->meta_description);
+        $this->assertNotEmpty($post->meta_keywords);
+        $this->assertSame('index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1', $post->meta_robots);
+        $this->assertSame($post->getUrl(), $post->canonical_url);
+        $this->assertSame($post->title, $post->og_title);
+        $this->assertSame($post->title, $post->twitter_title);
+
+        $this->get($post->getUrl())
+            ->assertOk()
+            ->assertSee('<title>'.$post->meta_title.'</title>', false)
+            ->assertSee('<link rel="canonical" href="'.$post->getUrl().'">', false)
+            ->assertSee('<meta name="description" content="'.$post->meta_description.'">', false)
+            ->assertSee('<meta property="og:title" content="'.$post->og_title.'">', false)
+            ->assertSee('<meta name="twitter:title" content="'.$post->twitter_title.'">', false)
+            ->assertSee('DiscussionForumPosting', false)
+            ->assertSee('mainEntityOfPage', false);
+    }
+
+    public function test_automatic_topic_seo_is_refreshed_when_content_changes(): void
+    {
+        $post = $this->postBy(CommunityUser::factory()->create());
+
+        $post->update([
+            'title' => 'Новый заголовок темы',
+            'slug' => 'novyy-zagolovok-temy',
+            'body_markdown' => 'Новое описание темы для поиска',
+            'body_html' => '<p>Новое описание темы для поиска</p>',
+        ]);
+
+        $post->refresh();
+        $this->assertStringStartsWith('Новый заголовок темы', $post->meta_title);
+        $this->assertSame('Новое описание темы для поиска', $post->meta_description);
+        $this->assertSame('Новый заголовок темы', $post->og_title);
+        $this->assertSame($post->getUrl(), $post->canonical_url);
+    }
+
     public function test_ai_persona_badge_is_not_rendered_on_public_community_pages(): void
     {
         $this->seed(CommunityAiPersonaSeeder::class);
@@ -95,6 +138,37 @@ class CommunityTest extends TestCase
         $this->get($post->getUrl())
             ->assertOk()
             ->assertSee('class="landing-shell community-layout community-topic-layout"', false);
+    }
+
+    public function test_topic_about_card_uses_admin_text_without_changing_letter_case(): void
+    {
+        SiteSetting::instance()->update([
+            'community_about_card_enabled' => true,
+            'community_about_card_eyebrow' => 'ЛогистРу MixCase',
+            'community_about_card_title' => 'Своя плашка сообщества',
+            'community_about_card_description' => 'Описание из настроек сообщества.',
+            'community_about_card_members_label' => 'наших участников',
+            'community_about_card_topics_label' => 'живых тем',
+            'community_about_card_button_text' => 'Открыть все темы',
+        ]);
+        app(SiteSettingsService::class)->clearCache();
+        $post = $this->postBy(CommunityUser::factory()->create());
+
+        $this->get($post->getUrl())
+            ->assertOk()
+            ->assertSeeText('ЛогистРу MixCase')
+            ->assertSeeText('Своя плашка сообщества')
+            ->assertSeeText('Описание из настроек сообщества.')
+            ->assertSeeText('наших участников')
+            ->assertSeeText('живых тем')
+            ->assertSeeText('Открыть все темы');
+
+        SiteSetting::instance()->update(['community_about_card_enabled' => false]);
+        app(SiteSettingsService::class)->clearCache();
+
+        $this->get($post->getUrl())
+            ->assertOk()
+            ->assertDontSeeText('Своя плашка сообщества');
     }
 
     public function test_community_header_shows_guest_and_member_actions(): void

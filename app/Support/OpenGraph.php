@@ -6,6 +6,8 @@ use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Models\BlogTag;
 use App\Models\CmsPage;
+use App\Models\CommunityPost;
+use App\Services\Community\CommunityPostSeoService;
 use App\Services\LandingPageService;
 use App\Services\SiteSettingsService;
 use Illuminate\Support\Facades\Storage;
@@ -252,6 +254,54 @@ final class OpenGraph
             : $meta['description'];
 
         $meta['twitter_image'] = self::absoluteImageUrl($twitterImagePath) ?? $meta['image'];
+
+        return $meta;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function forCommunityPost(CommunityPost $post): array
+    {
+        $defaults = app(CommunityPostSeoService::class)->metadata($post);
+        $title = filled($post->og_title)
+            ? (string) $post->og_title
+            : (filled($post->meta_title) ? (string) $post->meta_title : $defaults['meta_title']);
+        $description = filled($post->og_description)
+            ? (string) $post->og_description
+            : (filled($post->meta_description) ? (string) $post->meta_description : $defaults['meta_description']);
+
+        $meta = self::build(
+            title: $title,
+            description: $description,
+            url: filled($post->canonical_url) ? (string) $post->canonical_url : $post->getUrl(),
+            imagePath: null,
+            type: filled($post->og_type) ? (string) $post->og_type : 'article',
+            robots: filled($post->meta_robots) ? (string) $post->meta_robots : self::ROBOTS_INDEX,
+            keywords: filled($post->meta_keywords) ? $post->meta_keywords : $defaults['meta_keywords'],
+        );
+
+        $photo = $post->relationLoaded('photos') ? $post->photos->first() : $post->photos()->first();
+        if ($photo !== null) {
+            $meta['image'] = $photo->getUrl();
+            $meta['image_width'] = $photo->width;
+            $meta['image_height'] = $photo->height;
+            $meta['image_type'] = match (strtolower(pathinfo((string) $photo->path, PATHINFO_EXTENSION))) {
+                'jpg', 'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'webp' => 'image/webp',
+                default => null,
+            };
+        }
+
+        $meta['html_title'] = filled($post->meta_title) ? (string) $post->meta_title : $defaults['meta_title'];
+        $meta['twitter_card'] = filled($post->twitter_card) ? (string) $post->twitter_card : 'summary_large_image';
+        $meta['twitter_title'] = filled($post->twitter_title) ? (string) $post->twitter_title : $meta['title'];
+        $meta['twitter_description'] = filled($post->twitter_description)
+            ? self::trimDescription($post->twitter_description)
+            : $meta['description'];
+        $meta['twitter_image'] = $meta['image'];
+        $meta['author'] = $post->author?->displayName() ?: $meta['author'];
 
         return $meta;
     }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Community\CommunityPostSeoService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -28,6 +29,9 @@ class CommunityPost extends Model
         'community_user_id', 'community_category_id', 'slug', 'title', 'body_markdown',
         'body_html', 'external_url', 'status', 'score', 'comments_count', 'hot_score',
         'is_pinned', 'locked_at', 'edited_at', 'published_at', 'accepted_comment_id', 'resolved_at',
+        'meta_title', 'meta_description', 'meta_keywords', 'meta_robots', 'canonical_url',
+        'og_title', 'og_description', 'og_type', 'twitter_title', 'twitter_description',
+        'twitter_card', 'seo_is_custom',
     ];
 
     protected function casts(): array
@@ -40,6 +44,7 @@ class CommunityPost extends Model
             'published_at' => 'datetime',
             'resolved_at' => 'datetime',
             'hot_score' => 'float',
+            'seo_is_custom' => 'boolean',
         ];
     }
 
@@ -93,5 +98,27 @@ class CommunityPost extends Model
     public function getUrl(): string
     {
         return route('community.posts.show', ['post' => $this->id, 'slug' => $this->slug]);
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $post): void {
+            app(CommunityPostSeoService::class)->fill($post);
+        });
+
+        static::updating(function (self $post): void {
+            if (! $post->seo_is_custom && $post->isDirty([
+                'title', 'body_markdown', 'body_html', 'external_url', 'community_category_id',
+            ])) {
+                app(CommunityPostSeoService::class)->fill($post, overwrite: true);
+                $post->canonical_url = $post->getUrl();
+            }
+        });
+
+        static::created(function (self $post): void {
+            if (blank($post->canonical_url)) {
+                $post->forceFill(['canonical_url' => $post->getUrl()])->saveQuietly();
+            }
+        });
     }
 }

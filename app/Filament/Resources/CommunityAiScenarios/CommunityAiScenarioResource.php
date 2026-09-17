@@ -212,7 +212,16 @@ class CommunityAiScenarioResource extends Resource
                     : 'Сообщения будут импортированы из MAX, а затем Timeweb AI создаст бриф и черновики. Ничего не будет опубликовано.')
                 ->visible(fn (CommunityAiScenario $record): bool => in_array($record->status, [CommunityAiScenario::STATUS_DRAFT, CommunityAiScenario::STATUS_REVIEW, CommunityAiScenario::STATUS_FAILED], true))
                 ->action(function (CommunityAiScenario $record): void {
-                    $record->update(['status' => CommunityAiScenario::STATUS_QUEUED, 'last_error' => null]);
+                    $queued = CommunityAiScenario::query()
+                        ->whereKey($record->id)
+                        ->whereIn('status', [
+                            CommunityAiScenario::STATUS_DRAFT,
+                            CommunityAiScenario::STATUS_REVIEW,
+                            CommunityAiScenario::STATUS_FAILED,
+                        ])
+                        ->update(['status' => CommunityAiScenario::STATUS_QUEUED, 'last_error' => null]);
+                    abort_unless($queued === 1, 422, 'Сценарий уже запущен.');
+
                     PrepareCommunityAiScenario::dispatch($record->id);
                     Notification::make()->title('Сценарий поставлен в очередь')->success()->send();
                 }),

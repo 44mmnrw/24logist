@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Сообщество 24Logist')</title>
-    <meta name="description" content="@yield('description', 'Обсуждения перевозок, электронных документов и цифровой логистики в сообществе 24Logist.')">
-    <meta name="robots" content="@yield('robots', 'index, follow, max-image-preview:large')">
-    <link rel="canonical" href="@yield('canonical', url()->current())">
+    @hasSection('seo')
+        @yield('seo')
+    @else
+        <title>@yield('title', 'Сообщество ЛогистРу')</title>
+        <meta name="description" content="@yield('description', 'Обсуждения перевозок, электронных документов и цифровой логистики в сообществе ЛогистРу.')">
+        <meta name="robots" content="@yield('robots', 'index, follow, max-image-preview:large')">
+        <link rel="canonical" href="@yield('canonical', url()->current())">
+    @endif
     <x-site.favicon />
     <x-fonts.preload />
     @stack('structured-data')

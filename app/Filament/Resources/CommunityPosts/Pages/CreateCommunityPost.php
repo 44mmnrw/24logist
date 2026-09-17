@@ -80,6 +80,10 @@ class CreateCommunityPost extends CreateRecord
         $data['status'] = CommunityPost::STATUS_PUBLISHED;
         $data['published_at'] = $publishedAt;
         $data['hot_score'] = CommunityRanking::hotScore(1, $publishedAt);
+        $data['seo_is_custom'] = collect([
+            'meta_title', 'meta_description', 'meta_keywords', 'meta_robots', 'canonical_url',
+            'og_title', 'og_description', 'twitter_title', 'twitter_description', 'twitter_card',
+        ])->contains(fn (string $field): bool => filled($data[$field] ?? null));
 
         return $data;
     }

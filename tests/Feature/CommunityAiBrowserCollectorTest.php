@@ -113,6 +113,12 @@ class CommunityAiBrowserCollectorTest extends TestCase
 
         $this->assertSame(CommunityAiScenario::STATUS_QUEUED, $scenario->fresh()->status);
         Queue::assertPushed(PrepareCommunityAiScenario::class, fn ($job): bool => $job->scenarioId === $scenario->id);
+
+        $this->withToken(self::TOKEN)
+            ->postJson(route('community.ai.collector.prepare', $scenario))
+            ->assertUnprocessable()
+            ->assertJsonPath('message', 'Сценарий нельзя запустить из текущего статуса.');
+        Queue::assertPushed(PrepareCommunityAiScenario::class, 1);
     }
 
     public function test_source_post_scenarios_can_collect_context_and_queue_generation(): void

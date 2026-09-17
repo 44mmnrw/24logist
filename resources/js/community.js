@@ -534,6 +534,33 @@ document.addEventListener('click', async (event) => {
     }
 });
 
+const copyCommunityText = async (text) => {
+    if (navigator.clipboard?.writeText && window.isSecureContext) {
+        try {
+            await navigator.clipboard.writeText(text);
+            return;
+        } catch (_) {
+            // Firefox can reject Clipboard API despite HTTPS. Fall back to execCommand.
+        }
+    }
+
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.readOnly = true;
+    textarea.setAttribute('aria-hidden', 'true');
+    textarea.style.position = 'fixed';
+    textarea.style.inset = '0 auto auto -9999px';
+    textarea.style.opacity = '0';
+    document.body.append(textarea);
+    textarea.select();
+    textarea.setSelectionRange(0, textarea.value.length);
+
+    const copied = document.execCommand('copy');
+    textarea.remove();
+
+    if (!copied) throw new Error('Copy command was rejected');
+};
+
 document.addEventListener('click', async (event) => {
     const button = event.target.closest('[data-share-url]');
     if (!button) return;
@@ -542,18 +569,16 @@ document.addEventListener('click', async (event) => {
     const label = button.querySelector('[data-share-label]');
 
     try {
-        if (navigator.share) {
-            await navigator.share({title: document.title, url});
-            return;
-        }
-
-        await navigator.clipboard.writeText(url);
+        await copyCommunityText(url);
+        showCommunityToast('Ссылка на тему скопирована в буфер обмена.');
         if (label) {
             const previous = label.textContent;
             label.textContent = 'Ссылка скопирована';
             window.setTimeout(() => { label.textContent = previous; }, 1800);
         }
-    } catch (_) {}
+    } catch (_) {
+        showCommunityToast('Не удалось скопировать ссылку. Скопируйте адрес из строки браузера.', 'danger');
+    }
 });
 
 const reportDialog = document.querySelector('[data-report-dialog]');

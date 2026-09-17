@@ -47,6 +47,15 @@ class EditCommunityPost extends EditRecord
         $data['external_url'] = $externalUrl === '' ? null : $externalUrl;
         $data['edited_at'] = now();
 
+        $seoFields = [
+            'meta_title', 'meta_description', 'meta_keywords', 'meta_robots', 'canonical_url',
+            'og_title', 'og_description', 'twitter_title', 'twitter_description', 'twitter_card',
+        ];
+        $data['seo_is_custom'] = $this->getRecord()->seo_is_custom
+            || collect($seoFields)->contains(function (string $field) use ($data): bool {
+                return (string) ($data[$field] ?? '') !== (string) $this->getRecord()->getOriginal($field);
+            });
+
         return $data;
     }
 

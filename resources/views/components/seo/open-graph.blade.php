@@ -2,6 +2,7 @@
     'landing' => null,
     'page' => null,
     'blogPost' => null,
+    'communityPost' => null,
     'blogIndex' => false,
     'blogTag' => null,
     'blogCategory' => null,
@@ -11,6 +12,7 @@
 
 @php
     $meta = match (true) {
+        $communityPost !== null => \App\Support\OpenGraph::forCommunityPost($communityPost),
         $blogPost !== null => \App\Support\OpenGraph::forBlogPost($blogPost),
         $blogTag !== null => \App\Support\OpenGraph::forBlogTag($blogTag),
         $blogCategory !== null => \App\Support\OpenGraph::forBlogCategory($blogCategory),
@@ -109,6 +111,21 @@
             <meta property="article:tag" content="{{ $tag }}">
         @endif
     @endforeach
+@endif
+
+@if ($communityPost !== null)
+    @if ($communityPost->published_at)
+        <meta property="article:published_time" content="{{ $communityPost->published_at->toIso8601String() }}">
+    @endif
+    @if ($communityPost->edited_at ?: $communityPost->updated_at)
+        <meta property="article:modified_time" content="{{ ($communityPost->edited_at ?: $communityPost->updated_at)->toIso8601String() }}">
+    @endif
+    @if ($communityPost->author)
+        <meta property="article:author" content="{{ $communityPost->author->displayName() }}">
+    @endif
+    @if ($communityPost->category)
+        <meta property="article:section" content="{{ $communityPost->category->name }}">
+    @endif
 @endif
 
 @if (filled($meta['twitter_site'] ?? null))

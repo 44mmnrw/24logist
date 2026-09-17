@@ -1,12 +1,15 @@
 @extends('community.layout')
-@section('title', $post->title.' — Сообщество 24Logist')
-@section('description', \Illuminate\Support\Str::limit(strip_tags($post->body_html ?: $post->external_url ?: 'Фото и обсуждение в сообществе 24Logist'), 160))
-@section('canonical', $post->getUrl())
+@php($seo = \App\Support\OpenGraph::forCommunityPost($post))
+@section('seo')
+    <title>{{ $seo['html_title'] }}</title>
+    <x-seo.open-graph :community-post="$post" />
+@endsection
 
 @push('structured-data')
 <script type="application/ld+json">{!! json_encode([
     '@context' => 'https://schema.org', '@type' => 'DiscussionForumPosting',
-    'headline' => $post->title, 'url' => $post->getUrl(),
+    'headline' => $post->title, 'description' => $seo['description'], 'url' => $seo['url'],
+    'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => $seo['url']],
     'datePublished' => $post->published_at?->toIso8601String(),
     'dateModified' => $post->edited_at?->toIso8601String() ?: $post->updated_at?->toIso8601String(),
     'author' => ['@type' => 'Person', 'name' => $post->author?->username ?: '[удалён]'],
@@ -98,17 +101,20 @@
     </section>
     </div>
 
+    @php($communityAboutCard = app(\App\Services\SiteSettingsService::class)->communityAboutCard())
     <aside class="community-sidebar community-topic-sidebar" aria-label="О сообществе">
-        <div class="community-side-card community-about-card">
-            <span class="community-side-card__eyebrow">логистРу</span>
-            <h2>Сообщество о логистике</h2>
-            <p>Практические вопросы перевозчиков, экспедиторов, грузовладельцев и логистов.</p>
-            <dl class="community-about-card__stats">
-                <div><dt>{{ number_format($communityStats['members'], 0, ',', ' ') }}</dt><dd>участников</dd></div>
-                <div><dt>{{ number_format($communityStats['topics'], 0, ',', ' ') }}</dt><dd>обсуждений</dd></div>
-            </dl>
-            <a class="community-side-card__link" href="{{ route('community.index') }}">Все обсуждения</a>
-        </div>
+        @if ($communityAboutCard['enabled'])
+            <div class="community-side-card community-about-card">
+                <span class="community-side-card__eyebrow">{{ $communityAboutCard['eyebrow'] }}</span>
+                <h2>{{ $communityAboutCard['title'] }}</h2>
+                <p>{{ $communityAboutCard['description'] }}</p>
+                <dl class="community-about-card__stats">
+                    <div><dt>{{ number_format($communityStats['members'], 0, ',', ' ') }}</dt><dd>{{ $communityAboutCard['members_label'] }}</dd></div>
+                    <div><dt>{{ number_format($communityStats['topics'], 0, ',', ' ') }}</dt><dd>{{ $communityAboutCard['topics_label'] }}</dd></div>
+                </dl>
+                <a class="community-side-card__link" href="{{ route('community.index') }}">{{ $communityAboutCard['button_text'] }}</a>
+            </div>
+        @endif
         <div class="community-side-card community-rules">
             <h2>Правила</h2>
             <ol>

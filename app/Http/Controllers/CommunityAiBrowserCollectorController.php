@@ -178,10 +178,19 @@ class CommunityAiBrowserCollectorController extends Controller
 
         abort_if($messageCount === 0, 422, 'Сначала соберите сообщения хотя бы из одного чата.');
 
-        $scenario->update([
-            'status' => CommunityAiScenario::STATUS_QUEUED,
-            'last_error' => null,
-        ]);
+        $queued = CommunityAiScenario::query()
+            ->whereKey($scenario->id)
+            ->whereIn('status', [
+                CommunityAiScenario::STATUS_DRAFT,
+                CommunityAiScenario::STATUS_FAILED,
+                CommunityAiScenario::STATUS_REVIEW,
+            ])
+            ->update([
+                'status' => CommunityAiScenario::STATUS_QUEUED,
+                'last_error' => null,
+            ]);
+        abort_unless($queued === 1, 422, 'Сценарий уже запущен.');
+
         PrepareCommunityAiScenario::dispatch($scenario->id);
 
         return response()->json(['queued' => true, 'messages_count' => $messageCount]);

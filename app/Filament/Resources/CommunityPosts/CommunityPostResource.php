@@ -109,6 +109,66 @@ class CommunityPostResource extends Resource
                 ])
                 ->columns(2)
                 ->columnSpanFull(),
+            Section::make('SEO темы')
+                ->description('Поля заполняются автоматически при создании темы. Здесь их можно переопределить вручную.')
+                ->schema([
+                    TextInput::make('meta_title')
+                        ->label('Meta title')
+                        ->maxLength(70)
+                        ->helperText('Рекомендуемая длина до 60–70 символов.'),
+                    Select::make('meta_robots')
+                        ->label('Robots')
+                        ->options([
+                            'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' => 'Индексировать',
+                            'noindex, follow' => 'Не индексировать, переходить по ссылкам',
+                            'noindex, nofollow' => 'Не индексировать',
+                        ])
+                        ->native(false),
+                    Textarea::make('meta_description')
+                        ->label('Meta description')
+                        ->rows(3)
+                        ->maxLength(180)
+                        ->helperText('Краткое описание темы для поисковой выдачи, до 180 символов.')
+                        ->columnSpanFull(),
+                    Textarea::make('meta_keywords')
+                        ->label('Ключевые слова')
+                        ->rows(2)
+                        ->maxLength(500)
+                        ->helperText('Необязательно, через запятую.')
+                        ->columnSpanFull(),
+                    TextInput::make('canonical_url')
+                        ->label('Canonical URL')
+                        ->url()
+                        ->maxLength(500)
+                        ->helperText('По умолчанию используется публичный адрес темы.')
+                        ->columnSpanFull(),
+                    TextInput::make('og_title')
+                        ->label('Open Graph title')
+                        ->maxLength(255),
+                    TextInput::make('twitter_title')
+                        ->label('Twitter / X title')
+                        ->maxLength(255),
+                    Textarea::make('og_description')
+                        ->label('Open Graph description')
+                        ->rows(2)
+                        ->maxLength(500)
+                        ->columnSpanFull(),
+                    Textarea::make('twitter_description')
+                        ->label('Twitter / X description')
+                        ->rows(2)
+                        ->maxLength(500)
+                        ->columnSpanFull(),
+                    Select::make('twitter_card')
+                        ->label('Twitter card')
+                        ->options([
+                            'summary_large_image' => 'summary_large_image',
+                            'summary' => 'summary',
+                        ])
+                        ->native(false),
+                ])
+                ->columns(2)
+                ->collapsed()
+                ->columnSpanFull(),
             Section::make('Состояние')
                 ->description('Статус, закрепление и блокировка меняются только отдельными действиями модерации.')
                 ->schema([

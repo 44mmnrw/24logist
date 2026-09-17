@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Cache;
 
 class SiteSettingsService
 {
-    private const CACHE_KEY = 'site.settings.v23';
+    private const CACHE_KEY = 'site.settings.v24';
 
     public function get(): SiteSetting
     {
@@ -89,6 +89,32 @@ class SiteSettingsService
     public function communityVkEnabled(): bool
     {
         return $this->communityEnabled() && (bool) $this->get()->getAttribute('community_vk_enabled');
+    }
+
+    /**
+     * @return array{
+     *     enabled: bool,
+     *     eyebrow: string,
+     *     title: string,
+     *     description: string,
+     *     members_label: string,
+     *     topics_label: string,
+     *     button_text: string
+     * }
+     */
+    public function communityAboutCard(): array
+    {
+        $settings = $this->get();
+
+        return [
+            'enabled' => (bool) ($settings->getAttribute('community_about_card_enabled') ?? true),
+            'eyebrow' => $this->textOrDefault($settings, 'community_about_card_eyebrow', 'логистРу'),
+            'title' => $this->textOrDefault($settings, 'community_about_card_title', 'Сообщество о логистике'),
+            'description' => $this->textOrDefault($settings, 'community_about_card_description', 'Практические вопросы перевозчиков, экспедиторов, грузовладельцев и логистов.'),
+            'members_label' => $this->textOrDefault($settings, 'community_about_card_members_label', 'участников'),
+            'topics_label' => $this->textOrDefault($settings, 'community_about_card_topics_label', 'обсуждений'),
+            'button_text' => $this->textOrDefault($settings, 'community_about_card_button_text', 'Все обсуждения'),
+        ];
     }
 
     public function vkClientId(): string
@@ -281,6 +307,7 @@ class SiteSettingsService
     public function clearCache(): void
     {
         Cache::forget(self::CACHE_KEY);
+        Cache::forget('site.settings.v23');
         Cache::forget('site.settings.v22');
         Cache::forget('site.settings.v21');
         Cache::forget('site.settings.v20');
@@ -344,6 +371,13 @@ class SiteSettingsService
             'root_url' => $rootUrl,
             'type' => $type,
         ];
+    }
+
+    private function textOrDefault(SiteSetting $settings, string $attribute, string $default): string
+    {
+        $value = trim((string) $settings->getAttribute($attribute));
+
+        return $value !== '' ? $value : $default;
     }
 
     private function absoluteUrl(string $url): string

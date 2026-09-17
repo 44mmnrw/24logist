@@ -386,6 +386,48 @@ final class GeneralSiteSettingForm
                 ])
                 ->columns(1)
                 ->columnSpanFull(),
+            Section::make('Плашка «Сообщество о логистике»')
+                ->description('Текст боковой карточки на странице обсуждения. Регистр букв сохраняется ровно так, как введён здесь; числа участников и обсуждений рассчитываются автоматически.')
+                ->schema([
+                    Toggle::make('community_about_card_enabled')
+                        ->label('Показывать плашку')
+                        ->default(true),
+                    TextInput::make('community_about_card_eyebrow')
+                        ->label('Надпись над заголовком')
+                        ->required()
+                        ->maxLength(80)
+                        ->default('логистРу')
+                        ->helperText('Например: логистРу. Автоматического перевода в верхний регистр нет.'),
+                    TextInput::make('community_about_card_title')
+                        ->label('Заголовок')
+                        ->required()
+                        ->maxLength(160)
+                        ->default('Сообщество о логистике'),
+                    Textarea::make('community_about_card_description')
+                        ->label('Описание')
+                        ->required()
+                        ->rows(3)
+                        ->maxLength(500)
+                        ->default('Практические вопросы перевозчиков, экспедиторов, грузовладельцев и логистов.')
+                        ->columnSpanFull(),
+                    TextInput::make('community_about_card_members_label')
+                        ->label('Подпись количества участников')
+                        ->required()
+                        ->maxLength(80)
+                        ->default('участников'),
+                    TextInput::make('community_about_card_topics_label')
+                        ->label('Подпись количества обсуждений')
+                        ->required()
+                        ->maxLength(80)
+                        ->default('обсуждений'),
+                    TextInput::make('community_about_card_button_text')
+                        ->label('Текст кнопки')
+                        ->required()
+                        ->maxLength(100)
+                        ->default('Все обсуждения'),
+                ])
+                ->columns(2)
+                ->columnSpanFull(),
             Section::make('AI-персонажи Timeweb')
                 ->description('Один общий Bearer-токен используется сервером для обращений к 11 агентам Timeweb. Токен хранится в базе в зашифрованном виде и после сохранения не показывается.')
                 ->schema([
