@@ -18,6 +18,7 @@ use App\Models\SiteSetting;
 use App\Models\User;
 use App\Services\Community\CommunityAiScenarioPreparer;
 use App\Services\Community\CommunityAiScenarioPublisher;
+use App\Services\Community\TimewebAiClient;
 use App\Services\SiteSettingsService;
 use Database\Seeders\CommunityAiPersonaSeeder;
 use Database\Seeders\CommunityAiSourceSeeder;
@@ -120,6 +121,11 @@ class CommunityAiScenarioTest extends TestCase
         $this->assertTrue($scenario->steps->every(fn ($step): bool => $step->status === 'pending_review'));
         $this->assertSame(3, $scenario->steps()->where('type', 'comment')->whereNull('parent_step_id')->count());
         $this->assertSame(1, $scenario->steps()->where('type', 'comment')->whereNotNull('parent_step_id')->count());
+        $commentSteps = $scenario->steps()->where('type', 'comment')->get();
+        $this->assertTrue($commentSteps->every(fn ($step): bool => in_array($step->conversation_move, [
+            'question', 'agree', 'disagree', 'clarify', 'correct', 'doubt', 'practical_detail', 'support', 'light_humor', 'partial_answer',
+        ], true)));
+        $this->assertTrue($commentSteps->every(fn ($step): bool => $step->target_word_count >= 5 && $step->target_word_count <= 60));
         $this->assertDatabaseCount('community_ai_source_messages', 1);
         $this->assertDatabaseCount('community_ai_generations', 6);
         $encryptedText = (string) DB::table('community_ai_source_messages')->value('text');
@@ -325,6 +331,12 @@ class CommunityAiScenarioTest extends TestCase
         $this->assertStringContainsString('<source_post>', $planPrompt);
         $this->assertStringContainsString('В чате спорили, можно ли отозвать', $planPrompt);
         $this->assertStringContainsString('Люди спорили, можно ли отозвать', $commentPrompt);
+        $this->assertStringContainsString('Ориентир длины:', $commentPrompt);
+        $this->assertStringContainsString('Ты отвечаешь именно на комментарий', $commentPrompt);
+        $this->assertStringContainsString('Уточните у получателя', $commentPrompt);
+        $this->assertStringContainsString('Какой статус документа', $commentPrompt);
+        $this->assertStringNotContainsString('Если документ уже оформлен', $commentPrompt);
+        $this->assertStringNotContainsString('Всё обсуждение до тебя', $commentPrompt);
         Http::assertNotSent(fn (HttpRequest $request): bool => str_starts_with($request->url(), 'https://platform-api2.max.ru'));
     }
 
@@ -346,8 +358,9 @@ class CommunityAiScenarioTest extends TestCase
         ]);
         $aiCall = 0;
         $retryPrompt = '';
+        $retryLastRole = '';
 
-        Http::fake(function (HttpRequest $request) use ($commenters, &$aiCall, &$retryPrompt) {
+        Http::fake(function (HttpRequest $request) use ($commenters, &$aiCall, &$retryPrompt, &$retryLastRole) {
             $aiCall++;
             $messages = $request->data()['messages'] ?? [];
             $prompt = collect($messages)->pluck('content')->implode("\n");
@@ -381,6 +394,7 @@ class CommunityAiScenarioTest extends TestCase
                 ];
             } elseif ($aiCall === 4) {
                 $retryPrompt = $prompt;
+                $retryLastRole = (string) data_get($messages, (count($messages) - 1).'.role');
                 $content = [
                     'action' => 'comment',
                     'title' => null,
@@ -439,10 +453,11 @@ class CommunityAiScenarioTest extends TestCase
         $comments = $scenario->steps()->where('type', 'comment')->orderBy('sequence')->pluck('draft_body')->all();
         $this->assertSame(7, $aiCall);
         $this->assertSame('А документ сейчас во входящих, или уже в архиве, это видно, у получателя?', $comments[0]);
-        $this->assertDoesNotMatchRegularExpression('/[-\x{00AD}\x{2010}-\x{2015}\x{2212}:;]/u', $comments[0]);
+        $this->assertDoesNotMatchRegularExpression('/[\x{00AD}\x{2010}-\x{2015}\x{2212}:;]/u', $comments[0]);
+        $this->assertSame('user', $retryLastRole);
         $this->assertStringContainsString('шаблонное вступление', $retryPrompt);
         $this->assertStringContainsString('канцелярит', $retryPrompt);
-        $this->assertStringContainsString('использованы тире или дефисы', $retryPrompt);
+        $this->assertStringContainsString('использовано длинное тире', $retryPrompt);
         $this->assertStringContainsString('использовано двоеточие', $retryPrompt);
         $this->assertStringContainsString('использована точка с запятой', $retryPrompt);
         $this->assertDatabaseHas('community_ai_generations', [
@@ -451,6 +466,47 @@ class CommunityAiScenarioTest extends TestCase
             'purpose' => 'comment_retry',
             'status' => 'succeeded',
         ]);
+    }
+
+    public function test_comment_style_allows_an_ordinary_hyphen_but_rejects_a_long_dash(): void
+    {
+        $service = app(CommunityAiScenarioPreparer::class);
+        $violationsMethod = new \ReflectionMethod($service, 'commentStyleViolations');
+        $normalizeMethod = new \ReflectionMethod($service, 'normalizeGeneratedPunctuation');
+
+        $ordinaryHyphenViolations = $violationsMethod->invoke($service, 'А у других как-то иначе?', []);
+        $longDashViolations = $violationsMethod->invoke($service, 'Сверили документы — даты разошлись.', []);
+
+        $this->assertNotContains('использовано длинное тире', $ordinaryHyphenViolations);
+        $this->assertContains('использовано длинное тире', $longDashViolations);
+        $this->assertSame('А у других как-то иначе?', $normalizeMethod->invoke($service, 'А у других как-то иначе?'));
+        $this->assertSame('Сверили документы, даты разошлись.', $normalizeMethod->invoke($service, 'Сверили документы — даты разошлись.'));
+    }
+
+    public function test_timeweb_error_message_is_included_without_raw_response_data(): void
+    {
+        $persona = CommunityAiPersona::query()->firstOrFail();
+        Http::fake([
+            '*' => Http::response([
+                'error' => ['message' => '<b>messages: system role after assistant is not allowed</b>'],
+                'debug' => ['secret' => 'must-not-be-exposed'],
+            ], 400),
+        ]);
+
+        try {
+            app(TimewebAiClient::class)->complete(
+                $persona,
+                [['role' => 'user', 'content' => 'Тест']],
+                500,
+            );
+            $this->fail('Timeweb client should throw on HTTP 400.');
+        } catch (RuntimeException $exception) {
+            $this->assertSame(
+                'Timeweb AI отклонил запрос (HTTP 400): messages: system role after assistant is not allowed',
+                $exception->getMessage(),
+            );
+            $this->assertStringNotContainsString('must-not-be-exposed', $exception->getMessage());
+        }
     }
 
     public function test_admin_can_open_scenario_workflow_page(): void

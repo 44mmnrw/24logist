@@ -67,6 +67,27 @@ class StepsRelationManager extends RelationManager
                 ->native(false)
                 ->helperText('Можно указать дату в прошлом: материал опубликуется сразу, но в сообществе получит эту дату.'),
             TextInput::make('purpose')->label('Роль в обсуждении')->maxLength(255)->columnSpanFull(),
+            Select::make('conversation_move')
+                ->label('Разговорный ход')
+                ->options([
+                    'question' => 'Уточняющий вопрос',
+                    'agree' => 'Короткое согласие',
+                    'disagree' => 'Короткое возражение',
+                    'clarify' => 'Уточнение условия',
+                    'correct' => 'Мягкая поправка',
+                    'doubt' => 'Сомнение без решения',
+                    'practical_detail' => 'Одна практическая деталь',
+                    'support' => 'Короткая поддержка',
+                    'light_humor' => 'Лёгкая ирония',
+                    'partial_answer' => 'Частичный ответ',
+                ])
+                ->visible(fn (?CommunityAiScenarioStep $record): bool => $record?->type === 'comment'),
+            TextInput::make('target_word_count')
+                ->label('Ориентир длины, слов')
+                ->numeric()
+                ->minValue(5)
+                ->maxValue(60)
+                ->visible(fn (?CommunityAiScenarioStep $record): bool => $record?->type === 'comment'),
             TextInput::make('draft_title')->label('Заголовок')->maxLength(180)->visible(fn (?CommunityAiScenarioStep $record): bool => $record?->type === 'topic')->columnSpanFull(),
             Textarea::make('draft_body')->label('Текст')->rows(10)->required()->columnSpanFull(),
         ])->columns(2);

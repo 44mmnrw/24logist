@@ -19,9 +19,22 @@ final class CommunityAiScenarioPreparer
 {
     private const COMMENT_GENERATION_ATTEMPTS = 2;
 
-    private const COMMENT_MAX_WORDS = 75;
+    private const COMMENT_MAX_WORDS = 60;
 
     private const COMMENT_MAX_SENTENCES = 3;
+
+    private const CONVERSATION_MOVES = [
+        'question' => 'задай один короткий уточняющий вопрос',
+        'agree' => 'коротко согласись с конкретной мыслью, не пересказывая её',
+        'disagree' => 'не согласись только с одной конкретной мыслью',
+        'clarify' => 'уточни одно слово, статус или условие',
+        'correct' => 'мягко поправь одну неточность',
+        'doubt' => 'вырази короткое сомнение без готового решения',
+        'practical_detail' => 'добавь одну приземлённую практическую деталь',
+        'support' => 'поддержи собеседника короткой человеческой реакцией',
+        'light_humor' => 'добавь лёгкую иронию по поводу ситуации, не шутя над человеком',
+        'partial_answer' => 'дай только часть ответа и оставь место продолжению',
+    ];
 
     public function __construct(
         private readonly MaxChatImportService $importer,
@@ -100,7 +113,7 @@ final class CommunityAiScenarioPreparer
         $editor = $personas->firstOrFail();
         $plan = $this->generatePlan($scenario, $editor, $personas, $context);
         $category = $this->resolveCategory($scenario, (string) ($plan['category_slug'] ?? ''));
-        $cast = $this->resolveCast($plan, $personas);
+        $cast = $this->resolveCast($scenario, $plan, $personas);
 
         $scenario->generations()->whereNotNull('community_ai_scenario_step_id')->delete();
         $scenario->steps()->delete();
@@ -173,7 +186,7 @@ final class CommunityAiScenarioPreparer
             $sourceBody,
             $discussionContext,
         );
-        $cast = $this->resolveManualCast($plan, $personas, $topicPersona);
+        $cast = $this->resolveManualCast($scenario, $plan, $personas, $topicPersona);
         $discussionSummary = trim((string) ($plan['discussion_summary'] ?? ''));
         if ($discussionSummary === '') {
             $discussionSummary = 'В комментариях нужно опираться на реальные вопросы, сомнения и возражения из собранной ветки.';
@@ -255,7 +268,7 @@ final class CommunityAiScenarioPreparer
   "question": "главный вопрос участникам",
   "category_slug": "general|carriers|cargo-owners|edo-law|24logist",
   "participants": [
-    {"persona_slug": "slug", "purpose": "один конкретный разговорный ход", "delay_minutes": 0, "reply_to": null}
+    {"persona_slug": "slug", "purpose": "конкретная мысль для реакции", "move": "question|agree|disagree|clarify|correct|doubt|practical_detail|support|light_humor|partial_answer", "delay_minutes": 0, "reply_to": null}
   ]
 }
 Первый участник создаёт тему, у него reply_to всегда null. Затем выбери от 4 до 10 разных комментаторов: от 3 до 7 отвечают на основную тему с reply_to=null, от 1 до 7 отвечают на один из более ранних корневых комментариев и указывают в reply_to persona_slug его автора. Не планируй ответ на ответ. Задержки — абсолютные минуты от публикации темы, без одновременных ответов.
@@ -308,7 +321,7 @@ PROMPT,
   "topic_title": "новый заголовок с тем же смысом",
   "discussion_summary": "какие вопросы, сомнения, возражения и практические реакции были в собранной ветке",
   "participants": [
-    {"persona_slug": "slug", "purpose": "один конкретный разговорный ход", "delay_minutes": 15, "reply_to": null}
+    {"persona_slug": "slug", "purpose": "конкретная мысль для реакции", "move": "question|agree|disagree|clarify|correct|doubt|practical_detail|support|light_humor|partial_answer", "delay_minutes": 15, "reply_to": null}
   ]
 }
 Выбери от 4 до 10 разных комментаторов: от 3 до 7 отвечают на основную тему с reply_to=null, от 1 до 7 отвечают на один из более ранних корневых комментариев и указывают в reply_to persona_slug его автора. Не планируй ответ на ответ. Задержки — абсолютные минуты после публикации темы: от 5 до 1440, без совпадений.
@@ -331,16 +344,20 @@ PROMPT,
     /**
      * @param  array<string, mixed>  $plan
      * @param  EloquentCollection<int, CommunityAiPersona>  $personas
-     * @return list<array{persona: CommunityAiPersona, purpose: string, delay: int, reply_to: ?string}>
+     * @return list<array{persona: CommunityAiPersona, purpose: string, move: string, target_words: int, delay: int, reply_to: ?string}>
      */
-    private function resolveCast(array $plan, EloquentCollection $personas): array
-    {
+    private function resolveCast(
+        CommunityAiScenario $scenario,
+        array $plan,
+        EloquentCollection $personas,
+    ): array {
         $bySlug = $personas->keyBy('slug');
         $planned = collect(is_array($plan['participants'] ?? null) ? $plan['participants'] : [])
             ->filter(fn ($item): bool => is_array($item) && isset($item['persona_slug']))
-            ->map(fn (array $item): array => [
+            ->map(fn (array $item, int $index): array => [
                 'persona' => $bySlug->get((string) $item['persona_slug']),
                 'purpose' => Str::limit(trim((string) ($item['purpose'] ?? '')), 255, ''),
+                'move' => $this->conversationMove($item['move'] ?? null, $index),
                 'delay' => (int) ($item['delay_minutes'] ?? 0),
                 'reply_to' => $this->replyToSlug($item['reply_to'] ?? null),
             ])
@@ -349,7 +366,7 @@ PROMPT,
             ->values();
 
         $creator = $planned->first(fn (array $item): bool => $item['persona']->can_create_posts)
-            ?? ['persona' => $personas->firstWhere('can_create_posts', true), 'purpose' => 'Задаёт практический вопрос', 'delay' => 0];
+            ?? ['persona' => $personas->firstWhere('can_create_posts', true), 'purpose' => 'Задаёт практический вопрос', 'move' => 'question', 'delay' => 0];
 
         if (! $creator['persona'] instanceof CommunityAiPersona) {
             throw new RuntimeException('Нет AI-персоны, которая может создавать темы.');
@@ -368,6 +385,7 @@ PROMPT,
             $comments->push([
                 'persona' => $persona,
                 'purpose' => $this->fallbackConversationMove($index),
+                'move' => $this->conversationMove(null, $index),
                 'delay' => 0,
                 'reply_to' => null,
             ]);
@@ -382,6 +400,8 @@ PROMPT,
         $result = [[
             'persona' => $creator['persona'],
             'purpose' => $creator['purpose'] ?: 'Создаёт тему',
+            'move' => 'topic',
+            'target_words' => 0,
             'delay' => 0,
             'reply_to' => null,
         ]];
@@ -389,10 +409,13 @@ PROMPT,
         $fallbackDelays = [18, 35, 55, 80, 120, 180, 270, 420, 720, 1080];
 
         foreach ($comments->values() as $index => $item) {
-            $delay = max($minimumDelay, min(1440, (int) $item['delay'] ?: $fallbackDelays[$index]));
+            $fallbackDelay = $fallbackDelays[$index] ?? min(1440, 1080 + (($index - 9) * 60));
+            $delay = max($minimumDelay, min(1440, (int) $item['delay'] ?: $fallbackDelay));
             $result[] = [
                 'persona' => $item['persona'],
                 'purpose' => $item['purpose'] ?: 'Добавляет свою позицию',
+                'move' => $item['move'],
+                'target_words' => $this->targetWordCount($scenario, $item['persona'], $index),
                 'delay' => $delay,
                 'reply_to' => $item['reply_to'],
             ];
@@ -405,9 +428,10 @@ PROMPT,
     /**
      * @param  array<string, mixed>  $plan
      * @param  EloquentCollection<int, CommunityAiPersona>  $personas
-     * @return list<array{persona: CommunityAiPersona, purpose: string, delay: int, reply_to: ?string}>
+     * @return list<array{persona: CommunityAiPersona, purpose: string, move: string, target_words: int, delay: int, reply_to: ?string}>
      */
     private function resolveManualCast(
+        CommunityAiScenario $scenario,
         array $plan,
         EloquentCollection $personas,
         CommunityAiPersona $topicPersona,
@@ -415,9 +439,10 @@ PROMPT,
         $bySlug = $personas->keyBy('slug');
         $comments = collect(is_array($plan['participants'] ?? null) ? $plan['participants'] : [])
             ->filter(fn ($item): bool => is_array($item) && isset($item['persona_slug']))
-            ->map(fn (array $item): array => [
+            ->map(fn (array $item, int $index): array => [
                 'persona' => $bySlug->get((string) $item['persona_slug']),
                 'purpose' => Str::limit(trim((string) ($item['purpose'] ?? '')), 255, ''),
+                'move' => $this->conversationMove($item['move'] ?? null, $index),
                 'delay' => (int) ($item['delay_minutes'] ?? 0),
                 'reply_to' => $this->replyToSlug($item['reply_to'] ?? null),
             ])
@@ -437,6 +462,7 @@ PROMPT,
             $comments->push([
                 'persona' => $persona,
                 'purpose' => $this->fallbackConversationMove($index),
+                'move' => $this->conversationMove(null, $index),
                 'delay' => 0,
                 'reply_to' => null,
             ]);
@@ -451,6 +477,8 @@ PROMPT,
         $result = [[
             'persona' => $topicPersona,
             'purpose' => 'Создаёт новую тему по смыслу исходного поста',
+            'move' => 'topic',
+            'target_words' => 0,
             'delay' => 0,
             'reply_to' => null,
         ]];
@@ -458,10 +486,13 @@ PROMPT,
         $fallbackDelays = [12, 25, 45, 70, 105, 160, 240, 360, 600, 960];
 
         foreach ($comments->values() as $index => $item) {
-            $delay = max($minimumDelay, min(1440, (int) $item['delay'] ?: $fallbackDelays[$index]));
+            $fallbackDelay = $fallbackDelays[$index] ?? min(1440, 960 + (($index - 9) * 60));
+            $delay = max($minimumDelay, min(1440, (int) $item['delay'] ?: $fallbackDelay));
             $result[] = [
                 'persona' => $item['persona'],
                 'purpose' => $item['purpose'] ?: 'Добавляет отдельный практический взгляд',
+                'move' => $item['move'],
+                'target_words' => $this->targetWordCount($scenario, $item['persona'], $index),
                 'delay' => $delay,
                 'reply_to' => $item['reply_to'],
             ];
@@ -484,15 +515,50 @@ PROMPT,
             'Задаёт один точный уточняющий вопрос',
             'Добавляет одну практическую деталь',
             'Коротко возражает против одной мысли',
-            'Отвечает на комментарий и уточняет его последствие',
+            'Уточняет одно непонятное условие',
+            'Коротко соглашается с конкретной мыслью',
+            'Выражает сомнение без готового решения',
+            'Мягко поправляет одну неточность',
+            'Поддерживает участника короткой реакцией',
+            'Добавляет лёгкую иронию о ситуации',
+            'Даёт только часть ответа и оставляет место продолжению',
         ];
 
         return $moves[$index % count($moves)];
     }
 
+    private function conversationMove(mixed $value, int $index): string
+    {
+        $move = is_string($value) ? trim($value) : '';
+        if (array_key_exists($move, self::CONVERSATION_MOVES)) {
+            return $move;
+        }
+
+        $moves = array_keys(self::CONVERSATION_MOVES);
+
+        return $moves[$index % count($moves)];
+    }
+
+    private function targetWordCount(
+        CommunityAiScenario $scenario,
+        CommunityAiPersona $persona,
+        int $index,
+    ): int {
+        $hash = hexdec(substr(hash('sha256', $scenario->id.':'.$persona->id.':'.$index.':length'), 0, 8));
+        $roll = $hash % 100;
+        [$minimum, $maximum] = match (true) {
+            $roll < 40 => [5, 15],
+            $roll < 75 => [16, 30],
+            $roll < 95 => [31, 45],
+            default => [46, 60],
+        };
+
+        return $minimum + ($hash % ($maximum - $minimum + 1));
+    }
+
     /**
-     * @param  Collection<int, array{persona: CommunityAiPersona, purpose: string, delay: int, reply_to: ?string}>  $comments
-     * @return Collection<int, array{persona: CommunityAiPersona, purpose: string, delay: int, reply_to: ?string}>
+     * @param  Collection<int, array{persona: CommunityAiPersona, purpose: string, move: string, delay: int, reply_to: ?string}>  $comments
+     * @return Collection<int, array{persona: CommunityAiPersona, purpose: string, move: string, delay: int, reply_to: ?string}>
      */
     private function arrangeConversation(Collection $comments): Collection
     {
@@ -529,7 +595,7 @@ PROMPT,
         return $roots->concat($replies->take(7))->values();
     }
 
-    /** @param list<array{persona: CommunityAiPersona, purpose: string, delay: int, reply_to: ?string}> $cast
+    /** @param list<array{persona: CommunityAiPersona, purpose: string, move: string, target_words: int, delay: int, reply_to: ?string}> $cast
      * @return EloquentCollection<int, CommunityAiScenarioStep>
      */
     private function createSteps(CommunityAiScenario $scenario, array $cast): EloquentCollection
@@ -546,6 +612,8 @@ PROMPT,
                 'sequence' => $index + 1,
                 'planned_delay_minutes' => $member['delay'],
                 'purpose' => $member['purpose'],
+                'conversation_move' => $member['move'],
+                'target_word_count' => $member['target_words'],
                 'status' => 'draft',
                 'idempotency_key' => 'scenario:'.$scenario->id.':step:'.($index + 1),
             ]);
@@ -564,7 +632,8 @@ PROMPT,
         EloquentCollection $steps,
         ?array $reference = null,
     ): void {
-        $publishedContext = '';
+        $topicContext = '';
+        $conversationTurns = [];
         $previousComments = [];
         foreach ($steps as $step) {
             $persona = $step->persona;
@@ -574,16 +643,18 @@ PROMPT,
                 : null;
 
             $referenceInstruction = $this->referenceInstruction($reference, $isTopic);
+            $nearbyContext = $this->nearbyConversationContext($conversationTurns, $parentStep?->id);
 
             $messages = [
                 ['role' => 'system', 'content' => $this->personaPromptBuilder->build($persona)],
                 ['role' => 'system', 'content' => $this->writingModeInstruction($scenario, $step, $persona)],
+                ['role' => 'system', 'content' => $this->conversationDirectionInstruction($step)],
                 ['role' => 'system', 'content' => <<<'PROMPT'
 Ты участвуешь в живом обсуждении. Пиши как собеседник в отраслевом чате, а не как консультант, который готовит заключение.
 
 Правила комментария:
 1. Одна реплика содержит одну мысль или один вопрос.
-2. Обычно нужно от 1 до 3 коротких предложений и не больше 75 слов.
+2. Обычно нужно от 1 до 3 коротких предложений. Соблюдай отдельный ориентир длины для этой реплики.
 3. Начинай сразу с сути, можно разговорно и немного неровно.
 4. Не пересказывай тему, не раскладывай весь вопрос по ролям и не давай исчерпывающий ответ.
 5. Не используй списки, подзаголовки и длинные абзацы.
@@ -591,7 +662,9 @@ PROMPT,
 7. Избегай канцелярита. Не пиши «осуществлять», «целесообразно», «в части», «с точки зрения» и «таким образом».
 8. Выбери только один разговорный ход из указанной тебе роли. Уточни, коротко возрази, добавь одну практическую деталь, вырази сомнение или задай вопрос.
 9. Не создавай ложный личный опыт и не повторяй уже высказанное.
-10. В значениях title и body не используй тире, дефисы, двоеточия и точки с запятой. Перестраивай фразу через точку, запятую или два отдельных предложения.
+10. В значениях title и body не используй длинное тире, двоеточия и точки с запятой. Обычный дефис внутри слова используй по правилам русского языка. Перестраивай паузу через точку, запятую или два отдельных предложения.
+11. Не каждая реплика обязана содержать решение. Короткое сомнение, согласие, переспрос или человеческая реакция допустимы.
+12. Не завершай обсуждение и не подводи итог. После твоей реплики другим должно быть легко продолжить разговор.
 
 Верни только JSON по схеме из основной инструкции.
 PROMPT],
@@ -602,7 +675,7 @@ PROMPT],
                         .$referenceInstruction
                         .($isTopic
                             ? 'Создай самостоятельную тему. Сохрани смысл, факты и главный вопрос исходного поста, но перескажи его своими словами в манере автора. Не копируй текст дословно и не добавляй новые факты.'
-                            : $this->commentInstruction($parentStep, $publishedContext)),
+                            : $this->commentInstruction($parentStep, $topicContext, $nearbyContext)),
                 ],
             ];
 
@@ -640,9 +713,14 @@ PROMPT],
                 'last_error' => null,
             ]);
 
-            $publishedContext .= ($isTopic ? 'Тема' : $persona->communityUser->displayName()).': '
-                .($isTopic ? $title."\n" : '').$body."\n\n";
-            if (! $isTopic) {
+            if ($isTopic) {
+                $topicContext = Str::limit(trim($title."\n".$body), 1200, '');
+            } else {
+                $conversationTurns[] = [
+                    'step_id' => $step->id,
+                    'name' => $persona->communityUser->displayName(),
+                    'body' => $body,
+                ];
                 $previousComments[] = $body;
             }
         }
@@ -660,7 +738,9 @@ PROMPT],
                 ."<source_post>\n{$reference['source_body']}\n</source_post>\n";
         }
 
-        return "Как эту тему обсуждали в исходном чате:\n{$reference['discussion_summary']}\n"
+        $discussionSummary = Str::limit(trim($reference['discussion_summary']), 1200, '');
+
+        return "Как эту тему обсуждали в исходном чате:\n{$discussionSummary}\n"
             ."Возьми из этого конкретную реакцию, вопрос или сомнение, которое совпадает с твоей ролью. Не копируй реплики дословно.\n";
     }
 
@@ -692,19 +772,62 @@ PROMPT],
             ."Режим письма для этой реплики: {$mode}. {$instruction}";
     }
 
-    private function commentInstruction(?CommunityAiScenarioStep $parentStep, string $publishedContext): string
+    private function conversationDirectionInstruction(CommunityAiScenarioStep $step): string
     {
-        if ($parentStep !== null) {
-            $parentName = $parentStep->persona->communityUser->displayName();
-
-            return "Ты отвечаешь именно на комментарий {$parentName}:\n{$parentStep->draft_body}\n"
-                ."Сначала отреагируй на его конкретную мысль. Не пиши отдельный ответ на основную тему.\n"
-                ."Ответь одной непринуждённой репликой и оставь место продолжению разговора.\n\n"
-                ."Всё обсуждение до тебя:\n{$publishedContext}";
+        if ($step->type === 'topic') {
+            return 'Напиши тему как обычный участник сообщества. Не превращай её в статью, памятку или экспертное заключение.';
         }
 
-        return "Ответь на основную тему одной непринуждённой репликой. Не закрывай весь вопрос. Оставь место следующему участнику.\n"
-            ."Уже подготовлено:\n{$publishedContext}";
+        $move = self::CONVERSATION_MOVES[$step->conversation_move]
+            ?? self::CONVERSATION_MOVES['partial_answer'];
+        $target = max(5, min(self::COMMENT_MAX_WORDS, (int) ($step->target_word_count ?: 25)));
+        $minimum = max(3, $target - 5);
+        $maximum = min(self::COMMENT_MAX_WORDS, $target + 5);
+
+        return "Твой разговорный ход: {$move}.\n"
+            ."Ориентир длины: {$minimum}-{$maximum} слов. Это ориентир живой реплики, а не повод дописывать лишнее.\n"
+            .'Не называй свою роль, не объясняй выбранный ход и не пытайся охватить тему целиком.';
+    }
+
+    /**
+     * @param  list<array{step_id: int, name: string, body: string}>  $turns
+     */
+    private function nearbyConversationContext(array $turns, ?int $parentStepId): string
+    {
+        foreach (array_reverse($turns) as $turn) {
+            if ($parentStepId !== null && $turn['step_id'] === $parentStepId) {
+                continue;
+            }
+
+            return "Перед этим {$turn['name']} написал:\n"
+                .Str::limit(trim($turn['body']), 400, '');
+        }
+
+        return '';
+    }
+
+    private function commentInstruction(
+        ?CommunityAiScenarioStep $parentStep,
+        string $topicContext,
+        string $nearbyContext,
+    ): string {
+        $topic = $topicContext !== ''
+            ? "Короткий контекст основной темы:\n".Str::limit($topicContext, 700, '')."\n\n"
+            : '';
+
+        if ($parentStep !== null) {
+            $parentName = $parentStep->persona->communityUser->displayName();
+            $nearby = $nearbyContext !== '' ? "\n\n{$nearbyContext}" : '';
+
+            return $topic."Ты отвечаешь именно на комментарий {$parentName}:\n"
+                .Str::limit(trim((string) $parentStep->draft_body), 700, '')."\n"
+                ."Сначала отреагируй на его конкретную мысль. Не пиши отдельный ответ на основную тему.\n"
+                .'Ответь одной непринуждённой репликой и оставь место продолжению разговора.'
+                .$nearby;
+        }
+
+        return $topic
+            .'Ответь на основную тему одной непринуждённой репликой. Не закрывай весь вопрос и не пересказывай его. Оставь место следующему участнику.';
     }
 
     /**
@@ -735,7 +858,8 @@ PROMPT],
                 $persona->max_comment_tokens,
             );
             $body = trim((string) ($response['json']['body'] ?? ''));
-            $violations = $this->commentStyleViolations($body, $previousComments);
+            $maxWords = $this->commentMaxWords($step);
+            $violations = $this->commentStyleViolations($body, $previousComments, $maxWords);
 
             if ($body === '' || ($response['json']['action'] ?? null) === 'skip' || $violations === []) {
                 return $response;
@@ -743,7 +867,7 @@ PROMPT],
 
             if ($attempt === self::COMMENT_GENERATION_ATTEMPTS) {
                 $sanitizedBody = $this->normalizeGeneratedPunctuation($body);
-                $remainingViolations = $this->commentStyleViolations($sanitizedBody, $previousComments);
+                $remainingViolations = $this->commentStyleViolations($sanitizedBody, $previousComments, $maxWords);
                 if ($remainingViolations === []) {
                     $response['json']['body'] = $sanitizedBody;
 
@@ -757,9 +881,11 @@ PROMPT],
 
             $attemptMessages[] = ['role' => 'assistant', 'content' => $response['content']];
             $attemptMessages[] = [
-                'role' => 'system',
+                'role' => 'user',
                 'content' => 'Перепиши комментарий полностью. Нарушения: '.implode('; ', $violations).'. '
-                    .'Сделай одну живую реплику из 1, 2 или 3 коротких предложений, без канцелярита и без исчерпывающего ответа. В значении body не используй тире, дефисы, двоеточия и точки с запятой. Верни только JSON.',
+                    .'Сделай одну живую реплику из 1, 2 или 3 коротких предложений, без канцелярита и без исчерпывающего ответа. '
+                    .'Ориентир длины '.max(5, (int) ($step->target_word_count ?: 25)).' слов, максимум '.$maxWords.'. '
+                    .'В значении body не используй длинное тире, двоеточия и точки с запятой. Обычный дефис внутри слова разрешён. Верни только JSON.',
             ];
         }
 
@@ -769,15 +895,22 @@ PROMPT],
     /** @param list<string> $previousComments
      * @return list<string>
      */
-    private function commentStyleViolations(string $body, array $previousComments): array
+    private function commentMaxWords(CommunityAiScenarioStep $step): int
+    {
+        $target = max(5, min(self::COMMENT_MAX_WORDS, (int) ($step->target_word_count ?: 25)));
+
+        return min(self::COMMENT_MAX_WORDS, max(18, $target + 8));
+    }
+
+    private function commentStyleViolations(string $body, array $previousComments, ?int $maxWords = null): array
     {
         if ($body === '') {
             return [];
         }
 
         $violations = [];
-        if (preg_match('/[-\x{00AD}\x{2010}-\x{2015}\x{2212}]/u', $body) === 1) {
-            $violations[] = 'использованы тире или дефисы';
+        if (preg_match('/[\x{00AD}\x{2010}-\x{2015}\x{2212}]/u', $body) === 1) {
+            $violations[] = 'использовано длинное тире';
         }
         if (str_contains($body, ':')) {
             $violations[] = 'использовано двоеточие';
@@ -786,9 +919,10 @@ PROMPT],
             $violations[] = 'использована точка с запятой';
         }
 
+        $wordLimit = $maxWords ?? self::COMMENT_MAX_WORDS;
         $words = preg_split('/[^\p{L}\p{N}]+/u', $body, -1, PREG_SPLIT_NO_EMPTY) ?: [];
-        if (count($words) > self::COMMENT_MAX_WORDS) {
-            $violations[] = 'больше '.self::COMMENT_MAX_WORDS.' слов';
+        if (count($words) > $wordLimit) {
+            $violations[] = 'больше '.$wordLimit.' слов';
         }
 
         $sentences = preg_split('/(?<=[.!?…])\s+/u', trim($body), -1, PREG_SPLIT_NO_EMPTY) ?: [];
@@ -800,13 +934,16 @@ PROMPT],
             $violations[] = 'шаблонное вступление';
         }
 
-        $bureaucraticMatches = preg_match_all('/\b(?:осуществлять|целесообразно|в\s+части|с\s+точки\s+зрения|таким\s+образом|технический\s+маршрут|юридическое\s+содержание)\b/iu', $body);
-        if ($bureaucraticMatches !== false && $bureaucraticMatches >= 2) {
+        if (preg_match('/\b(?:важно\s+понимать|в\s+данном\s+случае|следует\s+учитывать|необходимо|целесообразно|с\s+точки\s+зрения|таким\s+образом|стоит\s+отметить|нужно\s+сделать\s+следующее|технический\s+маршрут|юридическое\s+содержание)\b/iu', $body) === 1) {
             $violations[] = 'канцелярит';
         }
 
         if (preg_match('/(?:во-первых.+во-вторых|проверьте\s+(?:два|три)\s+момента|подвед(?:ём|ем)\s+итог)/isu', $body) === 1) {
             $violations[] = 'исчерпывающий формат ответа';
+        }
+
+        if (preg_match('/(?:^|\n)\s*(?:[-*•]|\d+[.)])\s+/u', $body) === 1) {
+            $violations[] = 'формат списка';
         }
 
         foreach ($previousComments as $previousComment) {
@@ -821,8 +958,8 @@ PROMPT],
 
     private function normalizeGeneratedPunctuation(string $text): string
     {
-        $text = preg_replace('/\h+[-\x{00AD}\x{2010}-\x{2015}\x{2212}]\h+/u', ', ', $text) ?? $text;
-        $text = preg_replace('/[-\x{00AD}\x{2010}-\x{2015}\x{2212}]/u', ' ', $text) ?? $text;
+        $text = preg_replace('/\h+[\x{00AD}\x{2010}-\x{2015}\x{2212}]\h+/u', ', ', $text) ?? $text;
+        $text = preg_replace('/[\x{00AD}\x{2010}-\x{2015}\x{2212}]/u', ' ', $text) ?? $text;
         $text = preg_replace('/\h*:\h*/u', ', ', $text) ?? $text;
         $text = preg_replace('/\h*;\h*/u', ', ', $text) ?? $text;
         $text = preg_replace('/[ \t]{2,}/u', ' ', $text) ?? $text;

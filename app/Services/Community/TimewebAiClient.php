@@ -7,6 +7,7 @@ use App\Services\SiteSettingsService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use JsonException;
 use RuntimeException;
 
@@ -47,7 +48,12 @@ final class TimewebAiClient
         }
 
         if (! $response->successful()) {
-            throw new RuntimeException('Timeweb AI отклонил запрос (HTTP '.$response->status().').');
+            $detail = $this->errorDetail($response->json());
+
+            throw new RuntimeException(
+                'Timeweb AI отклонил запрос (HTTP '.$response->status().')'
+                .($detail !== '' ? ': '.$detail : '.'),
+            );
         }
 
         $raw = $response->json();
@@ -85,5 +91,26 @@ final class TimewebAiClient
         }
 
         return $decoded;
+    }
+
+    private function errorDetail(mixed $payload): string
+    {
+        if (! is_array($payload)) {
+            return '';
+        }
+
+        $detail = data_get($payload, 'error.message')
+            ?? data_get($payload, 'message')
+            ?? data_get($payload, 'detail');
+
+        if (! is_scalar($detail)) {
+            return '';
+        }
+
+        return Str::of((string) $detail)
+            ->stripTags()
+            ->squish()
+            ->limit(500, '')
+            ->toString();
     }
 }
