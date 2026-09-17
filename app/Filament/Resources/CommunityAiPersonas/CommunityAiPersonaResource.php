@@ -73,6 +73,26 @@ class CommunityAiPersonaResource extends Resource
                 ])
                 ->columns(2)
                 ->columnSpanFull(),
+            Section::make('Профессиональная речь')
+                ->description('Термины и рабочие выражения передаются модели при каждой генерации. Персонаж использует их выборочно, а не вставляет в каждую реплику.')
+                ->schema([
+                    Textarea::make('settings.professional_language.vocabulary')
+                        ->label('Термины и жаргон персонажа')
+                        ->helperText('По одному термину или выражению на строку. Можно коротко указать значение и уместный контекст использования.')
+                        ->rows(10)
+                        ->required()
+                        ->columnSpanFull(),
+                    TextInput::make('settings.professional_language.usage_chance')
+                        ->label('Вероятность профессионального выражения, %')
+                        ->helperText('Даже при срабатывании персонаж использует не более одного уместного термина в комментарии.')
+                        ->numeric()
+                        ->integer()
+                        ->minValue(0)
+                        ->maxValue(100)
+                        ->required(),
+                ])
+                ->columns(2)
+                ->columnSpanFull(),
             Section::make('Грамотность и естественные неровности')
                 ->description('Для каждой реплики платформа детерминированно выбирает обычный, разговорный или слегка небрежный режим.')
                 ->schema([

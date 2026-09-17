@@ -18,6 +18,10 @@ class CommunityAiPersonaSeeder extends Seeder
 
             foreach ($this->personas() as $data) {
                 $registeredAt = CarbonImmutable::parse($registrationDates[$data['slug']], config('app.timezone'));
+                $professionalLanguage = $this->professionalLanguage(
+                    $data['transport_role'],
+                    $data['role'],
+                );
                 $existingPersona = CommunityAiPersona::query()
                     ->where('slug', $data['slug'])
                     ->first();
@@ -29,9 +33,15 @@ class CommunityAiPersonaSeeder extends Seeder
 
                     $settings = $existingPersona->settings ?? [];
                     data_set($settings, 'literacy_profile.error_chance', $data['error_chance']);
+                    if (blank(data_get($settings, 'professional_language.vocabulary'))) {
+                        data_set($settings, 'professional_language.vocabulary', $professionalLanguage['vocabulary']);
+                    }
+                    if (data_get($settings, 'professional_language.usage_chance') === null) {
+                        data_set($settings, 'professional_language.usage_chance', $professionalLanguage['usage_chance']);
+                    }
                     $existingPersona->forceFill([
                         'settings' => $settings,
-                        'prompt_version' => max(5, $existingPersona->prompt_version),
+                        'prompt_version' => max(6, $existingPersona->prompt_version),
                         'system_prompt' => app(CommunityAiPersonaPromptBuilder::class)->buildFromValues(
                             name: $existingUser->displayName(),
                             role: $existingPersona->role_description,
@@ -76,6 +86,7 @@ class CommunityAiPersonaSeeder extends Seeder
                         'error_chance' => $data['error_chance'],
                         'imperfections' => $data['imperfections'],
                     ],
+                    'professional_language' => $professionalLanguage,
                 ];
 
                 $persona = CommunityAiPersona::query()->create([
@@ -87,7 +98,7 @@ class CommunityAiPersonaSeeder extends Seeder
                     'provider_agent_id' => $data['access_id'],
                     'provider_base_url' => $data['base_url'],
                     'model' => 'GPT-5.4 Mini',
-                    'prompt_version' => 5,
+                    'prompt_version' => 6,
                     'system_prompt' => app(CommunityAiPersonaPromptBuilder::class)->buildFromValues(
                         name: $data['name'],
                         role: $data['role'],
@@ -115,6 +126,163 @@ class CommunityAiPersonaSeeder extends Seeder
         $model->timestamps = false;
         $model->forceFill(['created_at' => $registeredAt])->saveQuietly();
         $model->timestamps = $usesTimestamps;
+    }
+
+    /** @return array{usage_chance: int, vocabulary: string} */
+    private function professionalLanguage(string $transportRole, string $roleDescription): array
+    {
+        $common = [
+            'заявка (согласованные условия конкретной перевозки)',
+            'ставка (цена конкретной перевозки с учётом формы оплаты)',
+            'подача (прибытие машины на погрузку)',
+            'окно или слот (согласованное время погрузки либо выгрузки)',
+            'простой (ожидание сверх согласованного времени)',
+            'порожняк (пробег машины без груза)',
+        ];
+
+        $roleVocabulary = match ($transportRole) {
+            'carrier' => [
+                'кругорейс (рейс с возвращением в исходный регион)',
+                'обратка (груз на обратный путь)',
+                'сцепка (тягач вместе с полуприцепом)',
+                'тент (тентованный полуприцеп)',
+                'реф (рефрижератор)',
+                'кубатура (полезный объём кузова)',
+                'перегруз по осям (превышение допустимой осевой нагрузки)',
+                'ГСМ (горюче-смазочные материалы)',
+            ],
+            'driver' => [
+                'рампа или док (место подачи машины под погрузку)',
+                'ворота (номер точки въезда или погрузочного дока)',
+                'отметка о прибытии (фиксация времени приезда на точку)',
+                'пломба (контрольная пломба грузового отсека)',
+                'стяжки (ремни для крепления груза)',
+                'тахо (разговорное название тахографа)',
+                'режим (режим труда и отдыха водителя)',
+                'весовая (пункт контроля массы и нагрузки по осям)',
+                'перецепка (смена полуприцепа или тягача)',
+            ],
+            'freight_forwarder' => [
+                'закрыть загрузку (подтвердить машину и перевозчика под груз)',
+                'закрыть машину (подобрать и подтвердить груз для свободной машины)',
+                'плечо (отдельный участок маршрута)',
+                'мультиточка (рейс с несколькими точками погрузки или выгрузки)',
+                'допник (дополнительное соглашение к заявке или договору)',
+                'срыв подачи (машина не прибыла в согласованное время)',
+                'переадресация (изменение точки доставки)',
+                'закрывашки (разговорное название комплекта закрывающих документов)',
+                'дебиторка (непогашенная задолженность клиента)',
+            ],
+            'cargo_owner' => [
+                'РЦ (распределительный центр)',
+                'SLA (согласованный уровень сервиса)',
+                'OTIF (доставка вовремя и в полном объёме)',
+                'приёмка (проверка и принятие груза получателем)',
+                'недопоставка (поставка не в полном количестве)',
+                'пересорт (несоответствие фактического ассортимента документам)',
+                'квота (выделенный объём перевозок или приёмки)',
+                'тендер (конкурентный выбор перевозчиков)',
+            ],
+            'dispatcher' => [
+                'машина на линии (автомобиль выполняет работу и доступен диспетчеру)',
+                'выпуск (разрешение и оформление машины на линию)',
+                'экипаж (водитель или сменные водители конкретной машины)',
+                'контрольная точка (этап маршрута для проверки статуса)',
+                'завис на точке (машина задержалась без понятного времени выезда)',
+                'подменная машина (транспорт на замену сорванной подаче)',
+                'статус по рейсу (текущее положение и состояние выполнения)',
+            ],
+            default => [
+                'ETA (расчётное время прибытия)',
+                'контрольная точка (этап маршрута для проверки статуса)',
+                'таймслот (выделенный временной интервал на точке)',
+                'мультиточка (маршрут с несколькими точками)',
+                'консолидация (объединение нескольких партий)',
+                'кросс-докинг (перегрузка без длительного хранения)',
+                'перепробег (лишний пробег относительно расчётного маршрута)',
+                'обратка (груз на обратный путь)',
+            ],
+        };
+
+        $role = mb_strtolower($roleDescription);
+        $specialty = [];
+        if (str_contains($role, 'юрист')) {
+            $specialty = [
+                'договор перевозки (обязательство доставить вверенный груз)',
+                'транспортная экспедиция (организация и сопровождение перевозки)',
+                'претензионный порядок (досудебное предъявление требования)',
+                'провозная плата (плата за перевозку груза)',
+                'транспортная накладная или ЭТрН (перевозочный документ)',
+                'экспедиторская расписка (подтверждение получения груза экспедитором)',
+            ];
+        } elseif (str_contains($role, 'бухгалтер') || str_contains($role, 'расчёт')) {
+            $specialty = [
+                'первичка (первичные учётные документы)',
+                'УПД (универсальный передаточный документ)',
+                'акт сверки (сверка взаимных расчётов)',
+                'ОСН и УСН (системы налогообложения)',
+                'НДС в ставке (налог уже включён в согласованную цену)',
+                'перевыставление расходов (передача подтверждённых расходов клиенту)',
+            ];
+        } elseif (str_contains($role, 'международ') || str_contains($role, 'тамож')) {
+            $specialty = [
+                'CMR (международная автомобильная накладная)',
+                'TIR (таможенная транзитная система МДП)',
+                'Incoterms (условия распределения обязанностей по поставке)',
+                'EXW, FCA, DAP и DDP (базисы поставки Incoterms)',
+                'ТН ВЭД (код классификации товара)',
+                'СВХ (склад временного хранения)',
+                'таможенный транзит (перемещение под таможенным контролем)',
+            ];
+        } elseif (str_contains($role, 'склад')) {
+            $specialty = [
+                'док (погрузочные ворота склада)',
+                'паллетоместо (единица складской вместимости)',
+                'адресное хранение (закрепление товара за ячейкой)',
+                'кросс-докинг (перегрузка без длительного хранения)',
+                'приёмка по количеству и качеству (складская проверка груза)',
+            ];
+        } elseif (str_contains($role, 'рефрижератор')) {
+            $specialty = [
+                'температурный режим (заданный диапазон температуры груза)',
+                'термописец (регистратор температуры в кузове)',
+                'предохлаждение (охлаждение кузова до погрузки)',
+                'санобработка (подтверждённая обработка грузового отсека)',
+            ];
+        } elseif (str_contains($role, 'бирж')) {
+            $specialty = [
+                'быстрая оплата (сокращённый срок расчёта за комиссию)',
+                'отсрочка (оплата через согласованное число дней)',
+                'карточка контрагента (профиль компании на площадке)',
+                'рейтинг и претензии (история работы участника площадки)',
+                'подмена реквизитов (несовпадение фактического получателя оплаты)',
+            ];
+        }
+
+        $usageChance = match ($transportRole) {
+            'driver' => 55,
+            'dispatcher' => 50,
+            'freight_forwarder' => 45,
+            'carrier' => 40,
+            'cargo_owner' => 28,
+            default => 32,
+        };
+        if (str_contains($role, 'начинающ') || str_contains($role, 'младш')) {
+            $usageChance = 15;
+        } elseif (str_contains($role, 'юрист')) {
+            $usageChance = 20;
+        }
+
+        $vocabulary = array_slice(array_values(array_unique([
+            ...$common,
+            ...$roleVocabulary,
+            ...$specialty,
+        ])), 0, 20);
+
+        return [
+            'usage_chance' => $usageChance,
+            'vocabulary' => implode("\n", $vocabulary),
+        ];
     }
 
     /**

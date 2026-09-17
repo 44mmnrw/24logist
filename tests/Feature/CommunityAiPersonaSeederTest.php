@@ -40,13 +40,17 @@ class CommunityAiPersonaSeederTest extends TestCase
         $this->assertStringContainsString('сухую иронию', $sergey->personality_description);
         $this->assertTrue($sergey->requires_review);
         $this->assertSame(1, $sergey->daily_comment_limit);
-        $this->assertSame(5, $sergey->prompt_version);
+        $this->assertSame(6, $sergey->prompt_version);
         $this->assertFalse($sergey->settings['web_search_enabled']);
         $this->assertSame(18, $sergey->settings['literacy_profile']['error_chance']);
+        $this->assertSame(40, $sergey->settings['professional_language']['usage_chance']);
+        $this->assertStringContainsString('кругорейс', $sergey->settings['professional_language']['vocabulary']);
         $this->assertStringNotContainsString('публично обозначенная AI-персона', $sergey->system_prompt);
         $this->assertStringContainsString('Характер:', $sergey->system_prompt);
         $this->assertStringContainsString('Уровень грамотности:', $sergey->system_prompt);
         $this->assertStringContainsString('Примерно в 18% сообщений', $sergey->system_prompt);
+        $this->assertStringContainsString('Профессиональная лексика, которой ты владеешь', $sergey->system_prompt);
+        $this->assertStringContainsString('кругорейс', $sergey->system_prompt);
         $this->assertStringContainsString('не используй длинное тире', $sergey->system_prompt);
 
         $this->assertSame(
@@ -69,6 +73,7 @@ class CommunityAiPersonaSeederTest extends TestCase
             ->firstOrFail();
         $settings = $persona->settings;
         $settings['custom_instructions'] = 'Не используй слово «коллеги».';
+        $settings['professional_language']['vocabulary'] = 'свой термин (настройка из админки)';
         $persona->update([
             'daily_comment_limit' => 99,
             'personality_description' => 'Настройка, изменённая в админке.',
@@ -82,6 +87,7 @@ class CommunityAiPersonaSeederTest extends TestCase
         $this->assertSame(99, $persona->daily_comment_limit);
         $this->assertSame('Настройка, изменённая в админке.', $persona->personality_description);
         $this->assertSame('Не используй слово «коллеги».', $persona->settings['custom_instructions']);
+        $this->assertSame('свой термин (настройка из админки)', $persona->settings['professional_language']['vocabulary']);
     }
 
     public function test_platform_prompt_is_built_from_current_persona_settings(): void
@@ -101,7 +107,27 @@ class CommunityAiPersonaSeederTest extends TestCase
 
         $this->assertStringContainsString('Пишет очень коротко и начинает сразу с практической детали.', $prompt);
         $this->assertStringContainsString('Иногда заканчивай реплику коротким вопросом.', $prompt);
+        $this->assertStringContainsString('тахо', $prompt);
         $this->assertStringContainsString('Михаил', $prompt);
+    }
+
+    public function test_personas_receive_role_specific_professional_vocabulary(): void
+    {
+        $this->seed(CommunityAiPersonaSeeder::class);
+
+        $driver = CommunityAiPersona::query()->where('slug', 'mikhail-driver')->firstOrFail();
+        $forwarder = CommunityAiPersona::query()->where('slug', 'igor-forwarder')->firstOrFail();
+        $cargoOwner = CommunityAiPersona::query()->where('slug', 'olga-cargo-owner-logistician')->firstOrFail();
+        $lawyer = CommunityAiPersona::query()->where('slug', 'elena-transport-lawyer')->firstOrFail();
+
+        $this->assertStringContainsString('тахо', $driver->settings['professional_language']['vocabulary']);
+        $this->assertStringContainsString('закрыть загрузку', $forwarder->settings['professional_language']['vocabulary']);
+        $this->assertStringContainsString('OTIF', $cargoOwner->settings['professional_language']['vocabulary']);
+        $this->assertStringContainsString('претензионный порядок', $lawyer->settings['professional_language']['vocabulary']);
+        $this->assertNotSame(
+            $driver->settings['professional_language']['vocabulary'],
+            $forwarder->settings['professional_language']['vocabulary'],
+        );
     }
 
     public function test_admin_can_open_platform_persona_settings(): void
@@ -113,6 +139,7 @@ class CommunityAiPersonaSeederTest extends TestCase
             ->get(CommunityAiPersonaResource::getUrl('edit', ['record' => $persona]))
             ->assertOk()
             ->assertSeeText('Характер и голос')
+            ->assertSeeText('Профессиональная речь')
             ->assertSeeText('Грамотность и естественные неровности')
             ->assertSeeText('Модель выбирается в настройках самого агента Timeweb');
     }
@@ -150,7 +177,7 @@ class CommunityAiPersonaSeederTest extends TestCase
         $this->assertSame('Прямой и немного ироничный практик.', $persona->personality_description);
         $this->assertSame('Короткие реплики без приветствий.', $persona->settings['communication_style']);
         $this->assertSame(8, $persona->daily_comment_limit);
-        $this->assertSame(6, $persona->prompt_version);
+        $this->assertSame(7, $persona->prompt_version);
         $this->assertStringContainsString('Иногда уточняй цену простоя.', $persona->system_prompt);
     }
 

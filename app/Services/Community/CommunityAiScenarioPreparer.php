@@ -784,6 +784,8 @@ PROMPT],
         $errorChance = max(0, min(60, (int) ($profile['error_chance'] ?? 5)));
         $casualChance = max(0, min(100 - $errorChance, (int) ($profile['casual_chance'] ?? 25)));
         $roll = hexdec(substr(hash('sha256', $scenario->id.':'.$step->id.':'.$persona->id), 0, 8)) % 100;
+        $jargonChance = max(0, min(100, (int) data_get($persona->settings, 'professional_language.usage_chance', 30)));
+        $jargonRoll = hexdec(substr(hash('sha256', $scenario->id.':'.$step->id.':'.$persona->id.':jargon'), 0, 8)) % 100;
 
         if ($roll < $errorChance) {
             $mode = 'rushed';
@@ -797,8 +799,13 @@ PROMPT],
             $instruction = 'Пиши грамотно, но не вылизывай текст до стиля статьи или официального ответа. Сохрани простую живую фразу.';
         }
 
+        $professionalInstruction = $jargonRoll < $jargonChance
+            ? 'В этой реплике можно естественно использовать не более одного профессионального термина или рабочего выражения из словаря персонажа, только если оно делает мысль точнее.'
+            : 'В этой реплике не добавляй жаргон специально. Используй профессиональный термин только если без него мысль станет неточной.';
+
         return "Профиль грамотности персонажа: {$description}\n"
-            ."Режим письма для этой реплики: {$mode}. {$instruction}";
+            ."Режим письма для этой реплики: {$mode}. {$instruction}\n"
+            .$professionalInstruction;
     }
 
     private function conversationDirectionInstruction(CommunityAiScenarioStep $step): string
