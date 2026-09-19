@@ -55,6 +55,7 @@ class BlocksRelationManager extends RelationManager
             'footer' => 'Колонки подвала',
             'header' => 'Ссылки меню',
             'pricing' => 'Тарифы',
+            'pricing_wide' => 'Широкий тариф',
             'additional_options' => 'Дополнительные позиции',
             default => static::$title ?? 'Блоки секции',
         };
@@ -604,6 +605,8 @@ class BlocksRelationManager extends RelationManager
             })
             ->headerActions([
                 CreateAction::make()
+                    ->visible(fn (): bool => $this->getOwnerRecord()->slug !== 'pricing_wide'
+                        || ! LandingBlock::query()->where('section_slug', 'pricing_wide')->where('block_type', 'plan')->exists())
                     ->label(match (true) {
                         $isQuiz => 'Добавить вопрос',
                         $isFaq => 'Добавить вопрос',
@@ -898,7 +901,7 @@ class BlocksRelationManager extends RelationManager
 
     protected function isPricingSection(): bool
     {
-        return $this->getOwnerRecord()->slug === 'pricing';
+        return in_array($this->getOwnerRecord()->slug, ['pricing', 'pricing_wide'], true);
     }
 
     protected function isAdditionalOptionsSection(): bool

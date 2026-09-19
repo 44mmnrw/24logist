@@ -923,6 +923,93 @@
 }
 .pricing-foot a { color: #16a34a; text-decoration: underline; }
 
+.pricing-wide-section {
+    padding-block: 80px;
+    background: #eef2f6;
+}
+.pricing-wide-head { max-width: none; }
+.pricing-wide-head h2 {
+    max-width: none;
+    font-size: clamp(40px, 4vw, 54px);
+    line-height: 1.15;
+}
+.pricing-card--wide {
+    margin-top: 48px;
+    padding: 24px;
+    display: grid;
+    grid-template-columns: 30% 70%;
+    grid-template-rows: auto 1fr auto;
+}
+.pricing-card--wide__heading,
+.pricing-card--wide__action {
+    grid-column: 1 / -1;
+}
+.pricing-card--wide__heading .pricing-card__desc { min-height: 0; }
+.pricing-card--wide__details {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 176px;
+    padding: 16px 32px 16px 0;
+}
+.pricing-card--wide .pricing-card__price {
+    font-size: clamp(48px, 4.5vw, 60px);
+    line-height: 1.05;
+}
+.pricing-card--wide .pricing-card__price-note {
+    border: 0;
+}
+.pricing-card--wide__features {
+    position: relative;
+    min-width: 0;
+    padding: 8px 0 24px 32px;
+}
+.pricing-card--wide__features::before {
+    content: '';
+    position: absolute;
+    top: 16px;
+    bottom: 32px;
+    left: 0;
+    width: 1px;
+    background: rgba(0, 0, 0, 0.12);
+}
+.pricing-card--wide ul {
+    padding: 0;
+    grid-template-columns: 1fr;
+}
+.pricing-card--wide__action {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 8px;
+}
+.pricing-card--wide__action .btn { width: auto; }
+.pricing-card--wide .pricing-card__check {
+    display: block;
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    color: #16a34a;
+}
+
+@media (max-width: 760px) {
+    .pricing-wide-head h2 { font-size: 34px; }
+    .pricing-card--wide {
+        grid-template-columns: 1fr;
+    }
+    .pricing-card--wide__details {
+        min-height: 0;
+        padding: 8px 0 0;
+    }
+    .pricing-card--wide .pricing-card__price { font-size: clamp(44px, 10vw, 56px); }
+    .pricing-card--wide .pricing-card__price-note {
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    .pricing-card--wide__features { padding: 8px 0 24px; }
+    .pricing-card--wide__features::before { display: none; }
+}
+
 .landing-section-slot > section.additional-options-section {
     padding-block: 80px;
     background: #f1f5f9;

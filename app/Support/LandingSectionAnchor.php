@@ -14,6 +14,7 @@ final class LandingSectionAnchor
         'product_showcase' => 'product-showcase',
         'why' => 'why',
         'pricing' => 'pricing',
+        'pricing_wide' => 'pricing-wide',
         'growth' => 'growth',
         'quiz' => 'quiz',
         'faq' => 'faq',

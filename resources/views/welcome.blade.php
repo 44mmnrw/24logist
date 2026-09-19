@@ -28,6 +28,7 @@
                     'features' => 'components.landing.features',
                     'product_showcase' => 'components.landing.product-showcase',
                     'pricing' => 'components.landing.pricing',
+                    'pricing_wide' => 'components.landing.pricing-wide',
                     'additional_options' => 'components.landing.additional-options',
                     'epd_platform' => 'components.landing.epd-platform',
                     'growth' => 'components.landing.growth',

@@ -36,6 +36,7 @@ class LandingContentSeeder extends Seeder
         $this->seedFaq();
         $this->seedFinalCta();
         $this->seedFooter();
+        $this->seedWidePricing();
     }
 
     private function section(array $data): LandingSection
@@ -417,6 +418,46 @@ class LandingContentSeeder extends Seeder
                     'sort_order' => $featureIndex + 1,
                 ]);
             }
+        }
+    }
+
+    private function seedWidePricing(): void
+    {
+        $order = (int) LandingSection::query()->where('slug', 'pricing')->value('sort_order') + 1;
+        LandingSection::query()->where('sort_order', '>=', $order)->increment('sort_order');
+
+        $section = $this->section([
+            'slug' => 'pricing_wide',
+            'name' => 'Широкий тариф',
+            'anchor' => 'pricing-wide',
+            'title' => 'Индивидуальный тариф для вашей компании',
+            'sort_order' => $order,
+        ]);
+
+        $plan = $this->block([
+            'section_slug' => $section->slug,
+            'block_type' => 'plan',
+            'title' => 'Корпорация',
+            'subtitle' => 'Условия под задачи вашей команды',
+            'price' => 'По запросу',
+            'description' => 'Количество рабочих мест по договору',
+            'tag' => 'Хит',
+            'button_text' => 'Запросить расчёт',
+            'link' => '/pages/contacts',
+            'button_style' => 'primary',
+            'is_highlighted' => true,
+            'sort_order' => 1,
+        ]);
+
+        foreach (['Индивидуальные лимиты', 'SSO и безопасность', 'SLA и онбординг', 'Выделенный менеджер'] as $index => $title) {
+            $this->block([
+                'section_slug' => $section->slug,
+                'block_type' => 'feature',
+                'parent_id' => $plan->id,
+                'title' => $title,
+                'icon' => $this->icon('check'),
+                'sort_order' => $index + 1,
+            ]);
         }
     }
 

@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Services\PublicPageCache;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Vite;
 use Symfony\Component\HttpFoundation\Response;
 
 final class CachePublicLandingPage
@@ -18,6 +19,13 @@ final class CachePublicLandingPage
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if (app()->environment('local') && Vite::isRunningHot()) {
+            $response = $next($request);
+            $response->headers->set('Cache-Control', 'no-store');
+
+            return $response;
+        }
+
         if (! config('public-cache.enabled', true) || ! $request->isMethodCacheable()) {
             return $next($request);
         }
