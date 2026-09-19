@@ -7,11 +7,13 @@ use App\Filament\Clusters\Landing\Resources\LandingSections\Pages\ListLandingSec
 use App\Filament\Clusters\Landing\Resources\LandingSections\RelationManagers\BlocksRelationManager;
 use App\Filament\Clusters\Landing\Resources\LandingSections\RelationManagers\HeaderButtonsRelationManager;
 use App\Models\LandingSection;
+use App\Services\LandingPageService;
 use App\Support\FilamentUploadPreview;
 use App\Support\LandingIcons;
 use App\Support\LandingMedia;
 use App\Support\LandingSectionAnchor;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
@@ -552,6 +554,11 @@ class LandingSectionResource extends Resource
                     ->counts('allBlocks'),
             ])
             ->defaultSort('sort_order')
+            ->reorderable('sort_order')
+            ->reorderRecordsTriggerAction(fn (Action $action, bool $isReordering): Action => $action
+                ->label($isReordering ? 'Готово' : 'Изменить порядок')
+                ->button())
+            ->afterReordering(fn () => app(LandingPageService::class)->clearCache())
             ->recordActions([
                 EditAction::make(),
             ])
