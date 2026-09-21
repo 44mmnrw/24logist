@@ -12,6 +12,8 @@ class LandingLead extends Model
 
     public const TYPE_EPD_PRESENTATION = 'epd_presentation';
 
+    public const TYPE_COMMERCIAL_OFFER = 'commercial_offer';
+
     public const STATUS_NEW = 'new';
 
     public const STATUS_PROCESSED = 'processed';
@@ -21,6 +23,7 @@ class LandingLead extends Model
         self::TYPE_QUIZ => 'Квиз (просчёт тарифа)',
         self::TYPE_CONTACT => 'Форма контактов',
         self::TYPE_EPD_PRESENTATION => 'Презентация модуля ЭПД',
+        self::TYPE_COMMERCIAL_OFFER => 'Коммерческое предложение',
     ];
 
     /** @var array<string, string> */

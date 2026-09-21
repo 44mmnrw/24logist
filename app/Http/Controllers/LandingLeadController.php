@@ -2,15 +2,65 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCommercialOfferLeadRequest;
 use App\Http\Requests\StoreContactLeadRequest;
 use App\Http\Requests\StoreEpdPresentationLeadRequest;
 use App\Http\Requests\StoreQuizLeadRequest;
+use App\Models\LandingBlock;
 use App\Models\LandingLead;
 use App\Support\LandingLeadQuizAnswers;
 use Illuminate\Http\JsonResponse;
 
 class LandingLeadController extends Controller
 {
+    public function storeCommercialOffer(StoreCommercialOfferLeadRequest $request): JsonResponse
+    {
+        if ($request->filled('website')) {
+            return response()->json(['message' => 'Заявка принята.'], 201);
+        }
+
+        $plan = LandingBlock::query()
+            ->where('section_slug', 'pricing_wide')
+            ->where('block_type', 'plan')
+            ->where('is_active', true)
+            ->first();
+        $extra = is_array($plan?->extra) ? $plan->extra : [];
+        $minimumUsers = max(1, (int) ($extra['users_min'] ?? 1));
+        $maximumUsers = min(500, max($minimumUsers, (int) ($extra['users_max'] ?? 500)));
+        $users = min($maximumUsers, max($minimumUsers, $request->integer('users')));
+        $optionIds = collect($request->validated('option_ids', []))->map(fn ($id): int => (int) $id)->all();
+        $options = $plan
+            ? $plan->children()->where('block_type', 'paid_option')->where('is_active', true)->whereIn('id', $optionIds)->get()
+            : collect();
+        $total = (max(0, (int) ($plan?->price ?? 0)) * $users) + $options->sum(fn (LandingBlock $option): int => max(0, (int) $option->price));
+        $currencySuffix = trim((string) ($extra['currency_suffix'] ?? '₽/мес'));
+
+        $lead = LandingLead::query()->create([
+            'type' => LandingLead::TYPE_COMMERCIAL_OFFER,
+            'status' => LandingLead::STATUS_NEW,
+            'name' => $request->string('name')->toString(),
+            'phone' => $request->string('phone')->toString(),
+            'email' => $request->string('email')->toString(),
+            'quiz_answers' => [
+                ['question' => 'Название компании', 'answer' => $request->string('company')->toString()],
+                ['question' => 'ИНН', 'answer' => $request->string('inn')->toString()],
+                ['question' => 'Количество пользователей', 'answer' => (string) $users],
+                ['question' => 'Дополнительные функции', 'answer' => $options->pluck('title')->implode(', ') ?: 'Не выбраны'],
+                ['question' => 'Расчётная стоимость', 'answer' => number_format($total, 0, ',', ' ').($currencySuffix !== '' ? ' '.$currencySuffix : '')],
+            ],
+            'recommended_plan_id' => $plan?->id,
+            'recommended_plan_title' => $plan?->title,
+            'source_url' => $request->headers->get('referer'),
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return response()->json([
+            'message' => 'Заявка принята. Мы подготовим коммерческое предложение и свяжемся с вами.',
+            'id' => $lead->id,
+        ], 201);
+    }
+
     public function storeQuiz(StoreQuizLeadRequest $request): JsonResponse
     {
         if ($request->filled('website')) {

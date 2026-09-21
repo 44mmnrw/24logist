@@ -158,8 +158,8 @@ final class CabinetLoginController extends Controller
 
     public function partySuggestions(Request $request): JsonResponse
     {
-        if (! $this->settings->cabinetRegistrationConfigured()) {
-            return $this->jsonError('Регистрация личного кабинета пока не настроена.', 503);
+        if (! $this->settings->cabinetAuthConfigured()) {
+            return $this->jsonError('Подсказки организаций пока не настроены.', 503);
         }
 
         $validated = $request->validate([

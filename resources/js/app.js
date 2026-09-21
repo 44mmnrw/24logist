@@ -8,6 +8,8 @@ import './landing-mobile-menu.js';
 import './landing-growth-dashboard.js';
 import './landing-product-carousel.js';
 import './landing-mobile-carousel.js';
+import './landing-wide-pricing.js';
+import './commercial-offer-modal.js';
 import './community.js';
 import './route-calculator.js';
 import './epd-game-bootstrap.js';

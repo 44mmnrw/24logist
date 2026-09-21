@@ -77,8 +77,8 @@ final class CabinetLoginClient
 
     public function suggestParty(string $query, string $clientIp): Response
     {
-        if (! $this->settings->cabinetRegistrationConfigured()) {
-            throw new RuntimeException('Регистрация личного кабинета пока не настроена.');
+        if (! $this->settings->cabinetAuthConfigured()) {
+            throw new RuntimeException('Подсказки организаций пока не настроены.');
         }
 
         return $this->post(self::PARTY_SUGGESTIONS_PATH, [

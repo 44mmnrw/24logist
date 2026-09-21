@@ -54,7 +54,7 @@ final class LandingLeadNotificationService
         $subject = LandingLeadMailTemplate::render($subjectTemplate, $lead, $site, ['{admin_url}' => $adminUrl]);
         $body = LandingLeadMailTemplate::render($bodyTemplate, $lead, $site, ['{admin_url}' => $adminUrl]);
 
-        if ($lead->type === LandingLead::TYPE_EPD_PRESENTATION && filled($lead->quiz_answers)) {
+        if (in_array($lead->type, [LandingLead::TYPE_EPD_PRESENTATION, LandingLead::TYPE_COMMERCIAL_OFFER], true) && filled($lead->quiz_answers)) {
             $details = collect($lead->quiz_answers)
                 ->filter(fn (mixed $row): bool => is_array($row))
                 ->map(fn (array $row): string => sprintf(

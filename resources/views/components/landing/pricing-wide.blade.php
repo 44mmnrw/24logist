@@ -1,9 +1,18 @@
 @php
     $section = $landing->section('pricing_wide');
     $plan = $landing->blocks('pricing_wide', 'plan')->first();
+    $planExtra = is_array($plan?->extra) ? $plan->extra : [];
+    $features = $plan?->children->where('block_type', 'feature')->values() ?? collect();
+    $paidOptions = $plan?->children->where('block_type', 'paid_option')->values() ?? collect();
+    $usersMin = max(1, (int) ($planExtra['users_min'] ?? 1));
+    $usersMax = min(500, max($usersMin, (int) ($planExtra['users_max'] ?? 20)));
+    $usersDefault = min($usersMax, max($usersMin, (int) ($planExtra['users_default'] ?? $usersMin)));
+    $basePrice = max(0, (int) ($plan?->price ?? 0));
+    $initialPrice = $basePrice * $usersDefault;
+    $currencySuffix = trim((string) ($planExtra['currency_suffix'] ?? '₽/мес'));
 @endphp
 
-@if ($section)
+@if ($section && $plan)
 <section class="pricing-wide-section" @if($section->anchorId()) id="{{ $section->anchorId() }}" @endif>
     <div class="landing-shell">
         <header class="section-head section-head--wide pricing-wide-head">
@@ -15,54 +24,98 @@
             @endif
         </header>
 
-        @if ($plan)
-            <article @class(['pricing-card', 'pricing-card--wide', 'pricing-card--hit' => $plan->is_highlighted])>
-                @if ($plan->tag || $plan->secondary_tag)
-                    <div class="pricing-card__badges">
-                        @if ($plan->tag)
-                            <span class="pricing-hit">{{ $plan->tag }}</span>
-                        @endif
-                        @if ($plan->secondary_tag)
-                            <span class="pricing-hit pricing-hit--secondary">{{ $plan->secondary_tag }}</span>
-                        @endif
+        <article
+            @class(['pricing-card', 'pricing-card--wide', 'pricing-card--hit' => $plan->is_highlighted])
+            data-wide-pricing
+            data-base-price="{{ $basePrice }}"
+        >
+            @if ($plan->tag || $plan->secondary_tag)
+                <div class="pricing-card__badges">
+                    @if ($plan->tag)
+                        <span class="pricing-hit">{{ $plan->tag }}</span>
+                    @endif
+                    @if ($plan->secondary_tag)
+                        <span class="pricing-hit pricing-hit--secondary">{{ $plan->secondary_tag }}</span>
+                    @endif
+                </div>
+            @endif
+
+            <div class="pricing-card--wide__details">
+                @if ($plan->title)
+                    <h3>{{ $plan->title }}</h3>
+                @endif
+                @if ($plan->subtitle)
+                    <p class="pricing-card__desc">{{ $plan->subtitle }}</p>
+                @endif
+                <div class="pricing-card__price" aria-live="polite">
+                    <span data-wide-pricing-total>{{ number_format($initialPrice, 0, ',', ' ') }}</span>
+                    @if ($currencySuffix !== '')
+                        <small>{{ $currencySuffix }}</small>
+                    @endif
+                </div>
+                @if ($plan->description)
+                    <p class="pricing-card__price-note">{{ $plan->description }}</p>
+                @endif
+            </div>
+
+            <div class="pricing-card--wide__features">
+                <ul>
+                    @foreach ($features as $feature)
+                        <li>
+                            <svg viewBox="0 0 16 16" width="20" height="20" fill="none" aria-hidden="true" class="pricing-card__check">
+                                <use href="#icon-doc-check-circle" xlink:href="#icon-doc-check-circle" />
+                            </svg>
+                            {{ $feature->title }}
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+
+            <div class="pricing-card--wide__additional-heading">
+                <h4>{{ $planExtra['additional_title'] ?? 'Дополнительные возможности' }}</h4>
+            </div>
+
+            <div class="pricing-card--wide__configurator">
+                <div class="pricing-card--wide__users">
+                    <span>{{ $planExtra['users_label'] ?? 'Количество пользователей' }}</span>
+                    <span class="pricing-card--wide__stepper">
+                        <button type="button" data-wide-pricing-decrease aria-label="Уменьшить количество пользователей">−</button>
+                        <input
+                            type="number"
+                            value="{{ $usersDefault }}"
+                            min="{{ $usersMin }}"
+                            max="{{ $usersMax }}"
+                            readonly
+                            aria-label="{{ $planExtra['users_label'] ?? 'Количество пользователей' }}"
+                            data-wide-pricing-users
+                        >
+                        <button type="button" data-wide-pricing-increase aria-label="Увеличить количество пользователей">+</button>
+                    </span>
+                </div>
+
+                @if ($paidOptions->isNotEmpty())
+                    <div class="pricing-card--wide__options">
+                        @foreach ($paidOptions as $option)
+                            @php($optionPrice = max(0, (int) $option->price))
+                            <label class="pricing-card--wide__option">
+                                <input type="checkbox" value="{{ $optionPrice }}" data-option-id="{{ $option->id }}" data-wide-pricing-option>
+                                <span class="pricing-card--wide__checkbox" aria-hidden="true"></span>
+                                <span class="pricing-card--wide__option-title">{{ $option->title }}</span>
+                                <strong>+{{ number_format($optionPrice, 0, ',', ' ') }} {{ $currencySuffix }}</strong>
+                            </label>
+                        @endforeach
                     </div>
                 @endif
 
-                <div class="pricing-card--wide__heading">
-                    <h3>{{ $plan->title }}</h3>
-                    <p class="pricing-card__desc">{{ $plan->subtitle }}</p>
-                </div>
-                <div class="pricing-card--wide__details">
-                    <div class="pricing-card__price">{{ $plan->price }}</div>
-                    <p class="pricing-card__price-note">{{ $plan->description }}</p>
-                </div>
-                <div class="pricing-card--wide__features">
-                    <ul>
-                        @foreach ($plan->children->where('block_type', 'feature') as $feature)
-                            <li>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="none" aria-hidden="true" class="pricing-card__check">
-                                    <use href="#icon-doc-check-circle" xlink:href="#icon-doc-check-circle" />
-                                </svg>
-                                {{ $feature->title }}
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
                 @if ($plan->button_text)
                     <div class="pricing-card--wide__action">
-                        @if (filled($plan->link))
-                            <a href="{{ \App\Support\LandingLinks::resolve($plan->link) }}" @class(['btn', 'btn--primary' => $plan->button_style === 'primary', 'btn--ghost' => $plan->button_style !== 'primary'])>
-                                {{ $plan->button_text }}
-                            </a>
-                        @else
-                            <button type="button" @class(['btn', 'btn--primary' => $plan->button_style === 'primary', 'btn--ghost' => $plan->button_style !== 'primary'])>
-                                {{ $plan->button_text }}
-                            </button>
-                        @endif
+                        <button type="button" data-commercial-offer-open @class(['btn', 'btn--primary' => $plan->button_style === 'primary', 'btn--ghost' => $plan->button_style !== 'primary'])>
+                            {{ $plan->button_text }}
+                        </button>
                     </div>
                 @endif
-            </article>
-        @endif
+            </div>
+        </article>
     </div>
 </section>
 @endif

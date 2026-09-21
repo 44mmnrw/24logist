@@ -439,14 +439,22 @@ class LandingContentSeeder extends Seeder
             'block_type' => 'plan',
             'title' => 'Корпорация',
             'subtitle' => 'Условия под задачи вашей команды',
-            'price' => 'По запросу',
-            'description' => 'Количество рабочих мест по договору',
+            'price' => '1200',
+            'description' => 'за одного пользователя в месяц',
             'tag' => 'Хит',
-            'button_text' => 'Запросить расчёт',
+            'button_text' => 'Получить предложение',
             'link' => '/pages/contacts',
             'button_style' => 'primary',
             'is_highlighted' => true,
             'sort_order' => 1,
+            'extra' => [
+                'additional_title' => 'Дополнительные возможности',
+                'users_label' => 'Количество пользователей',
+                'users_min' => 1,
+                'users_max' => 20,
+                'users_default' => 1,
+                'currency_suffix' => '₽/мес',
+            ],
         ]);
 
         foreach (['Индивидуальные лимиты', 'SSO и безопасность', 'SLA и онбординг', 'Выделенный менеджер'] as $index => $title) {
@@ -456,6 +464,21 @@ class LandingContentSeeder extends Seeder
                 'parent_id' => $plan->id,
                 'title' => $title,
                 'icon' => $this->icon('check'),
+                'sort_order' => $index + 1,
+            ]);
+        }
+
+        foreach ([
+            ['title' => 'Модуль ЭПД', 'price' => 1500],
+            ['title' => 'Расширенная аналитика', 'price' => 2500],
+            ['title' => 'Интеграция по API', 'price' => 3000],
+        ] as $index => $option) {
+            $this->block([
+                'section_slug' => $section->slug,
+                'block_type' => 'paid_option',
+                'parent_id' => $plan->id,
+                'title' => $option['title'],
+                'price' => $option['price'],
                 'sort_order' => $index + 1,
             ]);
         }

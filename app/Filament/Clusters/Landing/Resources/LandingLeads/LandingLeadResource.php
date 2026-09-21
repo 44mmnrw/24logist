@@ -63,7 +63,7 @@ class LandingLeadResource extends Resource
                 TextEntry::make('recommended_plan_title')
                     ->label('Рекомендованный тариф')
                     ->placeholder('—')
-                    ->visible(fn (LandingLead $record): bool => $record->type === LandingLead::TYPE_QUIZ),
+                    ->visible(fn (LandingLead $record): bool => in_array($record->type, [LandingLead::TYPE_QUIZ, LandingLead::TYPE_COMMERCIAL_OFFER], true)),
                 RepeatableEntry::make('quiz_answers')
                     ->label('Данные заявки')
                     ->schema([

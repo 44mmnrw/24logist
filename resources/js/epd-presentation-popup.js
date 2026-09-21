@@ -103,6 +103,7 @@ if (popup) {
     });
 
     document.addEventListener('cabinet-login:open', () => close({ remember: false }));
+    document.addEventListener('commercial-offer:open', () => close({ remember: false }));
 
     popup.querySelectorAll('[data-epd-registration-cta]').forEach((control) => {
         control.addEventListener('click', () => {

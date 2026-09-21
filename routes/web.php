@@ -25,12 +25,12 @@ use App\Http\Controllers\MaxCommunityWebhookController;
 use App\Http\Controllers\OgHeroCardController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PwaIconController;
-use App\Http\Controllers\RouteCalculatorController;
-use App\Http\Controllers\ReferralRedirectController;
-use App\Http\Controllers\ReferralPortalController;
+use App\Http\Controllers\ReferralPartnerRegistrationController;
 use App\Http\Controllers\ReferralPayoutExportController;
 use App\Http\Controllers\ReferralPlacementExportController;
-use App\Http\Controllers\ReferralPartnerRegistrationController;
+use App\Http\Controllers\ReferralPortalController;
+use App\Http\Controllers\ReferralRedirectController;
+use App\Http\Controllers\RouteCalculatorController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\TelegramCommunityAuthController;
 use App\Http\Controllers\VkCommunityAuthController;
@@ -97,6 +97,14 @@ Route::post('/leads/quiz', [LandingLeadController::class, 'storeQuiz'])
 Route::post('/leads/contact', [LandingLeadController::class, 'storeContact'])
     ->middleware('throttle:12,1')
     ->name('leads.contact.store');
+
+Route::post('/leads/commercial-offer', [LandingLeadController::class, 'storeCommercialOffer'])
+    ->middleware('throttle:12,1')
+    ->name('leads.commercial-offer.store');
+
+Route::post('/leads/party-suggestions', [CabinetLoginController::class, 'partySuggestions'])
+    ->middleware('throttle:30,1,lead-party-suggestions:')
+    ->name('leads.party-suggestions');
 
 Route::post('/leads/epd-presentation', [LandingLeadController::class, 'storeEpdPresentation'])
     ->middleware('throttle:12,1')

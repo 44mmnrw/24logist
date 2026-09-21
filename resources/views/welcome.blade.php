@@ -64,6 +64,7 @@
         <x-landing.footer />
     </div>
     <x-site.cabinet-login-modal />
+    <x-site.commercial-offer-modal />
     <x-site.epd-presentation-popup />
     <x-site.telegram-popup />
     <x-site.cookie-consent />

@@ -273,6 +273,116 @@ class BlocksRelationManager extends RelationManager
                 ]);
         }
 
+        if ($this->isWidePricingSection()) {
+            return $schema
+                ->components([
+                    TextInput::make('title')
+                        ->label('Название тарифа')
+                        ->required()
+                        ->maxLength(255),
+                    TextInput::make('subtitle')
+                        ->label('Подзаголовок над ценой')
+                        ->maxLength(255),
+                    TextInput::make('price')
+                        ->label('Цена за одного пользователя')
+                        ->numeric()
+                        ->minValue(0)
+                        ->required(),
+                    TextInput::make('description')
+                        ->label('Подпись под ценой')
+                        ->placeholder('за одного пользователя')
+                        ->maxLength(255),
+                    TextInput::make('wide_currency_suffix')
+                        ->label('Суффикс цены')
+                        ->placeholder('₽/мес')
+                        ->required(),
+                    TextInput::make('wide_additional_title')
+                        ->label('Заголовок нижней левой секции')
+                        ->placeholder('Дополнительные возможности')
+                        ->required()
+                        ->columnSpanFull(),
+                    TextInput::make('wide_users_label')
+                        ->label('Подпись селектора пользователей')
+                        ->placeholder('Количество пользователей')
+                        ->required()
+                        ->columnSpanFull(),
+                    TextInput::make('wide_users_min')
+                        ->label('Минимум пользователей')
+                        ->numeric()
+                        ->minValue(1)
+                        ->maxValue(500)
+                        ->required(),
+                    TextInput::make('wide_users_max')
+                        ->label('Максимум пользователей')
+                        ->numeric()
+                        ->minValue(1)
+                        ->maxValue(500)
+                        ->required(),
+                    TextInput::make('wide_users_default')
+                        ->label('Выбрано по умолчанию')
+                        ->numeric()
+                        ->minValue(1)
+                        ->maxValue(500)
+                        ->required(),
+                    TextInput::make('tag')
+                        ->label('Бейдж')
+                        ->placeholder('Хит'),
+                    Repeater::make('plan_features')
+                        ->label('Возможности тарифа')
+                        ->schema([
+                            TextInput::make('title')
+                                ->label('Пункт')
+                                ->required()
+                                ->maxLength(255),
+                        ])
+                        ->defaultItems(1)
+                        ->minItems(1)
+                        ->addActionLabel('Добавить возможность')
+                        ->reorderable()
+                        ->columnSpanFull(),
+                    Repeater::make('plan_options')
+                        ->label('Дополнительные функции')
+                        ->schema([
+                            TextInput::make('title')
+                                ->label('Название')
+                                ->required()
+                                ->maxLength(255),
+                            TextInput::make('price')
+                                ->label('Цена, ₽/мес')
+                                ->numeric()
+                                ->minValue(0)
+                                ->required(),
+                        ])
+                        ->defaultItems(1)
+                        ->addActionLabel('Добавить функцию')
+                        ->reorderable()
+                        ->columnSpanFull(),
+                    TextInput::make('button_text')
+                        ->label('Текст кнопки')
+                        ->maxLength(255),
+                    TextInput::make('link')
+                        ->label('Ссылка кнопки')
+                        ->maxLength(255),
+                    Select::make('button_style')
+                        ->label('Стиль кнопки')
+                        ->options([
+                            'primary' => 'Primary',
+                            'ghost' => 'Ghost',
+                        ])
+                        ->default('primary'),
+                    Toggle::make('is_highlighted')
+                        ->label('Выделить карточку')
+                        ->default(true),
+                    Toggle::make('is_active')
+                        ->label('Активен')
+                        ->default(true),
+                    TextInput::make('sort_order')
+                        ->label('Порядок')
+                        ->numeric()
+                        ->default(0),
+                ]);
+        }
+
         if ($this->isPricingSection()) {
             return $schema
                 ->components([
@@ -436,6 +546,7 @@ class BlocksRelationManager extends RelationManager
         $isHeader = $this->isHeaderSection();
         $isFooter = $this->isFooterSection();
         $isPricing = $this->isPricingSection();
+        $isWidePricing = $this->isWidePricingSection();
         $isAdditionalOptions = $this->isAdditionalOptionsSection();
 
         $table = $isQuiz
@@ -655,7 +766,7 @@ class BlocksRelationManager extends RelationManager
 
                         return $data;
                     })
-                    ->using(function (array $data) use ($isQuiz, $isPlatform, $isFooter, $isPricing): Model {
+                    ->using(function (array $data) use ($isQuiz, $isPlatform, $isFooter, $isPricing, $isWidePricing): Model {
                         if ($isQuiz) {
                             $options = $data['quiz_options'] ?? [];
                             unset($data['quiz_options']);
@@ -710,7 +821,8 @@ class BlocksRelationManager extends RelationManager
 
                         if ($isPricing) {
                             $features = $data['plan_features'] ?? [];
-                            unset($data['plan_features']);
+                            $options = $data['plan_options'] ?? [];
+                            $extra = $isWidePricing ? LandingPricing::wideExtraFromForm($data) : [];
 
                             $plan = LandingBlock::query()->create([
                                 'section_slug' => $this->getOwnerRecord()->slug,
@@ -724,12 +836,16 @@ class BlocksRelationManager extends RelationManager
                                 'button_text' => $data['button_text'] ?? null,
                                 'link' => $data['link'] ?? null,
                                 'button_style' => $data['button_style'] ?? 'ghost',
+                                'extra' => $extra,
                                 'is_highlighted' => $data['is_highlighted'] ?? false,
                                 'sort_order' => $data['sort_order'] ?? 0,
                                 'is_active' => $data['is_active'] ?? true,
                             ]);
 
                             LandingPricing::syncFeatures($plan, $features);
+                            if ($isWidePricing) {
+                                LandingPricing::syncOptions($plan, $options);
+                            }
 
                             return $plan;
                         }
@@ -744,7 +860,7 @@ class BlocksRelationManager extends RelationManager
             ])
             ->recordActions([
                 EditAction::make()
-                    ->mutateRecordDataUsing(function (array $data, LandingBlock $record) use ($isQuiz, $isPlatform, $isFooter, $isPricing, $isHeader): array {
+                    ->mutateRecordDataUsing(function (array $data, LandingBlock $record) use ($isQuiz, $isPlatform, $isFooter, $isPricing, $isWidePricing, $isHeader): array {
                         if ($isQuiz && $record->block_type === 'question') {
                             $data['quiz_options'] = LandingQuiz::optionsFormState($record);
                         }
@@ -759,6 +875,10 @@ class BlocksRelationManager extends RelationManager
 
                         if ($isPricing && $record->block_type === 'plan') {
                             $data['plan_features'] = LandingPricing::featuresFormState($record);
+
+                            if ($isWidePricing) {
+                                $data = array_merge($data, LandingPricing::wideFormState($record));
+                            }
                         }
 
                         if ($isHeader && $record->block_type === 'nav_link') {
@@ -769,7 +889,7 @@ class BlocksRelationManager extends RelationManager
 
                         return $data;
                     })
-                    ->using(function (array $data, LandingBlock $record) use ($isQuiz, $isPlatform, $isFooter, $isPricing): void {
+                    ->using(function (array $data, LandingBlock $record) use ($isQuiz, $isPlatform, $isFooter, $isPricing, $isWidePricing): void {
                         if ($isQuiz && $record->block_type === 'question') {
                             $options = $data['quiz_options'] ?? [];
                             $record->update([
@@ -814,6 +934,7 @@ class BlocksRelationManager extends RelationManager
 
                         if ($isPricing && $record->block_type === 'plan') {
                             $features = $data['plan_features'] ?? [];
+                            $options = $data['plan_options'] ?? [];
                             $record->update([
                                 'title' => $data['title'] ?? $record->title,
                                 'subtitle' => $data['subtitle'] ?? $record->subtitle,
@@ -824,12 +945,18 @@ class BlocksRelationManager extends RelationManager
                                 'button_text' => $data['button_text'] ?? $record->button_text,
                                 'link' => $data['link'] ?? $record->link,
                                 'button_style' => $data['button_style'] ?? $record->button_style,
+                                'extra' => $isWidePricing
+                                    ? LandingPricing::wideExtraFromForm($data, is_array($record->extra) ? $record->extra : [])
+                                    : $record->extra,
                                 'is_highlighted' => $data['is_highlighted'] ?? $record->is_highlighted,
                                 'sort_order' => $data['sort_order'] ?? $record->sort_order,
                                 'is_active' => $data['is_active'] ?? $record->is_active,
                             ]);
 
                             LandingPricing::syncFeatures($record, $features);
+                            if ($isWidePricing) {
+                                LandingPricing::syncOptions($record, $options);
+                            }
 
                             return;
                         }
@@ -862,7 +989,7 @@ class BlocksRelationManager extends RelationManager
                         }
 
                         if ($record->block_type === 'plan') {
-                            $record->children()->where('block_type', 'feature')->delete();
+                            $record->children()->whereIn('block_type', ['feature', 'paid_option'])->delete();
                         }
                     })
                     ->after(fn () => app(LandingPageService::class)->clearCache()),
@@ -902,6 +1029,11 @@ class BlocksRelationManager extends RelationManager
     protected function isPricingSection(): bool
     {
         return in_array($this->getOwnerRecord()->slug, ['pricing', 'pricing_wide'], true);
+    }
+
+    protected function isWidePricingSection(): bool
+    {
+        return $this->getOwnerRecord()->slug === 'pricing_wide';
     }
 
     protected function isAdditionalOptionsSection(): bool
