@@ -10,6 +10,42 @@
     $basePrice = max(0, (int) ($plan?->price ?? 0));
     $initialPrice = $basePrice * $usersDefault;
     $currencySuffix = trim((string) ($planExtra['currency_suffix'] ?? '₽/мес'));
+    $userCountLabels = [
+        1 => 'за одно рабочее место',
+        2 => 'за два рабочих места',
+        3 => 'за три рабочих места',
+        4 => 'за четыре рабочих места',
+        5 => 'за пять рабочих мест',
+        6 => 'за шесть рабочих мест',
+        7 => 'за семь рабочих мест',
+        8 => 'за восемь рабочих мест',
+        9 => 'за девять рабочих мест',
+        10 => 'за десять рабочих мест',
+        11 => 'за одиннадцать рабочих мест',
+        12 => 'за двенадцать рабочих мест',
+        13 => 'за тринадцать рабочих мест',
+        14 => 'за четырнадцать рабочих мест',
+        15 => 'за пятнадцать рабочих мест',
+        16 => 'за шестнадцать рабочих мест',
+        17 => 'за семнадцать рабочих мест',
+        18 => 'за восемнадцать рабочих мест',
+        19 => 'за девятнадцать рабочих мест',
+        20 => 'за двадцать рабочих мест',
+    ];
+    $workplaceNoun = static function (int $count): string {
+        $lastTwoDigits = $count % 100;
+        $lastDigit = $count % 10;
+
+        return $lastTwoDigits >= 11 && $lastTwoDigits <= 14
+            ? 'рабочих мест'
+            : match ($lastDigit) {
+                1 => 'рабочее место',
+                2, 3, 4 => 'рабочих места',
+                default => 'рабочих мест',
+            };
+    };
+    $initialUsersNote = $userCountLabels[$usersDefault]
+        ?? 'за '.$usersDefault.' '.$workplaceNoun($usersDefault);
 @endphp
 
 @if ($section && $plan)
@@ -28,6 +64,7 @@
             @class(['pricing-card', 'pricing-card--wide', 'pricing-card--hit' => $plan->is_highlighted])
             data-wide-pricing
             data-base-price="{{ $basePrice }}"
+            data-user-count-labels='@json($userCountLabels, JSON_UNESCAPED_UNICODE)'
         >
             @if ($plan->tag || $plan->secondary_tag)
                 <div class="pricing-card__badges">
@@ -53,9 +90,12 @@
                         <small>{{ $currencySuffix }}</small>
                     @endif
                 </div>
-                @if ($plan->description)
-                    <p class="pricing-card__price-note">{{ $plan->description }}</p>
-                @endif
+                <p
+                    class="pricing-card__price-note"
+                    data-wide-pricing-users-note
+                >
+                    {{ $initialUsersNote }}
+                </p>
             </div>
 
             <div class="pricing-card--wide__features">
@@ -69,13 +109,7 @@
                         </li>
                     @endforeach
                 </ul>
-            </div>
 
-            <div class="pricing-card--wide__additional-heading">
-                <h4>{{ $planExtra['additional_title'] ?? 'Дополнительные возможности' }}</h4>
-            </div>
-
-            <div class="pricing-card--wide__configurator">
                 <div class="pricing-card--wide__users">
                     <span>{{ $planExtra['users_label'] ?? 'Количество пользователей' }}</span>
                     <span class="pricing-card--wide__stepper">
@@ -92,7 +126,13 @@
                         <button type="button" data-wide-pricing-increase aria-label="Увеличить количество пользователей">+</button>
                     </span>
                 </div>
+            </div>
 
+            <div class="pricing-card--wide__additional-heading">
+                <h4>{{ $planExtra['additional_title'] ?? 'Дополнительные возможности' }}</h4>
+            </div>
+
+            <div class="pricing-card--wide__configurator">
                 @if ($paidOptions->isNotEmpty())
                     <div class="pricing-card--wide__options">
                         @foreach ($paidOptions as $option)

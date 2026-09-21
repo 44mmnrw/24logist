@@ -46,6 +46,16 @@ class LandingWidePricingTest extends TestCase
         $this->assertStringNotContainsString('btn--full', $html);
         $this->assertStringContainsString('data-base-price="1200"', $html);
         $this->assertStringContainsString('data-wide-pricing-users', $html);
+        $this->assertSame(1, substr_count($html, 'pricing-card--wide__users'));
+        $this->assertLessThan(
+            strpos($html, 'pricing-card--wide__additional-heading'),
+            strpos($html, 'pricing-card--wide__users'),
+        );
+        $this->assertStringContainsString('data-wide-pricing-users-note', $html);
+        $this->assertStringContainsString('data-user-count-labels=', $html);
+        $this->assertStringContainsString('за одно рабочее место', $html);
+        $this->assertStringContainsString('за двадцать рабочих мест', $html);
+        $this->assertStringContainsString('data-wide-pricing-total', $html);
         $this->assertStringContainsString('data-wide-pricing-decrease', $html);
         $this->assertStringContainsString('data-wide-pricing-increase', $html);
         $this->assertStringContainsString('data-wide-pricing-option', $html);

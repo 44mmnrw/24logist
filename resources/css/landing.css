@@ -983,7 +983,10 @@
 .pricing-card--wide__features {
     min-width: 0;
     display: flex;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
+    gap: 28px;
     padding: 40px 48px;
 }
 .pricing-card--wide ul {
@@ -1041,10 +1044,12 @@
 }
 .pricing-card--wide__action .btn { width: auto; }
 .pricing-card--wide__users {
+    width: 100%;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 132px;
+    grid-template-columns: max-content 132px;
     gap: 16px;
     align-items: center;
+    justify-content: start;
     color: #0f172a;
     font-size: 14px;
     font-weight: 600;
