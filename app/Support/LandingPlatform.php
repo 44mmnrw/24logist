@@ -7,6 +7,10 @@ use Illuminate\Support\Arr;
 
 final class LandingPlatform
 {
+    public const DEFAULT_ICON_BACKGROUND_COLOR = '#12326d';
+
+    public const DEFAULT_ICON_COLOR = '#22c55e';
+
     private const VIRTUAL_FIELDS = [
         'platform_note_text',
         'platform_note_icon',
@@ -41,6 +45,37 @@ final class LandingPlatform
         self::syncTitledChildren($card, 'list_item', $data['platform_list_items'] ?? [], true);
         self::syncTitledChildren($card, 'pill', $data['platform_pills'] ?? []);
         self::createRoles($card, $data['platform_roles'] ?? []);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @param  array<string, mixed>  $existing
+     * @return array<string, mixed>
+     */
+    public static function iconStyleExtra(array $data, array $existing = []): array
+    {
+        $submitted = is_array($data['extra'] ?? null) ? $data['extra'] : [];
+        $extra = array_replace($existing, $submitted);
+
+        $extra['icon_background_color'] = self::validColor($extra['icon_background_color'] ?? null)
+            ?? self::DEFAULT_ICON_BACKGROUND_COLOR;
+        $extra['icon_color'] = self::validColor($extra['icon_color'] ?? null)
+            ?? self::DEFAULT_ICON_COLOR;
+
+        return $extra;
+    }
+
+    /** @return array{background: string, icon: string} */
+    public static function iconColors(LandingBlock $card): array
+    {
+        $extra = is_array($card->extra) ? $card->extra : [];
+
+        return [
+            'background' => self::validColor($extra['icon_background_color'] ?? null)
+                ?? self::DEFAULT_ICON_BACKGROUND_COLOR,
+            'icon' => self::validColor($extra['icon_color'] ?? null)
+                ?? self::DEFAULT_ICON_COLOR,
+        ];
     }
 
     /**
@@ -167,5 +202,16 @@ final class LandingPlatform
     public static function stripVirtualFields(array $data): array
     {
         return Arr::except($data, self::VIRTUAL_FIELDS);
+    }
+
+    private static function validColor(mixed $value): ?string
+    {
+        if (! is_string($value)) {
+            return null;
+        }
+
+        $value = trim($value);
+
+        return preg_match('/^#[0-9a-f]{6}$/i', $value) === 1 ? strtolower($value) : null;
     }
 }

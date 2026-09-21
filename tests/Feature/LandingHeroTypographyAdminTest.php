@@ -45,6 +45,9 @@ class LandingHeroTypographyAdminTest extends TestCase
         ]);
 
         $component = Livewire::test(EditLandingSection::class, ['record' => $section->getRouteKey()])
+            ->assertSee('Открыть каталог')
+            ->assertSee('Выбор иконки Tabler')
+            ->assertSee('Все категории')
             ->set('data.hero_title_font_size', 64)
             ->set('data.hero_subtitle_1_font_size', 36)
             ->set('data.hero_subtitle_2_font_size', 22)

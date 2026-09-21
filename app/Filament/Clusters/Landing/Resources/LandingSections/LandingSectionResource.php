@@ -6,11 +6,10 @@ use App\Filament\Clusters\Landing\Resources\LandingSections\Pages\EditLandingSec
 use App\Filament\Clusters\Landing\Resources\LandingSections\Pages\ListLandingSections;
 use App\Filament\Clusters\Landing\Resources\LandingSections\RelationManagers\BlocksRelationManager;
 use App\Filament\Clusters\Landing\Resources\LandingSections\RelationManagers\HeaderButtonsRelationManager;
+use App\Filament\Forms\LandingIconSelect;
 use App\Models\LandingSection;
 use App\Services\LandingPageService;
 use App\Support\FilamentUploadPreview;
-use App\Support\LandingIcons;
-use App\Support\LandingMedia;
 use App\Support\LandingSectionAnchor;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -19,7 +18,6 @@ use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -647,16 +645,12 @@ class LandingSectionResource extends Resource
         return FilamentUploadPreview::resolve($component, $file, $storedFileNames);
     }
 
-    protected static function iconSelect(string $name, string $label, ?callable $visible = null): Select
+    protected static function iconSelect(string $name, string $label, ?callable $visible = null): LandingIconSelect
     {
-        $field = Select::make($name)
+        $field = LandingIconSelect::make($name)
             ->label($label)
-            ->options(LandingIcons::OPTIONS)
-            ->searchable()
             ->nullable()
-            ->helperText('Иконка из SVG-спрайта (public/images/icons/sprite.svg)')
-            ->dehydrateStateUsing(fn (?string $state) => LandingIcons::normalize($state))
-            ->formatStateUsing(fn (?string $state) => LandingIcons::resolve($state));
+            ->helperText('Ищите иконки по русскому или английскому названию. Доступны контурные и залитые варианты.');
 
         if ($visible !== null) {
             $field->visible($visible);

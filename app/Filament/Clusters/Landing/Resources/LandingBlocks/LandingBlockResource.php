@@ -7,9 +7,9 @@ use App\Filament\Clusters\Landing\Resources\LandingBlocks\Pages\EditLandingBlock
 use App\Filament\Clusters\Landing\Resources\LandingBlocks\Pages\ListLandingBlocks;
 use App\Filament\Clusters\Landing\Resources\LandingBlocks\RelationManagers\ChildrenRelationManager;
 use App\Filament\Clusters\Landing\Resources\LandingBlocks\RelationManagers\QuizOptionsRelationManager;
+use App\Filament\Forms\LandingIconSelect;
 use App\Models\LandingBlock;
 use App\Models\LandingSection;
-use App\Support\LandingIcons;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -95,12 +95,8 @@ class LandingBlockResource extends Resource
                 Textarea::make('description')
                     ->label(fn (?LandingBlock $record): string => $record?->block_type === 'faq' ? 'Ответ' : 'Описание')
                     ->rows(4),
-                Select::make('icon')
-                    ->label('Иконка')
-                    ->options(LandingIcons::OPTIONS)
-                    ->searchable()
-                    ->dehydrateStateUsing(fn (?string $state) => LandingIcons::normalize($state))
-                    ->formatStateUsing(fn (?string $state) => LandingIcons::resolve($state)),
+                LandingIconSelect::make('icon')
+                    ->label('Иконка'),
                 TextInput::make('price')
                     ->label('Цена')
                     ->maxLength(255),

@@ -3,6 +3,7 @@
 namespace App\Filament\Clusters\Landing\Resources\LandingSections\RelationManagers;
 
 use App\Filament\Clusters\Landing\Resources\LandingBlocks\LandingBlockResource;
+use App\Filament\Forms\LandingIconSelect;
 use App\Models\LandingBlock;
 use App\Models\LandingSection;
 use App\Services\LandingPageService;
@@ -16,6 +17,7 @@ use App\Support\LandingSectionAnchor;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -131,12 +133,8 @@ class BlocksRelationManager extends RelationManager
                         ->required()
                         ->maxLength(255)
                         ->columnSpanFull(),
-                    Select::make('icon')
-                        ->label('Иконка')
-                        ->options(LandingIcons::OPTIONS)
-                        ->searchable()
-                        ->dehydrateStateUsing(fn (?string $state) => LandingIcons::normalize($state))
-                        ->formatStateUsing(fn (?string $state) => LandingIcons::resolve($state)),
+                    LandingIconSelect::make('icon')
+                        ->label('Иконка'),
                     Toggle::make('is_active')
                         ->label('Активен')
                         ->default(true),
@@ -163,12 +161,18 @@ class BlocksRelationManager extends RelationManager
                         ->rows(3)
                         ->maxLength(2000)
                         ->columnSpanFull(),
-                    Select::make('icon')
-                        ->label('Иконка')
-                        ->options(LandingIcons::OPTIONS)
-                        ->searchable()
-                        ->dehydrateStateUsing(fn (?string $state) => LandingIcons::normalize($state))
-                        ->formatStateUsing(fn (?string $state) => LandingIcons::resolve($state)),
+                    LandingIconSelect::make('icon')
+                        ->label('Иконка'),
+                    ColorPicker::make('extra.icon_background_color')
+                        ->label('Цвет фона иконки')
+                        ->default(LandingPlatform::DEFAULT_ICON_BACKGROUND_COLOR)
+                        ->formatStateUsing(fn (?string $state): string => $state ?: LandingPlatform::DEFAULT_ICON_BACKGROUND_COLOR)
+                        ->required(),
+                    ColorPicker::make('extra.icon_color')
+                        ->label('Цвет иконки')
+                        ->default(LandingPlatform::DEFAULT_ICON_COLOR)
+                        ->formatStateUsing(fn (?string $state): string => $state ?: LandingPlatform::DEFAULT_ICON_COLOR)
+                        ->required(),
                     TextInput::make('tag')
                         ->label('Тег карточки')
                         ->maxLength(255),
@@ -178,12 +182,8 @@ class BlocksRelationManager extends RelationManager
                         ->rows(2)
                         ->maxLength(2000)
                         ->columnSpanFull(),
-                    Select::make('platform_note_icon')
-                        ->label('Иконка примечания')
-                        ->options(LandingIcons::OPTIONS)
-                        ->searchable()
-                        ->dehydrateStateUsing(fn (?string $state) => LandingIcons::normalize($state))
-                        ->formatStateUsing(fn (?string $state) => LandingIcons::resolve($state)),
+                    LandingIconSelect::make('platform_note_icon')
+                        ->label('Иконка примечания'),
                     Repeater::make('platform_list_items')
                         ->label('Пункты списка')
                         ->schema([
@@ -191,12 +191,8 @@ class BlocksRelationManager extends RelationManager
                                 ->label('Текст пункта')
                                 ->required()
                                 ->maxLength(255),
-                            Select::make('icon')
-                                ->label('Иконка')
-                                ->options(LandingIcons::OPTIONS)
-                                ->searchable()
-                                ->dehydrateStateUsing(fn (?string $state) => LandingIcons::normalize($state))
-                                ->formatStateUsing(fn (?string $state) => LandingIcons::resolve($state)),
+                            LandingIconSelect::make('icon')
+                                ->label('Иконка'),
                         ])
                         ->defaultItems(0)
                         ->addActionLabel('Добавить пункт')
@@ -256,13 +252,9 @@ class BlocksRelationManager extends RelationManager
                         ->label('Цена / подпись справа')
                         ->required()
                         ->maxLength(255),
-                    Select::make('icon')
+                    LandingIconSelect::make('icon')
                         ->label('Иконка')
-                        ->options(LandingIcons::OPTIONS)
-                        ->searchable()
-                        ->required()
-                        ->dehydrateStateUsing(fn (?string $state) => LandingIcons::normalize($state))
-                        ->formatStateUsing(fn (?string $state) => LandingIcons::resolve($state)),
+                        ->required(),
                     Toggle::make('is_active')
                         ->label('Активен')
                         ->default(true),
@@ -436,11 +428,9 @@ class BlocksRelationManager extends RelationManager
                                 ->label('Пункт')
                                 ->required()
                                 ->maxLength(255),
-                            Select::make('icon')
+                            LandingIconSelect::make('icon')
                                 ->label('Иконка')
-                                ->options(LandingIcons::OPTIONS)
-                                ->searchable()
-                                ->default('check'),
+                                ->default('tabler:check'),
                         ])
                         ->defaultItems(1)
                         ->minItems(1)
@@ -514,10 +504,8 @@ class BlocksRelationManager extends RelationManager
                                 ->label('URL')
                                 ->maxLength(255)
                                 ->placeholder('#features или mailto:hello@example.com'),
-                            Select::make('icon')
+                            LandingIconSelect::make('icon')
                                 ->label('Иконка')
-                                ->options(LandingIcons::OPTIONS)
-                                ->searchable()
                                 ->nullable(),
                         ])
                         ->defaultItems(1)
@@ -792,6 +780,7 @@ class BlocksRelationManager extends RelationManager
                                 'subtitle' => $data['subtitle'] ?? null,
                                 'description' => $data['description'] ?? null,
                                 'icon' => $data['icon'] ?? null,
+                                'extra' => LandingPlatform::iconStyleExtra($data),
                                 'tag' => $data['tag'] ?? null,
                                 'sort_order' => $data['sort_order'] ?? 0,
                                 'is_active' => $data['is_active'] ?? true,
@@ -909,6 +898,10 @@ class BlocksRelationManager extends RelationManager
                                 'subtitle' => $data['subtitle'] ?? $record->subtitle,
                                 'description' => $data['description'] ?? $record->description,
                                 'icon' => $data['icon'] ?? $record->icon,
+                                'extra' => LandingPlatform::iconStyleExtra(
+                                    $data,
+                                    is_array($record->extra) ? $record->extra : [],
+                                ),
                                 'tag' => $data['tag'] ?? $record->tag,
                                 'sort_order' => $data['sort_order'] ?? $record->sort_order,
                                 'is_active' => $data['is_active'] ?? $record->is_active,

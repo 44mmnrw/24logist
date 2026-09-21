@@ -4,6 +4,112 @@ namespace App\Support;
 
 final class LandingIcons
 {
+    private const TABLER_VERSION = 'v3.46.0';
+
+    private const TABLER_PREFIX = 'tabler:';
+
+    private const TABLER_FILLED_PREFIX = 'tabler-filled:';
+
+    /** @var array<string, string> */
+    private const LEGACY_TABLER_MAP = [
+        'brand-logo' => 'truck-delivery',
+        'brand-mark' => 'truck-delivery',
+        'telegram' => 'brand-telegram',
+        'badge-star' => 'star',
+        'x' => 'x',
+        'eye' => 'eye',
+        'eye-off' => 'eye-off',
+        'check' => 'check',
+        'check-blue' => 'check',
+        'check-circle' => 'circle-check',
+        'doc-check-circle' => 'file-check',
+        'arrow-right' => 'arrow-right',
+        'chevron-down' => 'chevron-down',
+        'info-circle' => 'info-circle',
+        'user-driver' => 'user',
+        'manager-avatar' => 'user-circle',
+        'truck' => 'truck',
+        'document-fast' => 'file-time',
+        'document-signed' => 'file-check',
+        'epd-platform' => 'file-description',
+        'documents' => 'files',
+        'chart-bar' => 'chart-bar',
+        'lifebuoy' => 'lifebuoy',
+        'shield-check' => 'shield-check',
+        'calendar-alert' => 'calendar-exclamation',
+        'clipboard-list' => 'clipboard-list',
+        'clock' => 'clock',
+        'server' => 'server',
+        'route' => 'route',
+        'calculator' => 'calculator',
+        'folder-archive' => 'archive',
+        'bell' => 'bell',
+        'banknotes' => 'cash-banknote',
+        'users-card' => 'address-book',
+        'rotes' => 'route',
+        'sliders' => 'adjustments',
+        'smartphone' => 'device-mobile',
+        'browser' => 'browser',
+        'menu-dots' => 'dots',
+        'mail' => 'mail',
+        'phone' => 'phone',
+        'home' => 'home',
+        'tech-support' => 'headset',
+        'additional-seat' => 'user-plus',
+        'additional-epd' => 'file-plus',
+        'additional-cloud' => 'cloud-plus',
+    ];
+
+    /** @var list<string> */
+    private const DEFAULT_TABLER_ICONS = [
+        'check',
+        'circle-check',
+        'info-circle',
+        'arrow-right',
+        'chevron-down',
+        'truck',
+        'route',
+        'map-pin',
+        'user',
+        'users',
+        'user-plus',
+        'phone',
+        'mail',
+        'bell',
+        'clock',
+        'calendar',
+        'calendar-exclamation',
+        'clipboard-list',
+        'file',
+        'file-check',
+        'file-plus',
+        'files',
+        'folder',
+        'archive',
+        'chart-bar',
+        'calculator',
+        'cash-banknote',
+        'shield-check',
+        'lifebuoy',
+        'headset',
+        'settings',
+        'adjustments',
+        'device-mobile',
+        'browser',
+        'cloud',
+        'cloud-plus',
+        'server',
+        'link',
+        'star',
+        'heart',
+    ];
+
+    /** @var array<string, true>|null */
+    private static ?array $tablerIcons = null;
+
+    /** @var array<string, true>|null */
+    private static ?array $tablerFilledIcons = null;
+
     /** @var array<string, string> */
     private const ICON_ALIASES = [
         'map-pin' => 'rotes',
@@ -109,6 +215,22 @@ final class LandingIcons
 
         $value = trim($value);
 
+        if (str_starts_with($value, self::TABLER_FILLED_PREFIX)) {
+            $name = substr($value, strlen(self::TABLER_FILLED_PREFIX));
+
+            return isset(self::tablerIconMap(true)[$name])
+                ? self::TABLER_FILLED_PREFIX.$name
+                : null;
+        }
+
+        if (str_starts_with($value, self::TABLER_PREFIX)) {
+            $name = substr($value, strlen(self::TABLER_PREFIX));
+
+            return isset(self::tablerIconMap(false)[$name])
+                ? self::TABLER_PREFIX.$name
+                : null;
+        }
+
         if (str_starts_with($value, 'icon:')) {
             $name = substr($value, 5);
             $name = self::ICON_ALIASES[$name] ?? $name;
@@ -141,14 +263,35 @@ final class LandingIcons
             return null;
         }
 
+        if (str_starts_with($name, self::TABLER_PREFIX) || str_starts_with($name, self::TABLER_FILLED_PREFIX)) {
+            return $name;
+        }
+
         return str_starts_with($name, 'icon:') ? $name : 'icon:'.$name;
     }
 
     public static function normalize(?string $value): ?string
     {
-        $resolved = self::resolve($value);
+        $resolved = self::toTabler($value);
 
         return $resolved !== null ? self::toStorage($resolved) : null;
+    }
+
+    public static function toTabler(?string $value): ?string
+    {
+        $resolved = self::resolve($value);
+
+        if ($resolved === null || self::isTabler($resolved)) {
+            return $resolved;
+        }
+
+        $tablerName = self::LEGACY_TABLER_MAP[$resolved] ?? null;
+
+        if ($tablerName === null) {
+            return null;
+        }
+
+        return self::TABLER_PREFIX.$tablerName;
     }
 
     /**
@@ -170,11 +313,36 @@ final class LandingIcons
 
     public static function symbolHref(string $name): string
     {
+        if (str_starts_with($name, self::TABLER_FILLED_PREFIX)) {
+            $icon = substr($name, strlen(self::TABLER_FILLED_PREFIX));
+
+            return asset('icons/tabler/'.self::TABLER_VERSION.'/tabler-sprite-filled.svg').'#tabler-filled-'.$icon;
+        }
+
+        if (str_starts_with($name, self::TABLER_PREFIX)) {
+            $icon = substr($name, strlen(self::TABLER_PREFIX));
+
+            return asset('icons/tabler/'.self::TABLER_VERSION.'/tabler-sprite.svg').'#tabler-'.$icon;
+        }
+
         return '#icon-'.$name;
+    }
+
+    public static function previewHref(string $name): string
+    {
+        if (self::isTabler($name)) {
+            return self::symbolHref($name);
+        }
+
+        return asset('images/icons/sprite.svg').'#icon-'.$name;
     }
 
     public static function viewBox(string $name): string
     {
+        if (self::isTabler($name)) {
+            return '0 0 24 24';
+        }
+
         return match ($name) {
             'check-blue', 'document-fast', 'chart-bar', 'lifebuoy', 'shield-check', 'document-signed', 'truck', 'user-driver', 'calendar-alert', 'calculator', 'banknotes', 'rotes', 'folder-archive', 'bell', 'users-card' => '0 0 20 20',
             'doc-check-circle' => '0 0 16 16',
@@ -188,5 +356,156 @@ final class LandingIcons
     public static function spritePath(): string
     {
         return asset('images/icons/sprite.svg');
+    }
+
+    public static function isTabler(string $name): bool
+    {
+        return str_starts_with($name, self::TABLER_PREFIX)
+            || str_starts_with($name, self::TABLER_FILLED_PREFIX);
+    }
+
+    /** @return array<string, string> */
+    public static function initialOptions(): array
+    {
+        $options = [];
+
+        foreach (self::DEFAULT_TABLER_ICONS as $name) {
+            $value = self::TABLER_PREFIX.$name;
+
+            if (isset(self::tablerIconMap(false)[$name])) {
+                $options[$value] = self::optionLabel($value) ?? $name;
+            }
+        }
+
+        return $options;
+    }
+
+    /** @return array<string, string> */
+    public static function searchOptions(string $search, int $limit = 60): array
+    {
+        $search = TablerIconTranslations::normalize($search);
+
+        if ($search === '') {
+            return self::initialOptions();
+        }
+
+        $matches = [];
+
+        foreach (self::tablerIconMap(false) as $name => $_) {
+            $score = self::searchScore(
+                $search,
+                $name.' '.TablerIconTranslations::searchText($name).' tabler outline контурная',
+            );
+
+            if ($score !== null) {
+                $value = self::TABLER_PREFIX.$name;
+                $matches[] = [$score, $value, self::optionLabel($value) ?? $name];
+            }
+        }
+
+        foreach (self::tablerIconMap(true) as $name => $_) {
+            $score = self::searchScore(
+                $search,
+                $name.' '.TablerIconTranslations::searchText($name).' tabler filled заливка',
+            );
+
+            if ($score !== null) {
+                $value = self::TABLER_FILLED_PREFIX.$name;
+                $matches[] = [$score, $value, self::optionLabel($value) ?? $name];
+            }
+        }
+
+        usort($matches, static fn (array $left, array $right): int => [$left[0], $left[1]] <=> [$right[0], $right[1]]);
+
+        $options = [];
+
+        foreach (array_slice($matches, 0, $limit) as [, $value, $label]) {
+            $options[$value] = $label;
+        }
+
+        return $options;
+    }
+
+    public static function optionLabel(?string $value): ?string
+    {
+        $name = self::toTabler($value);
+
+        if ($name === null) {
+            return null;
+        }
+
+        if (str_starts_with($name, self::TABLER_FILLED_PREFIX)) {
+            $slug = substr($name, strlen(self::TABLER_FILLED_PREFIX));
+            $kind = 'Заливка';
+        } elseif (str_starts_with($name, self::TABLER_PREFIX)) {
+            $slug = substr($name, strlen(self::TABLER_PREFIX));
+            $kind = 'Контур';
+        } else {
+            return null;
+        }
+
+        $href = e(self::previewHref($name));
+        $viewBox = e(self::viewBox($name));
+        $title = e(TablerIconTranslations::title($slug));
+        $slug = e($slug);
+        $kind = e($kind);
+
+        return '<span style="display:flex;align-items:center;gap:.625rem;min-width:0">'
+            .'<svg viewBox="'.$viewBox.'" aria-hidden="true" style="width:1.35rem;height:1.35rem;flex:none;color:currentColor">'
+            .'<use href="'.$href.'"></use></svg>'
+            .'<span style="display:flex;min-width:0;flex-direction:column;line-height:1.2">'
+            .'<span style="overflow:hidden;text-overflow:ellipsis">'.$title.'</span>'
+            .'<span style="overflow:hidden;text-overflow:ellipsis;opacity:.55;font-size:.72rem">'.$slug.'</span>'
+            .'</span>'
+            .'<span style="margin-left:auto;opacity:.6;font-size:.75rem;white-space:nowrap">'.$kind.'</span>'
+            .'</span>';
+    }
+
+    /** @return array<string, true> */
+    private static function tablerIconMap(bool $filled): array
+    {
+        if ($filled && self::$tablerFilledIcons !== null) {
+            return self::$tablerFilledIcons;
+        }
+
+        if (! $filled && self::$tablerIcons !== null) {
+            return self::$tablerIcons;
+        }
+
+        $file = public_path('icons/tabler/'.self::TABLER_VERSION.'/tabler-sprite'.($filled ? '-filled' : '').'.svg');
+        $contents = is_file($file) ? file_get_contents($file) : false;
+        $prefix = $filled ? 'tabler-filled-' : 'tabler-';
+        $names = [];
+
+        if (is_string($contents)) {
+            preg_match_all('/<symbol id="'.preg_quote($prefix, '/').'([a-z0-9-]+)"/', $contents, $matches);
+
+            foreach ($matches[1] ?? [] as $name) {
+                $names[$name] = true;
+            }
+        }
+
+        if ($filled) {
+            return self::$tablerFilledIcons = $names;
+        }
+
+        return self::$tablerIcons = $names;
+    }
+
+    private static function searchScore(string $needle, string $haystack): ?int
+    {
+        if ($needle === $haystack) {
+            return 0;
+        }
+
+        if (str_starts_with($haystack, $needle)) {
+            return 1;
+        }
+
+        if (preg_match('/(?:^|[\s:-])'.preg_quote($needle, '/').'/', $haystack) === 1) {
+            return 2;
+        }
+
+        return str_contains($haystack, $needle) ? 3 : null;
     }
 }

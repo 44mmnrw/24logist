@@ -31,7 +31,11 @@
 
                     <div class="platform-card__head">
                         @if ($card->icon)
-                            <div class="platform-card__icon">
+                            @php($iconColors = \App\Support\LandingPlatform::iconColors($card))
+                            <div
+                                class="platform-card__icon"
+                                style="--platform-icon-background: {{ $iconColors['background'] }}; --platform-icon-color: {{ $iconColors['icon'] }};"
+                            >
                                 <x-landing.icon :name="$card->icon" />
                             </div>
                         @endif

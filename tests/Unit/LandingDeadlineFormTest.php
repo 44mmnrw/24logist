@@ -41,7 +41,7 @@ class LandingDeadlineFormTest extends TestCase
 
         $this->assertSame('ВАЖНО', $data['extra']['deadline_kicker']);
         $this->assertSame('2 сентября 2026', $data['extra']['deadline_date']);
-        $this->assertSame('icon:calendar-alert', $data['extra']['deadline_icon']);
+        $this->assertSame('tabler:calendar-exclamation', $data['extra']['deadline_icon']);
         $this->assertSame('Новый текст', $data['extra']['deadline_text']);
         $this->assertArrayNotHasKey('deadline_button_text', $data['extra']);
         $this->assertSame('preserved', $data['extra']['unrelated']);
