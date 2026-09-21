@@ -1006,6 +1006,7 @@
     text-align: left;
 }
 .pricing-card--wide__additional-heading h4 {
+    margin: 0;
     max-width: 260px;
     font-size: 22px;
     line-height: 1.25;
