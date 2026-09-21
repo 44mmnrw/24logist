@@ -1049,7 +1049,7 @@
     grid-template-columns: max-content 132px;
     gap: 16px;
     align-items: center;
-    justify-content: start;
+    justify-content: end;
     color: #0f172a;
     font-size: 14px;
     font-weight: 600;
