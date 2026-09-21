@@ -16,6 +16,7 @@ if (modal) {
     let previouslyFocusedElement = null;
     let selectedUsers = 1;
     let selectedOptionIds = [];
+    let selectedBillingPeriod = 'month';
 
     initCabinetRegistrationPartySuggestions(modal);
 
@@ -74,6 +75,7 @@ if (modal) {
         const calculator = trigger.closest('[data-wide-pricing]');
         const usersInput = calculator?.querySelector('[data-wide-pricing-users]');
         selectedUsers = Math.max(1, Number(usersInput?.value) || 1);
+        selectedBillingPeriod = calculator?.dataset.widePricingPeriod === 'year' ? 'year' : 'month';
         selectedOptionIds = [...(calculator?.querySelectorAll('[data-wide-pricing-option]:checked') || [])]
             .map((option) => Number(option.dataset.optionId))
             .filter((id) => Number.isInteger(id) && id > 0);
@@ -135,6 +137,7 @@ if (modal) {
                 email: String(formData.get('email') || '').trim(),
                 phone,
                 users: selectedUsers,
+                billing_period: selectedBillingPeriod,
                 option_ids: selectedOptionIds,
                 privacy_accepted: consentInput?.checked === true,
                 website: String(formData.get('website') || ''),

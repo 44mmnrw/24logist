@@ -29,11 +29,15 @@ class LandingLeadController extends Controller
         $maximumUsers = min(500, max($minimumUsers, (int) ($extra['users_max'] ?? 500)));
         $users = min($maximumUsers, max($minimumUsers, $request->integer('users')));
         $optionIds = collect($request->validated('option_ids', []))->map(fn ($id): int => (int) $id)->all();
+        $billingPeriod = $request->validated('billing_period', 'month') === 'year' ? 'year' : 'month';
+        $periodMonths = $billingPeriod === 'year' ? 12 : 1;
         $options = $plan
             ? $plan->children()->where('block_type', 'paid_option')->where('is_active', true)->whereIn('id', $optionIds)->get()
             : collect();
-        $total = (max(0, (int) ($plan?->price ?? 0)) * $users) + $options->sum(fn (LandingBlock $option): int => max(0, (int) $option->price));
-        $currencySuffix = trim((string) ($extra['currency_suffix'] ?? '₽/мес'));
+        $total = ((max(0, (int) ($plan?->price ?? 0)) * $users) + $options->sum(fn (LandingBlock $option): int => max(0, (int) $option->price))) * $periodMonths;
+        $currencySuffix = trim((string) ($billingPeriod === 'year'
+            ? ($extra['year_currency_suffix'] ?? '₽/год')
+            : ($extra['currency_suffix'] ?? '₽/мес')));
 
         $lead = LandingLead::query()->create([
             'type' => LandingLead::TYPE_COMMERCIAL_OFFER,
@@ -45,6 +49,7 @@ class LandingLeadController extends Controller
                 ['question' => 'Название компании', 'answer' => $request->string('company')->toString()],
                 ['question' => 'ИНН', 'answer' => $request->string('inn')->toString()],
                 ['question' => 'Количество пользователей', 'answer' => (string) $users],
+                ['question' => 'Период оплаты', 'answer' => $billingPeriod === 'year' ? 'Год' : 'Месяц'],
                 ['question' => 'Дополнительные функции', 'answer' => $options->pluck('title')->implode(', ') ?: 'Не выбраны'],
                 ['question' => 'Расчётная стоимость', 'answer' => number_format($total, 0, ',', ' ').($currencySuffix !== '' ? ' '.$currencySuffix : '')],
             ],

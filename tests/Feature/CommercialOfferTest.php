@@ -61,6 +61,7 @@ class CommercialOfferTest extends TestCase
             'phone' => '+7 (900) 000-00-00',
             'privacy_accepted' => true,
             'users' => 3,
+            'billing_period' => 'year',
             'option_ids' => [$option->id],
             'website' => '',
         ])->assertCreated()
@@ -73,8 +74,9 @@ class CommercialOfferTest extends TestCase
         $this->assertSame('ООО Тестовая логистика', $lead->quiz_answers[0]['answer']);
         $this->assertSame('7707083893', $lead->quiz_answers[1]['answer']);
         $this->assertSame('3', $lead->quiz_answers[2]['answer']);
-        $this->assertSame($option->title, $lead->quiz_answers[3]['answer']);
-        $this->assertSame('5 100 ₽/мес', $lead->quiz_answers[4]['answer']);
+        $this->assertSame('Год', $lead->quiz_answers[3]['answer']);
+        $this->assertSame($option->title, $lead->quiz_answers[4]['answer']);
+        $this->assertSame('61 200 ₽/год', $lead->quiz_answers[5]['answer']);
     }
 
     public function test_all_contact_fields_are_required_for_commercial_offer(): void

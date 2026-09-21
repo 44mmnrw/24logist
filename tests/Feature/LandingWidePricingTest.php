@@ -52,6 +52,11 @@ class LandingWidePricingTest extends TestCase
             strpos($html, 'pricing-card--wide__users'),
         );
         $this->assertStringContainsString('data-wide-pricing-users-note', $html);
+        $this->assertStringContainsString('data-wide-pricing-period-button', $html);
+        $this->assertStringContainsString('data-period="month"', $html);
+        $this->assertStringContainsString('data-period="year"', $html);
+        $this->assertStringContainsString('data-year-currency-suffix="₽/год"', $html);
+        $this->assertStringContainsString('data-wide-pricing-option-price', $html);
         $this->assertStringContainsString('data-user-count-labels=', $html);
         $this->assertStringContainsString('за одно рабочее место', $html);
         $this->assertStringContainsString('за двадцать рабочих мест', $html);
@@ -82,6 +87,7 @@ class LandingWidePricingTest extends TestCase
             'price' => 1750,
             'description' => 'за пользователя',
             'wide_currency_suffix' => '₽/мес',
+            'wide_year_currency_suffix' => '₽/год',
             'wide_additional_title' => 'Добавьте нужное',
             'wide_users_label' => 'Пользователи',
             'wide_users_min' => 2,
@@ -106,6 +112,7 @@ class LandingWidePricingTest extends TestCase
         $this->assertSame('1750', $plan->price);
         $this->assertSame('Добавьте нужное', $plan->extra['additional_title']);
         $this->assertSame(3, $plan->extra['users_default']);
+        $this->assertSame('₽/год', $plan->extra['year_currency_suffix']);
         $this->assertSame(
             '900',
             $plan->children()->where('block_type', 'paid_option')->where('title', 'Дополнительный модуль')->value('price'),

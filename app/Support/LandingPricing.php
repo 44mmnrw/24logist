@@ -15,6 +15,7 @@ final class LandingPricing
         'wide_users_max',
         'wide_users_default',
         'wide_currency_suffix',
+        'wide_year_currency_suffix',
     ];
 
     /**
@@ -121,6 +122,7 @@ final class LandingPricing
             'wide_users_max' => $maximum,
             'wide_users_default' => min($maximum, max($minimum, (int) ($extra['users_default'] ?? $minimum))),
             'wide_currency_suffix' => (string) ($extra['currency_suffix'] ?? '₽/мес'),
+            'wide_year_currency_suffix' => (string) ($extra['year_currency_suffix'] ?? '₽/год'),
             'plan_options' => self::optionsFormState($plan),
         ];
     }
@@ -143,6 +145,7 @@ final class LandingPricing
             'users_max' => $maximum,
             'users_default' => $default,
             'currency_suffix' => trim((string) ($data['wide_currency_suffix'] ?? '₽/мес')),
+            'year_currency_suffix' => trim((string) ($data['wide_year_currency_suffix'] ?? '₽/год')),
         ]);
     }
 

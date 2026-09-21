@@ -454,6 +454,7 @@ class LandingContentSeeder extends Seeder
                 'users_max' => 20,
                 'users_default' => 1,
                 'currency_suffix' => '₽/мес',
+                'year_currency_suffix' => '₽/год',
             ],
         ]);
 

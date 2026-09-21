@@ -288,6 +288,10 @@ class BlocksRelationManager extends RelationManager
                         ->label('Суффикс цены')
                         ->placeholder('₽/мес')
                         ->required(),
+                    TextInput::make('wide_year_currency_suffix')
+                        ->label('Суффикс цены за год')
+                        ->placeholder('₽/год')
+                        ->required(),
                     TextInput::make('wide_additional_title')
                         ->label('Заголовок нижней левой секции')
                         ->placeholder('Дополнительные возможности')

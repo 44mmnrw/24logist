@@ -10,6 +10,7 @@
     $basePrice = max(0, (int) ($plan?->price ?? 0));
     $initialPrice = $basePrice * $usersDefault;
     $currencySuffix = trim((string) ($planExtra['currency_suffix'] ?? '₽/мес'));
+    $yearCurrencySuffix = trim((string) ($planExtra['year_currency_suffix'] ?? '₽/год'));
     $userCountLabels = [
         1 => 'за одно рабочее место',
         2 => 'за два рабочих места',
@@ -65,6 +66,9 @@
             data-wide-pricing
             data-base-price="{{ $basePrice }}"
             data-user-count-labels='@json($userCountLabels, JSON_UNESCAPED_UNICODE)'
+            data-wide-pricing-period="month"
+            data-month-currency-suffix="{{ $currencySuffix }}"
+            data-year-currency-suffix="{{ $yearCurrencySuffix }}"
         >
             @if ($plan->tag || $plan->secondary_tag)
                 <div class="pricing-card__badges">
@@ -87,7 +91,7 @@
                 <div class="pricing-card__price" aria-live="polite">
                     <span data-wide-pricing-total>{{ number_format($initialPrice, 0, ',', ' ') }}</span>
                     @if ($currencySuffix !== '')
-                        <small>{{ $currencySuffix }}</small>
+                        <small data-wide-pricing-suffix>{{ $currencySuffix }}</small>
                     @endif
                 </div>
                 <p
@@ -110,21 +114,31 @@
                     @endforeach
                 </ul>
 
-                <div class="pricing-card--wide__users">
-                    <span>{{ $planExtra['users_label'] ?? 'Количество пользователей' }}</span>
-                    <span class="pricing-card--wide__stepper">
-                        <button type="button" data-wide-pricing-decrease aria-label="Уменьшить количество пользователей">−</button>
-                        <input
-                            type="number"
-                            value="{{ $usersDefault }}"
-                            min="{{ $usersMin }}"
-                            max="{{ $usersMax }}"
-                            readonly
-                            aria-label="{{ $planExtra['users_label'] ?? 'Количество пользователей' }}"
-                            data-wide-pricing-users
-                        >
-                        <button type="button" data-wide-pricing-increase aria-label="Увеличить количество пользователей">+</button>
-                    </span>
+                <div class="pricing-card--wide__controls">
+                    <div class="pricing-card--wide__period">
+                        <span>Период оплаты</span>
+                        <span class="pricing-card--wide__period-switch" role="group" aria-label="Период оплаты">
+                            <button type="button" data-wide-pricing-period-button data-period="month" aria-pressed="true">Месяц</button>
+                            <button type="button" data-wide-pricing-period-button data-period="year" aria-pressed="false">Год</button>
+                        </span>
+                    </div>
+
+                    <div class="pricing-card--wide__users">
+                        <span>{{ $planExtra['users_label'] ?? 'Количество пользователей' }}</span>
+                        <span class="pricing-card--wide__stepper">
+                            <button type="button" data-wide-pricing-decrease aria-label="Уменьшить количество пользователей">−</button>
+                            <input
+                                type="number"
+                                value="{{ $usersDefault }}"
+                                min="{{ $usersMin }}"
+                                max="{{ $usersMax }}"
+                                readonly
+                                aria-label="{{ $planExtra['users_label'] ?? 'Количество пользователей' }}"
+                                data-wide-pricing-users
+                            >
+                            <button type="button" data-wide-pricing-increase aria-label="Увеличить количество пользователей">+</button>
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -141,7 +155,10 @@
                                 <input type="checkbox" value="{{ $optionPrice }}" data-option-id="{{ $option->id }}" data-wide-pricing-option>
                                 <span class="pricing-card--wide__checkbox" aria-hidden="true"></span>
                                 <span class="pricing-card--wide__option-title">{{ $option->title }}</span>
-                                <strong>+{{ number_format($optionPrice, 0, ',', ' ') }} {{ $currencySuffix }}</strong>
+                                <strong>
+                                    +<span data-wide-pricing-option-price data-monthly-price="{{ $optionPrice }}">{{ number_format($optionPrice, 0, ',', ' ') }}</span>
+                                    <span data-wide-pricing-option-suffix>{{ $currencySuffix }}</span>
+                                </strong>
                             </label>
                         @endforeach
                     </div>

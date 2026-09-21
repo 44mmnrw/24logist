@@ -30,6 +30,7 @@ class StoreCommercialOfferLeadRequest extends FormRequest
             'phone' => ['required', 'string', 'max:64', 'regex:/^(?=(?:\D*\d){10,15}\D*$)[+\d][\d\s().-]*$/'],
             'privacy_accepted' => ['required', 'accepted'],
             'users' => ['required', 'integer', 'min:1', 'max:500'],
+            'billing_period' => ['sometimes', 'string', 'in:month,year'],
             'option_ids' => ['sometimes', 'array', 'max:50'],
             'option_ids.*' => ['integer', 'distinct'],
             'website' => ['nullable', 'max:0'],
