@@ -278,12 +278,14 @@ class LandingSectionResource extends Resource
                     ->maxLength(255),
                 TextInput::make('button_primary_url')
                     ->label('Ссылка основной кнопки')
+                    ->helperText('Для открытия окна регистрации укажите #registration.')
                     ->maxLength(255),
                 TextInput::make('button_secondary_text')
                     ->label('Текст второй кнопки')
                     ->maxLength(255),
                 TextInput::make('button_secondary_url')
                     ->label('Ссылка второй кнопки')
+                    ->helperText('Для открытия окна регистрации укажите #registration.')
                     ->maxLength(255),
                 TextInput::make('extra.carousel_delay_ms')
                     ->label('Задержка карусели (сек)')

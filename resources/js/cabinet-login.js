@@ -202,6 +202,32 @@ if (modal) {
         trigger.addEventListener('click', () => open('registration'));
     });
 
+    document.addEventListener('click', (event) => {
+        if (!registrationForm || event.defaultPrevented || event.button !== 0
+            || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+
+        const link = event.target instanceof Element ? event.target.closest('a[href]') : null;
+        if (!link || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
+
+        let url;
+        try {
+            url = new URL(link.href, window.location.href);
+        } catch {
+            return;
+        }
+
+        if (url.hash !== '#registration' || url.origin !== window.location.origin
+            || url.pathname !== window.location.pathname || url.search !== window.location.search) return;
+
+        event.preventDefault();
+        open('registration');
+    });
+
+    const openRegistrationFromHash = () => {
+        if (registrationForm && window.location.hash === '#registration') open('registration');
+    };
+    window.addEventListener('hashchange', openRegistrationFromHash);
+
     modal.querySelectorAll('[data-cabinet-login-close]').forEach((control) => {
         control.addEventListener('click', close);
     });
@@ -381,6 +407,7 @@ if (modal) {
     syncRegistrationSubmitState();
     setMode(currentMode);
     initCabinetRegistrationPartySuggestions(modal);
+    openRegistrationFromHash();
 }
 
 export {};
