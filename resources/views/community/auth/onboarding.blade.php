@@ -6,7 +6,7 @@
 <div class="landing-shell community-auth-shell">
     <div class="community-auth-card community-onboarding-card">
         <span class="section-kicker">Последний шаг</span>
-        <h1>Создайте публичный профиль</h1>
+        <h1>{{ $communitySeo['h1'] }}</h1>
         <div class="community-onboarding-avatar">
             <x-community.avatar :user="$user" size="lg" />
             <span>Это фото будет видно другим участникам. Заменить или удалить его можно в настройках профиля.</span>

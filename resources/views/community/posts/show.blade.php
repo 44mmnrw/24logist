@@ -1,22 +1,4 @@
 @extends('community.layout')
-@php($seo = \App\Support\OpenGraph::forCommunityPost($post))
-@section('seo')
-    <title>{{ $seo['html_title'] }}</title>
-    <x-seo.open-graph :community-post="$post" />
-@endsection
-
-@push('structured-data')
-<script type="application/ld+json">{!! json_encode([
-    '@context' => 'https://schema.org', '@type' => 'DiscussionForumPosting',
-    'headline' => $post->title, 'description' => $seo['description'], 'url' => $seo['url'],
-    'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => $seo['url']],
-    'datePublished' => $post->published_at?->toIso8601String(),
-    'dateModified' => $post->edited_at?->toIso8601String() ?: $post->updated_at?->toIso8601String(),
-    'author' => ['@type' => 'Person', 'name' => $post->author?->username ?: '[удалён]'],
-    'commentCount' => $post->comments_count, 'interactionStatistic' => ['@type' => 'InteractionCounter', 'interactionType' => 'https://schema.org/LikeAction', 'userInteractionCount' => $post->score],
-], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) !!}</script>
-@endpush
-
 @section('content')
 <div class="landing-shell community-layout community-topic-layout">
     <div class="community-topic-column">
@@ -31,7 +13,7 @@
                     @if ($post->edited_at)<span>• изменено</span>@endif
                 </div>
             </div>
-            <h1>{{ $post->title }}</h1>
+            <h1>{{ $communitySeo['h1'] }}</h1>
             @if ($post->accepted_comment_id)<span class="community-badge community-badge--resolved">Есть решение</span>@endif
             <div class="community-topic__labels">
                 <a class="community-category-pill" href="{{ route('community.categories.show', $post->category) }}">{{ $post->category->name }}</a>

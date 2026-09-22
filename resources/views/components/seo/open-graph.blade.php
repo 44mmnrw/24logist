@@ -8,10 +8,12 @@
     'blogCategory' => null,
     'notFound' => false,
     'robots' => null,
+    'metadata' => null,
 ])
 
 @php
     $meta = match (true) {
+        $metadata !== null => $metadata,
         $communityPost !== null => \App\Support\OpenGraph::forCommunityPost($communityPost),
         $blogPost !== null => \App\Support\OpenGraph::forBlogPost($blogPost),
         $blogTag !== null => \App\Support\OpenGraph::forBlogTag($blogTag),
@@ -34,8 +36,8 @@
     <meta name="robots" content="{{ $meta['robots'] }}">
 @endif
 
-@if (filled($meta['description']))
-    <meta name="description" content="{{ $meta['description'] }}">
+@if (filled($meta['meta_description'] ?? $meta['description']))
+    <meta name="description" content="{{ $meta['meta_description'] ?? $meta['description'] }}">
 @endif
 
 @if (filled($meta['keywords'] ?? null))
@@ -71,6 +73,9 @@
 @if (filled($meta['image']))
     <meta property="og:image" content="{{ $meta['image'] }}">
     <meta property="og:image:secure_url" content="{{ $meta['image'] }}">
+    @if (filled($meta['image_alt'] ?? null))
+        <meta property="og:image:alt" content="{{ $meta['image_alt'] }}">
+    @endif
     @if (filled($meta['image_width'] ?? null) && filled($meta['image_height'] ?? null))
         <meta property="og:image:width" content="{{ $meta['image_width'] }}">
         <meta property="og:image:height" content="{{ $meta['image_height'] }}">
@@ -78,10 +83,14 @@
     @if (filled($meta['image_type'] ?? null))
         <meta property="og:image:type" content="{{ $meta['image_type'] }}">
     @endif
-    <meta name="twitter:card" content="{{ $meta['twitter_card'] ?? 'summary_large_image' }}">
+@endif
+
+<meta name="twitter:card" content="{{ $meta['twitter_card'] ?? (filled($meta['image']) ? 'summary_large_image' : 'summary') }}">
+@if (filled($meta['twitter_image'] ?? $meta['image']))
     <meta name="twitter:image" content="{{ $meta['twitter_image'] ?? $meta['image'] }}">
-@else
-    <meta name="twitter:card" content="{{ $meta['twitter_card'] ?? 'summary' }}">
+    @if (filled($meta['twitter_image_alt'] ?? null))
+        <meta name="twitter:image:alt" content="{{ $meta['twitter_image_alt'] }}">
+    @endif
 @endif
 
 <meta name="twitter:title" content="{{ $meta['twitter_title'] ?? $meta['title'] }}">

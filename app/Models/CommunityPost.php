@@ -107,6 +107,13 @@ class CommunityPost extends Model
         });
 
         static::updating(function (self $post): void {
+            if ($post->isDirty('slug') && ! $post->isDirty('canonical_url')) {
+                $previousUrl = route('community.posts.show', ['post' => $post->id, 'slug' => $post->getOriginal('slug')]);
+                if (blank($post->canonical_url) || $post->canonical_url === $previousUrl) {
+                    $post->canonical_url = $post->getUrl();
+                }
+            }
+
             if (! $post->seo_is_custom && $post->isDirty([
                 'title', 'body_markdown', 'body_html', 'external_url', 'community_category_id',
             ])) {

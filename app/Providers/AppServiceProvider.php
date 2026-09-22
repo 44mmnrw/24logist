@@ -86,6 +86,16 @@ class AppServiceProvider extends ServiceProvider
         });
 
         LandingLead::observe(LandingLeadObserver::class);
+        foreach ([\App\Models\CommunityCategory::class, \App\Models\CommunityPost::class, \App\Models\CommunityUser::class] as $model) {
+            $model::observe(\App\Observers\CommunitySeoObserver::class);
+        }
+        View::composer([
+            'community.layout', 'community.index', 'community.posts.show', 'community.profile',
+            'community.legal.*', 'community.auth.*', 'community.notifications',
+            'community.posts.form', 'community.moderation.index',
+        ], function ($view): void {
+            $view->with('communitySeo', app(\App\Services\Community\CommunitySeoService::class)->current(request()));
+        });
         foreach ([ReferralProgramSetting::class, ReferralTerm::class, ReferralParticipant::class, ReferralPartnerApplication::class, ReferralPlacement::class, ReferralAttribution::class, ReferralCommission::class, ReferralPayout::class] as $model) {
             $model::observe(ReferralAuditObserver::class);
         }

@@ -5,7 +5,7 @@
 @section('content')
 <div class="landing-shell community-form-shell">
     <div class="community-form-card">
-        <h1>Настройки профиля</h1>
+        <h1>{{ $communitySeo['h1'] }}</h1>
         <form method="POST" action="{{ route('community.settings.update') }}" class="community-form" enctype="multipart/form-data">@csrf @method('PUT')
             <h2>Основные данные</h2>
             <label>

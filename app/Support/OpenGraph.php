@@ -323,6 +323,40 @@ final class OpenGraph
         return $url !== null ? self::absoluteUrl($url) : null;
     }
 
+    /** Build independent search, Open Graph and Twitter metadata for community URLs. */
+    public static function forCommunityPage(array $defaults, array $settings = []): array
+    {
+        $settings = array_filter($settings, fn ($value): bool => filled($value));
+        $htmlTitle = $settings['meta_title'] ?? $defaults['html_title'];
+        $description = $settings['meta_description'] ?? $defaults['meta_description'] ?? $defaults['description'];
+        $image = $settings['og_image_path'] ?? $defaults['image'] ?? app(SiteSettingsService::class)->get()->og_image_path;
+        $meta = self::build(
+            title: $settings['og_title'] ?? $settings['meta_title'] ?? $defaults['title'],
+            description: $settings['og_description'] ?? $settings['meta_description'] ?? $defaults['description'],
+            url: $settings['canonical_url'] ?? $defaults['url'],
+            imagePath: $image,
+            type: $settings['og_type'] ?? $defaults['type'] ?? 'website',
+            robots: $settings['meta_robots'] ?? $defaults['robots'] ?? self::ROBOTS_INDEX,
+            keywords: $settings['meta_keywords'] ?? $defaults['keywords'] ?? null,
+        );
+        $meta['html_title'] = $htmlTitle;
+        $meta['meta_description'] = $description;
+        $meta['twitter_title'] = $settings['twitter_title'] ?? $settings['og_title'] ?? $settings['meta_title'] ?? $defaults['twitter_title'] ?? $meta['title'];
+        $meta['twitter_description'] = $settings['twitter_description'] ?? $settings['og_description'] ?? $settings['meta_description'] ?? $defaults['twitter_description'] ?? $meta['description'];
+        $meta['twitter_image'] = self::absolutePublicUrl($settings['twitter_image_path'] ?? null) ?? $meta['image'];
+        $meta['twitter_card'] = $settings['twitter_card'] ?? $defaults['twitter_card'] ?? 'summary_large_image';
+        $meta['image_alt'] = $settings['og_image_alt'] ?? $meta['title'];
+        $meta['twitter_image_alt'] = $settings['twitter_image_alt'] ?? $meta['image_alt'];
+
+        if (empty($settings['og_image_path']) && filled($defaults['image'] ?? null)) {
+            foreach (['image_width', 'image_height', 'image_type'] as $key) {
+                $meta[$key] = $defaults[$key] ?? $meta[$key];
+            }
+        }
+
+        return $meta;
+    }
+
     /**
      * @return array<string, mixed>
      */

@@ -8,6 +8,8 @@ use App\Models\BlogTag;
 use App\Models\CmsPage;
 use App\Models\CommunityCategory;
 use App\Models\CommunityPost;
+use App\Models\CommunitySeoPage;
+use App\Models\CommunityUser;
 use App\Models\LandingSection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -96,6 +98,7 @@ final class SitemapService
         $lines[] = 'Allow: /storage/site/favicon/';
         $lines[] = 'Allow: /storage/site/apple-touch-icon/';
         $lines[] = 'Allow: /storage/landing/';
+        $lines[] = 'Allow: /storage/community/seo/';
 
         return $lines;
     }
@@ -223,30 +226,40 @@ final class SitemapService
         }
 
         if (app(SiteSettingsService::class)->communityEnabled()) {
-            $communityLastmod = CommunityPost::query()->published()->max('updated_at');
-            $urls[] = [
-                'loc' => route('community.index'),
-                'lastmod' => $this->formatLastmod($communityLastmod),
-                'changefreq' => 'daily',
-                'priority' => '0.8',
-            ];
-
-            CommunityCategory::query()->active()->orderBy('sort_order')->get()->each(function (CommunityCategory $category) use (&$urls): void {
+            $seoPages = CommunitySeoPage::query()->get()->keyBy('page_key');
+            $addCommunityUrl = function (string $key, string $loc, mixed $lastmod, string $frequency, string $priority, ?string $robots = null, ?string $canonical = null) use (&$urls, $seoPages): void {
+                $page = $seoPages->get($key);
+                $settings = $page?->settings ?? [];
+                $robots = filled($settings['meta_robots'] ?? null) ? $settings['meta_robots'] : ($robots ?: 'index, follow');
+                $canonical = filled($settings['canonical_url'] ?? null) ? $settings['canonical_url'] : ($canonical ?: $loc);
+                if (($settings['include_in_sitemap'] ?? true) === false
+                    || preg_match('/\b(noindex|none)\b/i', $robots)
+                    || rtrim($canonical, '/') !== rtrim($loc, '/')) {
+                    return;
+                }
                 $urls[] = [
-                    'loc' => route('community.categories.show', $category),
-                    'lastmod' => $this->formatLastmod($category->updated_at),
-                    'changefreq' => 'daily',
-                    'priority' => '0.6',
+                    'loc' => $loc,
+                    'lastmod' => $this->formatLastmod(collect([$lastmod, $page?->updated_at])->filter()->map(fn ($date) => Carbon::parse($date))->max()),
+                    'changefreq' => $frequency,
+                    'priority' => $priority,
                 ];
+            };
+            $communityLastmod = CommunityPost::query()->published()->max('updated_at');
+            $addCommunityUrl('community.index', route('community.index'), $communityLastmod, 'daily', '0.8');
+            foreach (['community.rules', 'community.privacy'] as $route) {
+                $addCommunityUrl($route, route($route), null, 'monthly', '0.3');
+            }
+
+            CommunityCategory::query()->active()->orderBy('sort_order')->get()->each(function (CommunityCategory $category) use ($addCommunityUrl): void {
+                $addCommunityUrl('category:'.$category->id, route('community.categories.show', $category), $category->updated_at, 'daily', '0.6');
             });
 
-            CommunityPost::query()->published()->orderByDesc('published_at')->get()->each(function (CommunityPost $post) use (&$urls): void {
-                $urls[] = [
-                    'loc' => $post->getUrl(),
-                    'lastmod' => $this->formatLastmod($post->updated_at),
-                    'changefreq' => 'weekly',
-                    'priority' => '0.6',
-                ];
+            CommunityPost::query()->published()->orderByDesc('published_at')->get()->each(function (CommunityPost $post) use ($addCommunityUrl): void {
+                $addCommunityUrl('post:'.$post->id, $post->getUrl(), $post->updated_at, 'weekly', '0.6', $post->meta_robots, $post->canonical_url);
+            });
+
+            CommunityUser::query()->whereNotNull('onboarded_at')->whereNotNull('terms_accepted_at')->whereNotNull('username')->each(function (CommunityUser $user) use ($addCommunityUrl): void {
+                $addCommunityUrl('profile:'.$user->id, route('community.profile', $user), $user->updated_at, 'weekly', '0.3', 'noindex, follow');
             });
         }
 

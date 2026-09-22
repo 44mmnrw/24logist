@@ -1,0 +1,2 @@
+<link rel="preload" href="<?php echo e(asset('fonts/Geologica/Geologica-VariableFont_CRSV,SHRP,slnt,wght.woff2')); ?>" as="font" type="font/woff2" crossorigin>
+<?php /**PATH C:\laragon\www\24logistru\resources\views/components/fonts/preload.blade.php ENDPATH**/ ?>

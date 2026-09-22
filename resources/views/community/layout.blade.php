@@ -4,13 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    @hasSection('seo')
-        @yield('seo')
-    @else
-        <title>@yield('title', 'Сообщество ЛогистРу')</title>
-        <meta name="description" content="@yield('description', 'Обсуждения перевозок, электронных документов и цифровой логистики в сообществе ЛогистРу.')">
-        <meta name="robots" content="@yield('robots', 'index, follow, max-image-preview:large')">
-        <link rel="canonical" href="@yield('canonical', url()->current())">
+    <title>{{ $communitySeo['html_title'] }}</title>
+    <x-seo.open-graph :metadata="$communitySeo" :community-post="request()->routeIs('community.posts.show') ? request()->route('post') : null" />
+    @if ($communitySeo['schema'])
+        <script type="application/ld+json">{!! json_encode($communitySeo['schema'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR) !!}</script>
     @endif
     <x-site.favicon />
     <x-fonts.preload />

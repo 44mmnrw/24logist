@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="landing-shell community-form-shell">
-    <h1>Очередь модерации</h1>
+    <h1>{{ $communitySeo['h1'] }}</h1>
     <div class="community-report-list">
         @forelse($reports as $report)
             @php

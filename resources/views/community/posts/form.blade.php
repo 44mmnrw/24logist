@@ -4,6 +4,7 @@
 
 @section('content')
 <div class="landing-shell community-form-shell community-submit-shell">
+    <h1 class="community-composer-sr-only">{{ $communitySeo['h1'] }}</h1>
     <form method="POST" action="{{ $post->exists ? route('community.posts.update', $post) : route('community.posts.store') }}" class="community-form community-submit-form" enctype="multipart/form-data" data-community-composer>
         <div class="community-submit-form__top">
             @csrf

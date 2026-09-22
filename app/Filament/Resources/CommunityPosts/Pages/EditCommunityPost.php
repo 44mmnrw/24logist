@@ -53,7 +53,7 @@ class EditCommunityPost extends EditRecord
         ];
         $data['seo_is_custom'] = $this->getRecord()->seo_is_custom
             || collect($seoFields)->contains(function (string $field) use ($data): bool {
-                return (string) ($data[$field] ?? '') !== (string) $this->getRecord()->getOriginal($field);
+                return array_key_exists($field, $data) && (string) ($data[$field] ?? '') !== (string) $this->getRecord()->getOriginal($field);
             });
 
         return $data;

@@ -1,0 +1,10 @@
+<?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($photos->isNotEmpty()): ?>
+    <div class="<?php echo \Illuminate\Support\Arr::toCssClasses(['community-photo-gallery', 'community-photo-gallery--compact' => $compact ?? false, 'community-photo-gallery--feed' => $feed ?? false]); ?>">
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $photos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $photo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+            <a href="<?php echo e($photo->getUrl()); ?>" target="_blank" rel="noopener" aria-label="Открыть фото <?php echo e($loop->iteration); ?>">
+                <img src="<?php echo e($photo->getUrl()); ?>" alt="Фото <?php echo e($loop->iteration); ?>" width="<?php echo e($photo->width); ?>" height="<?php echo e($photo->height); ?>" loading="lazy" decoding="async">
+            </a>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+    </div>
+<?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+<?php /**PATH C:\laragon\www\24logistru\resources\views/community/photos/_gallery.blade.php ENDPATH**/ ?>

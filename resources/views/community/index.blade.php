@@ -6,7 +6,7 @@
 @section('content')
 <div class="landing-shell community-layout">
     <section class="community-feed">
-        <h1 class="community-feed__heading">{{ $activeCategory?->name ?: 'Обсуждения сообщества' }}</h1>
+        <h1 class="community-feed__heading">{{ $communitySeo['h1'] }}</h1>
 
         @php($sortLabels = ['hot' => 'Актуальное', 'new' => 'Новое', 'top' => 'Лучшее', 'unanswered' => 'Ждут ответа'])
         <nav class="community-sort" aria-label="Сортировка тем" data-community-sort>

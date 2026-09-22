@@ -6,7 +6,7 @@
 <div class="landing-shell community-auth-shell">
     <div class="community-auth-card">
         <span class="section-kicker">Без пароля</span>
-        <h1>{{ request()->routeIs('community.register') ? 'Зарегистрироваться в сообществе' : 'Войти в сообщество' }}</h1>
+        <h1>{{ $communitySeo['h1'] }}</h1>
         <p>{{ request()->routeIs('community.register') ? 'Выберите способ регистрации. После подтверждения входа вы создадите публичный профиль и зададите псевдоним.' : 'Выберите удобный способ входа. Публично будет виден только псевдоним, который вы зададите после входа.' }}</p>
         <div class="community-auth-buttons">
             @if (app(\App\Services\SiteSettingsService::class)->communityTelegramEnabled())

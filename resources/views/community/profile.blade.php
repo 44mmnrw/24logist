@@ -8,7 +8,7 @@
         <header class="community-profile-header">
             <x-community.avatar :user="$user" size="lg" />
             <div class="community-profile-details">
-                <h1>{{ $user->displayName() }}</h1>
+                <h1>{{ $communitySeo['h1'] }}</h1>
                 <p class="community-profile-handle">{{ '@'.$user->username }}</p>
                 <p>
                     @if ($user->transportRoleLabel())<span>{{ $user->transportRoleLabel() }}</span> · @endif
