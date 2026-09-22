@@ -14,11 +14,7 @@
             </div>
             <div class="final-cta__actions">
                 @if ($section?->button_primary_text)
-                    @if (filled($section->button_primary_url))
-                        <a href="{{ \App\Support\LandingLinks::resolve($section->button_primary_url) }}" class="btn btn--primary">{{ $section->button_primary_text }}</a>
-                    @else
-                        <button type="button" class="btn btn--primary">{{ $section->button_primary_text }}</button>
-                    @endif
+                    <button type="button" class="btn btn--primary" data-cabinet-registration-open>{{ $section->button_primary_text }}</button>
                 @endif
                 @if ($section?->button_secondary_text)
                     @if (filled($section->button_secondary_url))

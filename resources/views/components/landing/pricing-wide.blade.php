@@ -2,10 +2,6 @@
     $section = $landing->section('pricing_wide');
     $plan = $landing->blocks('pricing_wide', 'plan')->first();
     $planExtra = is_array($plan?->extra) ? $plan->extra : [];
-    $additionalTitle = $planExtra['additional_title'] ?? 'Добавить к тарифу';
-    if ($additionalTitle === 'Дополнительные возможности') {
-        $additionalTitle = 'Добавить к тарифу';
-    }
     $features = $plan?->children->where('block_type', 'feature')->values() ?? collect();
     $paidOptions = $plan?->children->where('block_type', 'paid_option')->values() ?? collect();
     $usersMin = max(1, (int) ($planExtra['users_min'] ?? 1));
@@ -141,7 +137,7 @@
 
             <div class="pricing-card--wide__additional-heading">
                 @if ($paidOptions->isNotEmpty())
-                    <h4>{{ $additionalTitle }}</h4>
+                    <h4>{{ $planExtra['additional_title'] ?? 'Дополнительные возможности' }}</h4>
                 @endif
             </div>
 

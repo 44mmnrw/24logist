@@ -304,8 +304,9 @@
     content: "";
     position: absolute;
     z-index: 0;
-    top: 20px;
-    bottom: 0;
+    /* Overlap the SVG ring edges, including the next icon's 5px top offset. */
+    top: 19px;
+    bottom: -7px;
     left: 7px;
     width: 2px;
     border-radius: 999px;
@@ -317,7 +318,7 @@
     height: 16px;
     margin-top: 5px;
     color: #16a34a;
-    background: #fff;
+    background: transparent;
 }
 .hero-list--progress .hero-list__icon::before {
     display: none;

@@ -54,11 +54,12 @@
             <ul class="hero-list hero-list--progress">
                 @foreach ($bullets as $bullet)
                     <li>
-                        @if ($bullet->icon)
-                            <span class="hero-list__icon" aria-hidden="true">
-                                <x-landing.icon :name="$bullet->icon" />
-                            </span>
-                        @endif
+                        <span class="hero-list__icon" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="landing-icon" viewBox="0 0 16 16" fill="none" focusable="false">
+                                <path d="M14.5341 6.66666C14.8385 8.16086 14.6215 9.71428 13.9193 11.0679C13.2171 12.4214 12.072 13.4934 10.6751 14.1049C9.27816 14.7164 7.71382 14.8305 6.24293 14.4282C4.77205 14.026 3.48353 13.1316 2.59225 11.8943C1.70097 10.657 1.26081 9.15148 1.34518 7.62892C1.42954 6.10635 2.03332 4.65872 3.05583 3.52744C4.07835 2.39616 5.45779 1.64961 6.96411 1.4123C8.47043 1.17498 10.0126 1.46123 11.3334 2.22333" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M6 7.33334L8 9.33334L14.6667 2.66667" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </span>
                         {{ $bullet->title }}
                     </li>
                 @endforeach

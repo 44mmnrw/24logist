@@ -65,7 +65,7 @@ class LandingWidePricingTest extends TestCase
         $this->assertStringContainsString('data-wide-pricing-decrease', $html);
         $this->assertStringContainsString('data-wide-pricing-increase', $html);
         $this->assertStringContainsString('data-wide-pricing-option', $html);
-        $this->assertStringContainsString('Добавить к тарифу', $html);
+        $this->assertStringContainsString('Дополнительные возможности', $html);
         $this->assertStringContainsString('Модуль ЭПД', $html);
         $this->assertStringContainsString('Получить предложение', $html);
         $this->assertStringContainsString('Выделенный менеджер', $html);
