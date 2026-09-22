@@ -2,6 +2,10 @@
     $section = $landing->section('pricing_wide');
     $plan = $landing->blocks('pricing_wide', 'plan')->first();
     $planExtra = is_array($plan?->extra) ? $plan->extra : [];
+    $additionalTitle = $planExtra['additional_title'] ?? 'Добавить к тарифу';
+    if ($additionalTitle === 'Дополнительные возможности') {
+        $additionalTitle = 'Добавить к тарифу';
+    }
     $features = $plan?->children->where('block_type', 'feature')->values() ?? collect();
     $paidOptions = $plan?->children->where('block_type', 'paid_option')->values() ?? collect();
     $usersMin = max(1, (int) ($planExtra['users_min'] ?? 1));
@@ -62,7 +66,7 @@
         </header>
 
         <article
-            @class(['pricing-card', 'pricing-card--wide', 'pricing-card--hit' => $plan->is_highlighted])
+            class="pricing-card pricing-card--wide"
             data-wide-pricing
             data-base-price="{{ $basePrice }}"
             data-user-count-labels='@json($userCountLabels, JSON_UNESCAPED_UNICODE)'
@@ -70,43 +74,36 @@
             data-month-currency-suffix="{{ $currencySuffix }}"
             data-year-currency-suffix="{{ $yearCurrencySuffix }}"
         >
-            @if ($plan->tag || $plan->secondary_tag)
-                <div class="pricing-card__badges">
-                    @if ($plan->tag)
-                        <span class="pricing-hit">{{ $plan->tag }}</span>
-                    @endif
-                    @if ($plan->secondary_tag)
-                        <span class="pricing-hit pricing-hit--secondary">{{ $plan->secondary_tag }}</span>
-                    @endif
-                </div>
-            @endif
-
             <div class="pricing-card--wide__details">
-                @if ($plan->title)
-                    <h3>{{ $plan->title }}</h3>
-                @endif
-                @if ($plan->subtitle)
-                    <p class="pricing-card__desc">{{ $plan->subtitle }}</p>
-                @endif
-                <div class="pricing-card__price" aria-live="polite">
-                    <span data-wide-pricing-total>{{ number_format($initialPrice, 0, ',', ' ') }}</span>
-                    @if ($currencySuffix !== '')
-                        <small data-wide-pricing-suffix>{{ $currencySuffix }}</small>
+                <div class="pricing-card--wide__intro">
+                    @if ($plan->title)
+                        <h3>{{ $plan->title }}</h3>
+                    @endif
+                    @if ($plan->subtitle)
+                        <p class="pricing-card__desc">{{ $plan->subtitle }}</p>
                     @endif
                 </div>
-                <p
-                    class="pricing-card__price-note"
-                    data-wide-pricing-users-note
-                >
-                    {{ $initialUsersNote }}
-                </p>
+                <div class="pricing-card--wide__summary">
+                    <div class="pricing-card__price" aria-live="polite">
+                        <span data-wide-pricing-total>{{ number_format($initialPrice, 0, ',', ' ') }}</span>
+                        @if ($currencySuffix !== '')
+                            <small data-wide-pricing-suffix>{{ $currencySuffix }}</small>
+                        @endif
+                    </div>
+                    <p
+                        class="pricing-card__price-note"
+                        data-wide-pricing-users-note
+                    >
+                        {{ $initialUsersNote }}
+                    </p>
+                </div>
             </div>
 
             <div class="pricing-card--wide__features">
                 <ul>
                     @foreach ($features as $feature)
                         <li>
-                            <svg viewBox="0 0 16 16" width="20" height="20" fill="none" aria-hidden="true" class="pricing-card__check">
+                            <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true" class="pricing-card__check">
                                 <use href="#icon-doc-check-circle" xlink:href="#icon-doc-check-circle" />
                             </svg>
                             {{ $feature->title }}
@@ -115,14 +112,6 @@
                 </ul>
 
                 <div class="pricing-card--wide__controls">
-                    <div class="pricing-card--wide__period">
-                        <span>Период оплаты</span>
-                        <span class="pricing-card--wide__period-switch" role="group" aria-label="Период оплаты">
-                            <button type="button" data-wide-pricing-period-button data-period="month" aria-pressed="true">Месяц</button>
-                            <button type="button" data-wide-pricing-period-button data-period="year" aria-pressed="false">Год</button>
-                        </span>
-                    </div>
-
                     <div class="pricing-card--wide__users">
                         <span>{{ $planExtra['users_label'] ?? 'Количество пользователей' }}</span>
                         <span class="pricing-card--wide__stepper">
@@ -139,11 +128,21 @@
                             <button type="button" data-wide-pricing-increase aria-label="Увеличить количество пользователей">+</button>
                         </span>
                     </div>
+
+                    <div class="pricing-card--wide__period">
+                        <span>Период оплаты</span>
+                        <span class="pricing-card--wide__period-switch" role="group" aria-label="Период оплаты">
+                            <button type="button" data-wide-pricing-period-button data-period="month" aria-pressed="true">Месяц</button>
+                            <button type="button" data-wide-pricing-period-button data-period="year" aria-pressed="false">Год</button>
+                        </span>
+                    </div>
                 </div>
             </div>
 
             <div class="pricing-card--wide__additional-heading">
-                <h4>{{ $planExtra['additional_title'] ?? 'Дополнительные возможности' }}</h4>
+                @if ($paidOptions->isNotEmpty())
+                    <h4>{{ $additionalTitle }}</h4>
+                @endif
             </div>
 
             <div class="pricing-card--wide__configurator">

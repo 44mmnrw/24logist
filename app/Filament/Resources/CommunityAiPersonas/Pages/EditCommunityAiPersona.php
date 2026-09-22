@@ -4,12 +4,20 @@ namespace App\Filament\Resources\CommunityAiPersonas\Pages;
 
 use App\Filament\Resources\CommunityAiPersonas\CommunityAiPersonaResource;
 use App\Services\Community\CommunityAiPersonaPromptBuilder;
+use App\Services\Community\CommunityAvatarService;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Validation\ValidationException;
 
 class EditCommunityAiPersona extends EditRecord
 {
     protected static string $resource = CommunityAiPersonaResource::class;
+
+    private ?string $previousAvatarPath = null;
+
+    protected function beforeSave(): void
+    {
+        $this->previousAvatarPath = $this->record->communityUser?->avatar_path;
+    }
 
     /** @param array<string, mixed> $data */
     protected function mutateFormDataBeforeSave(array $data): array
@@ -37,5 +45,10 @@ class EditCommunityAiPersona extends EditRecord
         $persona->forceFill([
             'system_prompt' => app(CommunityAiPersonaPromptBuilder::class)->build($persona),
         ])->saveQuietly();
+
+        $currentAvatarPath = $persona->communityUser?->avatar_path;
+        if ($this->previousAvatarPath !== $currentAvatarPath) {
+            app(CommunityAvatarService::class)->deletePath($this->previousAvatarPath);
+        }
     }
 }

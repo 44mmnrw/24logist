@@ -42,7 +42,8 @@ class LandingWidePricingTest extends TestCase
         $this->assertStringContainsString('pricing-card--wide__features', $html);
         $this->assertStringContainsString('pricing-card--wide__additional-heading', $html);
         $this->assertStringContainsString('pricing-card--wide__configurator', $html);
-        $this->assertStringContainsString('pricing-card--hit', $html);
+        $this->assertStringNotContainsString('pricing-card--hit', $html);
+        $this->assertStringNotContainsString('pricing-card__badges', $html);
         $this->assertStringNotContainsString('btn--full', $html);
         $this->assertStringContainsString('data-base-price="1200"', $html);
         $this->assertStringContainsString('data-wide-pricing-users', $html);
@@ -64,7 +65,7 @@ class LandingWidePricingTest extends TestCase
         $this->assertStringContainsString('data-wide-pricing-decrease', $html);
         $this->assertStringContainsString('data-wide-pricing-increase', $html);
         $this->assertStringContainsString('data-wide-pricing-option', $html);
-        $this->assertStringContainsString('Дополнительные возможности', $html);
+        $this->assertStringContainsString('Добавить к тарифу', $html);
         $this->assertStringContainsString('Модуль ЭПД', $html);
         $this->assertStringContainsString('Получить предложение', $html);
         $this->assertStringContainsString('Выделенный менеджер', $html);

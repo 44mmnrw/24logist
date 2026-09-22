@@ -5,8 +5,10 @@ namespace App\Filament\Resources\CommunityAiPersonas;
 use App\Filament\Resources\CommunityAiPersonas\Pages\EditCommunityAiPersona;
 use App\Filament\Resources\CommunityAiPersonas\Pages\ListCommunityAiPersonas;
 use App\Models\CommunityAiPersona;
+use App\Models\CommunityUser;
 use BackedEnum;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -15,6 +17,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -37,6 +40,33 @@ class CommunityAiPersonaResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
+            Section::make('Профиль персонажа')
+                ->description('Аватар отображается рядом с темами и комментариями персонажа в сообществе.')
+                ->relationship('communityUser')
+                ->schema([
+                    FileUpload::make('avatar_path')
+                        ->label('Аватар персонажа')
+                        ->disk('public')
+                        ->directory(fn (?CommunityUser $record): string => 'community/avatars/'.($record?->getKey() ?? 'ai'))
+                        ->visibility('public')
+                        ->image()
+                        ->imageEditor()
+                        ->imageCropAspectRatio('1:1')
+                        ->imageResizeTargetWidth(1024)
+                        ->imageResizeTargetHeight(1024)
+                        ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                        ->maxSize(8192)
+                        ->openable()
+                        ->downloadable()
+                        ->helperText('JPG, PNG или WebP, до 8 МБ. Рекомендуется квадратное изображение.')
+                        ->columnSpanFull(),
+                ])
+                ->mutateRelationshipDataBeforeSaveUsing(function (array $data): array {
+                    $data['avatar_source'] = filled($data['avatar_path'] ?? null) ? 'custom' : null;
+
+                    return $data;
+                })
+                ->columnSpanFull(),
             Section::make('Характер и голос')
                 ->description('Эти настройки принадлежат платформе и передаются модели в системном сообщении при каждой генерации.')
                 ->schema([
@@ -167,6 +197,11 @@ class CommunityAiPersonaResource extends Resource
     {
         return $table
             ->columns([
+                ImageColumn::make('communityUser.avatar_path')
+                    ->label('Аватар')
+                    ->disk('public')
+                    ->circular()
+                    ->defaultImageUrl(null),
                 TextColumn::make('communityUser.display_name')
                     ->label('Персонаж')
                     ->description(fn (CommunityAiPersona $record): string => '@'.$record->communityUser->username)

@@ -10,6 +10,8 @@ use App\Models\User;
 use App\Services\Community\CommunityAiPersonaPromptBuilder;
 use Database\Seeders\CommunityAiPersonaSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -155,10 +157,34 @@ class CommunityAiPersonaSeederTest extends TestCase
         $this->actingAs(User::factory()->create())
             ->get(CommunityAiPersonaResource::getUrl('edit', ['record' => $persona]))
             ->assertOk()
+            ->assertSeeText('Аватар персонажа')
             ->assertSeeText('Характер и голос')
             ->assertSeeText('Профессиональная речь')
             ->assertSeeText('Грамотность и естественные неровности')
             ->assertSeeText('Модель выбирается в настройках самого агента Timeweb');
+    }
+
+    public function test_admin_can_upload_an_ai_persona_avatar(): void
+    {
+        Storage::fake('public');
+        $this->seed(CommunityAiPersonaSeeder::class);
+        $persona = CommunityAiPersona::query()->with('communityUser')->firstOrFail();
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(EditCommunityAiPersona::class, ['record' => $persona->getRouteKey()])
+            ->fillForm([
+                'communityUser' => [
+                    'avatar_path' => UploadedFile::fake()->image('persona-avatar.png', 512, 512),
+                ],
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $user = $persona->communityUser->fresh();
+        $this->assertNotNull($user->avatar_path);
+        $this->assertStringStartsWith('community/avatars/'.$user->id.'/', $user->avatar_path);
+        $this->assertSame('custom', $user->avatar_source);
+        Storage::disk('public')->assertExists($user->avatar_path);
     }
 
     public function test_admin_can_save_persona_voice_settings_used_by_the_prompt(): void
