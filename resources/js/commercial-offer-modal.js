@@ -1,5 +1,6 @@
 import { initCabinetRegistrationPartySuggestions } from './cabinet-registration-party-suggestions.js';
 import { postJson } from './landing-forms.js';
+import { createSmartCaptcha } from './smartcaptcha.js';
 
 const modal = document.querySelector('[data-commercial-offer-modal]');
 
@@ -13,6 +14,7 @@ if (modal) {
     const submitWrap = form?.querySelector('[data-commercial-offer-submit-wrap]');
     const consentInput = form?.querySelector('[data-commercial-offer-consent]');
     const phoneInput = form?.querySelector('[name="phone"]');
+    const captcha = createSmartCaptcha(form);
     let previouslyFocusedElement = null;
     let selectedUsers = 1;
     let selectedOptionIds = [];
@@ -61,6 +63,7 @@ if (modal) {
 
     const close = () => {
         if (modal.hidden) return;
+        captcha.reset();
         modal.classList.remove('is-visible');
         modal.setAttribute('aria-hidden', 'true');
         document.documentElement.classList.remove('commercial-offer-open');
@@ -92,6 +95,7 @@ if (modal) {
         window.requestAnimationFrame(() => {
             modal.classList.add('is-visible');
             form?.querySelector('[name="name"]')?.focus();
+            captcha.load();
         });
     };
 
@@ -109,6 +113,7 @@ if (modal) {
 
     form?.addEventListener('submit', async (event) => {
         event.preventDefault();
+        if (form.dataset.submitting === 'true') return;
         showError();
 
         if (!form.checkValidity()) {
@@ -131,6 +136,7 @@ if (modal) {
 
         try {
             const payload = await postJson(modal.dataset.submitUrl || '', {
+                smart_token: await captcha.getToken(),
                 name: String(formData.get('name') || '').trim(),
                 company: String(formData.get('company') || '').trim(),
                 inn: String(formData.get('inn') || '').replace(/\D/g, ''),
@@ -152,6 +158,7 @@ if (modal) {
         } catch (error) {
             showError(error instanceof Error ? error.message : 'Не удалось отправить заявку. Попробуйте ещё раз.');
         } finally {
+            captcha.reset();
             if (form) form.dataset.submitting = 'false';
             syncSubmitState();
             if (submitButton) {

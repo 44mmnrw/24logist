@@ -8,16 +8,19 @@ use App\Http\Requests\StoreEpdPresentationLeadRequest;
 use App\Http\Requests\StoreQuizLeadRequest;
 use App\Models\LandingBlock;
 use App\Models\LandingLead;
+use App\Services\SmartCaptchaService;
 use App\Support\LandingLeadQuizAnswers;
 use Illuminate\Http\JsonResponse;
 
 class LandingLeadController extends Controller
 {
-    public function storeCommercialOffer(StoreCommercialOfferLeadRequest $request): JsonResponse
+    public function storeCommercialOffer(StoreCommercialOfferLeadRequest $request, SmartCaptchaService $captcha): JsonResponse
     {
         if ($request->filled('website')) {
             return response()->json(['message' => 'Заявка принята.'], 201);
         }
+
+        $captcha->validate('commercial_offer', (string) $request->validated('smart_token', ''), $request->ip(), $request->getHost());
 
         $plan = LandingBlock::query()
             ->where('section_slug', 'pricing_wide')
@@ -100,11 +103,13 @@ class LandingLeadController extends Controller
         ], 201);
     }
 
-    public function storeContact(StoreContactLeadRequest $request): JsonResponse
+    public function storeContact(StoreContactLeadRequest $request, SmartCaptchaService $captcha): JsonResponse
     {
         if ($request->filled('website')) {
             return response()->json(['message' => 'Сообщение отправлено.'], 201);
         }
+
+        $captcha->validate('contact', (string) $request->validated('smart_token', ''), $request->ip(), $request->getHost());
 
         $lead = LandingLead::query()->create([
             'type' => LandingLead::TYPE_CONTACT,

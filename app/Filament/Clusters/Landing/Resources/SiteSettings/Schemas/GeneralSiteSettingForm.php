@@ -49,6 +49,10 @@ final class GeneralSiteSettingForm
                         ->label('Личный кабинет')
                         ->icon('heroicon-o-arrow-right-end-on-rectangle')
                         ->schema(self::cabinetLoginTab()),
+                    Tab::make('smartcaptcha')
+                        ->label('Яндекс SmartCaptcha')
+                        ->icon('heroicon-o-shield-check')
+                        ->schema(self::smartCaptchaTab()),
                     Tab::make('telegram_popup')
                         ->label('Telegram-окно')
                         ->icon('heroicon-o-paper-airplane')
@@ -78,6 +82,41 @@ final class GeneralSiteSettingForm
     /**
      * @return array<int, mixed>
      */
+    private static function smartCaptchaTab(): array
+    {
+        $enabled = static fn (Get $get): bool => (bool) ($get('smartcaptcha_commercial_offer_enabled') || $get('smartcaptcha_contact_enabled'));
+
+        return [
+            Section::make('Защита форм от спама')
+                ->description('Создайте капчу в Яндекс Cloud, разрешите домен сайта и скопируйте ключи. Для обеих форм используется один набор ключей.')
+                ->schema([
+                    Toggle::make('smartcaptcha_commercial_offer_enabled')
+                        ->label('Капча в окне «Получить предложение»')
+                        ->live(),
+                    Toggle::make('smartcaptcha_contact_enabled')
+                        ->label('Капча в форме контактов')
+                        ->live(),
+                    TextInput::make('smartcaptcha_site_key')
+                        ->label('Ключ клиента')
+                        ->required($enabled)
+                        ->maxLength(255)
+                        ->helperText('Публичный ключ для виджета на сайте.'),
+                    TextInput::make('smartcaptcha_server_key')
+                        ->label('Ключ сервера')
+                        ->password()
+                        ->revealable()
+                        ->autocomplete('new-password')
+                        ->required(fn (Get $get, ?SiteSetting $record): bool => $enabled($get) && ! $record?->hasSecret('smartcaptcha_server_key'))
+                        ->maxLength(512)
+                        ->placeholder(fn (?SiteSetting $record): string => $record?->hasSecret('smartcaptcha_server_key') ? '***' : '')
+                        ->helperText('Хранится зашифрованно. Оставьте пустым, чтобы сохранить действующий ключ.'),
+                ])
+                ->columns(2)
+                ->columnSpanFull(),
+        ];
+    }
+
+    /** @return array<int, mixed> */
     private static function iconsTab(): array
     {
         return [

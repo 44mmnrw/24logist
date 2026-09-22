@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Services\SmartCaptchaService;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreCommercialOfferLeadRequest extends FormRequest
 {
@@ -23,6 +25,7 @@ class StoreCommercialOfferLeadRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'smart_token' => [Rule::requiredIf(app(SmartCaptchaService::class)->enabled('commercial_offer')), 'nullable', 'string', 'max:4096'],
             'name' => ['required', 'string', 'max:255'],
             'inn' => ['required', 'string', 'regex:/^(?:\d{10}|\d{12})$/'],
             'company' => ['required', 'string', 'max:255'],
@@ -41,6 +44,7 @@ class StoreCommercialOfferLeadRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'smart_token.required' => 'Подтвердите, что вы не робот.',
             'name.required' => 'Укажите имя.',
             'inn.required' => 'Укажите ИНН.',
             'inn.regex' => 'ИНН должен содержать 10 или 12 цифр.',

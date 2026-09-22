@@ -114,6 +114,7 @@
                         <label>{{ $phoneLabel }}<input type="tel" name="phone" autocomplete="tel" required placeholder="{{ $phonePlaceholder }}"></label>
                         <label>{{ $emailLabel }}<input type="email" name="email" autocomplete="email" placeholder="{{ $emailPlaceholder }}"></label>
                         <label>{{ $messageLabel }}<textarea name="message" rows="4" placeholder="{{ $messagePlaceholder }}"></textarea></label>
+                        <x-site.smartcaptcha form="contact" />
                         <p class="contacts-v2-form__error" data-contact-error hidden></p>
                         <p class="contacts-v2-form__success" data-contact-success hidden data-default-success="{{ $successMessage }}"></p>
                         <button type="submit" class="btn btn--primary btn--full"><x-landing.icon name="icon:arrow-right" />{{ $submitText }}</button>

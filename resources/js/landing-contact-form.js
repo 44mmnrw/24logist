@@ -1,4 +1,5 @@
 import { postJson } from './landing-forms.js';
+import { createSmartCaptcha } from './smartcaptcha.js';
 
 function initContactForm(form) {
     const submitUrl = form.dataset.submitUrl;
@@ -10,6 +11,8 @@ function initContactForm(form) {
     const errorNode = form.querySelector('[data-contact-error]');
     const successNode = form.querySelector('[data-contact-success]');
     const submitButton = form.querySelector('[type="submit"]');
+    const captcha = createSmartCaptcha(form);
+    captcha.load();
 
     const showError = (message) => {
         if (!errorNode) {
@@ -31,6 +34,7 @@ function initContactForm(form) {
 
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
+        if (form.dataset.submitting === 'true') return;
         showError('');
         showSuccess('');
 
@@ -46,12 +50,14 @@ function initContactForm(form) {
             return;
         }
 
+        form.dataset.submitting = 'true';
         if (submitButton) {
             submitButton.disabled = true;
         }
 
         try {
             const payload = await postJson(submitUrl, {
+                smart_token: await captcha.getToken(),
                 name,
                 phone,
                 email: email || null,
@@ -65,6 +71,8 @@ function initContactForm(form) {
         } catch (error) {
             showError(error instanceof Error ? error.message : 'Не удалось отправить сообщение.');
         } finally {
+            captcha.reset();
+            form.dataset.submitting = 'false';
             if (submitButton) {
                 submitButton.disabled = false;
             }

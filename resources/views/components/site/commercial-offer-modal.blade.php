@@ -57,6 +57,8 @@
 
                 <input class="landing-form-honeypot" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
 
+                <x-site.smartcaptcha form="commercial_offer" />
+
                 <p class="cabinet-login-modal__error cabinet-login-modal__field--wide" data-commercial-offer-error role="alert" hidden></p>
 
                 <label class="cabinet-login-modal__check commercial-offer-modal__consent cabinet-login-modal__field--wide">

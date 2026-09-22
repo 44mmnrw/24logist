@@ -5140,6 +5140,12 @@ html.commercial-offer-open {
     line-height: 1.4;
 }
 
+.site-smartcaptcha { grid-column: 1 / -1; min-width: 0; width: 100%; }
+.site-smartcaptcha__widget { min-height: 100px; }
+.site-smartcaptcha__status { margin: 8px 0 0; color: #45556c; font-size: 13px; line-height: 1.5; }
+.site-smartcaptcha__retry { margin-top: 8px; padding: 0; border: 0; background: none; color: #1d4ed8; font: inherit; text-decoration: underline; cursor: pointer; }
+.site-smartcaptcha [hidden] { display: none; }
+
 .commercial-offer-modal__card { width: min(620px, 100%); }
 .commercial-offer-modal__form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .commercial-offer-modal__consent {

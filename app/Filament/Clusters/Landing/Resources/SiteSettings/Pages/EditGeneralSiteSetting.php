@@ -88,7 +88,7 @@ class EditGeneralSiteSetting extends EditRecord
         }
 
         $data['mail_password'] = '';
-        foreach (['route_api_secret', 'cabinet_login_api_secret'] as $field) {
+        foreach (['route_api_secret', 'cabinet_login_api_secret', 'smartcaptcha_server_key'] as $field) {
             $data[$field] = '';
         }
 
@@ -109,7 +109,7 @@ class EditGeneralSiteSetting extends EditRecord
 
         unset($data['mail_password']);
 
-        foreach (['route_api_secret', 'cabinet_login_api_secret'] as $field) {
+        foreach (['route_api_secret', 'cabinet_login_api_secret', 'smartcaptcha_server_key'] as $field) {
             if (filled($data[$field] ?? null)) {
                 $this->pendingCommunitySecrets[$field] = (string) $data[$field];
             }

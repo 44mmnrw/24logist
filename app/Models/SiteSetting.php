@@ -7,7 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class SiteSetting extends Model
 {
+    protected $hidden = ['smartcaptcha_server_key'];
+
     protected $fillable = [
+        'smartcaptcha_commercial_offer_enabled',
+        'smartcaptcha_contact_enabled',
+        'smartcaptcha_site_key',
+        'smartcaptcha_server_key',
         'favicon_path',
         'site_logo_path',
         'apple_touch_icon_path',
@@ -138,6 +144,9 @@ class SiteSetting extends Model
     protected function casts(): array
     {
         return [
+            'smartcaptcha_commercial_offer_enabled' => 'boolean',
+            'smartcaptcha_contact_enabled' => 'boolean',
+            'smartcaptcha_server_key' => 'encrypted',
             'leads_notifications_enabled' => 'boolean',
             'telegram_popup_enabled' => 'boolean',
             'telegram_popup_show_delay' => 'integer',
