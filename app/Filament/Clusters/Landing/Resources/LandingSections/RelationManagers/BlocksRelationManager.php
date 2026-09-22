@@ -937,7 +937,9 @@ class BlocksRelationManager extends RelationManager
                                 'subtitle' => $data['subtitle'] ?? $record->subtitle,
                                 'price' => $data['price'] ?? $record->price,
                                 'description' => $data['description'] ?? $record->description,
-                                'tag' => $data['tag'] ?? $record->tag,
+                                'tag' => array_key_exists('tag', $data)
+                                    ? (filled($data['tag']) ? trim((string) $data['tag']) : null)
+                                    : $record->tag,
                                 'secondary_tag' => $data['secondary_tag'] ?? null,
                                 'button_text' => $data['button_text'] ?? $record->button_text,
                                 'link' => $data['link'] ?? $record->link,

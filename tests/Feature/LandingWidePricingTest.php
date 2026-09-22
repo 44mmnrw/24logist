@@ -93,7 +93,7 @@ class LandingWidePricingTest extends TestCase
             'wide_users_min' => 2,
             'wide_users_max' => 10,
             'wide_users_default' => 3,
-            'tag' => 'Выгодно',
+            'tag' => null,
             'plan_features' => [
                 ['title' => 'Базовая возможность'],
             ],
@@ -110,6 +110,7 @@ class LandingWidePricingTest extends TestCase
 
         $plan->refresh();
         $this->assertSame('1750', $plan->price);
+        $this->assertNull($plan->tag);
         $this->assertSame('Добавьте нужное', $plan->extra['additional_title']);
         $this->assertSame(3, $plan->extra['users_default']);
         $this->assertSame('₽/год', $plan->extra['year_currency_suffix']);
