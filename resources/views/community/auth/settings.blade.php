@@ -15,9 +15,31 @@
             </label>
             <label>
                 Никнейм
-                <input name="display_name" value="{{ old('display_name', $user->displayName()) }}" minlength="2" maxlength="50" required autocomplete="nickname">
-                <small>Это имя видят другие участники сообщества.</small>
+                <input name="display_name" value="{{ old('display_name', $user->display_name ?: $user->username) }}" minlength="2" maxlength="50" required autocomplete="nickname">
+                <small>Используется, если вы не выбрали показ имени или фамилии.</small>
             </label>
+            <fieldset>
+                <legend>Публичное имя</legend>
+                <label>
+                    <span class="community-field-label">Имя <small class="community-optional">необязательно</small></span>
+                    <input name="first_name" value="{{ old('first_name', $user->first_name) }}" maxlength="50" autocomplete="given-name">
+                </label>
+                <label class="community-check">
+                    <input type="hidden" name="show_first_name" value="0">
+                    <input type="checkbox" name="show_first_name" value="1" @checked((bool) old('show_first_name', $user->show_first_name))>
+                    <span>Показывать имя другим участникам</span>
+                </label>
+                <label>
+                    <span class="community-field-label">Фамилия <small class="community-optional">необязательно</small></span>
+                    <input name="last_name" value="{{ old('last_name', $user->last_name) }}" maxlength="50" autocomplete="family-name">
+                </label>
+                <label class="community-check">
+                    <input type="hidden" name="show_last_name" value="0">
+                    <input type="checkbox" name="show_last_name" value="1" @checked((bool) old('show_last_name', $user->show_last_name))>
+                    <span>Показывать фамилию другим участникам</span>
+                </label>
+                <small class="community-field-hint">Можно заполнить оба поля, одно из них или оставить их пустыми. Если галочки сняты, публично показывается никнейм.</small>
+            </fieldset>
             <label>
                 Роль в перевозках
                 <select name="transport_role">

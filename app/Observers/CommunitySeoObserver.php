@@ -17,7 +17,10 @@ class CommunitySeoObserver
         $fields = match (true) {
             $source instanceof CommunityCategory => ['name', 'slug', 'is_active', 'description'],
             $source instanceof CommunityPost => ['title', 'slug', 'status', 'deleted_at', 'body_html', 'meta_robots', 'canonical_url'],
-            default => ['username', 'display_name', 'onboarded_at', 'terms_accepted_at', 'deleted_at'],
+            default => [
+                'username', 'display_name', 'first_name', 'last_name', 'show_first_name', 'show_last_name',
+                'onboarded_at', 'terms_accepted_at', 'deleted_at',
+            ],
         };
         if (! $source->wasRecentlyCreated && ! $source->wasChanged($fields)) {
             return;

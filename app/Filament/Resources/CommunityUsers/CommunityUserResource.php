@@ -20,6 +20,7 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -52,6 +53,10 @@ class CommunityUserResource extends Resource
         return $schema->components([
             TextInput::make('username')->label('ID профиля')->disabled(),
             TextInput::make('display_name')->label('Никнейм')->required()->maxLength(50),
+            TextInput::make('first_name')->label('Имя')->maxLength(50),
+            Toggle::make('show_first_name')->label('Показывать имя'),
+            TextInput::make('last_name')->label('Фамилия')->maxLength(50),
+            Toggle::make('show_last_name')->label('Показывать фамилию'),
             Select::make('transport_role')->label('Роль в перевозках')->options(CommunityUser::TRANSPORT_ROLES)->placeholder('Не указана'),
             Select::make('role')->label('Права в сообществе')->options(['user' => 'Участник', 'moderator' => 'Модератор'])->required(),
             Textarea::make('bio')->label('О себе')->rows(5)->maxLength(1000)->columnSpanFull(),

@@ -17,7 +17,8 @@ class CommunityUser extends Authenticatable
     use HasFactory, Notifiable, SoftDeletes;
 
     protected $fillable = [
-        'username', 'display_name', 'avatar_path', 'avatar_source', 'transport_role', 'bio', 'role', 'karma', 'show_karma', 'onboarded_at', 'terms_accepted_at',
+        'username', 'display_name', 'first_name', 'last_name', 'show_first_name', 'show_last_name',
+        'avatar_path', 'avatar_source', 'transport_role', 'bio', 'role', 'karma', 'show_karma', 'onboarded_at', 'terms_accepted_at',
         'suspended_until', 'banned_at', 'last_login_at', 'last_seen_at', 'last_login_ip', 'last_user_agent',
     ];
 
@@ -37,6 +38,8 @@ class CommunityUser extends Authenticatable
         return [
             'onboarded_at' => 'datetime',
             'terms_accepted_at' => 'datetime',
+            'show_first_name' => 'boolean',
+            'show_last_name' => 'boolean',
             'show_karma' => 'boolean',
             'last_login_at' => 'datetime',
             'last_seen_at' => 'datetime',
@@ -121,7 +124,14 @@ class CommunityUser extends Authenticatable
 
     public function displayName(): string
     {
-        return filled($this->display_name) ? (string) $this->display_name : (string) $this->username;
+        $publicName = collect([
+            $this->show_first_name && filled($this->first_name) ? trim((string) $this->first_name) : null,
+            $this->show_last_name && filled($this->last_name) ? trim((string) $this->last_name) : null,
+        ])->filter()->implode(' ');
+
+        return $publicName !== ''
+            ? $publicName
+            : (filled($this->display_name) ? (string) $this->display_name : (string) $this->username);
     }
 
     public function transportRoleLabel(): ?string

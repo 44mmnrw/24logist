@@ -17,14 +17,14 @@ final class MaxInitDataValidator
 
         foreach ($pairs as $pair) {
             if ($pair === '' || ! str_contains($pair, '=')) {
-                throw $this->invalid();
+                throw $this->invalid('malformed_parameters');
             }
 
             [$key, $value] = explode('=', $pair, 2);
             $key = rawurldecode($key);
 
             if ($key === '' || array_key_exists($key, $data)) {
-                throw $this->invalid();
+                throw $this->invalid('duplicate_or_empty_parameter');
             }
 
             $data[$key] = rawurldecode($value);
@@ -37,7 +37,7 @@ final class MaxInitDataValidator
         $botToken = $this->settings->maxBotToken();
 
         if (! is_string($hash) || $hash === '' || $botToken === '') {
-            throw $this->invalid();
+            throw $this->invalid($botToken === '' ? 'bot_not_configured' : 'missing_hash');
         }
 
         $checkString = implode("\n", array_map(
@@ -49,13 +49,14 @@ final class MaxInitDataValidator
         $expected = hash_hmac('sha256', $checkString, $secretKey);
 
         if (! hash_equals($expected, strtolower($hash))) {
-            throw $this->invalid();
+            throw $this->invalid('signature_mismatch');
         }
 
         $authDate = filter_var($data['auth_date'] ?? null, FILTER_VALIDATE_INT);
         $ttl = (int) config('community.max.init_data_ttl', 3600);
 
         if ($authDate === false || $authDate > time() + 30 || $authDate < time() - $ttl) {
+            request()->attributes->set('max_auth_failure_reason', $authDate === false ? 'invalid_auth_date' : ($authDate > time() + 30 ? 'future_auth_date' : 'expired_init_data'));
             throw ValidationException::withMessages(['max' => 'Данные MAX устарели. Откройте мини-приложение заново.']);
         }
 
@@ -68,14 +69,17 @@ final class MaxInitDataValidator
             || ! is_string($queryId)
             || $queryId === ''
             || strlen($queryId) > 512) {
-            throw $this->invalid();
+            throw $this->invalid(! is_array($user) || ! isset($user['id']) || ! is_scalar($user['id']) ? 'invalid_user' : 'invalid_query_id');
         }
 
         return ['user' => $user, 'auth_date' => (int) $authDate] + $data;
     }
 
-    private function invalid(): ValidationException
+    private function invalid(string $reason): ValidationException
     {
+        // Keep diagnostics separate from signed payloads and personal data.
+        request()->attributes->set('max_auth_failure_reason', $reason);
+
         return ValidationException::withMessages(['max' => 'Не удалось подтвердить данные MAX.']);
     }
 }

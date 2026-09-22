@@ -109,11 +109,17 @@ class CommunityAccountController extends Controller
     {
         $user = auth('community')->user();
         $request->merge([
-            'display_name' => preg_replace('/\s+/u', ' ', trim((string) $request->input('display_name', $user->displayName()))),
+            'display_name' => preg_replace('/\s+/u', ' ', trim((string) $request->input('display_name', $user->display_name ?: $user->username))),
+            'first_name' => preg_replace('/\s+/u', ' ', trim((string) $request->input('first_name', $user->first_name))),
+            'last_name' => preg_replace('/\s+/u', ' ', trim((string) $request->input('last_name', $user->last_name))),
             'bio' => trim((string) $request->input('bio', $user->bio)),
         ]);
         $data = $request->validate([
             'display_name' => ['required', 'string', 'min:2', 'max:50', 'regex:/^[\pL\pN][\pL\pN ._-]*$/u'],
+            'first_name' => ['nullable', 'string', 'max:50', "regex:/^[\pL][\pL '\u{2019}-]*$/u"],
+            'last_name' => ['nullable', 'string', 'max:50', "regex:/^[\pL][\pL '\u{2019}-]*$/u"],
+            'show_first_name' => ['nullable', 'boolean'],
+            'show_last_name' => ['nullable', 'boolean'],
             'transport_role' => ['nullable', Rule::in(array_keys(CommunityUser::TRANSPORT_ROLES))],
             'bio' => ['nullable', 'string', 'max:1000'],
             'show_karma' => ['nullable', 'boolean'],
@@ -123,6 +129,8 @@ class CommunityAccountController extends Controller
             'remove_avatar' => ['nullable', 'boolean'],
         ], [
             'display_name.regex' => 'Никнейм может содержать буквы, цифры, пробелы, точку, дефис и подчёркивание.',
+            'first_name.regex' => 'Имя может содержать буквы, пробел, дефис или апостроф.',
+            'last_name.regex' => 'Фамилия может содержать буквы, пробел, дефис или апостроф.',
         ]);
 
         if ($request->hasFile('avatar') && ! $avatars->storeUpload($user, $request->file('avatar'))) {
@@ -133,6 +141,10 @@ class CommunityAccountController extends Controller
 
         $user->update([
             'display_name' => $data['display_name'],
+            'first_name' => filled($data['first_name'] ?? null) ? $data['first_name'] : null,
+            'last_name' => filled($data['last_name'] ?? null) ? $data['last_name'] : null,
+            'show_first_name' => filled($data['first_name'] ?? null) && (bool) ($data['show_first_name'] ?? false),
+            'show_last_name' => filled($data['last_name'] ?? null) && (bool) ($data['show_last_name'] ?? false),
             'transport_role' => array_key_exists('transport_role', $data)
                 ? (filled($data['transport_role']) ? $data['transport_role'] : null)
                 : $user->transport_role,

@@ -1034,6 +1034,25 @@ html {
     font-weight: 550;
 }
 
+.community-field-label {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.community-field-label .community-optional {
+    color: #7a899d;
+    font-size: 0.8125rem;
+    font-weight: 450;
+}
+
+.community-field-hint {
+    color: #667991;
+    font-size: 0.875rem;
+    font-weight: 450;
+    line-height: 1.45;
+}
+
 .community-form__or {
     color: #8593a5;
     text-align: center;

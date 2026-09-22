@@ -109,6 +109,10 @@ class CommunityAvatarTest extends TestCase
         $this->actingAs($user, 'community')->get(route('community.settings'))
             ->assertOk()
             ->assertSee('name="display_name"', false)
+            ->assertSee('name="first_name"', false)
+            ->assertSee('name="last_name"', false)
+            ->assertSee('name="show_first_name"', false)
+            ->assertSee('name="show_last_name"', false)
             ->assertSee('name="transport_role"', false)
             ->assertSee('name="bio"', false)
             ->assertSee('@stable_id');
@@ -133,5 +137,52 @@ class CommunityAvatarTest extends TestCase
             ->assertSee('@stable_id')
             ->assertSee('Диспетчер')
             ->assertSee('Организую перевозки по России.');
+    }
+
+    public function test_user_chooses_which_optional_name_parts_are_public(): void
+    {
+        $user = CommunityUser::factory()->create([
+            'username' => 'ivan_logist',
+            'display_name' => 'Иван на фуре',
+        ]);
+
+        $this->actingAs($user, 'community')->put(route('community.settings.update'), [
+            'display_name' => 'Иван на фуре',
+            'first_name' => 'Иван',
+            'last_name' => 'Петров-Сидоров',
+            'show_first_name' => 1,
+            'show_last_name' => 0,
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $user->refresh();
+        $this->assertSame('Иван', $user->displayName());
+        $this->assertTrue($user->show_first_name);
+        $this->assertFalse($user->show_last_name);
+        $this->get(route('community.profile', $user))->assertOk()->assertSee('<h1>Иван</h1>', false);
+
+        $this->actingAs($user, 'community')->put(route('community.settings.update'), [
+            'display_name' => 'Иван на фуре',
+            'first_name' => 'Иван',
+            'last_name' => 'Петров-Сидоров',
+            'show_first_name' => 1,
+            'show_last_name' => 1,
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $this->assertSame('Иван Петров-Сидоров', $user->fresh()->displayName());
+
+        $this->actingAs($user->fresh(), 'community')->put(route('community.settings.update'), [
+            'display_name' => 'Иван на фуре',
+            'first_name' => '',
+            'last_name' => '',
+            'show_first_name' => 1,
+            'show_last_name' => 1,
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $user->refresh();
+        $this->assertNull($user->first_name);
+        $this->assertNull($user->last_name);
+        $this->assertFalse($user->show_first_name);
+        $this->assertFalse($user->show_last_name);
+        $this->assertSame('Иван на фуре', $user->displayName());
     }
 }

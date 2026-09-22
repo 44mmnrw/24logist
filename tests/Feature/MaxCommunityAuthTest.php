@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Factory;
 use Illuminate\Http\Client\Request as ClientRequest;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -167,6 +168,45 @@ class MaxCommunityAuthTest extends TestCase
         $this->assertDatabaseCount('community_identities', 1);
         $this->assertDatabaseCount('community_login_challenges', 1);
         $this->assertDatabaseCount('community_max_init_data_uses', 1);
+    }
+
+    public function test_rejected_max_data_logs_reason_without_credentials_or_personal_data(): void
+    {
+        Log::spy();
+        $this->withHeader('User-Agent', 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_2 like Mac OS X) MAX/26.17.3')
+            ->postJson(route('community.auth.max.approve'), [
+                'challenge' => 'private-challenge',
+                'init_data' => $this->signedInitData(9934).'x',
+            ])->assertUnprocessable()->assertJsonValidationErrors('max');
+
+        Log::shouldHaveReceived('notice')->once()->with('Community MAX authorization rejected', [
+            'route' => 'community.auth.max.approve',
+            'reason' => 'signature_mismatch',
+            'fields' => ['max'],
+            'ios_version' => '15_8_2',
+            'max_version' => '26.17.3',
+            'challenge_type' => 'string',
+        ]);
+        $this->assertDatabaseCount('community_users', 0);
+    }
+
+    public function test_invalid_challenge_shape_is_diagnosed_without_logging_its_value(): void
+    {
+        Log::spy();
+        $this->postJson(route('community.auth.max.approve'), [
+            'challenge' => ['payload' => 'private-challenge'],
+            'init_data' => $this->signedInitData(9934),
+        ])->assertUnprocessable()->assertJsonValidationErrors('challenge');
+
+        Log::shouldHaveReceived('notice')->once()->with('Community MAX authorization rejected', [
+            'route' => 'community.auth.max.approve',
+            'reason' => 'request_or_account_validation',
+            'fields' => ['challenge'],
+            'ios_version' => null,
+            'max_version' => null,
+            'challenge_type' => 'array',
+        ]);
+        $this->assertDatabaseCount('community_users', 0);
     }
 
     public function test_unsigned_max_return_link_is_rejected(): void
