@@ -107,6 +107,20 @@ class CommunityUserResource extends Resource
                 TextColumn::make('last_seen_at')->label('Активность')->dateTime('d.m.Y H:i')->placeholder('—')->sortable(),
             ])
             ->filters([
+                SelectFilter::make('ai_personas')
+                    ->label('AI-персонажи')
+                    ->options([
+                        'exclude' => 'Не показывать',
+                        'only' => 'Только AI-персонажи',
+                        'all' => 'Показывать всех',
+                    ])
+                    ->default('exclude')
+                    ->native(false)
+                    ->query(fn (Builder $query, array $data): Builder => match ($data['value'] ?? 'exclude') {
+                        'only' => $query->whereHas('aiPersona'),
+                        'all' => $query,
+                        default => $query->whereDoesntHave('aiPersona'),
+                    }),
                 SelectFilter::make('role')->label('Права')->options(['user' => 'Участник', 'moderator' => 'Модератор']),
                 Filter::make('restricted')
                     ->label('Только ограниченные')

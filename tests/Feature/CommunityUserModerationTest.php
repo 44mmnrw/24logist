@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\CommunityUsers\Pages\ListCommunityUsers;
+use App\Models\CommunityAiPersona;
 use App\Models\CommunityIdentity;
 use App\Models\CommunityModerationAction;
 use App\Models\CommunityUser;
@@ -9,7 +11,9 @@ use App\Models\CommunityUserSession;
 use App\Models\User;
 use App\Services\Community\CommunityUserModerationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class CommunityUserModerationTest extends TestCase
@@ -31,6 +35,35 @@ class CommunityUserModerationTest extends TestCase
             ->get(route('filament.admin.resources.community-users.index'))
             ->assertOk()
             ->assertSee('Участники сообщества');
+    }
+
+    public function test_ai_personas_are_hidden_by_default_and_available_through_filter(): void
+    {
+        $admin = User::factory()->create();
+        $member = CommunityUser::factory()->create(['display_name' => 'Обычный участник']);
+        $aiUser = CommunityUser::factory()->create(['display_name' => 'AI-персонаж']);
+        CommunityAiPersona::query()->create([
+            'community_user_id' => $aiUser->id,
+            'slug' => 'filter-test-persona',
+            'role_description' => 'Тестовая роль',
+            'personality_description' => 'Тестовый характер',
+            'provider_agent_id' => (string) Str::uuid(),
+            'provider_base_url' => 'https://example.test/agent',
+            'system_prompt' => 'Тестовый системный промпт',
+        ]);
+        $this->actingAs($admin);
+
+        $table = Livewire::test(ListCommunityUsers::class)
+            ->assertTableFilterExists('ai_personas')
+            ->assertCanSeeTableRecords([$member])
+            ->assertCanNotSeeTableRecords([$aiUser]);
+
+        $table->filterTable('ai_personas', 'only')
+            ->assertCanSeeTableRecords([$aiUser])
+            ->assertCanNotSeeTableRecords([$member]);
+
+        $table->filterTable('ai_personas', 'all')
+            ->assertCanSeeTableRecords([$member, $aiUser]);
     }
 
     public function test_admin_can_open_full_participant_metadata_page(): void
