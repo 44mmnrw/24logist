@@ -4861,7 +4861,8 @@ html.commercial-offer-open {
     line-height: 1.2;
 }
 
-.cabinet-login-modal__card > p {
+.cabinet-login-modal__card > p,
+[data-commercial-offer-form-state] > p {
     margin: 6px 0 0;
     color: #566983;
     font-size: 14px;

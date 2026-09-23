@@ -18,10 +18,10 @@
         </button>
 
         <span class="cabinet-login-modal__eyebrow">Коммерческое предложение</span>
-        <h2 id="commercial-offer-title">Получить предложение</h2>
-        <p id="commercial-offer-description">Заполните все поля — отправим на email предложение по выбранному тарифу и описание функционала платформы.</p>
-
         <div data-commercial-offer-form-state>
+            <h2 id="commercial-offer-title">Получить предложение</h2>
+            <p id="commercial-offer-description">Заполните все поля — отправим на email предложение по выбранному тарифу и описание функционала платформы.</p>
+
             <form class="cabinet-login-modal__form commercial-offer-modal__form" data-commercial-offer-form data-cabinet-auth-form="registration" novalidate>
                 <label class="cabinet-login-modal__field cabinet-login-modal__field--wide">
                     <span>Имя</span>
@@ -84,8 +84,8 @@
 
         <div class="commercial-offer-modal__success" data-commercial-offer-success hidden role="status">
             <span class="commercial-offer-modal__success-icon">✓</span>
-            <h2>Заявка принята</h2>
-            <p data-commercial-offer-success-message>Проверьте почту: отправляем коммерческое предложение и описание функционала платформы.</p>
+            <h2 id="commercial-offer-success-title">Заявка принята</h2>
+            <p id="commercial-offer-success-description" data-commercial-offer-success-message>Проверьте почту: отправляем коммерческое предложение и описание функционала платформы.</p>
             <button class="cabinet-login-modal__submit" type="button" data-commercial-offer-close>Хорошо</button>
         </div>
     </div>

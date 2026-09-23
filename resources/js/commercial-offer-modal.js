@@ -71,6 +71,8 @@ if (modal) {
         showError();
         if (formState) formState.hidden = false;
         if (successState) successState.hidden = true;
+        modal.setAttribute('aria-labelledby', 'commercial-offer-title');
+        modal.setAttribute('aria-describedby', 'commercial-offer-description');
         modal.hidden = false;
         modal.setAttribute('aria-hidden', 'false');
         document.documentElement.classList.add('commercial-offer-open');
@@ -137,6 +139,8 @@ if (modal) {
             syncSubmitState();
             if (formState) formState.hidden = true;
             if (successState) successState.hidden = false;
+            modal.setAttribute('aria-labelledby', 'commercial-offer-success-title');
+            modal.setAttribute('aria-describedby', 'commercial-offer-success-description');
             if (payload.message && successMessage) successMessage.textContent = payload.message;
             successState?.querySelector('button')?.focus();
         } catch (error) {
