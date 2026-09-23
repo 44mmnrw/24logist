@@ -28,5 +28,26 @@ $lead = new App\Models\LandingLead([
 ]);
 $lead->id = 42;
 $lead->created_at = '2026-09-23 12:00:00';
-file_put_contents(__DIR__.'/commercial-offer-preview.pdf', app(App\Services\CommercialOfferPdfService::class)->render($lead));
+$longRecipient = in_array('--long-recipient', $argv, true);
+if ($longRecipient) {
+    $lead->name = mb_substr(str_repeat('Александров Константин Константинович ', 8), 0, 255);
+    $lead->email = str_repeat('a', 64).'@'.str_repeat('b', 63).'.'.str_repeat('c', 63).'.'.str_repeat('d', 58).'.ru';
+    $details = $lead->offer_details;
+    $details['company'] = mb_substr(str_repeat('Общество с ограниченной ответственностью «Межрегиональная транспортно-экспедиционная компания» ', 3), 0, 255);
+    $lead->offer_details = $details;
+}
+$filename = $longRecipient ? 'commercial-offer-long-preview.pdf' : 'commercial-offer-preview.pdf';
+if (in_array('--long-company', $argv, true)) {
+    $details = $lead->offer_details;
+    $details['company'] = 'Общество с ограниченной ответственностью «Межрегиональная транспортно-экспедиционная компания комплексного логистического сопровождения промышленных предприятий Северо-Западного региона»';
+    $lead->offer_details = $details;
+    $filename = 'commercial-offer-long-company-preview.pdf';
+}
+if (in_array('--unbroken-company', $argv, true)) {
+    $details = $lead->offer_details;
+    $details['company'] = str_repeat('Ш', 255);
+    $lead->offer_details = $details;
+    $filename = 'commercial-offer-unbroken-company-preview.pdf';
+}
+file_put_contents(__DIR__.'/'.$filename, app(App\Services\CommercialOfferPdfService::class)->render($lead));
 echo "PDF preview generated without sending mail.\n";

@@ -24,6 +24,23 @@
         ul { margin: 0 0 7pt; padding-left: 14pt; }
         li { margin: 0 0 4pt; padding-left: 1pt; }
         li::marker { color: #1264ef; }
+        .overview { font-size: 9.8pt; line-height: 1.25; }
+        .overview h1 { margin-bottom: 10pt; }
+        .overview h2 { margin: 10pt 0 6pt; }
+        .overview p { margin-bottom: 6pt; }
+        .overview .lead { font-size: 10.2pt; }
+        .overview .recipient { margin: 8pt 0; font-size: 9.2pt; line-height: 1.25; }
+        .overview .recipient p { margin-bottom: 2pt; }
+        .overview ul { margin-bottom: 5pt; }
+        .overview li { margin-bottom: 2pt; page-break-inside: avoid; }
+        .feature-group { page-break-inside: avoid; }
+        .overview--long { font-size: 9.2pt; line-height: 1.2; }
+        .overview--long h1 { font-size: 22pt; margin-bottom: 8pt; }
+        .overview--long h2 { margin: 8pt 0 5pt; }
+        .overview--long p { margin-bottom: 4pt; }
+        .overview--long .lead { font-size: 9.5pt; }
+        .overview--long .recipient { font-size: 8.8pt; line-height: 1.2; }
+        .overview--long li { margin-bottom: 1pt; }
         .terms { page-break-before: always; }
         table { width: 100%; border-collapse: collapse; margin: 10pt 0 11pt; table-layout: fixed; font-size: 9.6pt; line-height: 1.25; }
         th, td { border: .5pt solid #d9d9d9; text-align: left; padding: 4pt 10pt; vertical-align: middle; word-wrap: break-word; }
@@ -42,6 +59,7 @@
 @php
     $money = static fn (int $value): string => number_format($value, 0, ',', ' ');
     $yearly = $offer['billing_period'] === 'year';
+    $longRecipient = mb_strlen($offer['company'].$lead->name.$lead->email) > 255;
 @endphp
 <div class="stripe"><span></span></div>
 <header>
@@ -53,6 +71,7 @@
     логистРу · Коммерческое предложение № КП-{{ $lead->id }}
 </footer>
 
+<div class="overview{{ $longRecipient ? ' overview--long' : '' }}">
 <div class="eyebrow">ДЛЯ ЭКСПЕДИТОРСКИХ КОМПАНИЙ</div>
 <h1>Коммерческое предложение</h1>
 <p class="small"><b>От</b> ООО «Энерви Групп»<br>ИНН 5074081476 · КПП 507401001</p>
@@ -77,11 +96,14 @@
     <li>Хранение резервных копий ЭПД.</li>
     <li>300 МБ на аккаунт для хранения скан-копий документов.</li>
 </ul>
+<div class="feature-group">
 <h2><span>02</span> Дополнительные разделы</h2>
 <ul>
     <li><b>Счета на оплату</b> и предусмотренные сервисом формы бухгалтерских документов.</li>
     <li><b>Нормализация адресов по ФИАС.</b></li>
 </ul>
+</div>
+</div>
 
 <div class="terms">
     <div class="eyebrow">КОММЕРЧЕСКОЕ ПРЕДЛОЖЕНИЕ</div>
