@@ -1,6 +1,7 @@
 import { initCabinetRegistrationPartySuggestions } from './cabinet-registration-party-suggestions.js';
 import { postJson } from './landing-forms.js';
 import { createSmartCaptcha } from './smartcaptcha.js';
+import { initPhoneMask, phoneDigits } from './phone-mask.js';
 
 const modal = document.querySelector('[data-commercial-offer-modal]');
 
@@ -42,24 +43,7 @@ if (modal) {
     consentInput?.addEventListener('change', syncSubmitState);
     syncSubmitState();
 
-    const phoneDigits = (value) => String(value || '').replace(/\D/g, '').slice(-10);
-
-    const formatPhone = (value) => {
-        const digits = phoneDigits(value);
-        if (!digits) return '';
-
-        let formatted = `+7 (${digits.slice(0, 3)}`;
-        if (digits.length >= 3) formatted += ')';
-        if (digits.length > 3) formatted += ` ${digits.slice(3, 6)}`;
-        if (digits.length > 6) formatted += `-${digits.slice(6, 8)}`;
-        if (digits.length > 8) formatted += `-${digits.slice(8, 10)}`;
-
-        return formatted;
-    };
-
-    phoneInput?.addEventListener('input', () => {
-        phoneInput.value = formatPhone(phoneInput.value);
-    });
+    initPhoneMask(phoneInput);
 
     const close = () => {
         if (modal.hidden) return;
