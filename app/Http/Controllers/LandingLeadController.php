@@ -53,8 +53,8 @@ class LandingLeadController extends Controller
         }
         $total = ((max(0, (int) ($plan?->price ?? 0)) * $users) + $options->sum(fn (LandingBlock $option): int => max(0, (int) $option->price))) * $periodMonths;
         $currencySuffix = trim((string) ($billingPeriod === 'year'
-            ? ($extra['year_currency_suffix'] ?? '')
-            : ($extra['currency_suffix'] ?? '')));
+            ? ($extra['year_currency_suffix'] ?? '₽/год')
+            : ($extra['currency_suffix'] ?? '₽/мес')));
 
         $lead = LandingLead::query()->create([
             'type' => LandingLead::TYPE_COMMERCIAL_OFFER,
@@ -65,11 +65,9 @@ class LandingLeadController extends Controller
             'quiz_answers' => [
                 ['question' => 'Название компании', 'answer' => $request->string('company')->toString()],
                 ['question' => 'ИНН', 'answer' => $request->string('inn')->toString()],
-                ['question' => (string) ($extra['users_label'] ?? ''), 'answer' => (string) $users],
-                ['question' => (string) ($extra['period_label'] ?? ''), 'answer' => $billingPeriod === 'year'
-                    ? (string) ($extra['year_label'] ?? '')
-                    : (string) ($extra['month_label'] ?? '')],
-                ['question' => (string) ($extra['additional_title'] ?? ''), 'answer' => $options->pluck('title')->implode(', ') ?: 'Не выбраны'],
+                ['question' => 'Количество пользователей', 'answer' => (string) $users],
+                ['question' => 'Период оплаты', 'answer' => $billingPeriod === 'year' ? 'Год' : 'Месяц'],
+                ['question' => 'Дополнительные функции', 'answer' => $options->pluck('title')->implode(', ') ?: 'Не выбраны'],
                 ['question' => 'Расчётная стоимость', 'answer' => number_format($total, 0, ',', ' ').($currencySuffix !== '' ? ' '.$currencySuffix : '')],
             ],
             'recommended_plan_id' => $plan?->id,

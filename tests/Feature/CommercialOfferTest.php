@@ -68,12 +68,6 @@ class CommercialOfferTest extends TestCase
             ->where('block_type', 'plan')
             ->firstOrFail();
         $option = $plan->children()->where('block_type', 'paid_option')->firstOrFail();
-        $plan->update(['extra' => array_merge($plan->extra, [
-            'users_label' => 'Рабочие места',
-            'period_label' => 'Срок оплаты',
-            'year_label' => '12 месяцев',
-            'additional_title' => 'Подключаемые модули',
-        ])]);
 
         $this->postJson(route('leads.commercial-offer.store'), [
             'name' => 'Иван Петров',
@@ -95,11 +89,8 @@ class CommercialOfferTest extends TestCase
         $this->assertSame($plan->id, $lead->recommended_plan_id);
         $this->assertSame('ООО Тестовая логистика', $lead->quiz_answers[0]['answer']);
         $this->assertSame('7707083893', $lead->quiz_answers[1]['answer']);
-        $this->assertSame('Рабочие места', $lead->quiz_answers[2]['question']);
         $this->assertSame('3', $lead->quiz_answers[2]['answer']);
-        $this->assertSame('Срок оплаты', $lead->quiz_answers[3]['question']);
-        $this->assertSame('12 месяцев', $lead->quiz_answers[3]['answer']);
-        $this->assertSame('Подключаемые модули', $lead->quiz_answers[4]['question']);
+        $this->assertSame('Год', $lead->quiz_answers[3]['answer']);
         $this->assertSame($option->title, $lead->quiz_answers[4]['answer']);
         $this->assertSame('61 200 ₽/год', $lead->quiz_answers[5]['answer']);
         $this->assertSame(61200, $lead->offer_details['total']);

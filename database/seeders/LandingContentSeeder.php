@@ -440,7 +440,7 @@ class LandingContentSeeder extends Seeder
             'title' => 'Корпорация',
             'subtitle' => 'Условия под задачи вашей команды',
             'price' => '1200',
-            'description' => 'за {users} {workplaces}',
+            'description' => 'за одного пользователя в месяц',
             'tag' => 'Хит',
             'button_text' => 'Получить предложение',
             'link' => '/pages/contacts',
@@ -450,19 +450,11 @@ class LandingContentSeeder extends Seeder
             'extra' => [
                 'additional_title' => 'Дополнительные возможности',
                 'users_label' => 'Количество пользователей',
-                'users_decrease_label' => 'Уменьшить количество пользователей',
-                'users_increase_label' => 'Увеличить количество пользователей',
                 'users_min' => 1,
                 'users_max' => 20,
                 'users_default' => 1,
                 'currency_suffix' => '₽/мес',
                 'year_currency_suffix' => '₽/год',
-                'workplace_one' => 'рабочее место',
-                'workplace_few' => 'рабочих места',
-                'workplace_many' => 'рабочих мест',
-                'period_label' => 'Период оплаты',
-                'month_label' => 'Месяц',
-                'year_label' => 'Год',
             ],
         ]);
 
