@@ -583,7 +583,6 @@
 .why-card__icon img { width: 24px; height: 24px; }
 .why-card h3,
 .feature-card h3 { margin-top: 40px; font-size: 17px; line-height: 1.5; color: #0a0a0a; }
-.why-card p,
 .feature-card p { margin-top: 32px; font-size: 14px; line-height: 1.5; color: #45556c; }
 
 .why-card h3 {
@@ -594,12 +593,22 @@
     letter-spacing: 0.3px;
     text-transform: uppercase;
 }
-.why-card p {
+.why-card__description {
     margin-top: 10px;
     margin-bottom: 20px;
+    color: #45556c;
     font-size: 15px;
     line-height: 24px;
 }
+.why-card__description p,
+.why-card__description ul,
+.why-card__description ol { margin: 0 0 8px; }
+.why-card__description ul,
+.why-card__description ol { padding-left: 20px; }
+.why-card__description ul { list-style: disc; }
+.why-card__description ol { list-style: decimal; }
+.why-card__description li + li { margin-top: 4px; }
+.why-card__description > :last-child { margin-bottom: 0; }
 .why-card__number {
     position: absolute;
     top: 24px;

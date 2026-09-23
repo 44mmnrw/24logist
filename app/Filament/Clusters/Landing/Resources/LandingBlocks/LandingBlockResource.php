@@ -15,11 +15,15 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
@@ -53,6 +57,7 @@ class LandingBlockResource extends Resource
                     ->label('Секция')
                     ->options(fn () => LandingSection::query()->orderBy('sort_order')->pluck('name', 'slug'))
                     ->required()
+                    ->live()
                     ->searchable(),
                 Select::make('block_type')
                     ->label('Тип блока')
@@ -92,9 +97,27 @@ class LandingBlockResource extends Resource
                 TextInput::make('subtitle')
                     ->label('Подзаголовок')
                     ->maxLength(255),
-                Textarea::make('description')
-                    ->label(fn (?LandingBlock $record): string => $record?->block_type === 'faq' ? 'Ответ' : 'Описание')
-                    ->rows(4),
+                Group::make()
+                    ->schema(function (Get $get, $livewire): array {
+                        $sectionSlug = $get('section_slug')
+                            ?? ($livewire instanceof RelationManager ? $livewire->getOwnerRecord()->slug : null);
+
+                        return [
+                            $sectionSlug === 'why'
+                                ? RichEditor::make('description')
+                                    ->label('Описание')
+                                    ->toolbarButtons([
+                                        ['bold', 'italic'],
+                                        ['bulletList', 'orderedList'],
+                                        ['undo', 'redo'],
+                                    ])
+                                    ->floatingToolbars([])
+                                    ->fileAttachments(false)
+                                : Textarea::make('description')
+                                    ->label(fn (?LandingBlock $record): string => $record?->block_type === 'faq' ? 'Ответ' : 'Описание')
+                                    ->rows(4),
+                        ];
+                    }),
                 LandingIconSelect::make('icon')
                     ->label('Иконка'),
                 TextInput::make('price')

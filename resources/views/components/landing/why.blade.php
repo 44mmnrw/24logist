@@ -29,7 +29,7 @@
                         </div>
                     @endif
                     <h3>{{ $card->title }}</h3>
-                    <p>{{ $card->description }}</p>
+                    <div class="why-card__description">{!! \Illuminate\Support\Str::sanitizeHtml($card->description ?? '') !!}</div>
                     @if ($card->tag)
                         <span class="why-card__tag"><span aria-hidden="true"></span>{{ $card->tag }}</span>
                     @endif
