@@ -1,11 +1,13 @@
 from pathlib import Path
-import sys
+import create_functional_characteristics as functional
 
+functional.OUT = functional.OUT.with_name('логистРу — Функциональные характеристики — новый логотип.pdf')
+functional.build_functional()
 source = Path(__file__).with_name('create_platform_documents.py')
 namespace = {'__file__': str(source)}
 exec(compile(source.read_text(encoding='utf-8').split('\nresults = [')[0], str(source), 'exec'), namespace)
 print(namespace['build'](
-    Path(sys.argv[1]).name if len(sys.argv) > 1 else 'логистРу — Коммерческое предложение.pdf',
+    'логистРу — Коммерческое предложение — новый логотип.pdf',
     'логистРу · Коммерческое предложение',
     [namespace['offer_1'], namespace['offer_2']],
 ))

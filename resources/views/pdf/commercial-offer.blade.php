@@ -8,8 +8,8 @@
         body { margin: 0; font: 10.2pt/1.3 "DejaVu Sans", sans-serif; color: #202a38; }
         .stripe { position: fixed; top: -78pt; left: -48pt; right: -48pt; height: 5pt; background: #1264ef; }
         .stripe span { display: block; float: right; width: 16%; height: 5pt; background: #14ba48; }
-        header { position: fixed; top: -49pt; left: 0; right: 0; height: 38pt; }
-        header img { width: 135pt; height: auto; }
+        header { position: fixed; top: -58pt; left: 0; right: 0; height: 50pt; }
+        header img { width: 180pt; height: auto; }
         .brand-caption { position: absolute; top: 3pt; right: 0; text-align: right; font-size: 7.5pt; line-height: 1.6; color: #68768a; }
         footer { position: fixed; bottom: -45pt; left: 0; right: 0; border-top: .5pt solid #d9d9d9; padding-top: 8pt; color: #68768a; font-size: 7pt; line-height: 1.6; }
         .eyebrow { color: #1264ef; font-weight: bold; font-size: 8pt; margin: 0 0 10pt; }
@@ -104,7 +104,7 @@
     </table>
     <p class="small">Налоговые условия и параметры обмена ЭДО / ЭПД согласовываются в договоре.</p>
     <h2><span>03</span> Правовые условия</h2>
-    <p class="legal"><b>Доступ к программе.</b> Право использования, состав функций, оплата, поддержка и хранение данных регулируются договором и условиями использования. Исключительное право на программу пользователю не передаётся.</p>
+    <p class="legal"><b>Доступ к программе.</b> Право использования системы «логистРу» предоставляется на условиях простой (неисключительной) лицензии. Условия приобретения лицензии и использования системы изложены в публичной оферте.</p>
     <p class="legal"><b>Электронный документооборот.</b> Обмен ЭДО / ЭПД, передача данных в ГИС ЭПД и роуминг доступны в рамках подключённых услуг ООО «Эвотор ОФД». Их состав и стоимость согласовываются при подключении.</p>
     <p class="legal"><b>Персональные данные.</b> Обработка данных регулируется Федеральным законом от 27.07.2006 № 152-ФЗ и опубликованной политикой обработки персональных данных. Обязанности сторон и меры защиты устанавливаются законодательством и договором.</p>
     <p class="legal"><b>Российское программное обеспечение.</b> Реестровая запись № 34983 от 31.08.2026 в Едином реестре российских программ для ЭВМ и баз данных.</p>
