@@ -24,13 +24,14 @@ const initWidePricing = (calculator) => {
     const basePrice = Math.max(0, Number(calculator.dataset.basePrice) || 0);
     const minimumUsers = Math.max(1, Number(usersSelect.min) || 1);
     const maximumUsers = Math.max(minimumUsers, Number(usersSelect.max) || minimumUsers);
-    let userCountLabels = {};
+    const usersNoteTemplate = calculator.dataset.widePricingUsersNoteTemplate?.trim() || '';
+    let workplaceForms = {};
     let period = calculator.dataset.widePricingPeriod === 'year' ? 'year' : 'month';
 
     try {
-        userCountLabels = JSON.parse(calculator.dataset.userCountLabels || '{}');
+        workplaceForms = JSON.parse(calculator.dataset.widePricingWorkplaceForms || '{}');
     } catch {
-        userCountLabels = {};
+        workplaceForms = {};
     }
 
     const update = () => {
@@ -51,15 +52,17 @@ const initWidePricing = (calculator) => {
             const lastTwoDigits = users % 100;
             const lastDigit = users % 10;
             const workplaceNoun = lastTwoDigits >= 11 && lastTwoDigits <= 14
-                ? 'рабочих мест'
+                ? workplaceForms.many
                 : lastDigit === 1
-                    ? 'рабочее место'
+                    ? workplaceForms.one
                     : lastDigit >= 2 && lastDigit <= 4
-                        ? 'рабочих места'
-                        : 'рабочих мест';
+                        ? workplaceForms.few
+                        : workplaceForms.many;
 
-            usersNote.textContent = userCountLabels[users]
-                || `за ${formatPrice.format(users)} ${workplaceNoun}`;
+            usersNote.textContent = usersNoteTemplate.replace(/\{users\}|\{workplaces\}/g, (placeholder) => ({
+                '{users}': formatPrice.format(users),
+                '{workplaces}': workplaceNoun || '',
+            })[placeholder]);
         }
         periodButtons.forEach((button) => {
             button.setAttribute('aria-pressed', String(button.dataset.period === period));

@@ -68,7 +68,7 @@ class LandingSectionResource extends Resource
                 TextInput::make('kicker')
                     ->label('Надзаголовок')
                     ->maxLength(255)
-                    ->visible(fn (?LandingSection $record): bool => ! in_array($record?->slug, ['hero', 'product_showcase'], true)),
+                    ->visible(fn (?LandingSection $record): bool => ! in_array($record?->slug, ['hero', 'pricing_wide', 'product_showcase'], true)),
                 TextInput::make('title')
                     ->label('Заголовок')
                     ->maxLength(255)
@@ -111,7 +111,7 @@ class LandingSectionResource extends Resource
                         ? 'Можно использовать безопасную HTML-разметку: ссылки, переносы, жирный текст и списки.'
                         : null)
                     ->columnSpan(fn (?LandingSection $record): int|string => $record?->slug === 'hero' ? 1 : 'full')
-                    ->visible(fn (?LandingSection $record): bool => $record?->slug !== 'product_showcase'),
+                    ->visible(fn (?LandingSection $record): bool => ! in_array($record?->slug, ['pricing_wide', 'product_showcase'], true)),
                 TextInput::make('hero_subtitle_2_font_size')
                     ->label('Размер подзаголовка 2')
                     ->numeric()

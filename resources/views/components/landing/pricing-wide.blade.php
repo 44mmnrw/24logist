@@ -9,44 +9,30 @@
     $usersDefault = min($usersMax, max($usersMin, (int) ($planExtra['users_default'] ?? $usersMin)));
     $basePrice = max(0, (int) ($plan?->price ?? 0));
     $initialPrice = $basePrice * $usersDefault;
-    $currencySuffix = trim((string) ($planExtra['currency_suffix'] ?? '₽/мес'));
-    $yearCurrencySuffix = trim((string) ($planExtra['year_currency_suffix'] ?? '₽/год'));
-    $userCountLabels = [
-        1 => 'за одно рабочее место',
-        2 => 'за два рабочих места',
-        3 => 'за три рабочих места',
-        4 => 'за четыре рабочих места',
-        5 => 'за пять рабочих мест',
-        6 => 'за шесть рабочих мест',
-        7 => 'за семь рабочих мест',
-        8 => 'за восемь рабочих мест',
-        9 => 'за девять рабочих мест',
-        10 => 'за десять рабочих мест',
-        11 => 'за одиннадцать рабочих мест',
-        12 => 'за двенадцать рабочих мест',
-        13 => 'за тринадцать рабочих мест',
-        14 => 'за четырнадцать рабочих мест',
-        15 => 'за пятнадцать рабочих мест',
-        16 => 'за шестнадцать рабочих мест',
-        17 => 'за семнадцать рабочих мест',
-        18 => 'за восемнадцать рабочих мест',
-        19 => 'за девятнадцать рабочих мест',
-        20 => 'за двадцать рабочих мест',
+    $currencySuffix = trim((string) ($planExtra['currency_suffix'] ?? ''));
+    $yearCurrencySuffix = trim((string) ($planExtra['year_currency_suffix'] ?? ''));
+    $workplaceForms = [
+        'one' => trim((string) ($planExtra['workplace_one'] ?? '')),
+        'few' => trim((string) ($planExtra['workplace_few'] ?? '')),
+        'many' => trim((string) ($planExtra['workplace_many'] ?? '')),
     ];
-    $workplaceNoun = static function (int $count): string {
+    $workplaceNoun = static function (int $count) use ($workplaceForms): string {
         $lastTwoDigits = $count % 100;
         $lastDigit = $count % 10;
 
         return $lastTwoDigits >= 11 && $lastTwoDigits <= 14
-            ? 'рабочих мест'
+            ? $workplaceForms['many']
             : match ($lastDigit) {
-                1 => 'рабочее место',
-                2, 3, 4 => 'рабочих места',
-                default => 'рабочих мест',
+                1 => $workplaceForms['one'],
+                2, 3, 4 => $workplaceForms['few'],
+                default => $workplaceForms['many'],
             };
     };
-    $initialUsersNote = $userCountLabels[$usersDefault]
-        ?? 'за '.$usersDefault.' '.$workplaceNoun($usersDefault);
+    $usersNoteTemplate = trim((string) ($plan?->description ?? ''));
+    $initialUsersNote = strtr($usersNoteTemplate, [
+        '{users}' => number_format($usersDefault, 0, ',', ' '),
+        '{workplaces}' => $workplaceNoun($usersDefault),
+    ]);
 @endphp
 
 @if ($section && $plan)
@@ -65,7 +51,8 @@
             class="pricing-card pricing-card--wide"
             data-wide-pricing
             data-base-price="{{ $basePrice }}"
-            data-user-count-labels='@json($userCountLabels, JSON_UNESCAPED_UNICODE)'
+            data-wide-pricing-users-note-template="{{ $usersNoteTemplate }}"
+            data-wide-pricing-workplace-forms="{{ json_encode($workplaceForms, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR) }}"
             data-wide-pricing-period="month"
             data-month-currency-suffix="{{ $currencySuffix }}"
             data-year-currency-suffix="{{ $yearCurrencySuffix }}"
@@ -109,27 +96,27 @@
 
                 <div class="pricing-card--wide__controls">
                     <div class="pricing-card--wide__users">
-                        <span>{{ $planExtra['users_label'] ?? 'Количество пользователей' }}</span>
+                        <span>{{ $planExtra['users_label'] ?? '' }}</span>
                         <span class="pricing-card--wide__stepper">
-                            <button type="button" data-wide-pricing-decrease aria-label="Уменьшить количество пользователей">−</button>
+                            <button type="button" data-wide-pricing-decrease aria-label="{{ $planExtra['users_decrease_label'] ?? '' }}">−</button>
                             <input
                                 type="number"
                                 value="{{ $usersDefault }}"
                                 min="{{ $usersMin }}"
                                 max="{{ $usersMax }}"
                                 readonly
-                                aria-label="{{ $planExtra['users_label'] ?? 'Количество пользователей' }}"
+                                aria-label="{{ $planExtra['users_label'] ?? '' }}"
                                 data-wide-pricing-users
                             >
-                            <button type="button" data-wide-pricing-increase aria-label="Увеличить количество пользователей">+</button>
+                            <button type="button" data-wide-pricing-increase aria-label="{{ $planExtra['users_increase_label'] ?? '' }}">+</button>
                         </span>
                     </div>
 
                     <div class="pricing-card--wide__period">
-                        <span>Период оплаты</span>
-                        <span class="pricing-card--wide__period-switch" role="group" aria-label="Период оплаты">
-                            <button type="button" data-wide-pricing-period-button data-period="month" aria-pressed="true">Месяц</button>
-                            <button type="button" data-wide-pricing-period-button data-period="year" aria-pressed="false">Год</button>
+                        <span>{{ $planExtra['period_label'] ?? '' }}</span>
+                        <span class="pricing-card--wide__period-switch" role="group" aria-label="{{ $planExtra['period_label'] ?? '' }}">
+                            <button type="button" data-wide-pricing-period-button data-period="month" aria-pressed="true">{{ $planExtra['month_label'] ?? '' }}</button>
+                            <button type="button" data-wide-pricing-period-button data-period="year" aria-pressed="false">{{ $planExtra['year_label'] ?? '' }}</button>
                         </span>
                     </div>
                 </div>
@@ -137,7 +124,7 @@
 
             <div class="pricing-card--wide__additional-heading">
                 @if ($paidOptions->isNotEmpty())
-                    <h4>{{ $planExtra['additional_title'] ?? 'Дополнительные возможности' }}</h4>
+                    <h4>{{ $planExtra['additional_title'] ?? '' }}</h4>
                 @endif
             </div>
 

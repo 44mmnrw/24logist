@@ -11,11 +11,19 @@ final class LandingPricing
     private const WIDE_FIELDS = [
         'wide_additional_title',
         'wide_users_label',
+        'wide_users_decrease_label',
+        'wide_users_increase_label',
         'wide_users_min',
         'wide_users_max',
         'wide_users_default',
         'wide_currency_suffix',
         'wide_year_currency_suffix',
+        'wide_workplace_one',
+        'wide_workplace_few',
+        'wide_workplace_many',
+        'wide_period_label',
+        'wide_month_label',
+        'wide_year_label',
     ];
 
     /**
@@ -116,13 +124,21 @@ final class LandingPricing
         $maximum = min(500, max($minimum, (int) ($extra['users_max'] ?? 20)));
 
         return [
-            'wide_additional_title' => (string) ($extra['additional_title'] ?? 'Дополнительные возможности'),
-            'wide_users_label' => (string) ($extra['users_label'] ?? 'Количество пользователей'),
+            'wide_additional_title' => (string) ($extra['additional_title'] ?? ''),
+            'wide_users_label' => (string) ($extra['users_label'] ?? ''),
+            'wide_users_decrease_label' => (string) ($extra['users_decrease_label'] ?? ''),
+            'wide_users_increase_label' => (string) ($extra['users_increase_label'] ?? ''),
             'wide_users_min' => $minimum,
             'wide_users_max' => $maximum,
             'wide_users_default' => min($maximum, max($minimum, (int) ($extra['users_default'] ?? $minimum))),
-            'wide_currency_suffix' => (string) ($extra['currency_suffix'] ?? '₽/мес'),
-            'wide_year_currency_suffix' => (string) ($extra['year_currency_suffix'] ?? '₽/год'),
+            'wide_currency_suffix' => (string) ($extra['currency_suffix'] ?? ''),
+            'wide_year_currency_suffix' => (string) ($extra['year_currency_suffix'] ?? ''),
+            'wide_workplace_one' => (string) ($extra['workplace_one'] ?? ''),
+            'wide_workplace_few' => (string) ($extra['workplace_few'] ?? ''),
+            'wide_workplace_many' => (string) ($extra['workplace_many'] ?? ''),
+            'wide_period_label' => (string) ($extra['period_label'] ?? ''),
+            'wide_month_label' => (string) ($extra['month_label'] ?? ''),
+            'wide_year_label' => (string) ($extra['year_label'] ?? ''),
             'plan_options' => self::optionsFormState($plan),
         ];
     }
@@ -139,13 +155,21 @@ final class LandingPricing
         $default = min($maximum, max($minimum, (int) ($data['wide_users_default'] ?? $minimum)));
 
         return array_merge($currentExtra, [
-            'additional_title' => trim((string) ($data['wide_additional_title'] ?? 'Дополнительные возможности')),
-            'users_label' => trim((string) ($data['wide_users_label'] ?? 'Количество пользователей')),
+            'additional_title' => trim((string) ($data['wide_additional_title'] ?? '')),
+            'users_label' => trim((string) ($data['wide_users_label'] ?? '')),
+            'users_decrease_label' => trim((string) ($data['wide_users_decrease_label'] ?? '')),
+            'users_increase_label' => trim((string) ($data['wide_users_increase_label'] ?? '')),
             'users_min' => $minimum,
             'users_max' => $maximum,
             'users_default' => $default,
-            'currency_suffix' => trim((string) ($data['wide_currency_suffix'] ?? '₽/мес')),
-            'year_currency_suffix' => trim((string) ($data['wide_year_currency_suffix'] ?? '₽/год')),
+            'currency_suffix' => trim((string) ($data['wide_currency_suffix'] ?? '')),
+            'year_currency_suffix' => trim((string) ($data['wide_year_currency_suffix'] ?? '')),
+            'workplace_one' => trim((string) ($data['wide_workplace_one'] ?? '')),
+            'workplace_few' => trim((string) ($data['wide_workplace_few'] ?? '')),
+            'workplace_many' => trim((string) ($data['wide_workplace_many'] ?? '')),
+            'period_label' => trim((string) ($data['wide_period_label'] ?? '')),
+            'month_label' => trim((string) ($data['wide_month_label'] ?? '')),
+            'year_label' => trim((string) ($data['wide_year_label'] ?? '')),
         ]);
     }
 

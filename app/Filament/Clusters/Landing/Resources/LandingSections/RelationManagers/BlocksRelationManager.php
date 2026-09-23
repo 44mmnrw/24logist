@@ -282,7 +282,24 @@ class BlocksRelationManager extends RelationManager
                         ->required(),
                     TextInput::make('description')
                         ->label('Подпись под ценой')
-                        ->placeholder('за одного пользователя')
+                        ->placeholder('за {users} {workplaces}')
+                        ->helperText('Используйте {users} для количества и {workplaces} для нужной формы слова. Без них текст останется постоянным.')
+                        ->required()
+                        ->maxLength(255),
+                    TextInput::make('wide_workplace_one')
+                        ->label('Форма слова для 1, 21, 31…')
+                        ->placeholder('рабочее место')
+                        ->required()
+                        ->maxLength(255),
+                    TextInput::make('wide_workplace_few')
+                        ->label('Форма слова для 2–4, 22–24…')
+                        ->placeholder('рабочих места')
+                        ->required()
+                        ->maxLength(255),
+                    TextInput::make('wide_workplace_many')
+                        ->label('Форма слова для 5–20, 25–30…')
+                        ->placeholder('рабочих мест')
+                        ->required()
                         ->maxLength(255),
                     TextInput::make('wide_currency_suffix')
                         ->label('Суффикс цены')
@@ -302,6 +319,21 @@ class BlocksRelationManager extends RelationManager
                         ->placeholder('Количество пользователей')
                         ->required()
                         ->columnSpanFull(),
+                    TextInput::make('wide_users_decrease_label')
+                        ->label('Описание кнопки «−» для экранного диктора')
+                        ->required(),
+                    TextInput::make('wide_users_increase_label')
+                        ->label('Описание кнопки «+» для экранного диктора')
+                        ->required(),
+                    TextInput::make('wide_period_label')
+                        ->label('Подпись периода оплаты')
+                        ->required(),
+                    TextInput::make('wide_month_label')
+                        ->label('Кнопка месяца')
+                        ->required(),
+                    TextInput::make('wide_year_label')
+                        ->label('Кнопка года')
+                        ->required(),
                     TextInput::make('wide_users_min')
                         ->label('Минимум пользователей')
                         ->numeric()
@@ -320,9 +352,6 @@ class BlocksRelationManager extends RelationManager
                         ->minValue(1)
                         ->maxValue(500)
                         ->required(),
-                    TextInput::make('tag')
-                        ->label('Бейдж')
-                        ->placeholder('Хит'),
                     Repeater::make('plan_features')
                         ->label('Возможности тарифа')
                         ->schema([
@@ -355,9 +384,7 @@ class BlocksRelationManager extends RelationManager
                         ->columnSpanFull(),
                     TextInput::make('button_text')
                         ->label('Текст кнопки')
-                        ->maxLength(255),
-                    TextInput::make('link')
-                        ->label('Ссылка кнопки')
+                        ->helperText('Кнопка открывает форму коммерческого предложения.')
                         ->maxLength(255),
                     Select::make('button_style')
                         ->label('Стиль кнопки')
@@ -366,16 +393,9 @@ class BlocksRelationManager extends RelationManager
                             'ghost' => 'Ghost',
                         ])
                         ->default('primary'),
-                    Toggle::make('is_highlighted')
-                        ->label('Выделить карточку')
-                        ->default(true),
                     Toggle::make('is_active')
                         ->label('Активен')
                         ->default(true),
-                    TextInput::make('sort_order')
-                        ->label('Порядок')
-                        ->numeric()
-                        ->default(0),
                 ]);
         }
 
@@ -665,16 +685,18 @@ class BlocksRelationManager extends RelationManager
                                         ->label('Цена')
                                         ->limit(30),
                                     TextColumn::make('features_count')
-                                        ->label('Пунктов')
+                                        ->label($isWidePricing ? 'Пунктов и функций' : 'Пунктов')
                                         ->counts('children'),
                                     IconColumn::make('is_highlighted')
                                         ->label('Хит')
+                                        ->visible(! $isWidePricing)
                                         ->boolean(),
                                     IconColumn::make('is_active')
                                         ->label('Активен')
                                         ->boolean(),
                                     TextColumn::make('sort_order')
                                         ->label('Порядок')
+                                        ->visible(! $isWidePricing)
                                         ->sortable(),
                                 ])
                                 ->defaultSort('sort_order')
