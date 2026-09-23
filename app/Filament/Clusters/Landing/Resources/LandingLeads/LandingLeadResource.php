@@ -55,6 +55,11 @@ class LandingLeadResource extends Resource
                 TextEntry::make('name')->label('Имя / контакт'),
                 TextEntry::make('phone')->label('Телефон'),
                 TextEntry::make('email')->label('Email')->placeholder('—'),
+                TextEntry::make('offer_sent_at')
+                    ->label('Документы КП отправлены')
+                    ->dateTime('d.m.Y H:i')
+                    ->placeholder('Не отправлены')
+                    ->visible(fn (LandingLead $record): bool => $record->type === LandingLead::TYPE_COMMERCIAL_OFFER),
                 TextEntry::make('message')
                     ->label('Сообщение')
                     ->placeholder('—')

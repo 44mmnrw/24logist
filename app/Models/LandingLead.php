@@ -42,6 +42,8 @@ class LandingLead extends Model
         'quiz_answers',
         'recommended_plan_id',
         'recommended_plan_title',
+        'offer_details',
+        'offer_sent_at',
         'source_url',
         'ip',
         'user_agent',
@@ -51,6 +53,8 @@ class LandingLead extends Model
     {
         return [
             'quiz_answers' => 'array',
+            'offer_details' => 'array',
+            'offer_sent_at' => 'datetime',
         ];
     }
 

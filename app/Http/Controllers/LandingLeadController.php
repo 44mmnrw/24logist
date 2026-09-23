@@ -8,13 +8,15 @@ use App\Http\Requests\StoreEpdPresentationLeadRequest;
 use App\Http\Requests\StoreQuizLeadRequest;
 use App\Models\LandingBlock;
 use App\Models\LandingLead;
+use App\Services\CommercialOfferDeliveryService;
 use App\Services\SmartCaptchaService;
 use App\Support\LandingLeadQuizAnswers;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 
 class LandingLeadController extends Controller
 {
-    public function storeCommercialOffer(StoreCommercialOfferLeadRequest $request, SmartCaptchaService $captcha): JsonResponse
+    public function storeCommercialOffer(StoreCommercialOfferLeadRequest $request, SmartCaptchaService $captcha, CommercialOfferDeliveryService $offers): JsonResponse
     {
         if ($request->filled('website')) {
             return response()->json(['message' => 'Заявка принята.'], 201);
@@ -27,6 +29,13 @@ class LandingLeadController extends Controller
             ->where('block_type', 'plan')
             ->where('is_active', true)
             ->first();
+
+        if (! $plan || ! is_numeric($plan->price)) {
+            throw ValidationException::withMessages([
+                'users' => 'Тариф временно недоступен для расчёта. Обновите страницу и попробуйте ещё раз.',
+            ]);
+        }
+
         $extra = is_array($plan?->extra) ? $plan->extra : [];
         $minimumUsers = max(1, (int) ($extra['users_min'] ?? 1));
         $maximumUsers = min(500, max($minimumUsers, (int) ($extra['users_max'] ?? 500)));
@@ -34,9 +43,14 @@ class LandingLeadController extends Controller
         $optionIds = collect($request->validated('option_ids', []))->map(fn ($id): int => (int) $id)->all();
         $billingPeriod = $request->validated('billing_period', 'month') === 'year' ? 'year' : 'month';
         $periodMonths = $billingPeriod === 'year' ? 12 : 1;
-        $options = $plan
-            ? $plan->children()->where('block_type', 'paid_option')->where('is_active', true)->whereIn('id', $optionIds)->get()
-            : collect();
+        $options = $plan->children()->where('block_type', 'paid_option')->where('is_active', true)
+            ->whereIn('id', $optionIds)->orderBy('sort_order')->get();
+
+        if ($options->count() !== count($optionIds)) {
+            throw ValidationException::withMessages([
+                'option_ids' => 'Состав дополнительных функций изменился. Обновите страницу и выберите их заново.',
+            ]);
+        }
         $total = ((max(0, (int) ($plan?->price ?? 0)) * $users) + $options->sum(fn (LandingBlock $option): int => max(0, (int) $option->price))) * $periodMonths;
         $currencySuffix = trim((string) ($billingPeriod === 'year'
             ? ($extra['year_currency_suffix'] ?? '₽/год')
@@ -58,13 +72,34 @@ class LandingLeadController extends Controller
             ],
             'recommended_plan_id' => $plan?->id,
             'recommended_plan_title' => $plan?->title,
+            'offer_details' => [
+                'company' => $request->string('company')->toString(),
+                'inn' => $request->string('inn')->toString(),
+                'plan_title' => $plan->title,
+                'users' => $users,
+                'billing_period' => $billingPeriod,
+                'period_months' => $periodMonths,
+                'unit_price' => max(0, (int) $plan->price),
+                'options' => $options->map(fn (LandingBlock $option): array => [
+                    'id' => $option->id,
+                    'title' => $option->title,
+                    'price' => max(0, (int) $option->price),
+                ])->all(),
+                'total' => $total,
+                'currency_suffix' => $currencySuffix,
+            ],
             'source_url' => $request->headers->get('referer'),
             'ip' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);
 
+        $sent = $offers->send($lead);
+
         return response()->json([
-            'message' => 'Заявка принята. Мы подготовим коммерческое предложение и свяжемся с вами.',
+            'message' => $sent
+                ? 'Коммерческое предложение и описание функциональных характеристик отправлены на указанный email.'
+                : 'Заявка сохранена, но отправить документы автоматически не удалось. Мы свяжемся с вами.',
+            'documents_sent' => $sent,
             'id' => $lead->id,
         ], 201);
     }

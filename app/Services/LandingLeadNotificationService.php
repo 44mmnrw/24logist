@@ -80,6 +80,11 @@ final class LandingLeadNotificationService
 
     public function sendWelcomeEmail(LandingLead $lead): void
     {
+        // Commercial offers have their own email with two PDF attachments.
+        if ($lead->type === LandingLead::TYPE_COMMERCIAL_OFFER) {
+            return;
+        }
+
         $site = $this->settings->get();
 
         if (! $site->leads_welcome_enabled) {
