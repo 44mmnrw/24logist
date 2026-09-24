@@ -87,5 +87,6 @@
     </div>
     <div class="community-tooltip" id="community-tooltip" data-community-tooltip role="tooltip" hidden></div>
 </div>
+<x-site.tracking />
 </body>
 </html>

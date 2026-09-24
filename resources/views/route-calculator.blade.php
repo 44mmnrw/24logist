@@ -22,6 +22,7 @@
     </main>
     <x-landing.footer />
 </div>
+<x-site.tracking />
 </body>
 </html>
 

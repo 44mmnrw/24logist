@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex,nofollow">
     <title>Заявка принята — ЛогистРу</title>
-    @vite(['resources/css/app.css'])
+    @vite(['resources/css/app.css', 'resources/js/cookie-consent.js'])
 </head>
 <body>
 <main class="referral-portal">
@@ -18,5 +18,6 @@
         </section>
     </div>
 </main>
+<x-site.tracking />
 </body>
 </html>

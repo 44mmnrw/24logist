@@ -100,5 +100,6 @@
             </dialog>
         @endif
     </main>
+    <x-site.tracking />
 </body>
 </html>

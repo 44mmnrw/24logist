@@ -244,5 +244,6 @@
             </div>
         </main>
     </div>
+    <x-site.tracking />
 </body>
 </html>

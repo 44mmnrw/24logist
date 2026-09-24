@@ -6,7 +6,7 @@
     <meta name="robots" content="noindex,nofollow">
     <meta name="referrer" content="no-referrer">
     <title>Реферальная программа — ЛогистРу</title>
-    @vite(['resources/css/app.css'])
+    @vite(['resources/css/app.css', 'resources/js/cookie-consent.js'])
 </head>
 <body>
 <main class="referral-portal">
@@ -83,5 +83,6 @@
         </tbody></table></div></section>
     </div>
 </main>
+<x-site.tracking />
 </body>
 </html>

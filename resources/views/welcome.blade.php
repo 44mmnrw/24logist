@@ -67,8 +67,6 @@
     <x-site.commercial-offer-modal />
     <x-site.epd-presentation-popup />
     <x-site.telegram-popup />
-    <x-site.cookie-consent />
-    <x-analytics.yandex-metrika />
-    <x-analytics.google-analytics />
+    <x-site.tracking />
 </body>
 </html>

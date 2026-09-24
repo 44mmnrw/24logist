@@ -87,8 +87,6 @@
 
         <x-landing.footer />
     </div>
-    <x-site.cookie-consent />
-    <x-analytics.yandex-metrika />
-    <x-analytics.google-analytics />
+    <x-site.tracking />
 </body>
 </html>

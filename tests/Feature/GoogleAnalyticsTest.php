@@ -67,4 +67,39 @@ class GoogleAnalyticsTest extends TestCase
             ->assertOk()
             ->assertDontSee('https://a.24logist.ru/', false);
     }
+
+    public function test_tracking_is_rendered_once_across_public_pages(): void
+    {
+        SiteSetting::instance()->update([
+            'community_enabled' => true,
+            'google_analytics_enabled' => true,
+            'google_analytics_measurement_id' => 'G-ABC123XYZ9',
+            'yandex_metrika_enabled' => true,
+            'yandex_metrika_counter_id' => '109522459',
+            'route_calculator_enabled' => true,
+            'route_api_base_url' => 'https://example.test/api/',
+            'route_api_secret' => str_repeat('x', 32),
+        ]);
+        app(SiteSettingsService::class)->clearCache();
+
+        foreach ([
+            '/',
+            '/community',
+            '/community/rules',
+            '/community/login',
+            '/epd-game',
+            '/etrn-roulette',
+            '/route-calculator',
+            '/partners/register',
+            '/partners/registered',
+        ] as $path) {
+            $response = $this->get($path);
+            $this->assertSame(200, $response->status(), $path);
+            $html = $response->getContent();
+
+            $this->assertSame(1, substr_count($html, 'data-cookie-consent'), $path);
+            $this->assertSame(1, substr_count($html, 'ym(109522459, \'init\''), $path);
+            $this->assertSame(1, substr_count($html, "const endpoint = 'https://a.24logist.ru/'"), $path);
+        }
+    }
 }

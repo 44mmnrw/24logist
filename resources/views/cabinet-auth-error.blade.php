@@ -7,7 +7,7 @@
     <title>Не удалось открыть ЛогистРу</title>
     <x-site.favicon />
     <x-fonts.preload />
-    @vite(['resources/css/app.css'])
+    @vite(['resources/css/app.css', 'resources/js/cookie-consent.js'])
 </head>
 <body class="cabinet-auth-transition">
     <main class="cabinet-auth-transition__card" aria-labelledby="handoff-error-title">
@@ -16,5 +16,6 @@
         <p>{{ $message }}</p>
         <a class="btn btn--primary" href="{{ url('/') }}">Вернуться на лендинг</a>
     </main>
+    <x-site.tracking />
 </body>
 </html>
