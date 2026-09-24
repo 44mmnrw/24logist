@@ -24,6 +24,8 @@ export const LOGISTRU_SYMBOL = Object.freeze({
     logo: 'logistru',
 });
 
+export const LOGISTRU_COMBINATION_WEIGHT = 3;
+
 export const makeOperators = (names) => names.map((name) => ({
     id: name,
     name,
@@ -39,19 +41,25 @@ export const createRouletteOutcome = (operators, random = Math.random) => {
     }
 
     const roll = random();
-    if (roll < 0.25) {
-        const destination = operators[randomIndex(operators.length, random)];
-        return { matched: true, bonus: false, reels: Array(3).fill(destination), destination };
+    if (roll < 0.05) {
+        return {
+            matched: true,
+            bonus: true,
+            jackpot: true,
+            reels: Array(3).fill(LOGISTRU_SYMBOL),
+            destination: null,
+        };
     }
 
-    if (roll < 0.35) {
+    if (roll < 0.30) {
         const destination = operators[randomIndex(operators.length, random)];
-        const reels = Array(3).fill(destination);
-        reels[randomIndex(reels.length, random)] = LOGISTRU_SYMBOL;
-        return { matched: true, bonus: true, reels, destination };
+        return { matched: true, bonus: false, jackpot: false, reels: Array(3).fill(destination), destination };
     }
 
-    const symbols = [...operators, LOGISTRU_SYMBOL];
+    const symbols = [
+        ...operators,
+        ...Array(LOGISTRU_COMBINATION_WEIGHT).fill(LOGISTRU_SYMBOL),
+    ];
     const reels = Array.from({ length: 3 }, () => symbols[randomIndex(symbols.length, random)]);
     let bonusSeen = false;
     reels.forEach((symbol, index) => {
@@ -60,14 +68,11 @@ export const createRouletteOutcome = (operators, random = Math.random) => {
         bonusSeen = true;
     });
 
-    const edoReels = reels.filter(({ id }) => id !== LOGISTRU_SYMBOL.id);
-    const accidentalWin = reels.every(({ id }) => id === reels[0].id)
-        || (edoReels.length === 2 && edoReels[0].id === edoReels[1].id);
+    const accidentalWin = reels.every(({ id }) => id === reels[0].id);
     if (accidentalWin) {
-        const index = reels[2].id === LOGISTRU_SYMBOL.id ? 1 : 2;
-        const next = (operators.findIndex(({ id }) => id === edoReels[0].id) + 1) % operators.length;
-        reels[index] = operators[next];
+        const next = (operators.findIndex(({ id }) => id === reels[0].id) + 1) % operators.length;
+        reels[2] = operators[next];
     }
 
-    return { matched: false, bonus: false, reels, destination: null };
+    return { matched: false, bonus: false, jackpot: false, reels, destination: null };
 };

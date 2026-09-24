@@ -17,6 +17,8 @@ use App\Http\Controllers\CommunityPostController;
 use App\Http\Controllers\CommunityPostSubscriptionController;
 use App\Http\Controllers\CsrfTokenController;
 use App\Http\Controllers\FaviconController;
+use App\Http\Controllers\EtrnRouletteAttemptController;
+use App\Http\Controllers\EtrnRoulettePrizeController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LandingLeadController;
 use App\Http\Controllers\ManifestController;
@@ -184,19 +186,25 @@ Route::view('/epd-game', 'epd-game')
     ]))
     ->name('epd-game');
 
-Route::view('/etrn-roulette', 'etrn-roulette')
-    ->withoutMiddleware([
-        StartSession::class,
-        ShareErrorsFromSession::class,
-        PreventRequestForgery::class,
-    ])
-    ->middleware(SetCacheHeaders::using([
-        'public' => true,
-        'max_age' => 300,
-        's_maxage' => 300,
-        'etag' => true,
-    ]))
-    ->name('etrn-roulette');
+Route::view('/etrn-roulette', 'etrn-roulette')->name('etrn-roulette');
+
+Route::get('/etrn-roulette/attempts', [EtrnRouletteAttemptController::class, 'index'])
+    ->withoutMiddleware([StartSession::class, ShareErrorsFromSession::class, PreventRequestForgery::class])
+    ->middleware('throttle:120,1')
+    ->name('etrn-roulette.attempts.index');
+
+Route::post('/etrn-roulette/attempts', [EtrnRouletteAttemptController::class, 'store'])
+    ->middleware('throttle:120,1')
+    ->name('etrn-roulette.attempts.store');
+
+Route::get('/etrn-roulette/prize/auth/{provider}', [EtrnRoulettePrizeController::class, 'auth'])
+    ->whereIn('provider', ['telegram', 'vk', 'max'])
+    ->middleware('throttle:20,1')
+    ->name('etrn-roulette.prize.auth');
+
+Route::get('/etrn-roulette/prize/join', EtrnRoulettePrizeController::class)
+    ->middleware(['community.auth', 'community.onboarded', 'throttle:20,1'])
+    ->name('etrn-roulette.prize.join');
 
 Route::middleware(['community.locale', 'community.enabled', 'community.activity'])->prefix('community')->name('community.')->group(function (): void {
     Route::get('/', [CommunityController::class, 'index'])->name('index');

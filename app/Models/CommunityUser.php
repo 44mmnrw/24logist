@@ -73,6 +73,11 @@ class CommunityUser extends Authenticatable
         return $this->hasMany(CommunityUserSession::class);
     }
 
+    public function etrnRoulettePlayer(): HasOne
+    {
+        return $this->hasOne(EtrnRoulettePlayer::class);
+    }
+
     public function communityNotifications(): HasMany
     {
         return $this->hasMany(CommunityNotification::class);
