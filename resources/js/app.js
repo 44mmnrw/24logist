@@ -13,4 +13,5 @@ import './commercial-offer-modal.js';
 import './community.js';
 import './route-calculator.js';
 import './epd-game-bootstrap.js';
+import './etrn-roulette-bootstrap.js';
 import './cabinet-login.js';

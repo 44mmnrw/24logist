@@ -31,24 +31,7 @@
         ],
     ];
 
-    $epdOperators = [
-        'ПФ СКБ Контур',
-        'Калуга Астрал',
-        'Эдивеб',
-        'Такском',
-        'СберКорус',
-        'Компания Тензор',
-        'Эвотор ОФД',
-        'ФораПром',
-        'Айтиком',
-        'ОПЕРАТОР-ЦРПТ',
-        'Точка',
-        'НТСсофт',
-        'Энергетические системы и коммуникации',
-        'НИИАС',
-        'АТИ-Доки',
-        'НТЦ СТЭК',
-    ];
+    $epdOperators = config('epd_operators');
 @endphp
 <!DOCTYPE html>
 <html lang="ru">
@@ -108,6 +91,7 @@
             </a>
 
             <div class="epd-game__topbar-actions">
+                <a href="{{ route('etrn-roulette') }}" style="color:#1656bb;font-weight:700;text-decoration:none;margin-right:14px">Игра «Куда уйдёт ЭТрН?»</a>
                 <button class="epd-game__sound" type="button" data-epd-sound aria-pressed="false">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.8 8.5H3v7h3.8L11 19V5Zm4.2 3.2a5 5 0 0 1 0 7.6M18 5.5a9 9 0 0 1 0 13"/></svg>
                     <span data-epd-sound-label>Звук вкл.</span>

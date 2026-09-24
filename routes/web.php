@@ -184,6 +184,20 @@ Route::view('/epd-game', 'epd-game')
     ]))
     ->name('epd-game');
 
+Route::view('/etrn-roulette', 'etrn-roulette')
+    ->withoutMiddleware([
+        StartSession::class,
+        ShareErrorsFromSession::class,
+        PreventRequestForgery::class,
+    ])
+    ->middleware(SetCacheHeaders::using([
+        'public' => true,
+        'max_age' => 300,
+        's_maxage' => 300,
+        'etag' => true,
+    ]))
+    ->name('etrn-roulette');
+
 Route::middleware(['community.locale', 'community.enabled', 'community.activity'])->prefix('community')->name('community.')->group(function (): void {
     Route::get('/', [CommunityController::class, 'index'])->name('index');
     Route::get('/c/{category}', [CommunityController::class, 'category'])->name('categories.show');

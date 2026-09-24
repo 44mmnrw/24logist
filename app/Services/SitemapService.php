@@ -136,6 +136,13 @@ final class SitemapService
             'priority' => '0.6',
         ];
 
+        $urls[] = [
+            'loc' => route('etrn-roulette'),
+            'lastmod' => null,
+            'changefreq' => 'monthly',
+            'priority' => '0.6',
+        ];
+
         $pages = CmsPage::query()
             ->where('is_published', true)
             ->orderBy('sort_order')
