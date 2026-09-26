@@ -60,6 +60,7 @@ export const createEtrnRoulette = (game) => {
     const result = game.querySelector('[data-etrn-result]');
     const attemptCount = game.querySelector('[data-etrn-attempt-count]');
     const jackpotCount = game.querySelector('[data-etrn-jackpot-count]');
+    const nextJackpotChance = game.querySelector('[data-etrn-next-jackpot-chance]');
     const playerAttemptCount = game.querySelector('[data-etrn-player-attempt-count]');
     const authDialog = game.querySelector('[data-etrn-auth-dialog]');
     const authOpen = game.querySelector('[data-etrn-auth-open]');
@@ -87,6 +88,12 @@ export const createEtrnRoulette = (game) => {
     const applyCounters = (payload) => {
         renderAttempts(Number(payload.attempts));
         renderJackpots(Number(payload.jackpots));
+        if (nextJackpotChance && Number.isFinite(payload.next_jackpot_chance_percent)) {
+            nextJackpotChance.textContent = `${new Intl.NumberFormat('ru-RU', {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 3,
+            }).format(payload.next_jackpot_chance_percent)} %`;
+        }
         if (playerAttemptCount && Number.isFinite(Number(payload.player_attempts))) {
             playerAttemptCount.textContent = new Intl.NumberFormat('ru-RU').format(Number(payload.player_attempts));
         }

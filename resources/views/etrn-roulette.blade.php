@@ -57,7 +57,7 @@
                 </span>
                 <span class="etrn-roulette__chance">
                     <span>Шанс 3 логистРу</span>
-                    <strong>повышается ↑</strong>
+                    <strong><span data-etrn-next-jackpot-chance>0,5 %</span> <span aria-hidden="true">↑</span></strong>
                 </span>
             </div>
             <div class="etrn-roulette__prize">
@@ -71,16 +71,15 @@
                 @else
                     <a class="etrn-roulette__prize-link" href="{{ route('etrn-roulette.prize.join') }}" data-etrn-auth-open>Играть за приз</a>
                 @endif
-                <div class="etrn-roulette__prize-links">
-                    <a class="etrn-roulette__rules-link" href="{{ route('etrn-roulette.rules') }}">Правила игры</a>
-                    @if ($communityUser)
+                @if ($communityUser)
+                    <div class="etrn-roulette__prize-links">
                         <form method="POST" action="{{ route('community.logout') }}">
                             @csrf
                             <input type="hidden" name="return_to" value="etrn-roulette">
                             <button class="etrn-roulette__logout" type="submit">Выйти</button>
                         </form>
-                    @endif
-                </div>
+                    </div>
+                @endif
             </div>
             <button class="etrn-roulette__spin" type="button" data-etrn-spin>
                 <span class="etrn-roulette__spin-face">
@@ -88,6 +87,8 @@
                 </span>
             </button>
         </div>
+
+        <a class="etrn-roulette__rules-link" href="{{ route('etrn-roulette.rules') }}">Правила игры</a>
 
         <div class="etrn-roulette__captcha">
             <x-site.smartcaptcha form="etrn_roulette" invisible />

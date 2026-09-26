@@ -257,7 +257,7 @@ class EtrnRoulettePrizePlayerTest extends TestCase
 
     public function test_shared_next_jackpot_chance_grows_and_resets_after_superbonus(): void
     {
-        $rolls = [999_999, 1_000, 1_000];
+        $rolls = [999_999, 5_000, 5_000];
         $this->app->instance(EtrnRouletteOutcome::class, new EtrnRouletteOutcome(
             static function (int $max) use (&$rolls): int {
                 return $max === 999_999 ? array_shift($rolls) : 0;
@@ -265,30 +265,30 @@ class EtrnRoulettePrizePlayerTest extends TestCase
         ));
 
         $this->getJson(route('etrn-roulette.attempts.index'))
-            ->assertOk()->assertJsonPath('next_jackpot_chance_percent', 0.1);
+            ->assertOk()->assertJsonPath('next_jackpot_chance_percent', 0.5);
 
         $this->postJson(route('etrn-roulette.attempts.store'), [
             'request_id' => (string) Str::uuid(),
             'smart_token' => 'first-token',
         ])->assertOk()
             ->assertJsonPath('outcome.jackpot', false)
-            ->assertJsonPath('outcome.jackpot_chance_percent', 0.1)
-            ->assertJsonPath('next_jackpot_chance_percent', 0.101);
+            ->assertJsonPath('outcome.jackpot_chance_percent', 0.5)
+            ->assertJsonPath('next_jackpot_chance_percent', 0.51);
 
         $this->postJson(route('etrn-roulette.attempts.store'), [
             'request_id' => (string) Str::uuid(),
             'smart_token' => 'second-token',
         ])->assertOk()
             ->assertJsonPath('outcome.jackpot', true)
-            ->assertJsonPath('outcome.jackpot_chance_percent', 0.101)
-            ->assertJsonPath('next_jackpot_chance_percent', 0.1);
+            ->assertJsonPath('outcome.jackpot_chance_percent', 0.51)
+            ->assertJsonPath('next_jackpot_chance_percent', 0.5);
 
         $this->postJson(route('etrn-roulette.attempts.store'), [
             'request_id' => (string) Str::uuid(),
             'smart_token' => 'third-token',
         ])->assertOk()
             ->assertJsonPath('outcome.jackpot', false)
-            ->assertJsonPath('next_jackpot_chance_percent', 0.101);
+            ->assertJsonPath('next_jackpot_chance_percent', 0.51);
 
         $this->assertDatabaseHas('game_counters', ['key' => 'etrn-roulette-jackpot-streak', 'attempts' => 1]);
     }

@@ -11,9 +11,9 @@ final class EtrnRouletteOutcome
 
     private const ROLL_MAX = 999_999;
 
-    private const BASE_JACKPOT_ROLLS = 1_000;
+    private const BASE_JACKPOT_ROLLS = 5_000;
 
-    private const JACKPOT_ROLLS_PER_ATTEMPT = 10;
+    private const JACKPOT_ROLLS_PER_ATTEMPT = 100;
 
     private const MAX_JACKPOT_ROLLS = 100_000;
 
@@ -81,7 +81,10 @@ final class EtrnRouletteOutcome
     {
         return min(
             self::MAX_JACKPOT_ROLLS,
-            self::BASE_JACKPOT_ROLLS + min(9_900, max(0, $attemptsWithoutJackpot)) * self::JACKPOT_ROLLS_PER_ATTEMPT,
+            self::BASE_JACKPOT_ROLLS + min(
+                intdiv(self::MAX_JACKPOT_ROLLS - self::BASE_JACKPOT_ROLLS, self::JACKPOT_ROLLS_PER_ATTEMPT),
+                max(0, $attemptsWithoutJackpot),
+            ) * self::JACKPOT_ROLLS_PER_ATTEMPT,
         );
     }
 }
