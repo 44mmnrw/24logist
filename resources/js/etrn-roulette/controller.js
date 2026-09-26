@@ -24,7 +24,7 @@ const makeSymbol = (operator) => {
         }
     }
 
-    if (!['kontur', 'astral', 'saby', 'ediveb', 'evotor', 'taxcom', 'sber', 'tochka', 'logistru'].includes(operator.logo)) {
+    if (!['kontur', 'astral', 'saby', 'ediveb', 'evotor', 'taxcom', 'sber', 'tochka', 'mig', 'itcom', 'stek', 'oneofd', 'atidoki', 'niias', 'crpt', 'logistru'].includes(operator.logo)) {
         const name = document.createElement('span');
         name.className = operator.logo
             ? 'etrn-roulette__symbol-name'

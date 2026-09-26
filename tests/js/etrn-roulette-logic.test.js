@@ -13,13 +13,14 @@ test('matching result has one destination on all three reels', () => {
     assert.deepEqual(outcome.reels.map(({ id }) => id), Array(3).fill('ПФ СКБ Контур'));
 });
 
-test('triple LogistRu jackpot occupies the first five percent of outcomes', () => {
-    const outcome = createRouletteOutcome(operators, () => 0.049);
+test('triple LogistRu jackpot occupies the first 0.1 percent of outcomes', () => {
+    const outcome = createRouletteOutcome(operators, () => 0.000999);
     assert.equal(outcome.matched, true);
     assert.equal(outcome.bonus, true);
     assert.equal(outcome.jackpot, true);
     assert.equal(outcome.destination, null);
     assert.deepEqual(outcome.reels.map(({ id }) => id), Array(3).fill(LOGISTRU_SYMBOL.id));
+    assert.equal(createRouletteOutcome(operators, () => 0.001).jackpot, false);
 });
 
 test('miss never displays three matching operators', () => {

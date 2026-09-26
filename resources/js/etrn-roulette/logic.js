@@ -21,6 +21,13 @@ const LOGOS = Object.freeze({
     'Такском': 'taxcom',
     'СберКорус': 'sber',
     'Точка': 'tochka',
+    'НТСсофт': 'mig',
+    'Айтиком': 'itcom',
+    'НТЦ СТЭК': 'stek',
+    'Энергетические системы и коммуникации': 'oneofd',
+    'АТИ-Доки': 'atidoki',
+    'НИИАС': 'niias',
+    'ОПЕРАТОР-ЦРПТ': 'crpt',
 });
 
 export const LOGISTRU_SYMBOL = Object.freeze({
@@ -31,6 +38,8 @@ export const LOGISTRU_SYMBOL = Object.freeze({
 });
 
 export const LOGISTRU_COMBINATION_WEIGHT = 3;
+const JACKPOT_PROBABILITY = 0.001;
+const OPERATOR_WIN_PROBABILITY = 0.25;
 
 export const makeOperators = (names) => names.map((name) => ({
     id: name,
@@ -47,7 +56,7 @@ export const createRouletteOutcome = (operators, random = Math.random) => {
     }
 
     const roll = random();
-    if (roll < 0.05) {
+    if (roll < JACKPOT_PROBABILITY) {
         return {
             matched: true,
             bonus: true,
@@ -57,7 +66,7 @@ export const createRouletteOutcome = (operators, random = Math.random) => {
         };
     }
 
-    if (roll < 0.30) {
+    if (roll < JACKPOT_PROBABILITY + OPERATOR_WIN_PROBABILITY) {
         const destination = operators[randomIndex(operators.length, random)];
         return { matched: true, bonus: false, jackpot: false, reels: Array(3).fill(destination), destination };
     }
