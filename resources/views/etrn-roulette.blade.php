@@ -3,7 +3,7 @@
     $description = 'Интерактивная игра по мотивам рулетки роуминга ЭПД: запустите барабаны и узнайте, какому оператору выпадет ЭТрН.';
     $canonical = route('etrn-roulette');
     $communityUser = auth('community')->user();
-    $roulettePlayer = $communityUser?->etrnRoulettePlayer;
+    $roulettePlayer = $communityUser?->etrnRoulettePlayer()->first();
     $communitySettings = $communityUser === null ? app(\App\Services\SiteSettingsService::class) : null;
 @endphp
 <!DOCTYPE html>
@@ -61,7 +61,7 @@
                 </span> --}}
             </div>
             <div class="etrn-roulette__prize">
-                @if ($roulettePlayer)
+                @if ($roulettePlayer?->contact_verified_at)
                     <span class="etrn-roulette__prize-active">
                         <span>В розыгрыше</span>
                         <span>Учтено попыток: <strong data-etrn-player-attempt-count>{{ number_format($roulettePlayer->attempts, 0, ',', ' ') }}</strong></span>

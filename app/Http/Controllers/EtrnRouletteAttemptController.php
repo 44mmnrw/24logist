@@ -66,6 +66,7 @@ final class EtrnRouletteAttemptController extends Controller
 
             $player = $communityUserId === null ? null : DB::table('etrn_roulette_players')
                 ->where('community_user_id', $communityUserId)
+                ->whereNotNull('contact_verified_at')
                 ->lockForUpdate()
                 ->first();
 

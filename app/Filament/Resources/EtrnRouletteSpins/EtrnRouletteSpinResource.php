@@ -118,6 +118,7 @@ class EtrnRouletteSpinResource extends Resource
             Section::make('Участник и запрос')->schema([
                 TextEntry::make('communityUser.display_name')->label('Участник')->placeholder('Гость'),
                 TextEntry::make('communityUser.username')->label('Профиль')->placeholder('—'),
+                TextEntry::make('player.contact_email')->label('Контактный email')->placeholder('—')->copyable(),
                 TextEntry::make('community_user_id')->label('ID участника')->placeholder('—'),
                 TextEntry::make('ip_address')->label('IP')->placeholder('Не записан')->copyable(),
                 TextEntry::make('user_agent')->label('Браузер')->placeholder('Не записан')->columnSpanFull(),

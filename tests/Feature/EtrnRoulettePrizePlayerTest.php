@@ -3,15 +3,19 @@
 namespace Tests\Feature;
 
 use App\Filament\Resources\EtrnRouletteJackpots\Pages\ListEtrnRouletteJackpots;
+use App\Filament\Resources\EtrnRoulettePlayers\Pages\ListEtrnRoulettePlayers;
 use App\Filament\Resources\EtrnRouletteSpins\Pages\ListEtrnRouletteSpins;
 use App\Filament\Resources\EtrnRouletteSpins\Widgets\EtrnRouletteStats;
 use App\Models\CommunityUser;
+use App\Models\EtrnRoulettePlayer;
 use App\Models\SiteSetting;
 use App\Models\User;
+use App\Mail\EtrnRouletteContactCode;
 use App\Services\EtrnRouletteOutcome;
 use App\Services\SiteSettingsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -28,8 +32,14 @@ class EtrnRoulettePrizePlayerTest extends TestCase
         SiteSetting::instance()->update([
             'smartcaptcha_site_key' => 'test-public-key',
             'smartcaptcha_server_key' => 'test-private-key',
+            'mail_host' => 'smtp.example.test',
+            'mail_port' => 465,
+            'mail_username' => 'site@example.test',
+            'mail_password' => 'test-password',
+            'mail_from_address' => 'site@example.test',
         ]);
         app(SiteSettingsService::class)->clearCache();
+        Mail::fake();
         Http::preventStrayRequests();
         $this->captchaResponse = [
             'status' => 'ok',
@@ -58,13 +68,33 @@ class EtrnRoulettePrizePlayerTest extends TestCase
 
         $this->actingAs($user, 'community')
             ->get(route('etrn-roulette.prize.join'))
-            ->assertRedirect(route('etrn-roulette'));
+            ->assertOk()
+            ->assertSee('Контакт для розыгрыша');
+
+        $this->post(route('etrn-roulette.prize.contact'), ['email' => 'player@example.test'])
+            ->assertSessionHasErrors('contact_consent');
+        Mail::assertNothingSent();
+
+        $this->actingAs($user, 'community')
+            ->postJson(route('etrn-roulette.attempts.store'), [
+                'request_id' => (string) Str::uuid(),
+                'smart_token' => 'before-verification',
+            ])
+            ->assertOk()
+            ->assertJsonMissingPath('player_attempts');
+        $this->assertDatabaseCount('etrn_roulette_players', 0);
+
+        $this->verifyPrizeEmail($user);
 
         $this->actingAs($user, 'community')
             ->get(route('etrn-roulette.prize.join'))
             ->assertRedirect(route('etrn-roulette'));
 
         $this->assertDatabaseCount('etrn_roulette_players', 1);
+        $this->assertDatabaseHas('etrn_roulette_players', [
+            'community_user_id' => $user->id,
+            'contact_email' => 'player@example.test',
+        ]);
 
         $this->actingAs($user, 'community')
             ->postJson(route('etrn-roulette.attempts.store'), [
@@ -80,6 +110,82 @@ class EtrnRoulettePrizePlayerTest extends TestCase
         ]);
     }
 
+    public function test_expired_email_code_does_not_register_a_player(): void
+    {
+        $user = CommunityUser::factory()->create();
+        $code = $this->requestPrizeEmailCode($user);
+
+        $this->actingAs($user, 'community')
+            ->post(route('etrn-roulette.prize.verify'), ['code' => '000000' === $code ? '000001' : '000000'])
+            ->assertSessionHasErrors('code');
+
+        $this->travel(11)->minutes();
+        $this->actingAs($user, 'community')
+            ->post(route('etrn-roulette.prize.verify'), ['code' => $code])
+            ->assertSessionHasErrors('code');
+        $this->assertDatabaseCount('etrn_roulette_players', 0);
+    }
+
+    public function test_email_code_is_blocked_after_five_wrong_attempts(): void
+    {
+        $user = CommunityUser::factory()->create();
+        $code = $this->requestPrizeEmailCode($user);
+        $wrongCode = '000000' === $code ? '000001' : '000000';
+
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $this->actingAs($user, 'community')
+                ->post(route('etrn-roulette.prize.verify'), ['code' => $wrongCode])
+                ->assertSessionHasErrors('code');
+        }
+
+        $this->actingAs($user, 'community')
+            ->post(route('etrn-roulette.prize.verify'), ['code' => $code])
+            ->assertSessionHasErrors('code');
+        $this->assertDatabaseCount('etrn_roulette_players', 0);
+    }
+
+    public function test_email_delivery_failure_does_not_register_a_player(): void
+    {
+        SiteSetting::instance()->update(['mail_host' => null]);
+        $user = CommunityUser::factory()->create();
+
+        $this->actingAs($user, 'community')
+            ->post(route('etrn-roulette.prize.contact'), [
+                'email' => 'player@example.test',
+                'contact_consent' => '1',
+            ])
+            ->assertSessionHasErrors('email');
+
+        Mail::assertNothingSent();
+        $this->assertDatabaseCount('etrn_roulette_players', 0);
+    }
+
+    public function test_existing_player_keeps_previous_attempts_after_confirming_email(): void
+    {
+        $user = CommunityUser::factory()->create();
+        EtrnRoulettePlayer::query()->create([
+            'community_user_id' => $user->id,
+            'attempts' => 7,
+            'joined_at' => now(),
+        ]);
+
+        $this->verifyPrizeEmail($user);
+
+        $this->assertDatabaseHas('etrn_roulette_players', [
+            'community_user_id' => $user->id,
+            'attempts' => 7,
+            'contact_email' => 'player@example.test',
+        ]);
+
+        $this->actingAs($user, 'community')
+            ->postJson(route('etrn-roulette.attempts.store'), [
+                'request_id' => (string) Str::uuid(),
+                'smart_token' => 'after-verification',
+            ])
+            ->assertOk()
+            ->assertJsonPath('player_attempts', 8);
+    }
+
     public function test_player_sees_what_prize_attempt_count_means_and_can_log_out_to_game(): void
     {
         $this->withoutVite();
@@ -87,9 +193,7 @@ class EtrnRoulettePrizePlayerTest extends TestCase
         app(SiteSettingsService::class)->clearCache();
         $user = CommunityUser::factory()->create();
 
-        $this->actingAs($user, 'community')
-            ->get(route('etrn-roulette.prize.join'))
-            ->assertRedirect(route('etrn-roulette'));
+        $this->verifyPrizeEmail($user);
         $user->etrnRoulettePlayer()->update(['attempts' => 3]);
 
         $this->get(route('etrn-roulette'))
@@ -109,9 +213,7 @@ class EtrnRoulettePrizePlayerTest extends TestCase
     {
         $this->withoutVite();
         $communityUser = CommunityUser::factory()->create(['display_name' => 'Победитель теста']);
-        $this->actingAs($communityUser, 'community')
-            ->get(route('etrn-roulette.prize.join'))
-            ->assertRedirect(route('etrn-roulette'));
+        $this->verifyPrizeEmail($communityUser, 'winner@example.test');
 
         $this->app->instance(EtrnRouletteOutcome::class, new EtrnRouletteOutcome(static fn (int $max): int => 500));
         $requestId = (string) Str::uuid();
@@ -156,7 +258,15 @@ class EtrnRoulettePrizePlayerTest extends TestCase
         $this->actingAs($admin, 'web')
             ->get(route('filament.admin.resources.etrn-roulette-jackpots.index'))
             ->assertOk()
-            ->assertSee('Победитель теста');
+            ->assertSee('Победитель теста')
+            ->assertSee('winner@example.test');
+
+        $this->get(route('filament.admin.resources.etrn-roulette-players.index'))
+            ->assertOk()
+            ->assertSee('winner@example.test');
+
+        Livewire::test(ListEtrnRoulettePlayers::class)
+            ->assertCanSeeTableRecords([$communityUser->etrnRoulettePlayer]);
 
         Livewire::test(ListEtrnRouletteJackpots::class)
             ->assertCanSeeTableRecords([$first['spin_id']]);
@@ -291,5 +401,33 @@ class EtrnRoulettePrizePlayerTest extends TestCase
             ->assertJsonPath('next_jackpot_chance_percent', 1.01);
 
         $this->assertDatabaseHas('game_counters', ['key' => 'etrn-roulette-jackpot-streak', 'attempts' => 1]);
+    }
+
+    private function verifyPrizeEmail(CommunityUser $user, string $email = 'player@example.test'): void
+    {
+        $code = $this->requestPrizeEmailCode($user, $email);
+
+        $this->actingAs($user, 'community')
+            ->post(route('etrn-roulette.prize.verify'), ['code' => $code])
+            ->assertRedirect(route('etrn-roulette'));
+    }
+
+    private function requestPrizeEmailCode(CommunityUser $user, string $email = 'player@example.test'): string
+    {
+        $this->actingAs($user, 'community')
+            ->post(route('etrn-roulette.prize.contact'), [
+                'email' => $email,
+                'contact_consent' => '1',
+            ])
+            ->assertRedirect(route('etrn-roulette.prize.join'));
+
+        $code = null;
+        Mail::assertSent(EtrnRouletteContactCode::class, function (EtrnRouletteContactCode $mail) use (&$code, $email): bool {
+            $code = $mail->code;
+
+            return $mail->hasTo($email);
+        });
+
+        return $code;
     }
 }

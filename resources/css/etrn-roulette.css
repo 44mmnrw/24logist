@@ -21,6 +21,24 @@
 .etrn-roulette__rules p { margin: 0 0 10px; }
 .etrn-roulette__rules ol { margin: 0; padding-left: 20px; }
 .etrn-roulette__rules li + li { margin-top: 5px; }
+.etrn-roulette-contact-page { min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 24px; }
+.etrn-roulette-contact-card { width: min(100%, 480px); padding: clamp(22px, 5vw, 36px); border: 1px solid #d4e5f5; border-radius: 20px; background: #fff; box-shadow: 0 14px 40px #15365d18; color: #123c67; }
+.etrn-roulette-contact-card h1 { margin: 0 0 12px; font-size: clamp(23px, 5vw, 30px); }
+.etrn-roulette-contact-card p { margin: 0 0 18px; line-height: 1.5; }
+.etrn-roulette-contact-card__status { padding: 10px 12px; border-radius: 10px; background: #e1fff2; }
+.etrn-roulette-contact-card__form { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+.etrn-roulette-contact-card__form + .etrn-roulette-contact-card__form { padding-top: 20px; border-top: 1px solid #d4e5f5; }
+.etrn-roulette-contact-card__form > label:not(.etrn-roulette-contact-card__consent) { font-weight: 700; }
+.etrn-roulette-contact-card__form > input { width: 100%; min-height: 44px; padding: 9px 12px; border: 1px solid #a8c6de; border-radius: 10px; font: inherit; }
+.etrn-roulette-contact-card__form > input:focus-visible, .etrn-roulette-contact-card__form button:focus-visible, .etrn-roulette-contact-card__rules:focus-visible { outline: 3px solid #ffb347; outline-offset: 2px; }
+.etrn-roulette-contact-card__form button { min-height: 46px; border: 0; border-radius: 11px; background: linear-gradient(135deg, #057ed9, #184bb7); color: #fff; cursor: pointer; font: inherit; font-weight: 700; }
+.etrn-roulette-contact-card__form button:hover { filter: brightness(1.08); }
+.etrn-roulette-contact-card__form small { color: #58708d; line-height: 1.4; }
+.etrn-roulette-contact-card__consent { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.45; }
+.etrn-roulette-contact-card__consent input { flex: none; margin-top: 3px; }
+.etrn-roulette-contact-card__consent a, .etrn-roulette-contact-card__rules { color: #075fb7; }
+.etrn-roulette-contact-card__error { color: #ad2424; font-size: 13px; }
+.etrn-roulette-contact-card__rules { display: inline-block; margin-top: 22px; font-size: 13px; }
 .etrn-roulette__art { display: block; width: 100%; height: 100%; object-fit: contain; }
 .etrn-roulette__pulled { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; visibility: hidden; }
 .etrn-roulette__eyelids { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0; }

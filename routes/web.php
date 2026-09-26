@@ -206,6 +206,14 @@ Route::get('/etrn-roulette/prize/join', EtrnRoulettePrizeController::class)
     ->middleware(['community.auth', 'community.onboarded', 'throttle:20,1'])
     ->name('etrn-roulette.prize.join');
 
+Route::post('/etrn-roulette/prize/contact', [EtrnRoulettePrizeController::class, 'sendContactCode'])
+    ->middleware(['community.auth', 'community.onboarded', 'throttle:5,1'])
+    ->name('etrn-roulette.prize.contact');
+
+Route::post('/etrn-roulette/prize/verify', [EtrnRoulettePrizeController::class, 'verifyContactCode'])
+    ->middleware(['community.auth', 'community.onboarded', 'throttle:10,1'])
+    ->name('etrn-roulette.prize.verify');
+
 Route::middleware(['community.locale', 'community.enabled', 'community.activity'])->prefix('community')->name('community.')->group(function (): void {
     Route::get('/', [CommunityController::class, 'index'])->name('index');
     Route::get('/c/{category}', [CommunityController::class, 'category'])->name('categories.show');

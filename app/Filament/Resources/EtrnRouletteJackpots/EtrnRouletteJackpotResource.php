@@ -30,7 +30,7 @@ class EtrnRouletteJackpotResource extends Resource
     {
         return parent::getEloquentQuery()
             ->where('is_jackpot', true)
-            ->with('communityUser');
+            ->with(['communityUser', 'player']);
     }
 
     public static function table(Table $table): Table
@@ -41,6 +41,7 @@ class EtrnRouletteJackpotResource extends Resource
             TextColumn::make('communityUser.username')->label('ID профиля')->placeholder('—')->copyable(),
             TextColumn::make('prize_participation')->label('Участвует за приз')
                 ->state(fn (EtrnRouletteSpin $record): string => $record->etrn_roulette_player_id === null ? 'Нет' : 'Да'),
+            TextColumn::make('player.contact_email')->label('Контактный email')->placeholder('—')->copyable(),
             TextColumn::make('ip_address')->label('IP')->placeholder('Не записан')->copyable(),
             TextColumn::make('id')->label('ID вращения')->copyable(),
         ])->defaultSort('created_at', 'desc')
