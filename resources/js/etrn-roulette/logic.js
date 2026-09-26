@@ -38,8 +38,6 @@ export const LOGISTRU_SYMBOL = Object.freeze({
 });
 
 export const LOGISTRU_COMBINATION_WEIGHT = 3;
-const JACKPOT_PROBABILITY = 0.001;
-const OPERATOR_WIN_PROBABILITY = 0.25;
 
 export const makeOperators = (names) => names.map((name) => ({
     id: name,
@@ -47,47 +45,3 @@ export const makeOperators = (names) => names.map((name) => ({
     shortName: SHORT_NAMES[name] || DISPLAY_NAMES[name] || name,
     logo: LOGOS[name] || null,
 }));
-
-const randomIndex = (length, random) => Math.min(length - 1, Math.floor(random() * length));
-
-export const createRouletteOutcome = (operators, random = Math.random) => {
-    if (operators.length < 2) {
-        throw new Error('At least two operators are required');
-    }
-
-    const roll = random();
-    if (roll < JACKPOT_PROBABILITY) {
-        return {
-            matched: true,
-            bonus: true,
-            jackpot: true,
-            reels: Array(3).fill(LOGISTRU_SYMBOL),
-            destination: null,
-        };
-    }
-
-    if (roll < JACKPOT_PROBABILITY + OPERATOR_WIN_PROBABILITY) {
-        const destination = operators[randomIndex(operators.length, random)];
-        return { matched: true, bonus: false, jackpot: false, reels: Array(3).fill(destination), destination };
-    }
-
-    const symbols = [
-        ...operators,
-        ...Array(LOGISTRU_COMBINATION_WEIGHT).fill(LOGISTRU_SYMBOL),
-    ];
-    const reels = Array.from({ length: 3 }, () => symbols[randomIndex(symbols.length, random)]);
-    let bonusSeen = false;
-    reels.forEach((symbol, index) => {
-        if (symbol.id !== LOGISTRU_SYMBOL.id) return;
-        if (bonusSeen) reels[index] = operators[randomIndex(operators.length, random)];
-        bonusSeen = true;
-    });
-
-    const accidentalWin = reels.every(({ id }) => id === reels[0].id);
-    if (accidentalWin) {
-        const next = (operators.findIndex(({ id }) => id === reels[0].id) + 1) % operators.length;
-        reels[2] = operators[next];
-    }
-
-    return { matched: false, bonus: false, jackpot: false, reels, destination: null };
-};

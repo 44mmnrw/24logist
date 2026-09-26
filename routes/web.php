@@ -187,6 +187,7 @@ Route::view('/epd-game', 'epd-game')
     ->name('epd-game');
 
 Route::view('/etrn-roulette', 'etrn-roulette')->name('etrn-roulette');
+Route::view('/etrn-roulette/rules', 'etrn-roulette-rules')->name('etrn-roulette.rules');
 
 Route::get('/etrn-roulette/attempts', [EtrnRouletteAttemptController::class, 'index'])
     ->withoutMiddleware([StartSession::class, ShareErrorsFromSession::class, PreventRequestForgery::class])
@@ -194,7 +195,6 @@ Route::get('/etrn-roulette/attempts', [EtrnRouletteAttemptController::class, 'in
     ->name('etrn-roulette.attempts.index');
 
 Route::post('/etrn-roulette/attempts', [EtrnRouletteAttemptController::class, 'store'])
-    ->middleware('throttle:120,1')
     ->name('etrn-roulette.attempts.store');
 
 Route::get('/etrn-roulette/prize/auth/{provider}', [EtrnRoulettePrizeController::class, 'auth'])

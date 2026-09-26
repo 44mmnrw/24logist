@@ -42,10 +42,21 @@ export function createSmartCaptcha(form) {
     const container = root.querySelector('[data-smartcaptcha-widget]');
     const status = root.querySelector('[data-smartcaptcha-status]');
     const retry = root.querySelector('[data-smartcaptcha-retry]');
+    const invisible = root.dataset.invisible === 'true';
     let widgetId;
     let loading;
     let api;
     let widgetError = false;
+    let pendingToken;
+
+    const finishPending = (error, token) => {
+        if (!pendingToken) return;
+        const pending = pendingToken;
+        pendingToken = undefined;
+        window.clearTimeout(pending.timeout);
+        if (error) pending.reject(error);
+        else pending.resolve(token);
+    };
 
     const showStatus = (message = '', canRetry = false) => {
         status.textContent = message;
@@ -66,13 +77,21 @@ export function createSmartCaptcha(form) {
                 widgetId = api.render(container, {
                     sitekey: root.dataset.sitekey,
                     hl: 'ru',
-                    callback: () => showStatus(),
+                    invisible,
+                    callback: (token) => {
+                        showStatus();
+                        if (invisible) finishPending(token ? null : new Error('Подтвердите, что вы не робот.'), token);
+                    },
                 });
                 widgetError = false;
-                api.subscribe(widgetId, 'token-expired', () => showStatus('Проверка устарела. Пройдите её ещё раз.'));
+                api.subscribe(widgetId, 'token-expired', () => {
+                    showStatus('Проверка устарела. Пройдите её ещё раз.');
+                    finishPending(new Error('Проверка устарела. Попробуйте ещё раз.'));
+                });
                 const failWidget = () => {
                     widgetError = true;
                     showStatus(unavailableMessage, true);
+                    finishPending(new Error(unavailableMessage));
                 };
                 api.subscribe(widgetId, 'network-error', failWidget);
                 api.subscribe(widgetId, 'javascript-error', failWidget);
@@ -96,11 +115,26 @@ export function createSmartCaptcha(form) {
         async getToken() {
             await load();
             if (widgetId === undefined || widgetError) throw new Error(unavailableMessage);
+            if (invisible) {
+                showStatus('Проверяем запуск…');
+                return new Promise((resolve, reject) => {
+                    const timeout = window.setTimeout(() => {
+                        finishPending(new Error('Проверка занимает слишком много времени. Попробуйте ещё раз.'));
+                    }, 30000);
+                    pendingToken = { resolve, reject, timeout };
+                    try {
+                        api.execute(widgetId);
+                    } catch {
+                        finishPending(new Error(unavailableMessage));
+                    }
+                });
+            }
             const token = api.getResponse(widgetId);
             if (!token) throw new Error('Подтвердите, что вы не робот.');
             return token;
         },
         reset() {
+            finishPending(new Error('Проверка отменена.'));
             if (widgetId !== undefined && !widgetError) {
                 api.reset(widgetId);
                 showStatus();

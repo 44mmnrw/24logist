@@ -87,8 +87,8 @@ final class GeneralSiteSettingForm
         $enabled = static fn (Get $get): bool => (bool) ($get('smartcaptcha_commercial_offer_enabled') || $get('smartcaptcha_contact_enabled'));
 
         return [
-            Section::make('Защита форм от спама')
-                ->description('Создайте капчу в Яндекс Cloud, разрешите домен сайта и скопируйте ключи. Для обеих форм используется один набор ключей.')
+            Section::make('Защита форм и игры от ботов')
+                ->description('Создайте капчу в Яндекс Cloud, разрешите домен сайта и скопируйте ключи. Один набор ключей используется для форм и рулетки роуминга.')
                 ->schema([
                     Toggle::make('smartcaptcha_commercial_offer_enabled')
                         ->label('Капча в окне «Получить предложение»')

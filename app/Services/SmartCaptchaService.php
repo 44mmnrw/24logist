@@ -15,6 +15,7 @@ class SmartCaptchaService
         return match ($form) {
             'commercial_offer' => (bool) $this->settings->get()->smartcaptcha_commercial_offer_enabled,
             'contact' => (bool) $this->settings->get()->smartcaptcha_contact_enabled,
+            'etrn_roulette' => true,
             default => false,
         };
     }

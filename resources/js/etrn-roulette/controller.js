@@ -1,9 +1,18 @@
-import { createRouletteOutcome, LOGISTRU_COMBINATION_WEIGHT, LOGISTRU_SYMBOL, makeOperators } from './logic.js';
+import { LOGISTRU_COMBINATION_WEIGHT, LOGISTRU_SYMBOL, makeOperators } from './logic.js';
 import { createConfettiController } from '../epd-game/confetti.js';
+import { createSmartCaptcha } from '../smartcaptcha.js';
 
 const delay = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
 const SPIN_DURATION_MULTIPLIER = 3;
 const formatAttemptCounter = (attempts) => String(Math.max(0, Math.trunc(attempts))).padStart(5, '0');
+const newRequestId = () => {
+    if (typeof window.crypto.randomUUID === 'function') return window.crypto.randomUUID();
+    const bytes = window.crypto.getRandomValues(new Uint8Array(16));
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+};
 
 const makeSymbol = (operator) => {
     const symbol = document.createElement('div');
@@ -56,6 +65,7 @@ export const createEtrnRoulette = (game) => {
     const authOpen = game.querySelector('[data-etrn-auth-open]');
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const confetti = createConfettiController({ game, reducedMotion });
+    const captcha = createSmartCaptcha(game);
     const audio = {
         pull: new Audio(game.dataset.soundPull),
         stop: new Audio(game.dataset.soundStop),
@@ -63,20 +73,25 @@ export const createEtrnRoulette = (game) => {
         failure: new Audio(game.dataset.soundFailure),
     };
     let busy = false;
-    let displayedAttempts = null;
-    let displayedJackpots = null;
+    let pendingRequestId = null;
 
     const renderAttempts = (attempts) => {
-        displayedAttempts = attempts;
         attemptCount.textContent = formatAttemptCounter(attempts);
     };
 
     const renderJackpots = (jackpots) => {
-        displayedJackpots = jackpots;
         jackpotCount.textContent = String(Math.max(0, Math.trunc(jackpots)));
     };
 
-    const requestAttempts = async (url, options = {}) => {
+    const applyCounters = (payload) => {
+        renderAttempts(Number(payload.attempts));
+        renderJackpots(Number(payload.jackpots));
+        if (playerAttemptCount && Number.isFinite(Number(payload.player_attempts))) {
+            playerAttemptCount.textContent = new Intl.NumberFormat('ru-RU').format(Number(payload.player_attempts));
+        }
+    };
+
+    const requestAttempts = async (url, options = {}, updateCounter = true) => {
         const response = await window.fetch(url, {
             credentials: 'same-origin',
             headers: {
@@ -85,27 +100,46 @@ export const createEtrnRoulette = (game) => {
             },
             ...options,
         });
-        if (!response.ok) throw new Error(`Attempt counter request failed: ${response.status}`);
-        const payload = await response.json();
-        renderAttempts(Number(payload.attempts));
-        renderJackpots(Number(payload.jackpots));
-        if (playerAttemptCount && Number.isFinite(Number(payload.player_attempts))) {
-            playerAttemptCount.textContent = new Intl.NumberFormat('ru-RU').format(Number(payload.player_attempts));
+        if (!response.ok) {
+            const errorPayload = await response.json().catch(() => ({}));
+            const error = new Error(errorPayload.message || `Attempt request failed: ${response.status}`);
+            error.status = response.status;
+            throw error;
         }
+        const payload = await response.json();
+        if (updateCounter) applyCounters(payload);
+        return payload;
     };
 
-    const incrementAttempts = (isJackpot) => {
-        if (displayedAttempts !== null) renderAttempts(displayedAttempts + 1);
-        if (isJackpot && displayedJackpots !== null) renderJackpots(displayedJackpots + 1);
-        requestAttempts(game.dataset.attemptsIncrementUrl, {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-            },
-            body: JSON.stringify({ jackpot: isJackpot }),
-        }).catch(() => {});
+    const requestSpin = async () => {
+        pendingRequestId ??= newRequestId();
+        const smartToken = await captcha.getToken();
+        let payload;
+        try {
+            payload = await requestAttempts(game.dataset.attemptsIncrementUrl, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                },
+                body: JSON.stringify({ request_id: pendingRequestId, smart_token: smartToken }),
+            }, false);
+        } finally {
+            captcha.reset();
+        }
+        const byId = new Map([...operators, LOGISTRU_SYMBOL].map((operator) => [operator.id, operator]));
+        const reelIds = payload.outcome?.reels;
+        if (!Array.isArray(reelIds) || reelIds.length !== reels.length || reelIds.some((id) => !byId.has(id))) {
+            throw new Error('Некорректный ответ сервера. Обновите страницу.');
+        }
+        pendingRequestId = null;
+        return {
+            ...payload.outcome,
+            counters: payload,
+            reels: reelIds.map((id) => byId.get(id)),
+            destination: payload.outcome.destination ? byId.get(payload.outcome.destination) : null,
+        };
     };
 
     const play = (type) => {
@@ -164,8 +198,6 @@ export const createEtrnRoulette = (game) => {
     const spin = async () => {
         if (busy) return;
         busy = true;
-        const outcome = createRouletteOutcome(operators);
-        incrementAttempts(outcome.jackpot);
         game.dataset.phase = 'spinning';
         game.dataset.outcome = '';
         game.dataset.longResult = 'false';
@@ -173,12 +205,30 @@ export const createEtrnRoulette = (game) => {
         spinLabel.textContent = 'Крутим барабаны…';
         lever.disabled = true;
         reelsPanel.setAttribute('aria-busy', 'true');
-        status.textContent = 'Барабаны вращаются…';
+        status.textContent = 'Проверяем запуск…';
         result.textContent = '';
         confetti.stop();
+        let outcome;
+        try {
+            outcome = await requestSpin();
+        } catch (error) {
+            captcha.reset();
+            if (error.status === 409) pendingRequestId = null;
+            game.dataset.phase = 'idle';
+            reelsPanel.setAttribute('aria-busy', 'false');
+            status.textContent = error.message || 'Не удалось запустить барабаны. Попробуйте ещё раз.';
+            spinLabel.textContent = 'Крутить ещё раз';
+            spinButton.disabled = false;
+            lever.disabled = false;
+            busy = false;
+            return;
+        }
+        status.textContent = 'Барабаны вращаются…';
         play('pull');
 
         await Promise.all(reels.map((reel, index) => spinReel(reel, index, outcome.reels[index])));
+
+        applyCounters(outcome.counters);
 
         game.dataset.phase = 'stopped';
         game.dataset.outcome = outcome.jackpot ? 'jackpot' : outcome.matched ? 'match' : 'miss';
@@ -199,6 +249,7 @@ export const createEtrnRoulette = (game) => {
     };
 
     reels.forEach((reel, index) => renderReel(reel, index === 2 ? LOGISTRU_SYMBOL : operators[index]));
+    captcha.load();
     requestAttempts(game.dataset.attemptsUrl).catch(() => {});
     if (authDialog && authOpen) {
         const closeAuthDialog = () => {

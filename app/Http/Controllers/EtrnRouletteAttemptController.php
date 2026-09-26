@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EtrnRouletteSpin;
+use App\Services\EtrnRouletteOutcome;
+use App\Services\SmartCaptchaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 final class EtrnRouletteAttemptController extends Controller
 {
@@ -16,16 +20,55 @@ final class EtrnRouletteAttemptController extends Controller
         return $this->response($this->currentAttempts(), $this->currentJackpots());
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(Request $request, EtrnRouletteOutcome $outcomeGenerator, SmartCaptchaService $captcha): JsonResponse
     {
+        $validated = $request->validate(['request_id' => ['required', 'uuid']]);
+        $requestId = $validated['request_id'];
         $communityUserId = auth('community')->id();
-        $isJackpot = $request->boolean('jackpot');
+        $actorKey = hash('sha256', $communityUserId === null
+            ? 'session:'.$request->session()->getId()
+            : 'user:'.$communityUserId);
 
-        [$attempts, $jackpots, $playerAttempts] = DB::transaction(function () use ($communityUserId, $isJackpot): array {
+        $existing = EtrnRouletteSpin::query()->where('request_id', $requestId)->first();
+        if ($existing !== null) {
+            abort_if($existing->actor_key !== $actorKey, 409);
+            return $this->spinResponse($existing, true);
+        }
+
+        $validated = $request->validate(['smart_token' => ['required', 'string', 'max:4096']]);
+        $token = trim($validated['smart_token']);
+        if ($token === '') {
+            throw ValidationException::withMessages(['smart_token' => 'Подтвердите, что вы не робот.']);
+        }
+        $captcha->validate('etrn_roulette', $token, $request->ip(), $request->getHost());
+
+        $result = DB::transaction(function () use ($requestId, $communityUserId, $actorKey, $outcomeGenerator): array {
+            // Serialize spin creation, including guest requests and first-time jackpots.
             $counter = DB::table('game_counters')
                 ->where('key', self::COUNTER_KEY)
                 ->lockForUpdate()
                 ->first();
+
+            $existing = EtrnRouletteSpin::query()->where('request_id', $requestId)->first();
+            if ($existing !== null) {
+                abort_if($existing->actor_key !== $actorKey, 409);
+                return ['spin' => $existing, 'replayed' => true];
+            }
+
+            $player = $communityUserId === null ? null : DB::table('etrn_roulette_players')
+                ->where('community_user_id', $communityUserId)
+                ->lockForUpdate()
+                ->first();
+
+            $outcome = $outcomeGenerator->generate();
+            $spin = EtrnRouletteSpin::query()->create([
+                'request_id' => $requestId,
+                'actor_key' => $actorKey,
+                'community_user_id' => $communityUserId,
+                'etrn_roulette_player_id' => $player?->id,
+                'is_jackpot' => $outcome['jackpot'],
+                'outcome' => $outcome,
+            ]);
 
             if ($counter === null) {
                 DB::table('game_counters')->insert([
@@ -34,93 +77,75 @@ final class EtrnRouletteAttemptController extends Controller
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
-
-                $attempts = 1;
             } else {
-                $attempts = (int) $counter->attempts + 1;
-
-                DB::table('game_counters')
-                    ->where('key', self::COUNTER_KEY)
-                    ->update([
-                        'attempts' => $attempts,
-                        'updated_at' => now(),
-                    ]);
+                DB::table('game_counters')->where('key', self::COUNTER_KEY)->update([
+                    'attempts' => (int) $counter->attempts + 1,
+                    'updated_at' => now(),
+                ]);
             }
 
-            $jackpotCounter = DB::table('game_counters')
-                ->where('key', self::JACKPOT_COUNTER_KEY)
-                ->lockForUpdate()
-                ->first();
-            $jackpots = (int) ($jackpotCounter->attempts ?? 0);
-
-            if ($isJackpot) {
-                $jackpots++;
-
+            if ($outcome['jackpot']) {
+                $jackpotCounter = DB::table('game_counters')
+                    ->where('key', self::JACKPOT_COUNTER_KEY)
+                    ->first();
                 if ($jackpotCounter === null) {
                     DB::table('game_counters')->insert([
                         'key' => self::JACKPOT_COUNTER_KEY,
-                        'attempts' => $jackpots,
+                        'attempts' => 1,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
                 } else {
-                    DB::table('game_counters')
-                        ->where('key', self::JACKPOT_COUNTER_KEY)
-                        ->update([
-                            'attempts' => $jackpots,
-                            'updated_at' => now(),
-                        ]);
+                    DB::table('game_counters')->where('key', self::JACKPOT_COUNTER_KEY)->update([
+                        'attempts' => (int) $jackpotCounter->attempts + 1,
+                        'updated_at' => now(),
+                    ]);
                 }
             }
 
-            $playerAttempts = null;
-            if ($communityUserId !== null) {
-                $player = DB::table('etrn_roulette_players')
-                    ->where('community_user_id', $communityUserId)
-                    ->lockForUpdate()
-                    ->first();
-
-                if ($player !== null) {
-                    $playerAttempts = (int) $player->attempts + 1;
-                    DB::table('etrn_roulette_players')
-                        ->where('id', $player->id)
-                        ->update([
-                            'attempts' => $playerAttempts,
-                            'last_played_at' => now(),
-                            'updated_at' => now(),
-                        ]);
-                }
+            if ($player !== null) {
+                DB::table('etrn_roulette_players')->where('id', $player->id)->update([
+                    'attempts' => (int) $player->attempts + 1,
+                    'last_played_at' => now(),
+                    'updated_at' => now(),
+                ]);
             }
 
-            return [$attempts, $jackpots, $playerAttempts];
+            return ['spin' => $spin, 'replayed' => false];
         });
 
-        return $this->response($attempts, $jackpots, $playerAttempts);
+        return $this->spinResponse($result['spin'], $result['replayed']);
+    }
+
+    private function spinResponse(EtrnRouletteSpin $spin, bool $replayed): JsonResponse
+    {
+        $playerAttempts = $spin->etrn_roulette_player_id === null ? null :
+            (int) DB::table('etrn_roulette_players')->where('id', $spin->etrn_roulette_player_id)->value('attempts');
+
+        return $this->response($this->currentAttempts(), $this->currentJackpots(), $playerAttempts, [
+            'outcome' => $spin->outcome,
+            'spin_id' => $spin->id,
+            'replayed' => $replayed,
+        ]);
     }
 
     private function currentAttempts(): int
     {
-        return (int) (DB::table('game_counters')
-            ->where('key', self::COUNTER_KEY)
-            ->value('attempts') ?? 0);
+        return (int) (DB::table('game_counters')->where('key', self::COUNTER_KEY)->value('attempts') ?? 0);
     }
 
     private function currentJackpots(): int
     {
-        return (int) (DB::table('game_counters')
-            ->where('key', self::JACKPOT_COUNTER_KEY)
-            ->value('attempts') ?? 0);
+        return (int) (DB::table('game_counters')->where('key', self::JACKPOT_COUNTER_KEY)->value('attempts') ?? 0);
     }
 
-    private function response(int $attempts, int $jackpots, ?int $playerAttempts = null): JsonResponse
+    private function response(int $attempts, int $jackpots, ?int $playerAttempts = null, array $extra = []): JsonResponse
     {
-        $payload = ['attempts' => $attempts, 'jackpots' => $jackpots];
+        $payload = ['attempts' => $attempts, 'jackpots' => $jackpots, ...$extra];
         if ($playerAttempts !== null) {
             $payload['player_attempts'] = $playerAttempts;
         }
 
-        return response()
-            ->json($payload)
-            ->header('Cache-Control', 'no-store, private');
+        return response()->json($payload)->header('Cache-Control', 'no-store, private');
     }
 }

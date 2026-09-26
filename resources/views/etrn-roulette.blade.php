@@ -63,6 +63,7 @@
                 @else
                     <a class="etrn-roulette__prize-link" href="{{ route('etrn-roulette.prize.join') }}" data-etrn-auth-open>Играть за приз</a>
                 @endif
+                <a class="etrn-roulette__rules-link" href="{{ route('etrn-roulette.rules') }}">Правила игры</a>
             </div>
             <button class="etrn-roulette__spin" type="button" data-etrn-spin>
                 <span class="etrn-roulette__spin-face">
@@ -71,13 +72,18 @@
             </button>
         </div>
 
+        <div class="etrn-roulette__captcha">
+            <x-site.smartcaptcha form="etrn_roulette" invisible />
+            <small>Для защиты игры от автоматических запусков используется SmartCaptcha.</small>
+        </div>
+
         @if ($communityUser === null)
             <dialog class="etrn-roulette__auth-dialog" data-etrn-auth-dialog aria-labelledby="etrn-auth-title">
                 <div class="etrn-roulette__auth-card">
                     <button class="etrn-roulette__auth-close" type="button" data-etrn-auth-close aria-label="Закрыть">×</button>
                     <span class="etrn-roulette__auth-kicker">Розыгрыш подписки</span>
                     <h2 id="etrn-auth-title">Войдите, чтобы играть за приз</h2>
-                    <p>Выберите удобный способ входа. После авторизации вы вернётесь в игру, а следующие попытки будут участвовать в розыгрыше.</p>
+                    <p>Выберите удобный способ входа. После авторизации вы вернётесь в игру, а следующие попытки будут участвовать в розыгрыше. Участие не гарантирует получение приза.</p>
                     <div class="etrn-roulette__auth-providers">
                         @if ($communitySettings->communityTelegramEnabled())
                             <a class="etrn-roulette__auth-provider etrn-roulette__auth-provider--telegram" href="{{ route('etrn-roulette.prize.auth', ['provider' => 'telegram']) }}">Продолжить через Telegram</a>

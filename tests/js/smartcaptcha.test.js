@@ -6,6 +6,7 @@ let moduleId = 0;
 async function setup({ failScript = false } = {}) {
     const widgets = [];
     const scripts = [];
+    const executions = [];
     const api = {
         render(container, options) {
             widgets.push({ container, options, token: '', events: {}, destroyed: false });
@@ -14,6 +15,13 @@ async function setup({ failScript = false } = {}) {
         subscribe(id, event, callback) { widgets[id].events[event] = callback; },
         getResponse(id) { return widgets[id].token; },
         reset(id) { widgets[id].token = ''; },
+        execute(id) {
+            executions.push(id);
+            queueMicrotask(() => {
+                widgets[id].token = `spin-token-${executions.length}`;
+                widgets[id].options.callback(widgets[id].token);
+            });
+        },
         destroy(id) { widgets[id].destroyed = true; },
     };
     globalThis.window = { setTimeout, clearTimeout };
@@ -35,12 +43,12 @@ async function setup({ failScript = false } = {}) {
         },
     };
     const { createSmartCaptcha } = await import(`../../resources/js/smartcaptcha.js?test=${++moduleId}`);
-    const createForm = ({ hidden = false } = {}) => {
+    const createForm = ({ hidden = false, invisible = false } = {}) => {
         const status = { hidden: true, textContent: '' };
         const retry = { hidden: true, addEventListener(event, callback) { this[event] = callback; } };
         const container = {};
         const root = {
-            dataset: { sitekey: 'test-public-key' },
+            dataset: { sitekey: 'test-public-key', invisible: String(invisible) },
             hidden,
             closest() { return this.hidden ? {} : null; },
             querySelector(selector) {
@@ -54,7 +62,7 @@ async function setup({ failScript = false } = {}) {
         const controller = createSmartCaptcha({ querySelector: () => root });
         return { controller, root, status, retry };
     };
-    return { widgets, scripts, createForm, createSmartCaptcha };
+    return { widgets, scripts, executions, createForm, createSmartCaptcha };
 }
 
 test('disabled forms do not load the provider or require a token', async () => {
@@ -125,4 +133,15 @@ test('widget error rejects stale tokens and keeps retry available after form cle
     assert.equal(widgets.length, 2);
     widgets[1].token = 'new-token';
     assert.equal(await controller.getToken(), 'new-token');
+});
+
+test('invisible captcha executes for every spin and refreshes its token', async () => {
+    const { createForm, widgets, executions } = await setup();
+    const { controller } = createForm({ invisible: true });
+    await controller.load();
+    assert.equal(widgets[0].options.invisible, true);
+    assert.equal(await controller.getToken(), 'spin-token-1');
+    controller.reset();
+    assert.equal(await controller.getToken(), 'spin-token-2');
+    assert.deepEqual(executions, [0, 0]);
 });
