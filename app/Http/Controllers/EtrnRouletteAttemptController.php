@@ -15,6 +15,8 @@ final class EtrnRouletteAttemptController extends Controller
     private const COUNTER_KEY = 'etrn-roulette';
     private const JACKPOT_COUNTER_KEY = 'etrn-roulette-superbonus';
 
+    private const JACKPOT_STREAK_KEY = 'etrn-roulette-jackpot-streak';
+
     public function index(): JsonResponse
     {
         return $this->response($this->currentAttempts(), $this->currentJackpots());
@@ -42,10 +44,17 @@ final class EtrnRouletteAttemptController extends Controller
         }
         $captcha->validate('etrn_roulette', $token, $request->ip(), $request->getHost());
 
-        $result = DB::transaction(function () use ($requestId, $communityUserId, $actorKey, $outcomeGenerator): array {
+        $ipAddress = $request->ip();
+        $userAgent = $request->userAgent();
+
+        $result = DB::transaction(function () use ($requestId, $communityUserId, $actorKey, $outcomeGenerator, $ipAddress, $userAgent): array {
             // Serialize spin creation, including guest requests and first-time jackpots.
             $counter = DB::table('game_counters')
                 ->where('key', self::COUNTER_KEY)
+                ->lockForUpdate()
+                ->first();
+            $jackpotStreak = DB::table('game_counters')
+                ->where('key', self::JACKPOT_STREAK_KEY)
                 ->lockForUpdate()
                 ->first();
 
@@ -60,7 +69,9 @@ final class EtrnRouletteAttemptController extends Controller
                 ->lockForUpdate()
                 ->first();
 
-            $outcome = $outcomeGenerator->generate();
+            $attemptsWithoutJackpot = (int) ($jackpotStreak?->attempts ?? $counter?->attempts ?? 0);
+            $outcome = $outcomeGenerator->generate(null, $attemptsWithoutJackpot);
+            $outcome['jackpot_chance_percent'] = $outcomeGenerator->nextJackpotChancePercent($attemptsWithoutJackpot);
             $spin = EtrnRouletteSpin::query()->create([
                 'request_id' => $requestId,
                 'actor_key' => $actorKey,
@@ -68,6 +79,9 @@ final class EtrnRouletteAttemptController extends Controller
                 'etrn_roulette_player_id' => $player?->id,
                 'is_jackpot' => $outcome['jackpot'],
                 'outcome' => $outcome,
+                'result_kind' => $outcome['jackpot'] ? 'jackpot' : ($outcome['matched'] ? 'match' : 'miss'),
+                'ip_address' => $ipAddress,
+                'user_agent' => $userAgent === null ? null : mb_substr($userAgent, 0, 512),
             ]);
 
             if ($counter === null) {
@@ -101,6 +115,21 @@ final class EtrnRouletteAttemptController extends Controller
                         'updated_at' => now(),
                     ]);
                 }
+            }
+
+            $nextStreak = $outcome['jackpot'] ? 0 : $attemptsWithoutJackpot + 1;
+            if ($jackpotStreak === null) {
+                DB::table('game_counters')->insert([
+                    'key' => self::JACKPOT_STREAK_KEY,
+                    'attempts' => $nextStreak,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            } else {
+                DB::table('game_counters')->where('key', self::JACKPOT_STREAK_KEY)->update([
+                    'attempts' => $nextStreak,
+                    'updated_at' => now(),
+                ]);
             }
 
             if ($player !== null) {
@@ -139,9 +168,21 @@ final class EtrnRouletteAttemptController extends Controller
         return (int) (DB::table('game_counters')->where('key', self::JACKPOT_COUNTER_KEY)->value('attempts') ?? 0);
     }
 
+    private function currentJackpotStreak(): int
+    {
+        return (int) (DB::table('game_counters')->where('key', self::JACKPOT_STREAK_KEY)->value('attempts')
+            ?? $this->currentAttempts());
+    }
+
     private function response(int $attempts, int $jackpots, ?int $playerAttempts = null, array $extra = []): JsonResponse
     {
-        $payload = ['attempts' => $attempts, 'jackpots' => $jackpots, ...$extra];
+        $payload = [
+            'attempts' => $attempts,
+            'jackpots' => $jackpots,
+            'next_jackpot_chance_percent' => app(EtrnRouletteOutcome::class)
+                ->nextJackpotChancePercent($this->currentJackpotStreak()),
+            ...$extra,
+        ];
         if ($playerAttempts !== null) {
             $payload['player_attempts'] = $playerAttempts;
         }

@@ -9,7 +9,27 @@ class EtrnRouletteSpin extends Model
 {
     protected $fillable = [
         'request_id', 'actor_key', 'community_user_id', 'etrn_roulette_player_id', 'is_jackpot', 'outcome',
+        'result_kind', 'ip_address', 'user_agent',
     ];
+
+    public const RESULT_LABELS = [
+        'jackpot' => '3 ЛогистРу',
+        'match' => 'Совпадение',
+        'miss' => 'Без совпадения',
+    ];
+
+    public function resultLabel(): string
+    {
+        return self::RESULT_LABELS[$this->result_kind] ?? 'Неизвестно';
+    }
+
+    public function reelSummary(): string
+    {
+        return implode(' · ', array_map(
+            static fn (string $symbol): string => $symbol === 'logistru-bonus' ? 'ЛогистРу' : $symbol,
+            $this->outcome['reels'] ?? [],
+        ));
+    }
 
     protected function casts(): array
     {

@@ -29,4 +29,18 @@ class EtrnRouletteOutcomeTest extends TestCase
             static fn (string $symbol): bool => $symbol === EtrnRouletteOutcome::LOGISTRU_SYMBOL)));
         $this->assertGreaterThan(1, count(array_unique($miss['reels'])));
     }
+
+    public function test_jackpot_chance_grows_with_attempts_and_is_capped(): void
+    {
+        $generator = new EtrnRouletteOutcome();
+
+        $this->assertSame(0.1, $generator->nextJackpotChancePercent(0));
+        $this->assertSame(0.2, $generator->nextJackpotChancePercent(100));
+        $this->assertSame(1.1, $generator->nextJackpotChancePercent(1000));
+        $this->assertSame(10.0, $generator->nextJackpotChancePercent(9900));
+        $this->assertSame(10.0, $generator->nextJackpotChancePercent(100000));
+
+        $this->assertTrue($generator->generate(static fn (int $max): int => 1_999, 100)['jackpot']);
+        $this->assertFalse($generator->generate(static fn (int $max): int => $max === 999_999 ? 2_000 : 0, 100)['jackpot']);
+    }
 }

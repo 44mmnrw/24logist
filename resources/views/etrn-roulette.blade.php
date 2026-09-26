@@ -54,6 +54,10 @@
                     <span class="etrn-roulette__attempts-label">Супербонус</span>
                     <strong data-etrn-jackpot-count>0</strong>
                 </span>
+                <span class="etrn-roulette__chance">
+                    Шанс 3 ЛогистРу в следующей попытке:
+                    <strong data-etrn-next-jackpot-chance>0,1 %</strong>
+                </span>
             </div>
             <div class="etrn-roulette__prize">
                 @if ($roulettePlayer)
