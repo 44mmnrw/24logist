@@ -5,9 +5,11 @@
 }
 
 .etrn-roulette-page *, .etrn-roulette-page *::before, .etrn-roulette-page *::after { box-sizing: border-box; }
-.etrn-roulette { min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-bottom: 20px; }
-.etrn-roulette__captcha { width: min(calc(100vw - 24px), 75dvh, 800px); margin-top: 8px; color: #60728b; font-size: 11px; text-align: center; }
+.etrn-roulette-page--game { height: 100vh; height: 100dvh; overflow: hidden; }
+.etrn-roulette { position: relative; height: 100vh; height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.etrn-roulette__captcha { position: absolute; top: 0; left: 0; width: 1px; height: 1px; }
 .etrn-roulette__captcha .site-smartcaptcha__widget { min-height: 0; }
+.etrn-roulette__captcha .site-smartcaptcha__status, .etrn-roulette__captcha .site-smartcaptcha__retry { display: none; }
 .etrn-roulette__poster { position: relative; isolation: isolate; container-type: inline-size; width: min(100vw, 75dvh, 800px); aspect-ratio: 1086 / 1448; overflow: hidden; background: #fff; box-shadow: 0 22px 70px #15365d1a; }
 .etrn-roulette-rules-page { min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: clamp(20px, 5vw, 48px); }
 .etrn-roulette-rules-page__back { width: min(100%, 760px); color: #075fb7; font-size: 14px; font-weight: 700; text-decoration: none; }
@@ -81,7 +83,7 @@
 .etrn-roulette__prize-active { border-color: #f6da80; background: linear-gradient(135deg, #a76600, #79500a); }
 .etrn-roulette__rules-link { align-self: center; padding: .25em .5em; border-radius: 999px; background: #fffef5e8; box-shadow: 0 2px 7px #16436d25; color: #075fb7; font-size: clamp(10px, 1.65cqw, 14px); font-weight: 700; text-decoration: underline; text-underline-offset: .15em; white-space: nowrap; }
 .etrn-roulette__rules-link:hover { color: #064682; }
-.etrn-roulette__auth-dialog { width: min(92vw, 500px); max-height: 90dvh; padding: 0; overflow: visible; border: 0; border-radius: 26px; background: transparent; color: #10264b; }
+.etrn-roulette__auth-dialog { width: min(92vw, 500px); max-height: 90dvh; padding: 0; overflow: auto; border: 0; border-radius: 26px; background: transparent; color: #10264b; }
 .etrn-roulette__auth-dialog::backdrop { background: #061a38b8; backdrop-filter: blur(5px); }
 .etrn-roulette__auth-card { position: relative; padding: clamp(24px, 5vw, 40px); overflow: hidden; border: 3px solid #32e9c2; border-radius: 26px; background: linear-gradient(155deg, #fff 0 62%, #e9fffa 100%); box-shadow: 0 24px 80px #001d4c70, inset 0 0 0 5px #0874d914; text-align: center; }
 .etrn-roulette__auth-card::before { content: ''; position: absolute; inset: 0 0 auto; height: 8px; background: linear-gradient(90deg, #0874d9, #32e9c2, #00b972); }

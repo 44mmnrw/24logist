@@ -113,6 +113,11 @@ export function createSmartCaptcha(form) {
     return {
         load,
         async getToken() {
+            if (invisible && widgetError && widgetId !== undefined) {
+                api.destroy(widgetId);
+                widgetId = undefined;
+                widgetError = false;
+            }
             await load();
             if (widgetId === undefined || widgetError) throw new Error(unavailableMessage);
             if (invisible) {

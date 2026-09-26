@@ -20,7 +20,7 @@
     <x-fonts.preload />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="etrn-roulette-page">
+<body class="etrn-roulette-page etrn-roulette-page--game">
     <main class="etrn-roulette" data-etrn-game data-attempts-url="{{ route('etrn-roulette.attempts.index') }}" data-attempts-increment-url="{{ route('etrn-roulette.attempts.store') }}" style="--etrn-poster-url: url('{{ asset('images/etrn-game/poster.webp') }}'); --etrn-kontur-url: url('{{ asset('images/etrn-game/kontur.png') }}'); --etrn-astral-url: url('{{ asset('images/etrn-game/astral.svg') }}'); --etrn-saby-url: url('{{ asset('images/etrn-game/saby.svg') }}'); --etrn-ediveb-url: url('{{ asset('images/etrn-game/ediveb.png') }}'); --etrn-evotor-url: url('{{ asset('images/etrn-game/evotor.svg') }}'); --etrn-taxcom-url: url('{{ asset('images/etrn-game/taxcom.png') }}'); --etrn-sber-url: url('{{ asset('images/etrn-game/sber.png') }}'); --etrn-tochka-url: url('{{ asset('images/etrn-game/tochka.svg') }}'); --etrn-mig-url: url('{{ asset('images/etrn-game/mig.svg') }}'); --etrn-itcom-url: url('{{ asset('images/etrn-game/itcom.svg') }}'); --etrn-stek-url: url('{{ asset('images/etrn-game/stek.svg') }}'); --etrn-oneofd-url: url('{{ asset('images/etrn-game/1ofd.svg') }}'); --etrn-atidoki-url: url('{{ asset('images/etrn-game/ati.webp') }}'); --etrn-niias-url: url('{{ asset('images/etrn-game/niias.png') }}'); --etrn-crpt-url: url('{{ asset('images/etrn-game/crpt.svg') }}'); --etrn-logistru-url: url('{{ asset('images/etrn-game/logistru.png') }}')"
         aria-label="Развлекательная рулетка роуминга ЭПД. Результат случайный и не отражает фактическую совместимость операторов."
         data-sound-pull="{{ asset('sounds/epd/slot-pull.mp3') }}"
@@ -74,7 +74,6 @@
 
         <div class="etrn-roulette__captcha">
             <x-site.smartcaptcha form="etrn_roulette" invisible />
-            <small>Для защиты игры от автоматических запусков используется SmartCaptcha.</small>
         </div>
 
         @if ($communityUser === null)

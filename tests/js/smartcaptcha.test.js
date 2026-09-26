@@ -145,3 +145,13 @@ test('invisible captcha executes for every spin and refreshes its token', async 
     assert.equal(await controller.getToken(), 'spin-token-2');
     assert.deepEqual(executions, [0, 0]);
 });
+
+test('invisible captcha reloads after a widget error without a visible retry link', async () => {
+    const { createForm, widgets } = await setup();
+    const { controller } = createForm({ invisible: true });
+    await controller.load();
+    widgets[0].events['network-error']();
+    assert.equal(await controller.getToken(), 'spin-token-1');
+    assert.equal(widgets[0].destroyed, true);
+    assert.equal(widgets.length, 2);
+});
