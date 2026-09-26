@@ -57,7 +57,7 @@
                 </span>
                 <span class="etrn-roulette__chance">
                     <span>Шанс 3 логистРу</span>
-                    <strong><span data-etrn-next-jackpot-chance>0,5 %</span> <span aria-hidden="true">↑</span></strong>
+                    <strong data-etrn-next-jackpot-chance>1 из 100</strong>
                 </span>
             </div>
             <div class="etrn-roulette__prize">

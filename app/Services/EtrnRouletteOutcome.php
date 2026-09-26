@@ -11,7 +11,7 @@ final class EtrnRouletteOutcome
 
     private const ROLL_MAX = 999_999;
 
-    private const BASE_JACKPOT_ROLLS = 5_000;
+    private const BASE_JACKPOT_ROLLS = 10_000;
 
     private const JACKPOT_ROLLS_PER_ATTEMPT = 100;
 

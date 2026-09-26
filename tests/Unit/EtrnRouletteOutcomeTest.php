@@ -7,18 +7,18 @@ use Tests\TestCase;
 
 class EtrnRouletteOutcomeTest extends TestCase
 {
-    public function test_only_first_five_thousand_of_a_million_rolls_are_initial_jackpots(): void
+    public function test_only_first_ten_thousand_of_a_million_rolls_are_initial_jackpots(): void
     {
         $generator = new EtrnRouletteOutcome();
         // The service reads the same operator list that is shown on the game page.
-        $this->assertTrue($generator->generate(static fn (int $max): int => 4_999)['jackpot']);
-        $this->assertFalse($generator->generate(static fn (int $max): int => $max === 999_999 ? 5_000 : 0)['jackpot']);
+        $this->assertTrue($generator->generate(static fn (int $max): int => 9_999)['jackpot']);
+        $this->assertFalse($generator->generate(static fn (int $max): int => $max === 999_999 ? 10_000 : 0)['jackpot']);
     }
 
     public function test_operator_win_and_miss_never_create_an_accidental_jackpot(): void
     {
         $generator = new EtrnRouletteOutcome();
-        $win = $generator->generate(static fn (int $max): int => $max === 999_999 ? 5_000 : 0);
+        $win = $generator->generate(static fn (int $max): int => $max === 999_999 ? 10_000 : 0);
         $this->assertTrue($win['matched']);
         $this->assertFalse($win['jackpot']);
         $this->assertSame(array_fill(0, 3, $win['destination']), $win['reels']);
@@ -34,13 +34,13 @@ class EtrnRouletteOutcomeTest extends TestCase
     {
         $generator = new EtrnRouletteOutcome();
 
-        $this->assertSame(0.5, $generator->nextJackpotChancePercent(0));
-        $this->assertSame(0.51, $generator->nextJackpotChancePercent(1));
-        $this->assertSame(1.5, $generator->nextJackpotChancePercent(100));
-        $this->assertSame(10.0, $generator->nextJackpotChancePercent(950));
+        $this->assertSame(1.0, $generator->nextJackpotChancePercent(0));
+        $this->assertSame(1.01, $generator->nextJackpotChancePercent(1));
+        $this->assertSame(2.0, $generator->nextJackpotChancePercent(100));
+        $this->assertSame(10.0, $generator->nextJackpotChancePercent(900));
         $this->assertSame(10.0, $generator->nextJackpotChancePercent(100000));
 
-        $this->assertTrue($generator->generate(static fn (int $max): int => 14_999, 100)['jackpot']);
-        $this->assertFalse($generator->generate(static fn (int $max): int => $max === 999_999 ? 15_000 : 0, 100)['jackpot']);
+        $this->assertTrue($generator->generate(static fn (int $max): int => 19_999, 100)['jackpot']);
+        $this->assertFalse($generator->generate(static fn (int $max): int => $max === 999_999 ? 20_000 : 0, 100)['jackpot']);
     }
 }

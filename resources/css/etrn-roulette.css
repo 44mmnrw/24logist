@@ -125,7 +125,8 @@
 }
 @media (min-width: 1300px) {
   .etrn-roulette { padding-top: 0; }
-  .etrn-roulette__poster { width: min(100vw, calc(75dvh - 36px), 800px); }
+  .etrn-roulette__poster { width: min(100vw, 75dvh, 800px); }
+  .etrn-roulette__rules-link { left: calc(75% + min(25vw, 18.75dvh, 200px)); }
   .etrn-roulette__attempts { top: 17%; right: calc(100% + clamp(18px, 2vw, 36px)); bottom: auto; left: auto; min-width: max-content; font-size: clamp(12px, 1vw, 15px); transform: translateY(-50%) rotate(-1deg); }
   .etrn-roulette__chance { top: calc(100% + 30px); }
   .etrn-roulette__prize { top: 64%; right: auto; left: calc(100% + clamp(18px, 2vw, 36px)); width: clamp(220px, 18vw, 290px); font-size: clamp(16px, 1.2vw, 20px); transform: translateY(-50%) rotate(1deg); }

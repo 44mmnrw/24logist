@@ -88,11 +88,9 @@ export const createEtrnRoulette = (game) => {
     const applyCounters = (payload) => {
         renderAttempts(Number(payload.attempts));
         renderJackpots(Number(payload.jackpots));
-        if (nextJackpotChance && Number.isFinite(payload.next_jackpot_chance_percent)) {
-            nextJackpotChance.textContent = `${new Intl.NumberFormat('ru-RU', {
-                minimumFractionDigits: 1,
-                maximumFractionDigits: 3,
-            }).format(payload.next_jackpot_chance_percent)} %`;
+        if (nextJackpotChance && Number.isFinite(payload.next_jackpot_chance_percent) && payload.next_jackpot_chance_percent > 0) {
+            const attemptsPerJackpot = Math.round(100 / payload.next_jackpot_chance_percent);
+            nextJackpotChance.textContent = `1 из ${attemptsPerJackpot}`;
         }
         if (playerAttemptCount && Number.isFinite(Number(payload.player_attempts))) {
             playerAttemptCount.textContent = new Intl.NumberFormat('ru-RU').format(Number(payload.player_attempts));
