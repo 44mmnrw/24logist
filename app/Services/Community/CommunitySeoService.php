@@ -32,8 +32,8 @@ final class CommunitySeoService
         };
         $page = CommunitySeoPage::query()->where('page_key', $key)->first();
         $settings = array_filter($page?->settings ?? [], fn ($value): bool => filled($value));
-        $label = CommunitySeoRegistry::PAGES[$route][0] ?? 'Сообщество ЛогистРу';
-        $description = 'Обсуждения перевозок, электронных документов и цифровой логистики в сообществе ЛогистРу.';
+        $label = CommunitySeoRegistry::PAGES[$route][0] ?? 'Сообщество логистРу';
+        $description = 'Обсуждения перевозок, электронных документов и цифровой логистики в сообществе логистРу.';
         $type = 'WebPage';
         $public = (CommunitySeoRegistry::PAGES[$route][1] ?? null) === 'page';
         $url = $request->url();
@@ -41,7 +41,7 @@ final class CommunitySeoService
 
         if ($source instanceof CommunityCategory) {
             $label = $source->name;
-            $description = $source->description ?: 'Обсуждения по теме «'.$label.'» в сообществе ЛогистРу.';
+            $description = $source->description ?: 'Обсуждения по теме «'.$label.'» в сообществе логистРу.';
             $public = $source->is_active;
             $type = 'CollectionPage';
             $url = route('community.categories.show', $source);
@@ -52,7 +52,7 @@ final class CommunitySeoService
             $url = $source->getUrl();
         } elseif ($source instanceof CommunityUser) {
             $label = $source->displayName();
-            $description = $source->bio ?: 'Публикации и обсуждения участника '.$label.' в сообществе ЛогистРу.';
+            $description = $source->bio ?: 'Публикации и обсуждения участника '.$label.' в сообществе логистРу.';
             $public = $source->isOnboarded() && ! $source->trashed();
             $robots = 'noindex, follow';
             $type = 'ProfilePage';
@@ -60,9 +60,9 @@ final class CommunitySeoService
         } elseif ($route === 'community.index') {
             $type = 'CollectionPage';
         } elseif ($route === 'community.rules') {
-            $description = 'Правила публикации тем, комментариев и общения в сообществе ЛогистРу.';
+            $description = 'Правила публикации тем, комментариев и общения в сообществе логистРу.';
         } elseif ($route === 'community.privacy') {
-            $description = 'Как обрабатываются и защищаются персональные данные участников сообщества ЛогистРу.';
+            $description = 'Как обрабатываются и защищаются персональные данные участников сообщества логистРу.';
         } elseif ($route === 'community.posts.edit') {
             $label = 'Редактирование темы';
         }
@@ -70,7 +70,7 @@ final class CommunitySeoService
         $defaults = $source instanceof CommunityPost
             ? OpenGraph::forCommunityPost($source)
             : [
-                'html_title' => $label.' — ЛогистРу', 'title' => $label.' — ЛогистРу',
+                'html_title' => $label.' — логистРу', 'title' => $label.' — логистРу',
                 'description' => $description, 'url' => $url, 'robots' => $robots,
             ];
         if ($source instanceof CommunityPost) {

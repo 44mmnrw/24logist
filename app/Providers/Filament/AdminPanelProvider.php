@@ -46,7 +46,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login(Login::class)
-            ->brandName('ЛогистРу')
+            ->brandName('логистРу')
             ->brandLogo(fn (): string => app(SiteSettingsService::class)->logoUrl())
             ->brandLogoHeight('2rem')
             ->colors([

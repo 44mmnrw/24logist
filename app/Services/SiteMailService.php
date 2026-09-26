@@ -131,7 +131,7 @@ final class SiteMailService
             return (string) $site->mail_from_name;
         }
 
-        return (string) config('app.name', 'ЛогистРу');
+        return (string) config('app.name', 'логистРу');
     }
 
     private function formatMailError(\Throwable $exception, SiteSetting $site): string

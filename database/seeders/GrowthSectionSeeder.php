@@ -102,7 +102,7 @@ class GrowthSectionSeeder extends Seeder
                 ['name' => 'ООО "МЕТАЛЛИНВЕСТСПБ"', 'count_value' => '4', 'count_width' => 44, 'revenue_value' => '980 тыс. ₽', 'revenue_width' => 54, 'margin_value' => '15,7%', 'margin_width' => 85],
                 ['name' => 'ООО "КЛИМАТ-КОМПЛЕКС"', 'count_value' => '4', 'count_width' => 44, 'revenue_value' => '760 тыс. ₽', 'revenue_width' => 42, 'margin_value' => '18,4%', 'margin_width' => 100],
             ],
-            'dashboard_aria_label' => 'Примеры аналитических отчётов ЛогистРу',
+            'dashboard_aria_label' => 'Примеры аналитических отчётов логистРу',
             'unit_aria_label' => 'Единица измерения',
             'chart_aria_label' => 'Распределение маржинальности заявок',
             'tabs_aria_label' => 'Показатель рейтинга',

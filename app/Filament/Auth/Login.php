@@ -18,6 +18,6 @@ class Login extends BaseLogin
             return parent::getHeading();
         }
 
-        return 'Вход в админ-панель ЛогистРу';
+        return 'Вход в админ-панель логистРу';
     }
 }

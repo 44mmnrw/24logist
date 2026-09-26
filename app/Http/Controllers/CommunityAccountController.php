@@ -38,7 +38,7 @@ class CommunityAccountController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('community.index');
+        return redirect()->route($request->input('return_to') === 'etrn-roulette' ? 'etrn-roulette' : 'community.index');
     }
 
     public function onboarding(): View|RedirectResponse

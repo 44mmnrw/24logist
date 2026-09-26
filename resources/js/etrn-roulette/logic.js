@@ -8,8 +8,24 @@ const SHORT_NAMES = Object.freeze({
     'НТЦ СТЭК': 'СТЭК',
 });
 
+// Change only the values on the right: keys must match config/epd_operators.php.
 const DISPLAY_NAMES = Object.freeze({
+    'ПФ СКБ Контур': 'Контур',
+    'Калуга Астрал': 'Астрал',
+    'Эдивеб': 'Эдивеб',
+    'Такском': 'Такском',
+    'СберКорус': 'СберКорус',
+    'Компания Тензор': 'Саби',
+    'Эвотор ОФД': 'Эвотор',
     'ФораПром': 'ФОРА',
+    'Айтиком': 'Айтиком',
+    'ОПЕРАТОР-ЦРПТ': 'ЦРПТ',
+    'Точка': 'Точка',
+    'НТСсофт': 'МИГ24',
+    'Энергетические системы и коммуникации': 'Первый ОФД',
+    'НИИАС': 'НИИАС',
+    'АТИ-Доки': 'АТИ-Доки',
+    'НТЦ СТЭК': 'НТЦ СТЭК',
 });
 
 const LOGOS = Object.freeze({
@@ -32,8 +48,8 @@ const LOGOS = Object.freeze({
 
 export const LOGISTRU_SYMBOL = Object.freeze({
     id: 'logistru-bonus',
-    name: 'Бонус ЛогистРу',
-    shortName: 'ЛогистРу',
+    name: 'Бонус логистРу',
+    shortName: 'логистРу',
     logo: 'logistru',
 });
 
@@ -45,3 +61,9 @@ export const makeOperators = (names) => names.map((name) => ({
     shortName: SHORT_NAMES[name] || DISPLAY_NAMES[name] || name,
     logo: LOGOS[name] || null,
 }));
+
+export const describeOutcome = (outcome) => ({
+    status: outcome.matched ? 'ЭТрН отправляется к оператору' : 'Без выигрыша',
+    result: outcome.jackpot ? 'Супер приз!!!' : outcome.matched ? outcome.destination.name : 'Попробуйте ещё раз',
+    longResult: Boolean(outcome.destination && outcome.destination.name.length > 26),
+});

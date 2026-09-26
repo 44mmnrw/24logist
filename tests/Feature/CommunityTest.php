@@ -68,7 +68,7 @@ class CommunityTest extends TestCase
         $post->refresh();
 
         $this->assertNotEmpty($post->meta_title);
-        $this->assertStringContainsString('ЛогистРу', $post->meta_title);
+        $this->assertStringContainsString('логистРу', $post->meta_title);
         $this->assertSame('Текст', $post->meta_description);
         $this->assertNotEmpty($post->meta_keywords);
         $this->assertSame('index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1', $post->meta_robots);
@@ -144,7 +144,7 @@ class CommunityTest extends TestCase
     {
         SiteSetting::instance()->update([
             'community_about_card_enabled' => true,
-            'community_about_card_eyebrow' => 'ЛогистРу MixCase',
+            'community_about_card_eyebrow' => 'логистРу MixCase',
             'community_about_card_title' => 'Своя плашка сообщества',
             'community_about_card_description' => 'Описание из настроек сообщества.',
             'community_about_card_members_label' => 'наших участников',
@@ -156,7 +156,7 @@ class CommunityTest extends TestCase
 
         $this->get($post->getUrl())
             ->assertOk()
-            ->assertSeeText('ЛогистРу MixCase')
+            ->assertSeeText('логистРу MixCase')
             ->assertSeeText('Своя плашка сообщества')
             ->assertSeeText('Описание из настроек сообщества.')
             ->assertSeeText('наших участников')

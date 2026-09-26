@@ -82,7 +82,7 @@ class CommunitySeoPageResource extends Resource
                         ->helperText('Только для доступных индексируемых страниц с собственным canonical.'),
                     Placeholder::make('search_preview')->label('Предпросмотр поискового сниппета')
                         ->content(fn (Get $get, CommunitySeoPage $record): Htmlable => view('filament.community-seo-preview', [
-                            'title' => $get('settings.meta_title') ?: $record->label.' — ЛогистРу',
+                            'title' => $get('settings.meta_title') ?: $record->label.' — логистРу',
                             'description' => $get('settings.meta_description') ?: 'Описание будет сформировано из содержимого страницы.',
                             'url' => $get('settings.canonical_url') ?: $record->getUrl(),
                         ]))->columnSpanFull(),

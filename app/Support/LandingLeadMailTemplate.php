@@ -33,7 +33,7 @@ final class LandingLeadMailTemplate
             '{phone}' => trim((string) $lead->phone),
             '{type}' => $lead->typeLabel(),
             '{plan}' => trim((string) ($lead->recommended_plan_title ?? '')),
-            '{brand}' => trim((string) ($site->org_brand_name ?? '')) ?: 'ЛогистРу',
+            '{brand}' => trim((string) ($site->org_brand_name ?? '')) ?: 'логистРу',
             '{company_email}' => trim((string) ($site->org_email ?? '')),
             '{company_phone}' => trim((string) ($site->org_phone ?? '')),
             '{admin_url}' => '',

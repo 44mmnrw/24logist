@@ -17,7 +17,7 @@ return [
         'грузоперевозки' => ['name' => 'Грузоперевозки', 'slug' => 'gruzoperevozki', 'target' => '/tag/gruzoperevozki', 'intent' => 'informational'],
         'программа для экспедитора' => ['name' => 'Программа для экспедитора', 'slug' => 'programma-dlia-ekspeditora', 'target' => '/tag/programma-dlia-ekspeditora', 'intent' => 'commercial'],
         'программа для логиста' => ['name' => 'Программы для логистов', 'slug' => 'programmy-dlia-logistov', 'target' => '/tag/programmy-dlia-logistov', 'intent' => 'commercial'],
-        'логист ру' => ['name' => 'ЛогистРу', 'slug' => 'logistru', 'target' => '/tag/logistru', 'intent' => 'navigational'],
+        'логист ру' => ['name' => 'логистРу', 'slug' => 'logistru', 'target' => '/tag/logistru', 'intent' => 'navigational'],
         'сорм для экспедиторов' => ['name' => 'СОРМ', 'slug' => 'sorm', 'target' => '/tag/sorm', 'intent' => 'commercial'],
         'новости логистики' => ['name' => 'Новости логистики', 'slug' => 'novosti-logistiki', 'target' => '/tag/novosti-logistiki', 'intent' => 'informational'],
     ],

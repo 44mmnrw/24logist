@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex,nofollow">
     <meta name="referrer" content="no-referrer">
-    <title>Реферальная программа — ЛогистРу</title>
+    <title>Реферальная программа — логистРу</title>
     @vite(['resources/css/app.css', 'resources/js/cookie-consent.js'])
 </head>
 <body>
 <main class="referral-portal">
     <div class="referral-portal__shell">
         <header class="referral-portal__header">
-            <div><p class="referral-portal__muted">ЛогистРу</p><h1>Реферальная программа</h1></div>
+            <div><p class="referral-portal__muted">логистРу</p><h1>Реферальная программа</h1></div>
             <div><strong>{{ $participant->company_name }}</strong><br><span class="referral-portal__muted">ИНН {{ $participant->inn }}</span></div>
         </header>
 
@@ -27,7 +27,7 @@
         <section class="referral-portal__card">
             <h2>Персональная ссылка</h2>
             <div class="referral-portal__link"><input value="{{ $personalLink }}" readonly><button type="button" onclick="navigator.clipboard.writeText(this.previousElementSibling.value)">Копировать</button></div>
-            <p class="referral-portal__muted">Готовый текст: «Попробуйте ЛогистРу для управления перевозками: {{ $personalLink }}»</p>
+            <p class="referral-portal__muted">Готовый текст: «Попробуйте логистРу для управления перевозками: {{ $personalLink }}»</p>
         </section>
 
         <section class="referral-portal__grid">

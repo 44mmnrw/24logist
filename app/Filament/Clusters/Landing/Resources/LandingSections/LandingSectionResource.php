@@ -309,7 +309,7 @@ class LandingSectionResource extends Resource
                         TextInput::make('alt')
                             ->label('Alt-текст изображения')
                             ->maxLength(255)
-                            ->placeholder('Интерфейс ЛогистРу')
+                            ->placeholder('Интерфейс логистРу')
                             ->columnSpan(1)
                             ->extraAttributes(['class' => 'hero-carousel-alt'], true),
                     ])

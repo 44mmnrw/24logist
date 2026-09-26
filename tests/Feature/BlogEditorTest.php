@@ -56,7 +56,7 @@ class BlogEditorTest extends TestCase
             'title' => 'Практический обзор',
             'slug' => 'practical-review',
             'body' => '<h1>Небольшой ликбез</h1><div class="lead"><p>Вводный текст</p></div><h2>Подраздел</h2><p>Текст статьи</p>',
-            'tags' => ['СОРМ', 'ЛогистРу'],
+            'tags' => ['СОРМ', 'логистРу'],
             'is_published' => true,
             'published_at' => now(),
         ]);

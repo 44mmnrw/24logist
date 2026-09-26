@@ -197,7 +197,7 @@ class SiteSetting extends Model
 
     public static function defaultAiSiteSummary(): string
     {
-        return 'ЛогистРу — облачная CRM для экспедиторов и логистических компаний в России. '
+        return 'логистРу — облачная CRM для экспедиторов и логистических компаний в России. '
             .'Сервис объединяет заявки на перевозку, контроль рейсов, работу с контрагентами и водителями, '
             .'а также встроенный транспортный ЭДО (ЭТрН и сопутствующие документы). '
             .'Данные хранятся на серверах в РФ; тарифы от 2 900 ₽/мес.';
@@ -208,7 +208,7 @@ class SiteSetting extends Model
         return <<<'MD'
 ## О продукте
 
-ЛогистРу (24logist.ru) — SaaS-платформа для экспедиторов: заявки, рейсы, контрагенты, водители, отчёты и встроенный транспортный ЭДО.
+логистРу (24logist.ru) — SaaS-платформа для экспедиторов: заявки, рейсы, контрагенты, водители, отчёты и встроенный транспортный ЭДО.
 
 **Аудитория:** экспедиторские и транспортные компании в России.
 
@@ -292,7 +292,7 @@ TEXT;
         return static::query()->firstOrCreate(
             ['id' => 1],
             [
-                'org_brand_name' => 'ЛогистРу',
+                'org_brand_name' => 'логистРу',
                 'org_legal_name' => 'Общество с ограниченной ответственностью «Энерви Групп»',
                 'org_email' => 'info@24logist.ru',
                 'org_phone' => '+7 (495) 109-25-44',
@@ -311,7 +311,7 @@ TEXT;
                 'telegram_popup_enabled' => false,
                 'telegram_popup_badge' => 'Telegram-канал',
                 'telegram_popup_title' => 'Будьте в курсе обновлений',
-                'telegram_popup_description' => 'В канале ЛогистРу — новости об изменениях в транспортном ЭДО, обновления сервиса и полезные материалы для экспедиторов.',
+                'telegram_popup_description' => 'В канале логистРу — новости об изменениях в транспортном ЭДО, обновления сервиса и полезные материалы для экспедиторов.',
                 'telegram_popup_button_text' => 'Подписаться на канал',
                 'telegram_popup_dismiss_text' => 'Не сейчас',
                 'telegram_popup_channel_url' => 'https://telegram.me/logistru24',
@@ -346,7 +346,7 @@ TEXT;
                 'cabinet_registration_enabled' => false,
                 'cabinet_registration_button_text' => 'Создать личный кабинет',
                 'cabinet_registration_button_style' => 'primary',
-                'cabinet_login_eyebrow' => 'ЛогистРу',
+                'cabinet_login_eyebrow' => 'логистРу',
                 'cabinet_login_modal_title' => 'Вход в личный кабинет',
                 'cabinet_login_modal_description' => 'Введите данные, указанные при регистрации в платформе.',
                 'cabinet_login_identifier_label' => 'Email',
@@ -365,7 +365,7 @@ TEXT;
                 'mail_encryption' => 'smtps',
                 'mail_verify_ssl' => true,
                 'mail_from_address' => 'info@24logist.ru',
-                'mail_from_name' => 'ЛогистРу',
+                'mail_from_name' => 'логистРу',
                 'yandex_metrika_enabled' => false,
                 'yandex_metrika_webvisor' => true,
                 'yandex_metrika_clickmap' => true,

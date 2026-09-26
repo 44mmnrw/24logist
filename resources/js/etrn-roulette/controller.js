@@ -1,4 +1,4 @@
-import { LOGISTRU_COMBINATION_WEIGHT, LOGISTRU_SYMBOL, makeOperators } from './logic.js';
+import { LOGISTRU_COMBINATION_WEIGHT, LOGISTRU_SYMBOL, describeOutcome, makeOperators } from './logic.js';
 import { createConfettiController } from '../epd-game/confetti.js';
 import { createSmartCaptcha } from '../smartcaptcha.js';
 
@@ -60,11 +60,11 @@ export const createEtrnRoulette = (game) => {
     const result = game.querySelector('[data-etrn-result]');
     const attemptCount = game.querySelector('[data-etrn-attempt-count]');
     const jackpotCount = game.querySelector('[data-etrn-jackpot-count]');
-    const nextJackpotChance = game.querySelector('[data-etrn-next-jackpot-chance]');
     const playerAttemptCount = game.querySelector('[data-etrn-player-attempt-count]');
     const authDialog = game.querySelector('[data-etrn-auth-dialog]');
     const authOpen = game.querySelector('[data-etrn-auth-open]');
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const eyelids = game.querySelector('[data-etrn-eyelids]');
     const confetti = createConfettiController({ game, reducedMotion });
     const captcha = createSmartCaptcha(game);
     const audio = {
@@ -87,12 +87,6 @@ export const createEtrnRoulette = (game) => {
     const applyCounters = (payload) => {
         renderAttempts(Number(payload.attempts));
         renderJackpots(Number(payload.jackpots));
-        if (nextJackpotChance && Number.isFinite(Number(payload.next_jackpot_chance_percent))) {
-            nextJackpotChance.textContent = `${new Intl.NumberFormat('ru-RU', {
-                minimumFractionDigits: 1,
-                maximumFractionDigits: 3,
-            }).format(Number(payload.next_jackpot_chance_percent))} %`;
-        }
         if (playerAttemptCount && Number.isFinite(Number(payload.player_attempts))) {
             playerAttemptCount.textContent = new Intl.NumberFormat('ru-RU').format(Number(payload.player_attempts));
         }
@@ -237,16 +231,13 @@ export const createEtrnRoulette = (game) => {
 
         applyCounters(outcome.counters);
 
+        const description = describeOutcome(outcome);
         game.dataset.phase = 'stopped';
         game.dataset.outcome = outcome.jackpot ? 'jackpot' : outcome.matched ? 'match' : 'miss';
-        game.dataset.longResult = String(outcome.destination && outcome.destination.name.length > 26);
+        game.dataset.longResult = String(description.longResult);
         reelsPanel.setAttribute('aria-busy', 'false');
-        status.textContent = outcome.jackpot ? 'Три бонуса ЛогистРу!' : outcome.matched ? 'ЭТрН отправляется в' : 'Без выигрыша';
-        result.textContent = outcome.jackpot
-            ? 'Супербонус'
-            : outcome.matched
-            ? outcome.destination.name
-            : 'Попробуйте ещё раз';
+        status.textContent = description.status;
+        result.textContent = description.result;
         spinLabel.textContent = 'Крутить ещё раз';
         if (outcome.jackpot) confetti.start();
         play(outcome.matched ? 'success' : 'failure');
@@ -256,6 +247,25 @@ export const createEtrnRoulette = (game) => {
     };
 
     reels.forEach((reel, index) => renderReel(reel, index === 2 ? LOGISTRU_SYMBOL : operators[index]));
+    if (eyelids) {
+        let blinkTimer;
+        const scheduleBlink = () => {
+            if (reducedMotion.matches) return;
+            blinkTimer = window.setTimeout(() => {
+                if (!document.hidden) {
+                    eyelids.classList.add('is-blinking');
+                    window.setTimeout(() => eyelids.classList.remove('is-blinking'), 260);
+                }
+                scheduleBlink();
+            }, 3800 + Math.random() * 4800);
+        };
+        reducedMotion.addEventListener('change', () => {
+            window.clearTimeout(blinkTimer);
+            eyelids.classList.remove('is-blinking');
+            scheduleBlink();
+        });
+        scheduleBlink();
+    }
     captcha.load();
     requestAttempts(game.dataset.attemptsUrl).catch(() => {});
     if (authDialog && authOpen) {

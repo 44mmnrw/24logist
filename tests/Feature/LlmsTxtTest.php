@@ -57,7 +57,7 @@ MD;
     public function test_it_refreshes_llms_txt_from_published_pages_articles_and_used_tags(): void
     {
         SiteSetting::instance()->update([
-            'org_brand_name' => 'ЛогистРу',
+            'org_brand_name' => 'логистРу',
             'ai_site_summary' => 'CRM для транспортных экспедиторов.',
             'blog_description' => 'Материалы о цифровой логистике.',
         ]);
@@ -120,7 +120,7 @@ MD;
 
         $result = app(LlmsTxtService::class)->refreshFromPublishedContent();
 
-        $this->assertStringStartsWith("# ЛогистРу\n", $result['content']);
+        $this->assertStringStartsWith("# логистРу\n", $result['content']);
         $this->assertStringNotContainsString('# Laravel', $result['content']);
     }
 

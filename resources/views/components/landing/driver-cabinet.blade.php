@@ -33,7 +33,7 @@
                     @if ($mobileImage)
                         <x-landing.responsive-image
                             :path="$mobileImage"
-                            :alt="$extra['mobile_image_alt'] ?? 'Личный кабинет водителя ЛогистРу'"
+                            :alt="$extra['mobile_image_alt'] ?? 'Личный кабинет водителя логистРу'"
                             width="276"
                             height="576"
                             loading="lazy"

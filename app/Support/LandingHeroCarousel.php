@@ -16,7 +16,7 @@ final class LandingHeroCarousel
         }
 
         $extra = $section->extra ?? [];
-        $defaultAlt = (string) ($extra['dashboard_image_alt'] ?? 'Интерфейс ЛогистРу');
+        $defaultAlt = (string) ($extra['dashboard_image_alt'] ?? 'Интерфейс логистРу');
         $slides = [];
 
         foreach ($extra['carousel_slides'] ?? [] as $item) {

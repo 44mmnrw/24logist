@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Storage;
 
 final class OpenGraph
 {
-    public const SITE_NAME = 'ЛогистРу';
+    public const SITE_NAME = 'логистРу';
 
     public const ROBOTS_INDEX = 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
 

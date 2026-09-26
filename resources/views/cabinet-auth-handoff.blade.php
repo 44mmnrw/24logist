@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex,nofollow">
-    <title>Вход в ЛогистРу</title>
+    <title>Вход в логистРу</title>
     <style nonce="{{ $scriptNonce }}">
         html, body { min-height: 100%; margin: 0; background: #f3f7fc; }
         .handoff-fallback { display: grid; min-height: 100vh; place-items: center; font: 16px/1.5 sans-serif; }
@@ -18,7 +18,7 @@
 
     <noscript>
         <main class="handoff-fallback">
-            <button type="submit" form="cabinet-platform-handoff">Продолжить в ЛогистРу</button>
+            <button type="submit" form="cabinet-platform-handoff">Продолжить в логистРу</button>
         </main>
     </noscript>
 

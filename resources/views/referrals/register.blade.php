@@ -4,14 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="index,follow">
-    <title>Стать партнёром — ЛогистРу</title>
+    <title>Стать партнёром — логистРу</title>
     @vite(['resources/css/app.css', 'resources/js/cookie-consent.js'])
 </head>
 <body>
 <main class="referral-portal">
     <div class="referral-portal__shell" style="max-width: 760px">
         <header class="referral-portal__header">
-            <div><p class="referral-portal__muted">ЛогистРу</p><h1>Стать партнёром</h1></div>
+            <div><p class="referral-portal__muted">логистРу</p><h1>Стать партнёром</h1></div>
             <a href="{{ url('/') }}">На главную</a>
         </header>
 

@@ -24,7 +24,7 @@ class SiteMailServiceTest extends TestCase
                 'mail_username' => 'mailer@example.com',
                 'mail_password' => 'secret',
                 'mail_from_address' => 'mailer@example.com',
-                'mail_from_name' => 'ЛогистРу',
+                'mail_from_name' => 'логистРу',
             ],
         );
 
@@ -98,7 +98,7 @@ class SiteMailServiceTest extends TestCase
                 'mail_encryption' => 'ssl',
                 'mail_password' => 'secret',
                 'mail_from_address' => 'info@24logist.ru',
-                'mail_from_name' => 'ЛогистРу',
+                'mail_from_name' => 'логистРу',
             ],
         );
 

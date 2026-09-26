@@ -40,7 +40,7 @@ class EtrnRouletteStats extends StatsOverviewWidget
             Stat::make('Шанс следующего супербонуса', number_format($chance, 3, ',', ' ').' %'),
             Stat::make('Вращений в журнале', number_format((int) $counts->total, 0, ',', ' ')),
             Stat::make('Совпадений', number_format((int) $counts->matches, 0, ',', ' ')),
-            Stat::make('3 ЛогистРу', number_format((int) $counts->jackpots, 0, ',', ' ')),
+            Stat::make('3 логистРу', number_format((int) $counts->jackpots, 0, ',', ' ')),
             Stat::make('Без совпадения', number_format((int) $counts->misses, 0, ',', ' ')),
             Stat::make('Вращений за приз', number_format((int) $counts->prize_spins, 0, ',', ' ')),
             Stat::make('Вращений гостей', number_format((int) $counts->guest_spins, 0, ',', ' ')),

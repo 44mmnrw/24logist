@@ -21,7 +21,7 @@
     role="dialog"
     aria-modal="{{ $registrationVariant ? 'false' : 'true' }}"
     @if ($registrationVariant)
-        aria-label="Специальное предложение ЛогистРу"
+        aria-label="Специальное предложение логистРу"
     @else
         aria-labelledby="epd-popup-title"
         aria-describedby="epd-popup-description"
@@ -47,7 +47,7 @@
                     >
                         <img
                             src="{{ $registrationImage }}"
-                            alt="{{ $settings->epd_popup_registration_image_alt ?: 'Специальное предложение ЛогистРу' }}"
+                            alt="{{ $settings->epd_popup_registration_image_alt ?: 'Специальное предложение логистРу' }}"
                             width="1254"
                             height="1254"
                             loading="lazy"

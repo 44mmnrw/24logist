@@ -57,7 +57,7 @@ class LandingContentSeeder extends Seeder
             'sort_order' => 1,
             'extra' => [
                 'logo_icon' => $this->icon('brand-logo'),
-                'brand_name' => 'ЛогистРу',
+                'brand_name' => 'логистРу',
             ],
         ]);
 
@@ -100,7 +100,7 @@ class LandingContentSeeder extends Seeder
             'sort_order' => 2,
             'badge_text' => 'Лучший сервис для экспедиторов в России',
             'badge_icon' => $this->icon('badge-star'),
-            'title' => 'ЛогистРу — заявки, рейсы и ЭДО в одном кабинете',
+            'title' => 'логистРу — заявки, рейсы и ЭДО в одном кабинете',
             'seo_h1' => 'CRM для экспедиторов: заявки, ЭТрН и контроль рейсов',
             'button_primary_text' => 'Подобрать тариф',
             'button_secondary_text' => 'Посмотреть возможности',
@@ -108,7 +108,7 @@ class LandingContentSeeder extends Seeder
                 'hint_text' => 'Удобно для экспедитора, просто для перевозчика',
                 'hint_icon' => $this->icon('info-circle'),
                 'primary_button_icon' => $this->icon('arrow-right'),
-                'dashboard_image_alt' => 'Интерфейс ЛогистРу',
+                'dashboard_image_alt' => 'Интерфейс логистРу',
                 'carousel_delay_ms' => 5000,
                 'carousel_slides' => [],
             ],
@@ -219,14 +219,14 @@ class LandingContentSeeder extends Seeder
             'slug' => 'platform',
             'name' => 'Платформа',
             'sort_order' => 4,
-            'kicker' => 'Что внутри ЛогистРу',
+            'kicker' => 'Что внутри логистРу',
             'title' => 'Четыре опоры сервиса для экспедитора',
             'description' => 'От первой заявки до электронных перевозочных документов и безопасного хранения данных — всё, что нужно, чтобы вести перевозки без потерь.',
             'extra' => [
                 'deadline_kicker' => 'ДЕДЛАЙН',
                 'deadline_date' => '1 сентября 2026',
                 'deadline_icon' => $this->icon('calendar-alert'),
-                'deadline_text' => 'С этой даты транспортный ЭДО становится обязательным. Подключитесь к ЛогистРу заранее — настроим обмен ЭТрН и сопутствующими документами без простоев в работе.',
+                'deadline_text' => 'С этой даты транспортный ЭДО становится обязательным. Подключитесь к логистРу заранее — настроим обмен ЭТрН и сопутствующими документами без простоев в работе.',
                 'deadline_button_text' => 'Подготовиться к ЭДО',
             ],
         ]);
@@ -617,7 +617,7 @@ class LandingContentSeeder extends Seeder
                     ['name' => 'ООО "МЕТАЛЛИНВЕСТСПБ"', 'count_value' => '4', 'count_width' => 44, 'revenue_value' => '980 тыс. ₽', 'revenue_width' => 54, 'margin_value' => '15,7%', 'margin_width' => 85],
                     ['name' => 'ООО "КЛИМАТ-КОМПЛЕКС"', 'count_value' => '4', 'count_width' => 44, 'revenue_value' => '760 тыс. ₽', 'revenue_width' => 42, 'margin_value' => '18,4%', 'margin_width' => 100],
                 ],
-                'dashboard_aria_label' => 'Примеры аналитических отчётов ЛогистРу',
+                'dashboard_aria_label' => 'Примеры аналитических отчётов логистРу',
                 'unit_aria_label' => 'Единица измерения',
                 'chart_aria_label' => 'Распределение маржинальности заявок',
                 'tabs_aria_label' => 'Показатель рейтинга',
@@ -735,8 +735,8 @@ class LandingContentSeeder extends Seeder
             'description' => 'Лучший сервис для экспедиторов в России. Заявки, ЭДО и рейсы в одном кабинете.',
             'extra' => [
                 'logo_icon' => $this->icon('brand-logo'),
-                'brand_name' => 'ЛогистРу',
-                'copyright' => '© 2026 ЛогистРу. Все права защищены.',
+                'brand_name' => 'логистРу',
+                'copyright' => '© 2026 логистРу. Все права защищены.',
                 'tagline' => 'Сделано для логистов',
             ],
         ]);

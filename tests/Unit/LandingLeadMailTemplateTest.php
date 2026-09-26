@@ -20,7 +20,7 @@ class LandingLeadMailTemplateTest extends TestCase
         ]);
 
         $site = new SiteSetting([
-            'org_brand_name' => 'ЛогистРу',
+            'org_brand_name' => 'логистРу',
             'org_email' => 'info@24logist.ru',
             'org_phone' => '+7 (495) 109-25-44',
         ]);
@@ -32,7 +32,7 @@ class LandingLeadMailTemplateTest extends TestCase
         );
 
         $this->assertSame(
-            'Здравствуйте, Анна! Тариф: Стандарт. ЛогистРу · Квиз (просчёт тарифа)',
+            'Здравствуйте, Анна! Тариф: Стандарт. логистРу · Квиз (просчёт тарифа)',
             $result,
         );
     }

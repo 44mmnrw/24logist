@@ -28,7 +28,7 @@ class LandingHeroTypographyAdminTest extends TestCase
         $section = LandingSection::query()->create([
             'slug' => 'hero',
             'name' => 'Главный экран',
-            'title' => 'ЛогистРу',
+            'title' => 'логистРу',
             'seo_h1' => 'CRM для экспедиторов',
             'extra' => [
                 'title_font_size' => 56,

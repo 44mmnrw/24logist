@@ -22,7 +22,7 @@
         ],
         'publisher' => [
             '@type' => 'Organization',
-            'name' => 'ЛогистРу',
+            'name' => 'логистРу',
             'url' => url('/'),
             'logo' => [
                 '@type' => 'ImageObject',
@@ -42,7 +42,7 @@
     <title>{{ $epdSeoTitle }}</title>
     <meta name="description" content="{{ $epdSeoDescription }}">
     <meta name="keywords" content="роуминг ЭПД, операторы ЭПД, электронные перевозочные документы, ЭТрН, ЭЗЗ, ЭПЭ">
-    <meta name="author" content="ЛогистРу">
+    <meta name="author" content="логистРу">
     <meta name="application-name" content="{{ $epdSeoTitle }}">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
@@ -83,9 +83,9 @@
         data-sound-failure="{{ asset('sounds/epd/failure.mp3') }}"
     >
         <header class="epd-game__topbar">
-            <a class="epd-game__brand" href="{{ url('/') }}" aria-label="ЛогистРу — перейти на главную">
+            <a class="epd-game__brand" href="{{ url('/') }}" aria-label="логистРу — перейти на главную">
                 <span class="epd-game__logo-wrap">
-                    <img src="{{ app(\App\Services\SiteSettingsService::class)->logoUrl() }}" alt="ЛогистРу" width="154" height="38">
+                    <img src="{{ app(\App\Services\SiteSettingsService::class)->logoUrl() }}" alt="логистРу" width="154" height="38">
                 </span>
                 <span class="epd-game__brand-meta">Игровой стенд ЭПД</span>
             </a>

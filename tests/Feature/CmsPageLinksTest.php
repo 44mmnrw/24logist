@@ -72,10 +72,10 @@ class CmsPageLinksTest extends TestCase
         CmsPage::query()->create([
             'title' => 'Эксплуатационная документация',
             'slug' => 'ekspluatacionnaia-dokumentaciia-po-logistru',
-            'meta_title' => 'Эксплуатационная документация программы для экспедиторов ЛогистРу',
+            'meta_title' => 'Эксплуатационная документация программы для экспедиторов логистРу',
             'body' => '{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Документация"}]}]}',
             'extra' => [
-                'og_title' => 'Эксплуатационная документация ПО ЛогистРу',
+                'og_title' => 'Эксплуатационная документация ПО логистРу',
             ],
             'is_published' => true,
         ]);
@@ -83,11 +83,11 @@ class CmsPageLinksTest extends TestCase
         $this->get('/pages/ekspluatacionnaia-dokumentaciia-po-logistru')
             ->assertOk()
             ->assertSee(
-                '<title>Эксплуатационная документация программы для экспедиторов ЛогистРу</title>',
+                '<title>Эксплуатационная документация программы для экспедиторов логистРу</title>',
                 false,
             )
             ->assertSee(
-                'property="og:title" content="Эксплуатационная документация ПО ЛогистРу"',
+                'property="og:title" content="Эксплуатационная документация ПО логистРу"',
                 false,
             );
     }

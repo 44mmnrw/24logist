@@ -195,7 +195,7 @@ final class GeneralSiteSettingForm
                     TextInput::make('seo_meta_title')
                         ->label('Meta title')
                         ->maxLength(70)
-                        ->placeholder('ЛогистРу — платформа для логистики')
+                        ->placeholder('логистРу — платформа для логистики')
                         ->helperText('Тег <title>. Рекомендуется до 60–70 символов.'),
                     Textarea::make('og_description')
                         ->label('Meta description')
@@ -213,7 +213,7 @@ final class GeneralSiteSettingForm
                     TextInput::make('og_title')
                         ->label('Open Graph — заголовок')
                         ->maxLength(255)
-                        ->placeholder('ЛогистРу — платформа для логистики')
+                        ->placeholder('логистРу — платформа для логистики')
                         ->helperText('Необязательно. Пусто — Meta title или Hero.'),
                     FileUpload::make('og_image_path')
                         ->label('Open Graph — изображение')
@@ -280,7 +280,7 @@ final class GeneralSiteSettingForm
                     TextInput::make('org_brand_name')
                         ->label('Бренд / название сервиса')
                         ->maxLength(255)
-                        ->placeholder('ЛогистРу'),
+                        ->placeholder('логистРу'),
                     TextInput::make('org_legal_name')
                         ->label('Юридическое название')
                         ->maxLength(255)
@@ -364,7 +364,7 @@ final class GeneralSiteSettingForm
     {
         return [
             Section::make('Карта и калькулятор маршрута')
-                ->description('Самостоятельный публичный раздел /route-calculator. Сайт обращается к платформе ЛогистРу только с сервера; API-секрет хранится в базе зашифрованно и никогда не передаётся в браузер.')
+                ->description('Самостоятельный публичный раздел /route-calculator. Сайт обращается к платформе логистРу только с сервера; API-секрет хранится в базе зашифрованно и никогда не передаётся в браузер.')
                 ->schema([
                     Toggle::make('route_calculator_enabled')
                         ->label('Включить калькулятор маршрута')
@@ -642,7 +642,7 @@ final class GeneralSiteSettingForm
     {
         return [
             Section::make('Кнопки и окна личного кабинета')
-                ->description('Вход и регистрация проходят в модальном окне лендинга, после чего пользователь безопасно переводится в ЛогистРу уже с авторизованной сессией.')
+                ->description('Вход и регистрация проходят в модальном окне лендинга, после чего пользователь безопасно переводится в логистРу уже с авторизованной сессией.')
                 ->schema([
                     Toggle::make('cabinet_login_enabled')
                         ->label('Показывать кнопку входа в личный кабинет')
@@ -684,7 +684,7 @@ final class GeneralSiteSettingForm
                         ->label('Надпись над заголовком')
                         ->required()
                         ->maxLength(100)
-                        ->default('ЛогистРу'),
+                        ->default('логистРу'),
                     TextInput::make('cabinet_login_modal_title')
                         ->label('Заголовок окна')
                         ->required()
@@ -719,7 +719,7 @@ final class GeneralSiteSettingForm
                 ->columns(2)
                 ->columnSpanFull(),
             Section::make('Подключение к платформе')
-                ->description('Лендинг обращается к ЛогистРу сервер-сервер по внутреннему IP. Домен остаётся в HTTPS-запросе для корректной проверки сертификата; прокси и внешний DNS не используются.')
+                ->description('Лендинг обращается к логистРу сервер-сервер по внутреннему IP. Домен остаётся в HTTPS-запросе для корректной проверки сертификата; прокси и внешний DNS не используются.')
                 ->schema([
                     TextInput::make('cabinet_login_url')
                         ->label('HTTPS-адрес платформы')
@@ -732,14 +732,14 @@ final class GeneralSiteSettingForm
                         ->url()
                         ->maxLength(2048)
                         ->placeholder('https://24logist.ru')
-                        ->helperText('Должен в точности совпадать с разрешённым origin в настройках API ЛогистРу.'),
+                        ->helperText('Должен в точности совпадать с разрешённым origin в настройках API логистРу.'),
                     TextInput::make('cabinet_login_connect_ip')
                         ->label('Внутренний IP платформы')
                         ->required(fn (Get $get): bool => (bool) ($get('cabinet_login_enabled') || $get('cabinet_registration_enabled')))
                         ->rule('ip')
                         ->maxLength(45)
                         ->placeholder('147.45.236.73')
-                        ->helperText('Адрес интерфейса этого же сервера, на котором HTTPS-сайт ЛогистРу доступен на порту 443. Значение хранится зашифрованно.'),
+                        ->helperText('Адрес интерфейса этого же сервера, на котором HTTPS-сайт логистРу доступен на порту 443. Значение хранится зашифрованно.'),
                     TextInput::make('cabinet_login_api_timeout')
                         ->label('Тайм-аут, секунд')
                         ->numeric()
@@ -759,7 +759,7 @@ final class GeneralSiteSettingForm
                         ->minLength(32)
                         ->maxLength(512)
                         ->placeholder(fn (?SiteSetting $record): string => $record?->hasSecret('cabinet_login_api_secret') ? '***' : '')
-                        ->helperText('Тот же Bearer-секрет должен быть настроен в ЛогистРу для origin лендинга. Оставьте пустым, чтобы не менять сохранённый секрет.')
+                        ->helperText('Тот же Bearer-секрет должен быть настроен в логистРу для origin лендинга. Оставьте пустым, чтобы не менять сохранённый секрет.')
                         ->columnSpanFull(),
                 ])
                 ->columns(2)
@@ -1034,7 +1034,7 @@ final class GeneralSiteSettingForm
                     TextInput::make('mail_from_name')
                         ->label('Имя отправителя')
                         ->maxLength(255)
-                        ->placeholder('ЛогистРу'),
+                        ->placeholder('логистРу'),
                 ])
                 ->columns(2)
                 ->columnSpanFull(),

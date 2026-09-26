@@ -13,7 +13,7 @@ class EtrnRouletteSpin extends Model
     ];
 
     public const RESULT_LABELS = [
-        'jackpot' => '3 ЛогистРу',
+        'jackpot' => '3 логистРу',
         'match' => 'Совпадение',
         'miss' => 'Без совпадения',
     ];
@@ -26,7 +26,7 @@ class EtrnRouletteSpin extends Model
     public function reelSummary(): string
     {
         return implode(' · ', array_map(
-            static fn (string $symbol): string => $symbol === 'logistru-bonus' ? 'ЛогистРу' : $symbol,
+            static fn (string $symbol): string => $symbol === 'logistru-bonus' ? 'логистРу' : $symbol,
             $this->outcome['reels'] ?? [],
         ));
     }

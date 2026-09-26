@@ -18,11 +18,11 @@ class EtrnRouletteJackpotResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTrophy;
 
-    protected static ?string $navigationLabel = '3 ЛогистРу';
+    protected static ?string $navigationLabel = '3 логистРу';
 
     protected static ?string $modelLabel = 'супербонус рулетки';
 
-    protected static ?string $pluralModelLabel = 'Выпадения 3 ЛогистРу';
+    protected static ?string $pluralModelLabel = 'Выпадения 3 логистРу';
 
     protected static string|\UnitEnum|null $navigationGroup = 'Игры';
 

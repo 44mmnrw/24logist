@@ -45,7 +45,7 @@
             <section
                 data-cabinet-auth-panel="login"
                 data-title="{{ $siteSettings->cabinet_login_modal_title ?: 'Вход в личный кабинет' }}"
-                data-description="{{ $siteSettings->cabinet_login_modal_description ?: 'Введите email и пароль, указанные при регистрации в ЛогистРу.' }}"
+                data-description="{{ $siteSettings->cabinet_login_modal_description ?: 'Введите email и пароль, указанные при регистрации в логистРу.' }}"
             >
                 <form class="cabinet-login-modal__form" data-cabinet-auth-form="login" novalidate>
                     <label class="cabinet-login-modal__field cabinet-login-modal__field--wide">
@@ -84,7 +84,7 @@
             <section
                 data-cabinet-auth-panel="password-reset"
                 data-title="Восстановление пароля"
-                data-description="Введите email, указанный при регистрации в ЛогистРу. Мы отправим ссылку для создания нового пароля."
+                data-description="Введите email, указанный при регистрации в логистРу. Мы отправим ссылку для создания нового пароля."
                 hidden
             >
                 <form class="cabinet-login-modal__form" data-cabinet-auth-form="password-reset" novalidate>

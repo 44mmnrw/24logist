@@ -31,6 +31,7 @@
         <div class="etrn-roulette__poster">
             <img class="etrn-roulette__art" src="{{ asset('images/etrn-game/poster-blank-reels.webp') }}" alt="Логист запускает рулетку роуминга ЭПД" width="1086" height="1448">
             <img class="etrn-roulette__pulled" src="{{ asset('images/etrn-game/poster-lever-pulled-blank-reels.webp') }}" alt="" aria-hidden="true" width="1086" height="1448">
+            <img class="etrn-roulette__eyelids" src="{{ asset('images/etrn-game/eyelids.svg') }}" alt="" aria-hidden="true" width="1086" height="1448" data-etrn-eyelids>
             <canvas class="etrn-roulette__confetti" data-epd-confetti aria-hidden="true"></canvas>
 
             <div class="etrn-roulette__reels" aria-label="Три барабана с операторами ЭДО" aria-busy="false" data-etrn-reels>
@@ -55,19 +56,31 @@
                     <strong data-etrn-jackpot-count>0</strong>
                 </span>
                 <span class="etrn-roulette__chance">
-                    Шанс 3 ЛогистРу в следующей попытке:
-                    <strong data-etrn-next-jackpot-chance>0,1 %</strong>
+                    <span>Шанс 3 логистРу</span>
+                    <strong>повышается ↑</strong>
                 </span>
             </div>
             <div class="etrn-roulette__prize">
                 @if ($roulettePlayer)
-                    <span class="etrn-roulette__prize-active">За приз: <strong data-etrn-player-attempt-count>{{ number_format($roulettePlayer->attempts, 0, ',', ' ') }}</strong></span>
+                    <span class="etrn-roulette__prize-active">
+                        <span>В розыгрыше</span>
+                        <span>Учтено попыток: <strong data-etrn-player-attempt-count>{{ number_format($roulettePlayer->attempts, 0, ',', ' ') }}</strong></span>
+                    </span>
                 @elseif ($communityUser)
                     <a class="etrn-roulette__prize-link" href="{{ route('etrn-roulette.prize.join') }}">Играть за приз</a>
                 @else
                     <a class="etrn-roulette__prize-link" href="{{ route('etrn-roulette.prize.join') }}" data-etrn-auth-open>Играть за приз</a>
                 @endif
-                <a class="etrn-roulette__rules-link" href="{{ route('etrn-roulette.rules') }}">Правила игры</a>
+                <div class="etrn-roulette__prize-links">
+                    <a class="etrn-roulette__rules-link" href="{{ route('etrn-roulette.rules') }}">Правила игры</a>
+                    @if ($communityUser)
+                        <form method="POST" action="{{ route('community.logout') }}">
+                            @csrf
+                            <input type="hidden" name="return_to" value="etrn-roulette">
+                            <button class="etrn-roulette__logout" type="submit">Выйти</button>
+                        </form>
+                    @endif
+                </div>
             </div>
             <button class="etrn-roulette__spin" type="button" data-etrn-spin>
                 <span class="etrn-roulette__spin-face">

@@ -53,7 +53,7 @@ final class LlmsTxtService
         $brand = trim((string) $settings->org_brand_name);
 
         if ($brand === '' || mb_strtolower($brand) === 'laravel') {
-            $brand = 'ЛогистРу';
+            $brand = 'логистРу';
         }
         $summary = $this->normalizeSiteSummary(
             $this->plainText($settings->ai_site_summary, 500),

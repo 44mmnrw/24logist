@@ -62,7 +62,7 @@
                     @if ($mobileImage)
                         <x-landing.responsive-image
                             :path="$mobileImage"
-                            :alt="$extra['mobile_image_alt'] ?? 'Мобильный интерфейс ЛогистРу'"
+                            :alt="$extra['mobile_image_alt'] ?? 'Мобильный интерфейс логистРу'"
                             width="276"
                             height="576"
                             loading="lazy"

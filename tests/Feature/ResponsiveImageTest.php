@@ -32,7 +32,7 @@ class ResponsiveImageTest extends TestCase
         LandingSection::query()->create([
             'slug' => 'hero',
             'name' => 'Главный экран',
-            'title' => 'ЛогистРу',
+            'title' => 'логистРу',
             'seo_h1' => 'CRM для экспедиторов',
             'is_active' => true,
             'sort_order' => 1,
@@ -40,7 +40,7 @@ class ResponsiveImageTest extends TestCase
                 'carousel_slides' => [
                     [
                         'image' => 'landing/hero/dashboard.png',
-                        'alt' => 'Интерфейс ЛогистРу',
+                        'alt' => 'Интерфейс логистРу',
                     ],
                 ],
             ],

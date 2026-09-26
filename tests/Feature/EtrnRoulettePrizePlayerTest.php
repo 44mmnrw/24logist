@@ -80,6 +80,31 @@ class EtrnRoulettePrizePlayerTest extends TestCase
         ]);
     }
 
+    public function test_player_sees_what_prize_attempt_count_means_and_can_log_out_to_game(): void
+    {
+        $this->withoutVite();
+        SiteSetting::instance()->update(['community_enabled' => true]);
+        app(SiteSettingsService::class)->clearCache();
+        $user = CommunityUser::factory()->create();
+
+        $this->actingAs($user, 'community')
+            ->get(route('etrn-roulette.prize.join'))
+            ->assertRedirect(route('etrn-roulette'));
+        $user->etrnRoulettePlayer()->update(['attempts' => 3]);
+
+        $this->get(route('etrn-roulette'))
+            ->assertOk()
+            ->assertSee('В розыгрыше')
+            ->assertSee('Учтено попыток:')
+            ->assertSee('data-etrn-player-attempt-count>3</strong>', false)
+            ->assertSee('name="return_to" value="etrn-roulette"', false)
+            ->assertSee('Выйти');
+
+        $this->post(route('community.logout'), ['return_to' => 'etrn-roulette'])
+            ->assertRedirect(route('etrn-roulette'));
+        $this->assertGuest('community');
+    }
+
     public function test_only_server_generated_jackpots_appear_in_admin(): void
     {
         $this->withoutVite();
