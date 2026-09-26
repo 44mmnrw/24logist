@@ -24,6 +24,8 @@
 .etrn-roulette__symbol-logo--ediveb { width: 100%; height: 64%; background-image: var(--etrn-ediveb-url); background-size: contain; background-position: center; transform: scale(1.08); }
 .etrn-roulette__symbol-logo--evotor { width: 100%; height: 68%; background-image: var(--etrn-evotor-url); background-size: contain; background-position: center; transform: scale(1.06); }
 .etrn-roulette__symbol-logo--taxcom { width: 100%; height: 76%; background-image: var(--etrn-taxcom-url); background-size: contain; background-position: center; transform: scale(1.06); }
+.etrn-roulette__symbol-logo--sber { width: 100%; height: 64%; background-image: var(--etrn-sber-url); background-size: contain; background-position: center; }
+.etrn-roulette__symbol-logo--tochka { width: 100%; height: 64%; background-image: var(--etrn-tochka-url); background-size: contain; background-position: center; }
 .etrn-roulette__symbol-logo--logistru { width: 100%; height: 64%; background-image: var(--etrn-logistru-url); background-size: contain; background-position: center; transform: scale(1.2); }
 .etrn-roulette__reel:first-child .etrn-roulette__symbol-logo--logistru { transform: translateX(-3%) scale(1.02); }
 .etrn-roulette__reel:nth-child(2) .etrn-roulette__symbol-logo--logistru { transform: scale(1.08); }

@@ -8,6 +8,10 @@ const SHORT_NAMES = Object.freeze({
     'НТЦ СТЭК': 'СТЭК',
 });
 
+const DISPLAY_NAMES = Object.freeze({
+    'ФораПром': 'ФОРА',
+});
+
 const LOGOS = Object.freeze({
     'ПФ СКБ Контур': 'kontur',
     'Калуга Астрал': 'astral',
@@ -15,6 +19,8 @@ const LOGOS = Object.freeze({
     'Эдивеб': 'ediveb',
     'Эвотор ОФД': 'evotor',
     'Такском': 'taxcom',
+    'СберКорус': 'sber',
+    'Точка': 'tochka',
 });
 
 export const LOGISTRU_SYMBOL = Object.freeze({
@@ -28,8 +34,8 @@ export const LOGISTRU_COMBINATION_WEIGHT = 3;
 
 export const makeOperators = (names) => names.map((name) => ({
     id: name,
-    name,
-    shortName: SHORT_NAMES[name] || name,
+    name: DISPLAY_NAMES[name] || name,
+    shortName: SHORT_NAMES[name] || DISPLAY_NAMES[name] || name,
     logo: LOGOS[name] || null,
 }));
 
