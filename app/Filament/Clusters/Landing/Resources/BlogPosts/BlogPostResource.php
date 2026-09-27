@@ -521,7 +521,7 @@ class BlogPostResource extends Resource
                     ->label('Опубликована')
                     ->boolean(),
                 IconColumn::make('is_featured')
-                    ->label('Featured')
+                    ->label('Выделенная')
                     ->boolean()
                     ->toggleable(),
                 TextColumn::make('published_at')

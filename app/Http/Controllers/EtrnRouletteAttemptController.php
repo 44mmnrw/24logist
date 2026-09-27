@@ -15,8 +15,6 @@ final class EtrnRouletteAttemptController extends Controller
     private const COUNTER_KEY = 'etrn-roulette';
     private const JACKPOT_COUNTER_KEY = 'etrn-roulette-superbonus';
 
-    private const JACKPOT_STREAK_KEY = 'etrn-roulette-jackpot-streak';
-
     public function index(): JsonResponse
     {
         return $this->response($this->currentAttempts(), $this->currentJackpots());
@@ -53,26 +51,20 @@ final class EtrnRouletteAttemptController extends Controller
                 ->where('key', self::COUNTER_KEY)
                 ->lockForUpdate()
                 ->first();
-            $jackpotStreak = DB::table('game_counters')
-                ->where('key', self::JACKPOT_STREAK_KEY)
-                ->lockForUpdate()
-                ->first();
-
             $existing = EtrnRouletteSpin::query()->where('request_id', $requestId)->first();
             if ($existing !== null) {
                 abort_if($existing->actor_key !== $actorKey, 409);
                 return ['spin' => $existing, 'replayed' => true];
             }
 
-            $player = $communityUserId === null ? null : DB::table('etrn_roulette_players')
+            $player = ! config('etrn_roulette.prize_enabled') || $communityUserId === null ? null : DB::table('etrn_roulette_players')
                 ->where('community_user_id', $communityUserId)
                 ->whereNotNull('contact_verified_at')
                 ->lockForUpdate()
                 ->first();
 
-            $attemptsWithoutJackpot = (int) ($jackpotStreak?->attempts ?? $counter?->attempts ?? 0);
-            $outcome = $outcomeGenerator->generate(null, $attemptsWithoutJackpot);
-            $outcome['jackpot_chance_percent'] = $outcomeGenerator->nextJackpotChancePercent($attemptsWithoutJackpot);
+            $outcome = $outcomeGenerator->generate();
+            $outcome['jackpot_chance_percent'] = $outcomeGenerator->nextJackpotChancePercent();
             $spin = EtrnRouletteSpin::query()->create([
                 'request_id' => $requestId,
                 'actor_key' => $actorKey,
@@ -118,21 +110,6 @@ final class EtrnRouletteAttemptController extends Controller
                 }
             }
 
-            $nextStreak = $outcome['jackpot'] ? 0 : $attemptsWithoutJackpot + 1;
-            if ($jackpotStreak === null) {
-                DB::table('game_counters')->insert([
-                    'key' => self::JACKPOT_STREAK_KEY,
-                    'attempts' => $nextStreak,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            } else {
-                DB::table('game_counters')->where('key', self::JACKPOT_STREAK_KEY)->update([
-                    'attempts' => $nextStreak,
-                    'updated_at' => now(),
-                ]);
-            }
-
             if ($player !== null) {
                 DB::table('etrn_roulette_players')->where('id', $player->id)->update([
                     'attempts' => (int) $player->attempts + 1,
@@ -169,19 +146,13 @@ final class EtrnRouletteAttemptController extends Controller
         return (int) (DB::table('game_counters')->where('key', self::JACKPOT_COUNTER_KEY)->value('attempts') ?? 0);
     }
 
-    private function currentJackpotStreak(): int
-    {
-        return (int) (DB::table('game_counters')->where('key', self::JACKPOT_STREAK_KEY)->value('attempts')
-            ?? $this->currentAttempts());
-    }
-
     private function response(int $attempts, int $jackpots, ?int $playerAttempts = null, array $extra = []): JsonResponse
     {
         $payload = [
             'attempts' => $attempts,
             'jackpots' => $jackpots,
             'next_jackpot_chance_percent' => app(EtrnRouletteOutcome::class)
-                ->nextJackpotChancePercent($this->currentJackpotStreak()),
+                ->nextJackpotChancePercent(),
             ...$extra,
         ];
         if ($playerAttempts !== null) {

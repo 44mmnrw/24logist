@@ -28,11 +28,10 @@ class EtrnRouletteStats extends StatsOverviewWidget
             ->first();
 
         $screenCounters = DB::table('game_counters')
-            ->whereIn('key', ['etrn-roulette', 'etrn-roulette-superbonus', 'etrn-roulette-jackpot-streak'])
+            ->whereIn('key', ['etrn-roulette', 'etrn-roulette-superbonus'])
             ->pluck('attempts', 'key');
 
-        $streak = (int) ($screenCounters['etrn-roulette-jackpot-streak'] ?? $screenCounters['etrn-roulette'] ?? 0);
-        $chance = app(EtrnRouletteOutcome::class)->nextJackpotChancePercent($streak);
+        $chance = app(EtrnRouletteOutcome::class)->nextJackpotChancePercent();
 
         return [
             Stat::make('На экране: попытки', number_format((int) ($screenCounters['etrn-roulette'] ?? 0), 0, ',', ' ')),

@@ -29,6 +29,8 @@ class EtrnRoulettePrizePlayerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->withoutVite();
+        config()->set('etrn_roulette.prize_enabled', true);
         SiteSetting::instance()->update([
             'smartcaptcha_site_key' => 'test-public-key',
             'smartcaptcha_server_key' => 'test-private-key',
@@ -46,6 +48,49 @@ class EtrnRoulettePrizePlayerTest extends TestCase
             'host' => parse_url(route('etrn-roulette.attempts.store'), PHP_URL_HOST),
         ];
         Http::fake(['smartcaptcha.cloud.yandex.ru/validate' => fn () => Http::response($this->captchaResponse)]);
+    }
+
+    public function test_entertainment_only_mode_hides_prizes_and_disables_participation(): void
+    {
+        config()->set('etrn_roulette.prize_enabled', false);
+
+        $this->get(route('etrn-roulette'))
+            ->assertOk()
+            ->assertDontSee('Играть за приз')
+            ->assertDontSee('Супер приз');
+        $this->get(route('etrn-roulette.rules'))
+            ->assertOk()
+            ->assertSee('Призов и розыгрыша нет')
+            ->assertDontSee('Отдельная акция с подпиской');
+        $this->get(route('etrn-roulette.prize.auth', ['provider' => 'telegram']))
+            ->assertNotFound();
+
+        $user = CommunityUser::factory()->create();
+        EtrnRoulettePlayer::query()->create([
+            'community_user_id' => $user->id,
+            'attempts' => 3,
+            'joined_at' => now(),
+            'contact_verified_at' => now(),
+        ]);
+
+        $this->actingAs($user, 'community')
+            ->get(route('etrn-roulette'))
+            ->assertOk()
+            ->assertDontSee('В розыгрыше')
+            ->assertDontSee('Играть за приз');
+        $this->get(route('etrn-roulette.prize.join'))->assertNotFound();
+        $this->post(route('etrn-roulette.prize.contact'), [])->assertNotFound();
+        $this->post(route('etrn-roulette.prize.verify'), [])->assertNotFound();
+
+        $this->postJson(route('etrn-roulette.attempts.store'), [
+            'request_id' => (string) Str::uuid(),
+            'smart_token' => 'valid-test-token',
+        ])->assertOk()->assertJsonMissingPath('player_attempts');
+
+        $this->assertDatabaseHas('etrn_roulette_players', [
+            'community_user_id' => $user->id,
+            'attempts' => 3,
+        ]);
     }
 
     public function test_guest_is_sent_to_community_login_before_joining_prize_game(): void
@@ -186,9 +231,8 @@ class EtrnRoulettePrizePlayerTest extends TestCase
             ->assertJsonPath('player_attempts', 8);
     }
 
-    public function test_player_sees_what_prize_attempt_count_means_and_can_log_out_to_game(): void
+    public function test_player_can_log_out_without_seeing_prize_participation(): void
     {
-        $this->withoutVite();
         SiteSetting::instance()->update(['community_enabled' => true]);
         app(SiteSettingsService::class)->clearCache();
         $user = CommunityUser::factory()->create();
@@ -198,9 +242,9 @@ class EtrnRoulettePrizePlayerTest extends TestCase
 
         $this->get(route('etrn-roulette'))
             ->assertOk()
-            ->assertSee('В розыгрыше')
-            ->assertSee('Учтено попыток:')
-            ->assertSee('data-etrn-player-attempt-count>3</strong>', false)
+            ->assertDontSee('В розыгрыше')
+            ->assertDontSee('Учтено попыток:')
+            ->assertDontSee('Играть за приз')
             ->assertSee('name="return_to" value="etrn-roulette"', false)
             ->assertSee('Выйти');
 
@@ -215,7 +259,9 @@ class EtrnRoulettePrizePlayerTest extends TestCase
         $communityUser = CommunityUser::factory()->create(['display_name' => 'Победитель теста']);
         $this->verifyPrizeEmail($communityUser, 'winner@example.test');
 
-        $this->app->instance(EtrnRouletteOutcome::class, new EtrnRouletteOutcome(static fn (int $max): int => 500));
+        $this->app->instance(EtrnRouletteOutcome::class, new EtrnRouletteOutcome(
+            static fn (int $max): int => $max === 999_999 ? 500 : $max,
+        ));
         $requestId = (string) Str::uuid();
         $first = $this->actingAs($communityUser, 'community')
             ->postJson(route('etrn-roulette.attempts.store'), [
@@ -365,42 +411,50 @@ class EtrnRoulettePrizePlayerTest extends TestCase
         $this->assertDatabaseCount('etrn_roulette_spins', 0);
     }
 
-    public function test_shared_next_jackpot_chance_grows_and_resets_after_superbonus(): void
+    public function test_each_spin_keeps_the_same_superbonus_chance(): void
     {
-        $rolls = [999_999, 10_000, 10_000];
+        $rolls = [999_999, 0, 0];
+        $jackpotIndex = count(config('epd_operators'));
+        $chance = 25 / ($jackpotIndex + 1);
+        $spin = 0;
         $this->app->instance(EtrnRouletteOutcome::class, new EtrnRouletteOutcome(
-            static function (int $max) use (&$rolls): int {
-                return $max === 999_999 ? array_shift($rolls) : 0;
+            static function (int $max) use (&$rolls, &$spin, $jackpotIndex): int {
+                if ($max === 999_999) {
+                    $spin++;
+                    return array_shift($rolls);
+                }
+
+                return $spin === 2 && $max === $jackpotIndex ? $jackpotIndex : 0;
             },
         ));
 
         $this->getJson(route('etrn-roulette.attempts.index'))
-            ->assertOk()->assertJsonPath('next_jackpot_chance_percent', 1);
+            ->assertOk()->assertJsonPath('next_jackpot_chance_percent', $chance);
 
         $this->postJson(route('etrn-roulette.attempts.store'), [
             'request_id' => (string) Str::uuid(),
             'smart_token' => 'first-token',
         ])->assertOk()
             ->assertJsonPath('outcome.jackpot', false)
-            ->assertJsonPath('outcome.jackpot_chance_percent', 1)
-            ->assertJsonPath('next_jackpot_chance_percent', 1.01);
+            ->assertJsonPath('outcome.jackpot_chance_percent', $chance)
+            ->assertJsonPath('next_jackpot_chance_percent', $chance);
 
         $this->postJson(route('etrn-roulette.attempts.store'), [
             'request_id' => (string) Str::uuid(),
             'smart_token' => 'second-token',
         ])->assertOk()
             ->assertJsonPath('outcome.jackpot', true)
-            ->assertJsonPath('outcome.jackpot_chance_percent', 1.01)
-            ->assertJsonPath('next_jackpot_chance_percent', 1);
+            ->assertJsonPath('outcome.jackpot_chance_percent', $chance)
+            ->assertJsonPath('next_jackpot_chance_percent', $chance);
 
         $this->postJson(route('etrn-roulette.attempts.store'), [
             'request_id' => (string) Str::uuid(),
             'smart_token' => 'third-token',
         ])->assertOk()
             ->assertJsonPath('outcome.jackpot', false)
-            ->assertJsonPath('next_jackpot_chance_percent', 1.01);
+            ->assertJsonPath('next_jackpot_chance_percent', $chance);
 
-        $this->assertDatabaseHas('game_counters', ['key' => 'etrn-roulette-jackpot-streak', 'attempts' => 1]);
+        $this->assertDatabaseMissing('game_counters', ['key' => 'etrn-roulette-jackpot-streak']);
     }
 
     private function verifyPrizeEmail(CommunityUser $user, string $email = 'player@example.test'): void

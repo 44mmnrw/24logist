@@ -7,18 +7,26 @@ use Tests\TestCase;
 
 class EtrnRouletteOutcomeTest extends TestCase
 {
-    public function test_only_first_ten_thousand_of_a_million_rolls_are_initial_jackpots(): void
+    public function test_each_matching_triple_uses_the_same_probability(): void
     {
         $generator = new EtrnRouletteOutcome();
-        // The service reads the same operator list that is shown on the game page.
-        $this->assertTrue($generator->generate(static fn (int $max): int => 9_999)['jackpot']);
-        $this->assertFalse($generator->generate(static fn (int $max): int => $max === 999_999 ? 10_000 : 0)['jackpot']);
+        $operators = array_values(config('epd_operators'));
+
+        foreach ([...$operators, EtrnRouletteOutcome::LOGISTRU_SYMBOL] as $index => $symbol) {
+            $outcome = $generator->generate(static fn (int $max): int => $max === 999_999 ? 0 : $index);
+
+            $this->assertTrue($outcome['matched']);
+            $this->assertSame(array_fill(0, 3, $symbol), $outcome['reels']);
+            $this->assertSame($symbol === EtrnRouletteOutcome::LOGISTRU_SYMBOL, $outcome['jackpot']);
+        }
+
+        $this->assertSame(25 / (count($operators) + 1), $generator->nextJackpotChancePercent());
     }
 
     public function test_operator_win_and_miss_never_create_an_accidental_jackpot(): void
     {
         $generator = new EtrnRouletteOutcome();
-        $win = $generator->generate(static fn (int $max): int => $max === 999_999 ? 10_000 : 0);
+        $win = $generator->generate(static fn (int $max): int => $max === 999_999 ? 249_999 : 0);
         $this->assertTrue($win['matched']);
         $this->assertFalse($win['jackpot']);
         $this->assertSame(array_fill(0, 3, $win['destination']), $win['reels']);
@@ -30,17 +38,11 @@ class EtrnRouletteOutcomeTest extends TestCase
         $this->assertGreaterThan(1, count(array_unique($miss['reels'])));
     }
 
-    public function test_jackpot_chance_grows_with_attempts_and_is_capped(): void
+    public function test_rolls_outside_the_matching_pool_do_not_win(): void
     {
         $generator = new EtrnRouletteOutcome();
 
-        $this->assertSame(1.0, $generator->nextJackpotChancePercent(0));
-        $this->assertSame(1.01, $generator->nextJackpotChancePercent(1));
-        $this->assertSame(2.0, $generator->nextJackpotChancePercent(100));
-        $this->assertSame(10.0, $generator->nextJackpotChancePercent(900));
-        $this->assertSame(10.0, $generator->nextJackpotChancePercent(100000));
-
-        $this->assertTrue($generator->generate(static fn (int $max): int => 19_999, 100)['jackpot']);
-        $this->assertFalse($generator->generate(static fn (int $max): int => $max === 999_999 ? 20_000 : 0, 100)['jackpot']);
+        $this->assertFalse($generator->generate(static fn (int $max): int => $max === 999_999 ? 250_000 : 0)['matched']);
+        $this->assertFalse($generator->generate(static fn (int $max): int => $max === 999_999 ? 999_999 : 0)['jackpot']);
     }
 }

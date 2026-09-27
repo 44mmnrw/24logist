@@ -53,7 +53,7 @@ export const LOGISTRU_SYMBOL = Object.freeze({
     logo: 'logistru',
 });
 
-export const LOGISTRU_COMBINATION_WEIGHT = 3;
+export const LOGISTRU_COMBINATION_WEIGHT = 1;
 
 export const makeOperators = (names) => names.map((name) => ({
     id: name,
@@ -63,7 +63,7 @@ export const makeOperators = (names) => names.map((name) => ({
 }));
 
 export const describeOutcome = (outcome) => ({
-    status: outcome.matched ? 'ЭТрН отправляется к оператору' : 'Без выигрыша',
-    result: outcome.jackpot ? 'Супер приз!!!' : outcome.matched ? outcome.destination.name : 'Попробуйте ещё раз',
+    status: outcome.matched ? 'ЭТрН отправляется к оператору' : 'Нет совпадения',
+    result: outcome.jackpot ? 'Супербонус!' : outcome.matched ? outcome.destination.name : 'Попробуйте ещё раз',
     longResult: Boolean(outcome.destination && outcome.destination.name.length > 26),
 });

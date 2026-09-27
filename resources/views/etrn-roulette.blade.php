@@ -3,8 +3,6 @@
     $description = 'Интерактивная игра по мотивам рулетки роуминга ЭПД: запустите барабаны и узнайте, какому оператору выпадет ЭТрН.';
     $canonical = route('etrn-roulette');
     $communityUser = auth('community')->user();
-    $roulettePlayer = $communityUser?->etrnRoulettePlayer()->first();
-    $communitySettings = $communityUser === null ? app(\App\Services\SiteSettingsService::class) : null;
 @endphp
 <!DOCTYPE html>
 <html lang="ru">
@@ -57,10 +55,11 @@
                 </span>
                 {{-- <span class="etrn-roulette__chance">
                     <span>Шанс 3 логистРу</span>
-                    <strong data-etrn-next-jackpot-chance>1 из 100</strong>
+                    <strong data-etrn-next-jackpot-chance>1 из 68</strong>
                 </span> --}}
             </div>
             <div class="etrn-roulette__prize">
+                {{-- Призовое участие приостановлено: игра работает только для развлечения.
                 @if ($roulettePlayer?->contact_verified_at)
                     <span class="etrn-roulette__prize-active">
                         <span>В розыгрыше</span>
@@ -70,7 +69,7 @@
                     <a class="etrn-roulette__prize-link" href="{{ route('etrn-roulette.prize.join') }}">Играть за приз</a>
                 @else
                     <a class="etrn-roulette__prize-link" href="{{ route('etrn-roulette.prize.join') }}" data-etrn-auth-open>Играть за приз</a>
-                @endif
+                @endif --}}
                 @if ($communityUser)
                     <div class="etrn-roulette__prize-links">
                         <form method="POST" action="{{ route('community.logout') }}">
@@ -94,6 +93,7 @@
             <x-site.smartcaptcha form="etrn_roulette" invisible />
         </div>
 
+        {{-- Призовая авторизация приостановлена вместе с участием.
         @if ($communityUser === null)
             <dialog class="etrn-roulette__auth-dialog" data-etrn-auth-dialog aria-labelledby="etrn-auth-title">
                 <div class="etrn-roulette__auth-card">
@@ -121,7 +121,7 @@
                     <small>Продолжая, вы соглашаетесь с <a href="{{ route('community.rules') }}">правилами сообщества</a> и <a href="{{ route('community.privacy') }}">политикой конфиденциальности</a>.</small>
                 </div>
             </dialog>
-        @endif
+        @endif --}}
     </main>
     <x-site.tracking />
 </body>

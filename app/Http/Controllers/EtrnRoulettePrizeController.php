@@ -20,6 +20,8 @@ final class EtrnRoulettePrizeController extends Controller
 
     public function auth(Request $request, string $provider): RedirectResponse
     {
+        abort_unless(config('etrn_roulette.prize_enabled'), 404);
+
         if (auth('community')->check()) {
             return redirect()->route('etrn-roulette.prize.join');
         }
@@ -38,6 +40,8 @@ final class EtrnRoulettePrizeController extends Controller
 
     public function __invoke(Request $request): View|RedirectResponse
     {
+        abort_unless(config('etrn_roulette.prize_enabled'), 404);
+
         if (auth('community')->user()->etrnRoulettePlayer()->whereNotNull('contact_verified_at')->exists()) {
             return redirect()->route('etrn-roulette');
         }
@@ -55,6 +59,8 @@ final class EtrnRoulettePrizeController extends Controller
 
     public function sendContactCode(Request $request, SiteMailService $siteMail): RedirectResponse
     {
+        abort_unless(config('etrn_roulette.prize_enabled'), 404);
+
         $request->merge(['email' => mb_strtolower(trim((string) $request->input('email')))]);
         $data = $request->validate([
             'email' => ['required', 'email:rfc', 'max:255'],
@@ -103,6 +109,8 @@ final class EtrnRoulettePrizeController extends Controller
 
     public function verifyContactCode(Request $request): RedirectResponse
     {
+        abort_unless(config('etrn_roulette.prize_enabled'), 404);
+
         $data = $request->validate(['code' => ['required', 'regex:/^\d{6}$/']]);
         $pending = $request->session()->get(self::CONTACT_SESSION_KEY);
         if (! is_array($pending)
