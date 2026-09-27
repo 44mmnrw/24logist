@@ -534,7 +534,10 @@ class BlogPostResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->defaultSort('published_at', 'desc')
+            ->defaultSort(fn (Builder $query): Builder => $query
+                ->orderBy('is_published')
+                ->orderByRaw('CASE WHEN is_published = 0 THEN updated_at ELSE published_at END DESC')
+                ->orderByDesc('id'))
             ->filters([
                 SelectFilter::make('is_published')
                     ->label('Статус')

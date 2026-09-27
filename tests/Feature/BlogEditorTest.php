@@ -4,10 +4,12 @@ namespace Tests\Feature;
 
 use App\Filament\Clusters\Landing\Resources\BlogPosts\Pages\CreateBlogPost;
 use App\Filament\Clusters\Landing\Resources\BlogPosts\Pages\EditBlogPost;
+use App\Filament\Clusters\Landing\Resources\BlogPosts\Pages\ListBlogPosts;
 use App\Models\BlogPost;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -15,6 +17,44 @@ use Tests\TestCase;
 class BlogEditorTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_admin_lists_drafts_before_published_articles(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        BlogPost::query()->create([
+            'title' => 'Published new',
+            'slug' => 'published-new',
+            'body' => 'Article body',
+            'is_published' => true,
+            'published_at' => now()->subDay(),
+        ]);
+        $draftOld = BlogPost::query()->create([
+            'title' => 'Draft old',
+            'slug' => 'draft-old',
+            'body' => 'Article body',
+            'is_published' => false,
+        ]);
+        BlogPost::query()->create([
+            'title' => 'Published old',
+            'slug' => 'published-old',
+            'body' => 'Article body',
+            'is_published' => true,
+            'published_at' => now()->subDays(2),
+        ]);
+        $draftNew = BlogPost::query()->create([
+            'title' => 'Draft new',
+            'slug' => 'draft-new',
+            'body' => 'Article body',
+            'is_published' => false,
+        ]);
+
+        DB::table('blog_posts')->where('id', $draftOld->id)->update(['updated_at' => now()->subDays(2)]);
+        DB::table('blog_posts')->where('id', $draftNew->id)->update(['updated_at' => now()->subDay()]);
+
+        Livewire::test(ListBlogPosts::class)
+            ->assertSeeInOrder(['Draft new', 'Draft old', 'Published new', 'Published old']);
+    }
 
     public function test_uploading_cover_automatically_creates_branded_card_image(): void
     {
