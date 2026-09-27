@@ -4,11 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\EtrnRouletteSpin;
 use App\Services\EtrnRouletteOutcome;
-use App\Services\SmartCaptchaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 
 final class EtrnRouletteAttemptController extends Controller
 {
@@ -20,7 +18,7 @@ final class EtrnRouletteAttemptController extends Controller
         return $this->response($this->currentAttempts(), $this->currentJackpots());
     }
 
-    public function store(Request $request, EtrnRouletteOutcome $outcomeGenerator, SmartCaptchaService $captcha): JsonResponse
+    public function store(Request $request, EtrnRouletteOutcome $outcomeGenerator): JsonResponse
     {
         $validated = $request->validate(['request_id' => ['required', 'uuid']]);
         $requestId = $validated['request_id'];
@@ -34,13 +32,6 @@ final class EtrnRouletteAttemptController extends Controller
             abort_if($existing->actor_key !== $actorKey, 409);
             return $this->spinResponse($existing, true);
         }
-
-        $validated = $request->validate(['smart_token' => ['required', 'string', 'max:4096']]);
-        $token = trim($validated['smart_token']);
-        if ($token === '') {
-            throw ValidationException::withMessages(['smart_token' => 'Подтвердите, что вы не робот.']);
-        }
-        $captcha->validate('etrn_roulette', $token, $request->ip(), $request->getHost());
 
         $ipAddress = $request->ip();
         $userAgent = $request->userAgent();

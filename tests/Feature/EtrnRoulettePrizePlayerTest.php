@@ -24,16 +24,12 @@ class EtrnRoulettePrizePlayerTest extends TestCase
 {
     use RefreshDatabase;
 
-    private array $captchaResponse;
-
     protected function setUp(): void
     {
         parent::setUp();
         $this->withoutVite();
         config()->set('etrn_roulette.prize_enabled', true);
         SiteSetting::instance()->update([
-            'smartcaptcha_site_key' => 'test-public-key',
-            'smartcaptcha_server_key' => 'test-private-key',
             'mail_host' => 'smtp.example.test',
             'mail_port' => 465,
             'mail_username' => 'site@example.test',
@@ -42,12 +38,7 @@ class EtrnRoulettePrizePlayerTest extends TestCase
         ]);
         app(SiteSettingsService::class)->clearCache();
         Mail::fake();
-        Http::preventStrayRequests();
-        $this->captchaResponse = [
-            'status' => 'ok',
-            'host' => parse_url(route('etrn-roulette.attempts.store'), PHP_URL_HOST),
-        ];
-        Http::fake(['smartcaptcha.cloud.yandex.ru/validate' => fn () => Http::response($this->captchaResponse)]);
+        Http::fake();
     }
 
     public function test_entertainment_only_mode_hides_prizes_and_disables_participation(): void
@@ -84,7 +75,6 @@ class EtrnRoulettePrizePlayerTest extends TestCase
 
         $this->postJson(route('etrn-roulette.attempts.store'), [
             'request_id' => (string) Str::uuid(),
-            'smart_token' => 'valid-test-token',
         ])->assertOk()->assertJsonMissingPath('player_attempts');
 
         $this->assertDatabaseHas('etrn_roulette_players', [
@@ -123,7 +113,6 @@ class EtrnRoulettePrizePlayerTest extends TestCase
         $this->actingAs($user, 'community')
             ->postJson(route('etrn-roulette.attempts.store'), [
                 'request_id' => (string) Str::uuid(),
-                'smart_token' => 'before-verification',
             ])
             ->assertOk()
             ->assertJsonMissingPath('player_attempts');
@@ -144,7 +133,6 @@ class EtrnRoulettePrizePlayerTest extends TestCase
         $this->actingAs($user, 'community')
             ->postJson(route('etrn-roulette.attempts.store'), [
                 'request_id' => (string) Str::uuid(),
-                'smart_token' => 'first-token',
             ])
             ->assertOk()
             ->assertJsonPath('player_attempts', 1);
@@ -225,7 +213,6 @@ class EtrnRoulettePrizePlayerTest extends TestCase
         $this->actingAs($user, 'community')
             ->postJson(route('etrn-roulette.attempts.store'), [
                 'request_id' => (string) Str::uuid(),
-                'smart_token' => 'after-verification',
             ])
             ->assertOk()
             ->assertJsonPath('player_attempts', 8);
@@ -266,7 +253,6 @@ class EtrnRoulettePrizePlayerTest extends TestCase
         $first = $this->actingAs($communityUser, 'community')
             ->postJson(route('etrn-roulette.attempts.store'), [
                 'request_id' => $requestId,
-                'smart_token' => 'first-token',
                 'jackpot' => false,
             ])
             ->assertOk()
@@ -293,13 +279,12 @@ class EtrnRoulettePrizePlayerTest extends TestCase
         $this->actingAs($communityUser, 'community')
             ->postJson(route('etrn-roulette.attempts.store'), [
                 'request_id' => (string) Str::uuid(),
-                'smart_token' => 'second-token',
             ])
             ->assertOk()
             ->assertJsonPath('attempts', 2);
 
         $this->assertDatabaseCount('etrn_roulette_spins', 2);
-        Http::assertSentCount(2);
+        Http::assertNothingSent();
         $admin = User::factory()->create();
         $this->actingAs($admin, 'web')
             ->get(route('filament.admin.resources.etrn-roulette-jackpots.index'))
@@ -334,7 +319,6 @@ class EtrnRoulettePrizePlayerTest extends TestCase
         $spin = $this->withServerVariables(['REMOTE_ADDR' => '192.0.2.15', 'HTTP_USER_AGENT' => 'Roulette test browser'])
             ->postJson(route('etrn-roulette.attempts.store'), [
                 'request_id' => $requestId,
-                'smart_token' => 'first-token',
             ])->assertOk()->json();
 
         $this->assertDatabaseHas('etrn_roulette_spins', [
@@ -350,7 +334,6 @@ class EtrnRoulettePrizePlayerTest extends TestCase
         ));
         $match = $this->postJson(route('etrn-roulette.attempts.store'), [
             'request_id' => (string) Str::uuid(),
-            'smart_token' => 'second-token',
         ])->assertOk()->json();
 
         $this->assertDatabaseHas('etrn_roulette_spins', [
@@ -384,7 +367,6 @@ class EtrnRoulettePrizePlayerTest extends TestCase
 
         $this->postJson(route('etrn-roulette.attempts.store'), [
             'request_id' => $requestId,
-            'smart_token' => 'first-token',
             'jackpot' => true,
         ])->assertOk()->assertJsonPath('outcome.jackpot', false);
 
@@ -397,17 +379,12 @@ class EtrnRoulettePrizePlayerTest extends TestCase
         $this->assertDatabaseCount('etrn_roulette_spins', 1);
     }
 
-    public function test_captcha_is_required_and_rejected_tokens_cannot_create_spins(): void
+    public function test_request_id_is_required_and_invalid_ids_cannot_create_spins(): void
     {
-        $this->postJson(route('etrn-roulette.attempts.store'), ['request_id' => (string) Str::uuid()])
-            ->assertUnprocessable()->assertJsonValidationErrors('smart_token');
-        Http::assertNothingSent();
-
-        $this->captchaResponse = ['status' => 'failed'];
-        $this->postJson(route('etrn-roulette.attempts.store'), [
-            'request_id' => (string) Str::uuid(),
-            'smart_token' => 'invalid-token',
-        ])->assertUnprocessable()->assertJsonValidationErrors('smart_token');
+        $this->postJson(route('etrn-roulette.attempts.store'), [])
+            ->assertUnprocessable()->assertJsonValidationErrors('request_id');
+        $this->postJson(route('etrn-roulette.attempts.store'), ['request_id' => 'invalid'])
+            ->assertUnprocessable()->assertJsonValidationErrors('request_id');
         $this->assertDatabaseCount('etrn_roulette_spins', 0);
     }
 
@@ -433,7 +410,6 @@ class EtrnRoulettePrizePlayerTest extends TestCase
 
         $this->postJson(route('etrn-roulette.attempts.store'), [
             'request_id' => (string) Str::uuid(),
-            'smart_token' => 'first-token',
         ])->assertOk()
             ->assertJsonPath('outcome.jackpot', false)
             ->assertJsonPath('outcome.jackpot_chance_percent', $chance)
@@ -441,7 +417,6 @@ class EtrnRoulettePrizePlayerTest extends TestCase
 
         $this->postJson(route('etrn-roulette.attempts.store'), [
             'request_id' => (string) Str::uuid(),
-            'smart_token' => 'second-token',
         ])->assertOk()
             ->assertJsonPath('outcome.jackpot', true)
             ->assertJsonPath('outcome.jackpot_chance_percent', $chance)
@@ -449,7 +424,6 @@ class EtrnRoulettePrizePlayerTest extends TestCase
 
         $this->postJson(route('etrn-roulette.attempts.store'), [
             'request_id' => (string) Str::uuid(),
-            'smart_token' => 'third-token',
         ])->assertOk()
             ->assertJsonPath('outcome.jackpot', false)
             ->assertJsonPath('next_jackpot_chance_percent', $chance);

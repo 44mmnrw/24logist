@@ -1,6 +1,5 @@
 import { LOGISTRU_COMBINATION_WEIGHT, LOGISTRU_SYMBOL, describeOutcome, makeOperators } from './logic.js';
 import { createConfettiController } from '../epd-game/confetti.js';
-import { createSmartCaptcha } from '../smartcaptcha.js';
 
 const delay = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
 const SPIN_DURATION_MULTIPLIER = 3;
@@ -67,7 +66,6 @@ export const createEtrnRoulette = (game) => {
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const eyelids = game.querySelector('[data-etrn-eyelids]');
     const confetti = createConfettiController({ game, reducedMotion });
-    const captcha = createSmartCaptcha(game);
     const audio = {
         pull: new Audio(game.dataset.soundPull),
         stop: new Audio(game.dataset.soundStop),
@@ -119,21 +117,15 @@ export const createEtrnRoulette = (game) => {
 
     const requestSpin = async () => {
         pendingRequestId ??= newRequestId();
-        const smartToken = await captcha.getToken();
-        let payload;
-        try {
-            payload = await requestAttempts(game.dataset.attemptsIncrementUrl, {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-                },
-                body: JSON.stringify({ request_id: pendingRequestId, smart_token: smartToken }),
-            }, false);
-        } finally {
-            captcha.reset();
-        }
+        const payload = await requestAttempts(game.dataset.attemptsIncrementUrl, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+            },
+            body: JSON.stringify({ request_id: pendingRequestId }),
+        }, false);
         const byId = new Map([...operators, LOGISTRU_SYMBOL].map((operator) => [operator.id, operator]));
         const reelIds = payload.outcome?.reels;
         if (!Array.isArray(reelIds) || reelIds.length !== reels.length || reelIds.some((id) => !byId.has(id))) {
@@ -218,7 +210,6 @@ export const createEtrnRoulette = (game) => {
         try {
             outcome = await requestSpin();
         } catch (error) {
-            captcha.reset();
             if (error.status === 409) pendingRequestId = null;
             game.dataset.phase = 'idle';
             reelsPanel.setAttribute('aria-busy', 'false');
@@ -271,7 +262,6 @@ export const createEtrnRoulette = (game) => {
         });
         scheduleBlink();
     }
-    captcha.load();
     requestAttempts(game.dataset.attemptsUrl).catch(() => {});
     if (authDialog && authOpen) {
         const closeAuthDialog = () => {

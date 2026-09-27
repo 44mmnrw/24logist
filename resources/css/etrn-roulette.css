@@ -7,9 +7,6 @@
 .etrn-roulette-page *, .etrn-roulette-page *::before, .etrn-roulette-page *::after { box-sizing: border-box; }
 .etrn-roulette-page--game { height: 100vh; height: 100dvh; overflow: hidden; }
 .etrn-roulette { position: relative; height: 100vh; height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 90px; }
-.etrn-roulette__captcha { position: absolute; top: 0; left: 0; width: 1px; height: 1px; }
-.etrn-roulette__captcha .site-smartcaptcha__widget { min-height: 0; }
-.etrn-roulette__captcha .site-smartcaptcha__status, .etrn-roulette__captcha .site-smartcaptcha__retry { display: none; }
 .etrn-roulette__poster { position: relative; isolation: isolate; container-type: inline-size; width: min(100vw, calc(75dvh - 96px), 800px); aspect-ratio: 1086 / 1448; overflow: visible; background: #fff; box-shadow: 0 22px 70px #15365d1a; }
 .etrn-roulette-rules-page { min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: clamp(20px, 5vw, 48px); }
 .etrn-roulette-rules-page__back { display: inline-flex; align-items: center; gap: 4px; width: min(100%, 760px); color: #075fb7; font-size: 14px; font-weight: 700; text-decoration: none; }

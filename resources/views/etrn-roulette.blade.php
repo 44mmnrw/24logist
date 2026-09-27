@@ -89,10 +89,6 @@
 
         <a class="etrn-roulette__rules-link" href="{{ route('etrn-roulette.rules') }}">Правила игры</a>
 
-        <div class="etrn-roulette__captcha">
-            <x-site.smartcaptcha form="etrn_roulette" invisible />
-        </div>
-
         {{-- Призовая авторизация приостановлена вместе с участием.
         @if ($communityUser === null)
             <dialog class="etrn-roulette__auth-dialog" data-etrn-auth-dialog aria-labelledby="etrn-auth-title">
