@@ -73,6 +73,25 @@ class CommunityAiScenario extends Model
         ];
     }
 
+    /**
+     * @return list<string>
+     */
+    public static function normalizeScanKeywords(mixed $keywords): array
+    {
+        return collect(is_array($keywords) ? $keywords : [$keywords])
+            ->filter(fn (mixed $keyword): bool => is_string($keyword))
+            ->flatMap(function (string $keyword): array {
+                $parts = preg_split('/[,;\r\n]+/u', $keyword, -1, PREG_SPLIT_NO_EMPTY);
+
+                return $parts === false ? [$keyword] : $parts;
+            })
+            ->map(fn (string $keyword): string => trim($keyword))
+            ->filter()
+            ->unique(fn (string $keyword): string => mb_strtolower($keyword))
+            ->values()
+            ->all();
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(CommunityCategory::class, 'community_category_id');

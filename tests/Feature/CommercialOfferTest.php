@@ -146,7 +146,7 @@ class CommercialOfferTest extends TestCase
         LandingBlock::query()->whereKey($lead->recommended_plan_id)->update(['price' => 99000, 'title' => 'Новый тариф']);
         $html = view('pdf.commercial-offer', ['lead' => $lead->fresh(), 'offer' => $lead->offer_details, 'logo' => '', 'signature' => ''])->render();
         $this->assertStringContainsString('2 400', $html);
-        $this->assertStringContainsString('Итого за месяц', $html);
+        $this->assertStringContainsString('Стоимость доступа', $html);
         $this->assertStringContainsString('&lt;b&gt;Компания &amp; партнёры&lt;/b&gt;', $html);
         $this->assertStringNotContainsString('<b>Компания', $html);
         $this->assertStringNotContainsString('Новый тариф', $html);

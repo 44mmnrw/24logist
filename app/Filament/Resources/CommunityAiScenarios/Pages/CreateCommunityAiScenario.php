@@ -12,6 +12,8 @@ class CreateCommunityAiScenario extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
+        $data['scan_keywords'] = CommunityAiScenario::normalizeScanKeywords($data['scan_keywords'] ?? []);
+
         if (($data['mode'] ?? null) === CommunityAiScenario::MODE_MANUAL) {
             $data['scan_keywords'] = [];
         }

@@ -82,8 +82,10 @@ class CommunityAiScenarioResource extends Resource
                         ->required(),
                     TagsInput::make('scan_keywords')
                         ->label('Ключевые слова и фразы')
-                        ->placeholder('Например: ЭТрН, простой на погрузке')
-                        ->helperText('Сообщения будут отобраны по любому из указанных слов или фраз. Для сохранения контекста добавятся соседние реплики. Оставьте пустым, чтобы анализировать весь период.')
+                        ->placeholder('Введите слово или фразу и нажмите Enter')
+                        ->helperText('Запятая, точка с запятой и Enter разделяют ключевые слова. Сообщения будут отобраны по любому из них. Оставьте поле пустым, чтобы анализировать весь период.')
+                        ->splitKeys([',', ';'])
+                        ->trim()
                         ->visible(fn (Get $get): bool => $get('mode') !== CommunityAiScenario::MODE_MANUAL)
                         ->columnSpanFull(),
                 ])

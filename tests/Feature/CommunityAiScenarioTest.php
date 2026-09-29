@@ -105,7 +105,7 @@ class CommunityAiScenarioTest extends TestCase
             'source_ids' => [$source->id],
             'source_from' => $from,
             'source_to' => $to,
-            'scan_keywords' => ['Truck', 'loading'],
+            'scan_keywords' => ['Truck, loading'],
             'status' => CommunityAiScenario::STATUS_DRAFT,
         ]);
 
@@ -228,6 +228,28 @@ class CommunityAiScenarioTest extends TestCase
         $this->assertSame('Тема редактора', $scenario->source_post_title);
         $this->assertSame('Исходный пост, по которому нужно создать новую тему.', $scenario->manual_topic_body);
         $this->assertSame([$source->id], $scenario->source_ids);
+    }
+
+    public function test_admin_keyword_list_is_split_on_common_delimiters_when_saved(): void
+    {
+        $source = CommunityAiSource::query()->firstOrFail();
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(CreateCommunityAiScenario::class)
+            ->fillForm([
+                'mode' => CommunityAiScenario::MODE_SOURCE,
+                'source_ids' => [$source->id],
+                'source_from' => now()->subDay()->startOfDay(),
+                'source_to' => now()->subDay()->endOfDay(),
+                'scan_keywords' => ['ЭТрН, расписка; поручение'],
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame(
+            ['ЭТрН', 'расписка', 'поручение'],
+            CommunityAiScenario::query()->latest('id')->firstOrFail()->scan_keywords,
+        );
     }
 
     public function test_source_post_is_rewritten_and_comments_use_collected_discussion(): void

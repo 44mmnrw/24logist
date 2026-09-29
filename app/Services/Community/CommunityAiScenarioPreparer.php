@@ -50,6 +50,7 @@ final class CommunityAiScenarioPreparer
         }
 
         $scenario->update([
+            'scan_keywords' => CommunityAiScenario::normalizeScanKeywords($scenario->scan_keywords),
             'status' => CommunityAiScenario::STATUS_PREPARING,
             'last_error' => null,
             'completed_at' => null,
@@ -1167,11 +1168,8 @@ PROMPT],
 
     private function normalizedKeywords(CommunityAiScenario $scenario): Collection
     {
-        return collect($scenario->scan_keywords ?? [])
-            ->filter(fn ($keyword): bool => is_string($keyword))
+        return collect(CommunityAiScenario::normalizeScanKeywords($scenario->scan_keywords))
             ->map(fn (string $keyword): string => mb_strtolower(trim($keyword)))
-            ->filter()
-            ->unique()
             ->values();
     }
 
