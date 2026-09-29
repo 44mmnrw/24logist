@@ -44,13 +44,15 @@ class EpdPresentationPopupTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertSee('data-popup-variant="registration"', false)
-            ->assertSee('images/logistru-special-offer-1254x1254.png', false)
-            ->assertSee('https://logistsystem.ru/register', false)
+            ->assertSee('images/logistru-test-access-popup-list-1254x1254.png', false)
             ->assertSee('Создать личный кабинет')
             ->assertSee('epd-popup__card--registration', false)
             ->assertSee('data-popup-version=', false)
             ->assertSee('data-show-delay="30"', false)
-            ->assertSee('epd-popup__registration-image-link', false)
+            ->assertSee('epd-popup__registration-image', false)
+            ->assertSee('epd-popup__registration-button', false)
+            ->assertSee('data-cabinet-registration-open', false)
+            ->assertSee('data-epd-registration-cta', false)
             ->assertDontSee('data-registration-offer-badge', false)
             ->assertDontSee('epd-popup__content--registration', false)
             ->assertDontSee('data-epd-form', false)
@@ -65,7 +67,6 @@ class EpdPresentationPopupTest extends TestCase
             'epd_popup_registration_image_path' => 'site/banners/custom-offer.png',
             'epd_popup_registration_image_alt' => 'Описание нового баннера',
             'epd_popup_registration_button_text' => 'Получить доступ',
-            'epd_popup_registration_button_url' => 'https://example.com/register',
         ]);
         app(SiteSettingsService::class)->clearCache();
 
@@ -73,10 +74,11 @@ class EpdPresentationPopupTest extends TestCase
             ->assertOk()
             ->assertSee('/storage/site/banners/custom-offer.png', false)
             ->assertSee('Описание нового баннера')
-            ->assertSee('epd-popup__registration-image-link', false)
+            ->assertSee('epd-popup__registration-image', false)
+            ->assertSee('epd-popup__registration-button', false)
+            ->assertSee('data-cabinet-registration-open', false)
             ->assertDontSee('data-registration-offer-badge', false)
-            ->assertSee('Получить доступ')
-            ->assertSee('https://example.com/register', false);
+            ->assertSee('Получить доступ');
     }
 
     public function test_popup_can_be_disabled_in_site_settings(): void

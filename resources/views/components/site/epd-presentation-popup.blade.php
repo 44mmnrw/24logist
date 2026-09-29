@@ -3,7 +3,7 @@
     $registrationVariant = (bool) ($settings->epd_popup_registration_enabled ?? false);
     $popupVariant = $registrationVariant ? 'registration' : 'presentation';
     $registrationImage = \App\Support\LandingMedia::url($settings->epd_popup_registration_image_path)
-        ?? asset('images/logistru-special-offer-1254x1254.png');
+        ?? asset('images/logistru-test-access-popup-list-1254x1254.png');
     $registrationPopupVersion = $settings->updated_at?->getTimestamp() ?? 1;
 @endphp
 
@@ -37,14 +37,7 @@
         <div class="epd-popup__visual">
             <div class="epd-popup__visual-frame">
                 @if ($registrationVariant)
-                    <a
-                        class="epd-popup__registration-image-link"
-                        href="{{ $settings->epd_popup_registration_button_url ?: 'https://logistsystem.ru/register' }}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        data-epd-registration-cta
-                        aria-label="{{ $settings->epd_popup_registration_button_text ?: 'Создать личный кабинет' }}"
-                    >
+                    <div class="epd-popup__registration-image">
                         <img
                             src="{{ $registrationImage }}"
                             alt="{{ $settings->epd_popup_registration_image_alt ?: 'Специальное предложение логистРу' }}"
@@ -53,7 +46,7 @@
                             loading="lazy"
                             decoding="async"
                         >
-                    </a>
+                    </div>
                 @else
                     <img
                         src="{{ asset('images/epd-announcement-27-08.png') }}"
@@ -66,6 +59,19 @@
                 @endif
             </div>
         </div>
+
+        @if ($registrationVariant)
+            <div class="epd-popup__registration-actions">
+                <button
+                    class="epd-popup__registration-button"
+                    type="button"
+                    data-cabinet-registration-open
+                    data-epd-registration-cta
+                >
+                    {{ $settings->epd_popup_registration_button_text ?: 'Создать личный кабинет' }}
+                </button>
+            </div>
+        @endif
 
         @unless ($registrationVariant)
         <div class="epd-popup__content">

@@ -321,7 +321,7 @@ TEXT;
                 'telegram_popup_auto_close_delay' => 0,
                 'epd_popup_enabled' => true,
                 'epd_popup_registration_enabled' => false,
-                'epd_popup_registration_image_alt' => '14 дней тестового доступа, встроенный ЭДО и ЭПД, бесплатная настройка',
+                'epd_popup_registration_image_alt' => '14 дней тестового доступа: подключение к ЭДО, настройка доступов и техническая поддержка',
                 'epd_popup_registration_badge_value' => '−50%',
                 'epd_popup_registration_badge_value_font' => 'geologica',
                 'epd_popup_registration_badge_label' => 'на пакет ЭПД',

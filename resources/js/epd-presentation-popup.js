@@ -53,7 +53,7 @@ if (popup) {
         errorNode.hidden = !message;
     };
 
-    const close = ({ remember = true } = {}) => {
+    const close = ({ remember = true, restoreFocus = true } = {}) => {
         if (popup.hidden) {
             return;
         }
@@ -68,7 +68,9 @@ if (popup) {
 
         window.setTimeout(() => {
             popup.hidden = true;
-            previouslyFocusedElement?.focus?.();
+            if (restoreFocus) {
+                previouslyFocusedElement?.focus?.();
+            }
         }, 220);
     };
 
@@ -102,8 +104,8 @@ if (popup) {
         control.addEventListener('click', () => close());
     });
 
-    document.addEventListener('cabinet-login:open', () => close({ remember: false }));
-    document.addEventListener('commercial-offer:open', () => close({ remember: false }));
+    document.addEventListener('cabinet-login:open', () => close({ remember: false, restoreFocus: false }));
+    document.addEventListener('commercial-offer:open', () => close({ remember: false, restoreFocus: false }));
 
     popup.querySelectorAll('[data-epd-registration-cta]').forEach((control) => {
         control.addEventListener('click', () => {

@@ -887,12 +887,9 @@ final class GeneralSiteSettingForm
                                 ->helperText('Текст для доступности и поисковых систем.')
                                 ->columnSpanFull(),
                             TextInput::make('epd_popup_registration_button_text')
-                                ->label('Текст кнопки')
-                                ->maxLength(100),
-                            TextInput::make('epd_popup_registration_button_url')
-                                ->label('Ссылка кнопки')
-                                ->url()
-                                ->maxLength(2048)
+                                ->label('Текст кнопки регистрации')
+                                ->helperText('Кнопка открывает модальное окно регистрации на сайте.')
+                                ->maxLength(100)
                                 ->columnSpanFull(),
                         ])
                         ->columns(2)
