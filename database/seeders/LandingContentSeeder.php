@@ -37,6 +37,7 @@ class LandingContentSeeder extends Seeder
         $this->seedFinalCta();
         $this->seedFooter();
         $this->seedWidePricing();
+        $this->seedReviews();
     }
 
     private function section(array $data): LandingSection
@@ -367,6 +368,22 @@ class LandingContentSeeder extends Seeder
                     'alt' => '',
                 ]],
             ],
+        ]);
+    }
+
+    private function seedReviews(): void
+    {
+        $order = (int) (LandingSection::query()->where('slug', 'pricing')->value('sort_order') ?? 7);
+        LandingSection::query()->where('sort_order', '>=', $order)->increment('sort_order');
+
+        $this->section([
+            'slug' => 'reviews',
+            'name' => 'Отзывы клиентов',
+            'anchor' => 'reviews',
+            'title' => 'Как логистРу помогает бизнесу в реальной работе',
+            'description' => 'Отзывы экспедиторских компаний, перевозчиков и ИП о заявках, документах и ЭДО',
+            'is_active' => false,
+            'sort_order' => $order,
         ]);
     }
 

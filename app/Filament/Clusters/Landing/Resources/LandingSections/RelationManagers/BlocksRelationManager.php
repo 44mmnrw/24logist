@@ -7,23 +7,27 @@ use App\Filament\Forms\LandingIconSelect;
 use App\Models\LandingBlock;
 use App\Models\LandingSection;
 use App\Services\LandingPageService;
+use App\Support\FilamentUploadPreview;
 use App\Support\LandingFooter;
 use App\Support\LandingIcons;
 use App\Support\LandingPlatform;
 use App\Support\LandingPricing;
 use App\Support\LandingQuiz;
 use App\Support\LandingQuizRecommendation;
+use App\Support\LandingReviews;
 use App\Support\LandingSectionAnchor;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
@@ -59,6 +63,7 @@ class BlocksRelationManager extends RelationManager
             'pricing' => 'Тарифы',
             'pricing_wide' => 'Широкий тариф',
             'additional_options' => 'Дополнительные позиции',
+            'reviews' => 'Отзывы клиентов',
             default => static::$title ?? 'Блоки секции',
         };
     }
@@ -526,6 +531,100 @@ class BlocksRelationManager extends RelationManager
                 ]);
         }
 
+        if ($this->isReviewsSection()) {
+            return $schema
+                ->components([
+                    TextInput::make('title')
+                        ->label('Компания или ИП')
+                        ->required()
+                        ->maxLength(255)
+                        ->columnSpanFull(),
+                    FileUpload::make('extra.logo_path')
+                        ->label('Логотип компании')
+                        ->disk('public')
+                        ->directory('landing/reviews')
+                        ->visibility('public')
+                        ->image()
+                        ->imagePreviewHeight('160')
+                        ->maxFiles(1)
+                        ->maxSize(4096)
+                        ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                        ->fetchFileInformation(false)
+                        ->orientImagesFromExif(false)
+                        ->openable()
+                        ->downloadable()
+                        ->getUploadedFileUsing(static fn (FileUpload $component, string $file, string|array|null $storedFileNames): ?array => FilamentUploadPreview::resolve($component, $file, $storedFileNames))
+                        ->helperText('Необязательно. Без логотипа будет показана монограмма. PNG, JPG или WebP до 4 МБ.')
+                        ->columnSpanFull(),
+                    Select::make('extra.client_type')
+                        ->label('Тип клиента')
+                        ->options(LandingReviews::CLIENT_TYPES)
+                        ->required(),
+                    Select::make('extra.segment')
+                        ->label('Сегмент')
+                        ->options(LandingReviews::SEGMENTS)
+                        ->required(),
+                    TextInput::make('extra.region')
+                        ->label('Город или регион')
+                        ->maxLength(120)
+                        ->columnSpanFull(),
+                    Textarea::make('description')
+                        ->label('Цитата')
+                        ->required()
+                        ->rows(5)
+                        ->maxLength(1500)
+                        ->columnSpanFull(),
+                    TextInput::make('extra.representative_name')
+                        ->label('Имя представителя')
+                        ->required()
+                        ->maxLength(120),
+                    TextInput::make('extra.representative_position')
+                        ->label('Должность представителя')
+                        ->required()
+                        ->maxLength(160),
+                    Repeater::make('review_metrics')
+                        ->label('Измеримые результаты')
+                        ->schema([
+                            TextInput::make('value')
+                                ->label('Значение')
+                                ->placeholder('−40%')
+                                ->required()
+                                ->maxLength(32),
+                            TextInput::make('label')
+                                ->label('Подпись')
+                                ->placeholder('времени на документы')
+                                ->required()
+                                ->maxLength(120),
+                        ])
+                        ->defaultItems(1)
+                        ->minItems(1)
+                        ->maxItems(2)
+                        ->addActionLabel('Добавить результат')
+                        ->reorderable()
+                        ->columnSpanFull(),
+                    Toggle::make('extra.publication_approved')
+                        ->label('Отзыв согласован с клиентом')
+                        ->helperText('Обязательно для публикации. После подтверждения фиксируются дата и администратор.')
+                        ->rules([
+                            fn (Get $get): \Closure => function (string $attribute, mixed $value, \Closure $fail) use ($get): void {
+                                if ($get('is_active') && ! filter_var($value, FILTER_VALIDATE_BOOL)) {
+                                    $fail('Подтвердите согласование отзыва с клиентом перед публикацией.');
+                                }
+                            },
+                        ])
+                        ->default(false)
+                        ->columnSpanFull(),
+                    Toggle::make('is_active')
+                        ->label('Опубликовать отзыв')
+                        ->helperText('Несогласованный отзыв нельзя опубликовать.')
+                        ->default(false),
+                    TextInput::make('sort_order')
+                        ->label('Порядок')
+                        ->numeric()
+                        ->default(0),
+                ]);
+        }
+
         return LandingBlockResource::form($schema);
     }
 
@@ -540,8 +639,33 @@ class BlocksRelationManager extends RelationManager
         $isPricing = $this->isPricingSection();
         $isWidePricing = $this->isWidePricingSection();
         $isAdditionalOptions = $this->isAdditionalOptionsSection();
+        $isReviews = $this->isReviewsSection();
 
-        $table = $isQuiz
+        if ($isReviews) {
+            $table = $table
+                ->columns([
+                    TextColumn::make('title')
+                        ->label('Компания или ИП')
+                        ->searchable()
+                        ->limit(50),
+                    TextColumn::make('extra.segment')
+                        ->label('Сегмент')
+                        ->formatStateUsing(fn (?string $state): string => LandingReviews::SEGMENTS[$state] ?? '—'),
+                    IconColumn::make('extra.publication_approved')
+                        ->label('Согласован')
+                        ->boolean(),
+                    IconColumn::make('is_active')
+                        ->label('Опубликован')
+                        ->boolean(),
+                    TextColumn::make('sort_order')
+                        ->label('Порядок')
+                        ->sortable(),
+                ])
+                ->defaultSort('sort_order')
+                ->reorderable('sort_order')
+                ->afterReordering(fn () => app(LandingPageService::class)->clearCache());
+        } else {
+            $table = $isQuiz
             ? $table
                 ->columns([
                     TextColumn::make('title')
@@ -679,9 +803,10 @@ class BlocksRelationManager extends RelationManager
                                 ])
                                 ->defaultSort('sort_order')
                             : LandingBlockResource::table($table)))))));
+        }
 
         return $table
-            ->modifyQueryUsing(function ($query) use ($isMobile, $isPlatform, $isHeader, $isFooter, $isPricing, $isAdditionalOptions): void {
+            ->modifyQueryUsing(function ($query) use ($isMobile, $isPlatform, $isHeader, $isFooter, $isPricing, $isAdditionalOptions, $isReviews): void {
                 if ($isMobile) {
                     $query->where('block_type', 'bullet');
                 }
@@ -705,6 +830,10 @@ class BlocksRelationManager extends RelationManager
                 if ($isAdditionalOptions) {
                     $query->where('block_type', 'option');
                 }
+
+                if ($isReviews) {
+                    $query->where('block_type', 'review');
+                }
             })
             ->headerActions([
                 CreateAction::make()
@@ -719,9 +848,10 @@ class BlocksRelationManager extends RelationManager
                         $isFooter => 'Добавить колонку',
                         $isPricing => 'Добавить тариф',
                         $isAdditionalOptions => 'Добавить позицию',
+                        $isReviews => 'Добавить отзыв',
                         default => null,
                     })
-                    ->mutateFormDataUsing(function (array $data) use ($isQuiz, $isFaq, $isMobile, $isPlatform, $isHeader, $isFooter, $isPricing, $isAdditionalOptions): array {
+                    ->mutateFormDataUsing(function (array $data) use ($isQuiz, $isFaq, $isMobile, $isPlatform, $isHeader, $isFooter, $isPricing, $isAdditionalOptions, $isReviews): array {
                         $data['section_slug'] = $this->getOwnerRecord()->slug;
 
                         if ($isQuiz) {
@@ -756,9 +886,22 @@ class BlocksRelationManager extends RelationManager
                             $data['block_type'] = 'option';
                         }
 
+                        if ($isReviews) {
+                            $data['block_type'] = 'review';
+                        }
+
                         return $data;
                     })
-                    ->using(function (array $data) use ($isQuiz, $isPlatform, $isFooter, $isPricing, $isWidePricing): Model {
+                    ->using(function (array $data) use ($isQuiz, $isPlatform, $isFooter, $isPricing, $isWidePricing, $isReviews): Model {
+                        if ($isReviews) {
+                            $data = LandingReviews::prepareForSave($data);
+                            $record = new LandingBlock;
+                            $record->fill($data);
+                            $this->getRelationship()->save($record);
+
+                            return $record;
+                        }
+
                         if ($isQuiz) {
                             $options = $data['quiz_options'] ?? [];
                             unset($data['quiz_options']);
@@ -853,7 +996,7 @@ class BlocksRelationManager extends RelationManager
             ])
             ->recordActions([
                 EditAction::make()
-                    ->mutateRecordDataUsing(function (array $data, LandingBlock $record) use ($isQuiz, $isPlatform, $isFooter, $isPricing, $isWidePricing, $isHeader): array {
+                    ->mutateRecordDataUsing(function (array $data, LandingBlock $record) use ($isQuiz, $isPlatform, $isFooter, $isPricing, $isWidePricing, $isHeader, $isReviews): array {
                         if ($isQuiz && $record->block_type === 'question') {
                             $data['quiz_options'] = LandingQuiz::optionsFormState($record);
                         }
@@ -880,9 +1023,22 @@ class BlocksRelationManager extends RelationManager
                             $data['section_anchor'] = in_array($link, $sectionLinks, true) ? $link : null;
                         }
 
+                        if ($isReviews && $record->block_type === 'review') {
+                            $data['review_metrics'] = LandingReviews::metrics($record);
+                        }
+
                         return $data;
                     })
-                    ->using(function (array $data, LandingBlock $record) use ($isQuiz, $isPlatform, $isFooter, $isPricing, $isWidePricing): void {
+                    ->using(function (array $data, LandingBlock $record) use ($isQuiz, $isPlatform, $isFooter, $isPricing, $isWidePricing, $isReviews): void {
+                        if ($isReviews && $record->block_type === 'review') {
+                            $record->update(LandingReviews::prepareForSave(
+                                $data,
+                                is_array($record->extra) ? $record->extra : [],
+                            ));
+
+                            return;
+                        }
+
                         if ($isQuiz && $record->block_type === 'question') {
                             $options = $data['quiz_options'] ?? [];
                             $record->update([
@@ -1038,5 +1194,10 @@ class BlocksRelationManager extends RelationManager
     protected function isAdditionalOptionsSection(): bool
     {
         return $this->getOwnerRecord()->slug === 'additional_options';
+    }
+
+    protected function isReviewsSection(): bool
+    {
+        return $this->getOwnerRecord()->slug === 'reviews';
     }
 }

@@ -514,7 +514,7 @@ class LandingSectionResource extends Resource
                     ->keyLabel('Ключ')
                     ->valueLabel('Значение')
                     ->reorderable()
-                    ->visible(fn (?LandingSection $record): bool => ! in_array($record?->slug, ['hero', 'mobile', 'driver_cabinet', 'quiz', 'footer', 'faq', 'platform', 'header', 'pricing', 'pricing_wide', 'why', 'growth', 'product_showcase'], true)),
+                    ->visible(fn (?LandingSection $record): bool => ! in_array($record?->slug, ['hero', 'mobile', 'driver_cabinet', 'quiz', 'footer', 'faq', 'platform', 'header', 'pricing', 'pricing_wide', 'why', 'growth', 'product_showcase', 'reviews'], true)),
                 Toggle::make('is_active')
                     ->label('Активна')
                     ->default(true),

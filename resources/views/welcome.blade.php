@@ -27,6 +27,7 @@
                     'platform' => 'components.landing.platform',
                     'features' => 'components.landing.features',
                     'product_showcase' => 'components.landing.product-showcase',
+                    'reviews' => 'components.landing.reviews',
                     'pricing' => 'components.landing.pricing',
                     'pricing_wide' => 'components.landing.pricing-wide',
                     'additional_options' => 'components.landing.additional-options',
@@ -44,6 +45,9 @@
             @endphp
             @foreach ($landing->sections() as $landingSection)
                 @if (isset($sectionViews[$landingSection->slug]))
+                    @if ($landingSection->slug === 'reviews' && \App\Support\LandingReviews::renderable($landingSection->blocks)->isEmpty())
+                        @continue
+                    @endif
                     @if (in_array($landingSection->slug, ['mobile', 'driver_cabinet'], true))
                         @if ($mobileStoryRendered)
                             @continue

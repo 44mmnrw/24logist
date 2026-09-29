@@ -12,6 +12,7 @@ final class LandingSectionAnchor
         'hero' => 'hero',
         'features' => 'features',
         'product_showcase' => 'product-showcase',
+        'reviews' => 'reviews',
         'why' => 'why',
         'pricing' => 'pricing',
         'pricing_wide' => 'pricing-wide',

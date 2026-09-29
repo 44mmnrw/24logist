@@ -120,14 +120,6 @@
                     </label>
 
                     <div class="cabinet-login-modal__field">
-                        <label for="cabinet-registration-account-name">Название компании</label>
-                        <div class="cabinet-login-modal__lookup">
-                            <input id="cabinet-registration-account-name" type="text" name="account_name" autocomplete="organization" required maxlength="255" data-party-account-name>
-                            <div class="cabinet-login-modal__suggestions" data-party-account-name-suggestions role="listbox" aria-label="Подсказки организаций" hidden></div>
-                        </div>
-                    </div>
-
-                    <div class="cabinet-login-modal__field">
                         <label for="cabinet-registration-inn">ИНН</label>
                         <div class="cabinet-login-modal__lookup">
                             <input id="cabinet-registration-inn" type="text" name="inn" inputmode="numeric" autocomplete="off" required minlength="10" maxlength="12" pattern="[0-9]{10}([0-9]{2})?" data-party-inn>
@@ -140,6 +132,14 @@
                         <span>Телефон</span>
                         <input type="tel" name="phone" autocomplete="tel" inputmode="numeric" required minlength="18" maxlength="18" pattern="\+7 \([0-9]{3}\) [0-9]{3}-[0-9]{2}-[0-9]{2}" placeholder="+7 (___) ___-__-__" data-phone-mask>
                     </label>
+
+                    <div class="cabinet-login-modal__field">
+                        <label for="cabinet-registration-account-name">Название компании</label>
+                        <div class="cabinet-login-modal__lookup">
+                            <input id="cabinet-registration-account-name" type="text" name="account_name" autocomplete="organization" required maxlength="255" data-party-account-name>
+                            <div class="cabinet-login-modal__suggestions" data-party-account-name-suggestions role="listbox" aria-label="Подсказки организаций" hidden></div>
+                        </div>
+                    </div>
 
                     <label class="cabinet-login-modal__field cabinet-login-modal__field--wide">
                         <span>Email</span>

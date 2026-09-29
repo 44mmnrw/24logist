@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use App\Support\LandingIcons;
+use App\Support\LandingReviews;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Validation\ValidationException;
 
 class LandingBlock extends Model
 {
@@ -45,6 +47,12 @@ class LandingBlock extends Model
 
             if (is_array($block->extra)) {
                 $block->extra = LandingIcons::normalizeExtraIcons($block->extra);
+            }
+
+            if ($block->block_type === 'review' && $block->is_active && ! LandingReviews::isApproved($block)) {
+                throw ValidationException::withMessages([
+                    'extra.publication_approved' => 'Подтвердите согласование отзыва с клиентом перед публикацией.',
+                ]);
             }
         });
     }
