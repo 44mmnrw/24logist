@@ -12,12 +12,16 @@ use App\Support\FilamentUploadPreview;
 use App\Support\OpenGraph;
 use App\Support\RichContent\FontSizeRichContentPlugin;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\CodeEditor;
+use Filament\Forms\Components\CodeEditor\Enums\Language;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\RichEditor\RichContentRenderer;
 use Filament\Forms\Components\RichEditor\TextColor;
 use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
 use Filament\Forms\Components\Select;
@@ -122,6 +126,31 @@ class BlogPostResource extends Resource
                         ->helperText('Используется в карточках блога и как запасное meta description. Под заголовком статьи не выводится.')
                         ->columnSpanFull(),
                     RichEditor::make('body')
+                        ->hintAction(
+                            Action::make('editHtml')
+                                ->label('Вставить / изменить HTML')
+                                ->icon('heroicon-o-code-bracket')
+                                ->color('gray')
+                                ->modalHeading('HTML-код статьи')
+                                ->modalDescription('Вставьте готовую разметку или отредактируйте текущий HTML. После применения проверьте результат в визуальном редакторе и сохраните статью.')
+                                ->modalSubmitActionLabel('Применить HTML')
+                                ->fillForm(fn (Get $get): array => [
+                                    'html' => RichContentRenderer::make($get('body') ?? '')
+                                        ->plugins([FontSizeRichContentPlugin::make()])
+                                        ->fileAttachmentsDisk('public')
+                                        ->fileAttachmentsVisibility('public')
+                                        ->toHtml(),
+                                ])
+                                ->schema([
+                                    CodeEditor::make('html')
+                                        ->label('HTML')
+                                        ->language(Language::Html)
+                                        ->required(),
+                                ])
+                                ->action(function (array $data, Set $set): void {
+                                    $set('body', trim((string) $data['html']));
+                                }),
+                        )
                         ->label('Текст статьи')
                         ->required()
                         ->plugins([FontSizeRichContentPlugin::make()])

@@ -114,6 +114,28 @@ class BlogEditorTest extends TestCase
         );
     }
 
+    public function test_admin_can_replace_article_body_from_html_modal(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $post = BlogPost::query()->create([
+            'title' => 'HTML import',
+            'slug' => 'html-import',
+            'body' => '<p>Old body</p>',
+            'is_published' => false,
+        ]);
+
+        $html = '<h2>Новый раздел</h2><p><strong>Форматированный текст</strong></p><blockquote><p>Важное примечание</p></blockquote>';
+
+        Livewire::test(EditBlogPost::class, ['record' => $post->getRouteKey()])
+            ->assertFormComponentActionExists('body', 'editHtml')
+            ->callFormComponentAction('body', 'editHtml', ['html' => $html])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame($html, $post->fresh()->body);
+    }
+
     public function test_admin_can_save_deeply_nested_rich_editor_table_content(): void
     {
         $this->actingAs(User::factory()->create());
