@@ -1,3 +1,4 @@
+import { initRegisterCapabilities } from './cabinet-registration-capabilities.ts';
 import { getCsrfToken, postJson } from './landing-forms.js';
 import { initCabinetRegistrationPartySuggestions } from './cabinet-registration-party-suggestions.js';
 
@@ -403,6 +404,7 @@ if (modal) {
         }
     }));
 
+    initRegisterCapabilities(modal, syncRegistrationSubmitState);
     registrationForm?.addEventListener('change', syncRegistrationSubmitState);
     syncRegistrationSubmitState();
     setMode(currentMode);

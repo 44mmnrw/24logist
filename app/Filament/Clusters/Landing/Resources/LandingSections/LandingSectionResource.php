@@ -11,6 +11,7 @@ use App\Models\LandingSection;
 use App\Services\LandingPageService;
 use App\Support\FilamentUploadPreview;
 use App\Support\LandingSectionAnchor;
+use App\Support\YandexRatingWidget;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -469,6 +470,37 @@ class LandingSectionResource extends Resource
                     'Иконка раскрытия вопроса',
                     fn (?LandingSection $record): bool => $record?->slug === 'faq',
                 ),
+                Section::make('Отзывы на Яндексе')
+                    ->description('Плашка под вопросами и ответами: рейтинг Яндекса и переход к отзывам о компании.')
+                    ->schema([
+                        Toggle::make('extra.yandex_reviews_enabled')
+                            ->label('Показывать блок')
+                            ->formatStateUsing(fn ($state): bool => $state === null ? true : (bool) $state),
+                        TextInput::make('extra.yandex_reviews_title')
+                            ->label('Заголовок')
+                            ->maxLength(150)
+                            ->formatStateUsing(fn ($state, ?LandingSection $record): string => array_key_exists('yandex_reviews_title', $record?->extra ?? []) ? ($state ?? '') : YandexRatingWidget::DEFAULT_TITLE),
+                        Textarea::make('extra.yandex_reviews_text')
+                            ->label('Текст')
+                            ->rows(3)
+                            ->maxLength(500)
+                            ->formatStateUsing(fn ($state, ?LandingSection $record): string => array_key_exists('yandex_reviews_text', $record?->extra ?? []) ? ($state ?? '') : YandexRatingWidget::DEFAULT_TEXT),
+                        Textarea::make('extra.yandex_reviews_code')
+                            ->label('Код виджета Яндекса')
+                            ->rows(4)
+                            ->maxLength(5000)
+                            ->formatStateUsing(fn ($state, ?LandingSection $record): string => array_key_exists('yandex_reviews_code', $record?->extra ?? []) ? ($state ?? '') : YandexRatingWidget::DEFAULT_CODE)
+                            ->helperText('Вставьте iframe рейтинга из Яндекс Бизнес или его адрес. Ссылка на отзывы определяется автоматически. Пустое поле скрывает блок.')
+                            ->rules([
+                                fn (): \Closure => function (string $attribute, mixed $value, \Closure $fail): void {
+                                    if (filled($value) && YandexRatingWidget::organizationId($value) === null) {
+                                        $fail('Вставьте код рейтинга с адресом https://yandex.ru/sprav/widget/rating-badge/НОМЕР.');
+                                    }
+                                },
+                            ]),
+                    ])
+                    ->columnSpanFull()
+                    ->visible(fn (?LandingSection $record): bool => $record?->slug === 'faq'),
                 TextInput::make('extra.brand_name')
                     ->label('Название бренда')
                     ->maxLength(255)

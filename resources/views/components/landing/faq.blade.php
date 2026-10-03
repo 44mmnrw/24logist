@@ -35,5 +35,6 @@
             @endforeach
         </div>
     </div>
+    @include('components.landing.yandex-reviews', ['extra' => $extra])
 </section>
 @endif

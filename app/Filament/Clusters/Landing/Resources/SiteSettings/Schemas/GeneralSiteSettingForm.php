@@ -738,7 +738,7 @@ final class GeneralSiteSettingForm
                         ->required(fn (Get $get): bool => (bool) ($get('cabinet_login_enabled') || $get('cabinet_registration_enabled')))
                         ->rule('ip')
                         ->maxLength(45)
-                        ->placeholder('147.45.236.73')
+                        ->placeholder('5.42.114.199')
                         ->helperText('Адрес интерфейса этого же сервера, на котором HTTPS-сайт логистРу доступен на порту 443. Значение хранится зашифрованно.'),
                     TextInput::make('cabinet_login_api_timeout')
                         ->label('Тайм-аут, секунд')

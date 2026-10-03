@@ -153,7 +153,7 @@
                     </label>
                     --}}
 
-                    <fieldset class="cabinet-login-modal__fieldset cabinet-login-modal__field--wide">
+                    <fieldset class="cabinet-login-modal__fieldset cabinet-login-modal__field--wide" data-register-capabilities aria-describedby="cabinet-registration-capabilities-hint">
                         <legend>Чем занимается компания</legend>
                         <label class="cabinet-login-modal__check">
                             <input type="checkbox" name="capabilities[]" value="cargo_owner">
@@ -167,6 +167,7 @@
                             <input type="checkbox" value="carrier" disabled>
                             <span>Выполняет перевозки (перевозчик) <small>В разработке</small></span>
                         </label>
+                        <p id="cabinet-registration-capabilities-hint" class="cabinet-login-modal__capabilities-hint">Заказчик не может одновременно быть Экспедитором или Перевозчиком. При выборе несовместимого варианта предыдущая отметка снимается.</p>
                     </fieldset>
 
                     <div class="cabinet-login-modal__field">
