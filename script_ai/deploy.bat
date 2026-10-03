@@ -9,7 +9,7 @@ REM ================================================================
 REM  CONFIG
 REM ================================================================
 
-set "SERVER_HOST=24logist.ru"
+set "SERVER_HOST=5.42.114.199"
 set "SERVER_USER=logist_sys"
 REM Document root (nginx). Laravel + git live in .app below.
 set "SERVER_WEB=/var/www/logist_sys/data/www/24logist.ru"
